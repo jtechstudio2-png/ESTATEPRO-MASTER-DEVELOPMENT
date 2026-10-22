@@ -77,14 +77,14 @@ The migration uses tenant-owned rows with a `company_id` and a policy that compa
 
 Required runtime controls:
 1. Authenticate the user and validate an active company membership before setting tenant context.
-2. Start a transaction and set the validated tenant with `SET LOCAL app.current_company_id = '<validated-uuid>'` or the parameterised equivalent supported by the database driver. Never derive it from an untrusted request header alone.
+2. Start a transaction and set both the authenticated user and validated tenant with transaction-local `app.current_user_id` and `app.current_company_id` settings using the parameterised equivalent supported by the database driver. Never derive either value from an untrusted request header alone.
 3. Use a runtime database role that is not table owner, superuser or `BYPASSRLS`.
 4. Never let users issue arbitrary SQL or set the tenant context themselves.
 5. Add application-level permission and record-relationship checks in addition to RLS.
 6. Test every table family for cross-tenant read/write attempts, joins, exports, search, cached responses and background jobs.
 7. Treat company creation and initial owner bootstrap as a narrowly scoped service flow; it needs an explicit strategy for creating the first tenant before normal tenant context exists.
 8. Ensure background workers set and clear tenant context per job/transaction. Do not reuse a connection with stale tenant context.
-9. Global identity/reference tables need separate grants and access policies; RLS on tenant-owned tables does not automatically secure global tables.
+9. Global identity/reference tables need separate grants and access policies. Migration 0005 adds profile visibility RLS for users; global reference tables and platform-managed catalogues still require grants that restrict writes to platform operations.
 10. RLS is defence in depth, not a substitute for reviewed database grants, API authorisation or security tests.
 
 The RLS migration enables and forces RLS on listed tenant tables. PostgreSQL superusers and roles with `BYPASSRLS` remain able to bypass policies; operational role design is therefore essential.
@@ -139,7 +139,7 @@ All writes must validate tenant scope and role/record permissions. Use transacti
 
 - Database and object storage are private; no public document buckets.
 - Runtime database credentials use least privilege and cannot bypass RLS.
-- Tenant context is transaction-local and established only after membership validation.
+- Tenant and authenticated-user context is transaction-local and established only after session and membership validation.
 - Every portal read/download is re-authorised against active access grants.
 - Audit events capture actor, company, action, entity, timestamp and correlation ID while minimising sensitive payloads.
 - PII and credentials are not written to general logs.
