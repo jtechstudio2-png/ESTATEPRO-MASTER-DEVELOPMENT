@@ -43,9 +43,9 @@ Creates the initial relational baseline:
 - Regional property type catalogue and company-specific enablement.
 - Contacts and multiple contact relationships.
 - Properties, ownerships, units, media and agent profiles.
-- Leads, activities, viewings, deals, deal parties and stage history.
+- Leads, lead activities, contact activities/communication history, viewings, deals, deal parties, offer history and stage history.
 - Versioned lease template metadata, leases, lease parties, rent charges, payments and allocations.\n- FX sources, rate history, explicit conversion records, subscription plan catalogue, feature entitlements and tenant usage counters.
-- Maintenance requests and status history.
+- Maintenance requests and status history, plus property/unit inspections and inspection checklist items.
 - Operational finance entries and commission records.
 - Documents, document versions and explicit access grants.
 - Audit logs, notifications, automation rules/runs, subscription records and landlord/tenant access grants.
@@ -184,7 +184,7 @@ Before calling the schema production-ready, run these checks in a disposable Pos
 - Indexing, API/service, security, scalability and validation plans.
 
 ### Database requirements
-DDL is committed. No database instance has been provisioned and no migration has been executed in this repository session. Reviewed country/currency/locale seed data, approved FX providers and rounding rules, inspection/offer/template clause structures, and any additional subscription entitlement fields may require follow-up migrations based on product-owner decisions.
+DDL is committed. No database instance has been provisioned and no migration has been executed in this repository session. Reviewed country/currency/locale seed data, approved FX providers and rounding rules, jurisdiction-specific lease clause structures, and any additional subscription entitlement fields may require follow-up migrations based on product-owner decisions.
 
 ### API requirements
 No endpoints are implemented. APIs must establish tenant context, enforce role/record permissions, use transactions and idempotency, and re-authorise every portal/file request.
