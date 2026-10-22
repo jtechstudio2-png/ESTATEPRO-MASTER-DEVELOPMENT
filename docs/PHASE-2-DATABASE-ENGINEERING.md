@@ -22,7 +22,7 @@ The core schema is country-neutral. Country-specific behaviour is configuration 
 Every monetary record stores a numeric amount and explicit ISO currency reference. Company default currency is a display/reporting preference, not a rule that all assets, leases and payments use one currency.
 
 - Never sum values in different currencies as if they were equivalent.
-- Cross-currency reporting requires explicit exchange-rate source, effective timestamp, rate, base/quote currencies, rounding and provenance. FX conversion tables are a follow-on migration once product requirements specify whether rates are user-entered, provider-supplied or both.
+- Cross-currency reporting requires explicit exchange-rate source, effective timestamp, rate, base/quote currencies, rounding and provenance. Migrations 0003 includes exchange-rate sources, versioned rate records and company-scoped conversion records; product owners must still choose approved rate sources and accounting/rounding policy.
 - Payment allocations must reconcile in compatible currencies or use a documented FX transaction; this invariant is enforced in domain transactions, not by the initial DDL alone.
 - Numeric precision and rounding policy must be reviewed with accounting and launch-market requirements before live money is recorded.
 
@@ -44,7 +44,7 @@ Creates the initial relational baseline:
 - Contacts and multiple contact relationships.
 - Properties, ownerships, units, media and agent profiles.
 - Leads, activities, viewings, deals, deal parties and stage history.
-- Versioned lease template metadata, leases, lease parties, rent charges, payments and allocations.
+- Versioned lease template metadata, leases, lease parties, rent charges, payments and allocations.\n- FX sources, rate history, explicit conversion records, subscription plan catalogue, feature entitlements and tenant usage counters.
 - Maintenance requests and status history.
 - Operational finance entries and commission records.
 - Documents, document versions and explicit access grants.
@@ -184,7 +184,7 @@ Before calling the schema production-ready, run these checks in a disposable Pos
 - Indexing, API/service, security, scalability and validation plans.
 
 ### Database requirements
-DDL is committed. No database instance has been provisioned and no migration has been executed in this repository session. Reviewed seed data, FX conversion model, detailed subscription entitlements and any additional inspection/offer/template clause structures may require follow-up migrations based on product-owner decisions.
+DDL is committed. No database instance has been provisioned and no migration has been executed in this repository session. Reviewed country/currency/locale seed data, approved FX providers and rounding rules, inspection/offer/template clause structures, and any additional subscription entitlement fields may require follow-up migrations based on product-owner decisions.
 
 ### API requirements
 No endpoints are implemented. APIs must establish tenant context, enforce role/record permissions, use transactions and idempotency, and re-authorise every portal/file request.
