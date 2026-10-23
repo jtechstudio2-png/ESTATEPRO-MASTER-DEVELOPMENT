@@ -12,8 +12,8 @@ The platform is designed and built phase by phase. Each phase ends with a close-
 |---|---|---|---|
 | 1 | Product Strategy & System Architecture | Complete | [Baseline](docs/PHASE-1-PRODUCT-STRATEGY-ARCHITECTURE.md) · [Detailed specification](docs/PHASE-1-DETAILED-SPECIFICATION.md) |
 | 2 | Database Engineering | Complete | [Design](docs/PHASE-2-DATABASE-ENGINEERING.md) · [Migrations](database/migrations) · [Tests](database/tests) |
-| 3 | UI/UX System Design | Next — requirements received ([Phase 2 §14.8](docs/PHASE-2-DATABASE-ENGINEERING.md#148-next-phase-roadmap--phase-3-uiux-system-design)) | — |
-| 4 | Property Management Module | Not started | — |
+| 3 | UI/UX System Design | Complete (design specification) | [Overview](docs/phase-3-ui-ux/README.md) · [Dashboards](docs/phase-3-ui-ux/06-role-dashboards.md) · [Close-out](docs/phase-3-ui-ux/05-phase-3-validation-gate.md#8-phase-3-close-out) |
+| 4 | Property Management Module | Next ([roadmap](docs/phase-3-ui-ux/05-phase-3-validation-gate.md#88-next-phase-roadmap--phase-4-property-management-module)) | — |
 | 5 | Client CRM Module | Not started | — |
 | 6 | Sales Pipeline Management | Not started | — |
 | 7 | Rental & Lease Management | Not started | — |
