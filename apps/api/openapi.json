@@ -173,6 +173,932 @@
           "Company"
         ]
       }
+    },
+    "/api/v1/property-types": {
+      "get": {
+        "operationId": "PropertyTypes_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[active]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[appliesTo]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "property",
+                "unit"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[countryCode]",
+            "required": false,
+            "in": "query",
+            "description": "Types usable in this country",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyTypeListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property types"
+        ]
+      },
+      "post": {
+        "operationId": "PropertyTypes_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePropertyTypeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyTypeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property types"
+        ]
+      }
+    },
+    "/api/v1/property-types/{propertyTypeId}": {
+      "patch": {
+        "operationId": "PropertyTypes_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyTypeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePropertyTypeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyTypeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property types"
+        ]
+      }
+    },
+    "/api/v1/properties": {
+      "get": {
+        "operationId": "Properties_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[isManaged]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[countryCode]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated ISO country codes",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyTypeId]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated type ids",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated office ids",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Reference, name or address contains",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "reference",
+                "-reference",
+                "createdAt",
+                "-createdAt",
+                "updatedAt",
+                "-updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      },
+      "post": {
+        "operationId": "Properties_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePropertyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}": {
+      "get": {
+        "operationId": "Properties_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      },
+      "patch": {
+        "operationId": "Properties_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePropertyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/archive": {
+      "post": {
+        "operationId": "Properties_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/restore": {
+      "post": {
+        "operationId": "Properties_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/units": {
+      "get": {
+        "operationId": "Properties_listUnits",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[availability]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated availability values",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "unitLabel",
+                "-unitLabel",
+                "createdAt",
+                "-createdAt",
+                "updatedAt",
+                "-updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      },
+      "post": {
+        "operationId": "Properties_createUnit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUnitBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/units/{unitId}": {
+      "get": {
+        "operationId": "Properties_getUnit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      },
+      "patch": {
+        "operationId": "Properties_updateUnit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUnitBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/units/{unitId}/archive": {
+      "post": {
+        "operationId": "Properties_archiveUnit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/units/{unitId}/restore": {
+      "post": {
+        "operationId": "Properties_restoreUnit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
     }
   },
   "info": {
@@ -412,6 +1338,1094 @@
         "required": [
           "data"
         ]
+      },
+      "PropertyTypeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name in the best matching Accept-Language, else the default name"
+          },
+          "usageClass": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "commercial",
+              "industrial",
+              "land",
+              "mixed_use",
+              "hospitality",
+              "agricultural",
+              "other"
+            ]
+          },
+          "appliesTo": {
+            "type": "string",
+            "enum": [
+              "property",
+              "unit",
+              "both"
+            ]
+          },
+          "countryCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "NULL = all countries"
+          },
+          "isCompanyDefined": {
+            "type": "boolean",
+            "description": "false = platform default (read-only); true = this company’s own type"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "code",
+          "name",
+          "usageClass",
+          "appliesTo",
+          "countryCode",
+          "isCompanyDefined",
+          "sortOrder",
+          "isActive",
+          "version"
+        ]
+      },
+      "PropertyTypeListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PropertyTypeDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePropertyTypeBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "shop_with_flat"
+          },
+          "name": {
+            "type": "string"
+          },
+          "usageClass": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "commercial",
+              "industrial",
+              "land",
+              "mixed_use",
+              "hospitality",
+              "agricultural",
+              "other"
+            ]
+          },
+          "appliesTo": {
+            "type": "string",
+            "enum": [
+              "property",
+              "unit",
+              "both"
+            ]
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "Limit to one country; omit for all countries"
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "usageClass",
+          "appliesTo"
+        ]
+      },
+      "UpdatePropertyTypeBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000
+          }
+        }
+      },
+      "RefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ]
+      },
+      "PropertySummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "propertyType": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "office": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "locality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "formattedAddress": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unitCount": {
+            "type": "number"
+          },
+          "isManaged": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name",
+          "propertyType",
+          "office",
+          "countryCode",
+          "locality",
+          "formattedAddress",
+          "unitCount",
+          "isManaged",
+          "archivedAt",
+          "updatedAt"
+        ]
+      },
+      "PageDto": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "limit",
+          "nextCursor"
+        ]
+      },
+      "PropertyPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PropertySummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "LandAreaInput": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "minimum": 0.0001,
+            "maximum": 1000000000
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "sqm",
+              "sqft",
+              "acre",
+              "hectare",
+              "plot"
+            ],
+            "description": "\"plot\" is kept as entered; it has no fixed size in square metres"
+          }
+        },
+        "required": [
+          "value",
+          "unit"
+        ]
+      },
+      "AddressInput": {
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "type": "string",
+            "example": "GH",
+            "description": "ISO 3166-1 alpha-2"
+          },
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string"
+          },
+          "addressLine3": {
+            "type": "string"
+          },
+          "dependentLocality": {
+            "type": "string",
+            "description": "Neighbourhood or district"
+          },
+          "locality": {
+            "type": "string",
+            "description": "City, town or post town"
+          },
+          "adminArea2": {
+            "type": "string",
+            "description": "County, district or municipality"
+          },
+          "adminArea1": {
+            "type": "string",
+            "description": "Region, state or emirate"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "localComponents": {
+            "type": "object",
+            "description": "Country-specific parts, e.g. {\"digital_address\": \"GA-123-4567\"} (GH) or {\"zone_number\": \"66\", …} (QA)",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "countryCode"
+        ]
+      },
+      "CreatePropertyBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "description": "Building or estate name"
+          },
+          "tenureCode": {
+            "type": "object",
+            "description": "Tenure code from the \"tenure\" picklist for the property’s country"
+          },
+          "tenureExpiresOn": {
+            "type": "object",
+            "format": "date"
+          },
+          "titleReference": {
+            "type": "object",
+            "description": "Land registry / title number"
+          },
+          "yearBuilt": {
+            "type": "object",
+            "minimum": 1000,
+            "maximum": 2200
+          },
+          "floorsCount": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 300
+          },
+          "landArea": {
+            "$ref": "#/components/schemas/LandAreaInput"
+          },
+          "isManaged": {
+            "type": "boolean",
+            "description": "Under a management agreement"
+          },
+          "internalNotes": {
+            "type": "object"
+          },
+          "jurisdictionCode": {
+            "type": "string",
+            "description": "Defaults to the office jurisdiction when in the same country"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone; defaults to the office (same country) or the country default",
+            "example": "Africa/Accra"
+          },
+          "propertyTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressInput"
+          },
+          "createWholePropertyUnit": {
+            "type": "boolean",
+            "description": "Also create the single \"Whole property\" unit (houses, plots)",
+            "default": false
+          }
+        },
+        "required": [
+          "propertyTypeId",
+          "officeId",
+          "address"
+        ]
+      },
+      "AddressDto": {
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "addressLine1": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "addressLine2": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "addressLine3": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dependentLocality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "locality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "adminArea2": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "adminArea1": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "postalCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "localComponents": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "formatted": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "countryCode",
+          "addressLine1",
+          "addressLine2",
+          "addressLine3",
+          "dependentLocality",
+          "locality",
+          "adminArea2",
+          "adminArea1",
+          "postalCode",
+          "localComponents",
+          "formatted",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "AreaDto": {
+        "type": "object",
+        "properties": {
+          "sqm": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Square metres; null for units with no fixed size (plot)"
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sqm",
+          "value",
+          "unit"
+        ]
+      },
+      "PropertyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string",
+            "example": "PRP-2026-000001"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "propertyType": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "office": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "tenureCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tenureExpiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "titleReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "yearBuilt": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "floorsCount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "landArea": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AreaDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isManaged": {
+            "type": "boolean"
+          },
+          "internalNotes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "customFields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Company custom fields (read-only in Phase 4)"
+          },
+          "unitCount": {
+            "type": "number",
+            "description": "Units that are not archived"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name",
+          "propertyType",
+          "office",
+          "jurisdictionCode",
+          "timezone",
+          "address",
+          "tenureCode",
+          "tenureExpiresOn",
+          "titleReference",
+          "yearBuilt",
+          "floorsCount",
+          "landArea",
+          "isManaged",
+          "internalNotes",
+          "customFields",
+          "unitCount",
+          "archivedAt",
+          "archivedReason",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "UpdatePropertyBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "description": "Building or estate name"
+          },
+          "tenureCode": {
+            "type": "object",
+            "description": "Tenure code from the \"tenure\" picklist for the property’s country"
+          },
+          "tenureExpiresOn": {
+            "type": "object",
+            "format": "date"
+          },
+          "titleReference": {
+            "type": "object",
+            "description": "Land registry / title number"
+          },
+          "yearBuilt": {
+            "type": "object",
+            "minimum": 1000,
+            "maximum": 2200
+          },
+          "floorsCount": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 300
+          },
+          "landArea": {
+            "$ref": "#/components/schemas/LandAreaInput"
+          },
+          "isManaged": {
+            "type": "boolean",
+            "description": "Under a management agreement"
+          },
+          "internalNotes": {
+            "type": "object"
+          },
+          "jurisdictionCode": {
+            "type": "string",
+            "description": "Defaults to the office jurisdiction when in the same country"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone; defaults to the office (same country) or the country default",
+            "example": "Africa/Accra"
+          },
+          "propertyTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "address": {
+            "description": "Replaces the whole address",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInput"
+              }
+            ]
+          }
+        }
+      },
+      "ArchiveBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "UnitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string",
+            "example": "UNT-2026-000001"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "unitType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isWholeProperty": {
+            "type": "boolean"
+          },
+          "floorLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "bathrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "receptionRooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "floorArea": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AreaDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parkingSpaces": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "furnishingCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "energyRating": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "available",
+              "under_maintenance",
+              "owner_occupied",
+              "unavailable"
+            ]
+          },
+          "availabilityNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "availabilityUntil": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "featureCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "propertyId",
+          "unitLabel",
+          "unitType",
+          "isWholeProperty",
+          "floorLabel",
+          "bedrooms",
+          "bathrooms",
+          "receptionRooms",
+          "floorArea",
+          "parkingSpaces",
+          "furnishingCode",
+          "energyRating",
+          "availability",
+          "availabilityNote",
+          "availabilityUntil",
+          "featureCodes",
+          "archivedAt",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "UnitPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "FloorAreaInput": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "minimum": 0.0001,
+            "maximum": 10000000
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "sqm",
+              "sqft"
+            ]
+          }
+        },
+        "required": [
+          "value",
+          "unit"
+        ]
+      },
+      "CreateUnitBody": {
+        "type": "object",
+        "properties": {
+          "unitTypeId": {
+            "type": "object",
+            "format": "uuid"
+          },
+          "floorLabel": {
+            "type": "object"
+          },
+          "bedrooms": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "bathrooms": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.5
+          },
+          "receptionRooms": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "floorArea": {
+            "$ref": "#/components/schemas/FloorAreaInput"
+          },
+          "parkingSpaces": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "furnishingCode": {
+            "type": "object",
+            "description": "Code from the \"furnishing\" picklist"
+          },
+          "energyRating": {
+            "type": "object",
+            "description": "Energy rating where the market uses one (e.g. EPC band)"
+          },
+          "featureCodes": {
+            "description": "Codes from the \"feature\" picklist; replaces the full set",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unitLabel": {
+            "type": "string",
+            "example": "Flat 3B"
+          },
+          "isWholeProperty": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "unitLabel"
+        ]
+      },
+      "UpdateUnitBody": {
+        "type": "object",
+        "properties": {
+          "unitTypeId": {
+            "type": "object",
+            "format": "uuid"
+          },
+          "floorLabel": {
+            "type": "object"
+          },
+          "bedrooms": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "bathrooms": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.5
+          },
+          "receptionRooms": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "floorArea": {
+            "$ref": "#/components/schemas/FloorAreaInput"
+          },
+          "parkingSpaces": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "furnishingCode": {
+            "type": "object",
+            "description": "Code from the \"furnishing\" picklist"
+          },
+          "energyRating": {
+            "type": "object",
+            "description": "Energy rating where the market uses one (e.g. EPC band)"
+          },
+          "featureCodes": {
+            "description": "Codes from the \"feature\" picklist; replaces the full set",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        }
       }
     }
   }

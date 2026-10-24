@@ -13,7 +13,7 @@ The platform is designed and built phase by phase. Each phase ends with a close-
 | 1 | Product Strategy & System Architecture | Complete | [Baseline](docs/PHASE-1-PRODUCT-STRATEGY-ARCHITECTURE.md) · [Detailed specification](docs/PHASE-1-DETAILED-SPECIFICATION.md) |
 | 2 | Database Engineering | Complete | [Design](docs/PHASE-2-DATABASE-ENGINEERING.md) · [Migrations](database/migrations) · [Tests](database/tests) |
 | 3 | UI/UX System Design | Complete (design specification) | [Overview](docs/phase-3-ui-ux/README.md) · [Dashboards](docs/phase-3-ui-ux/06-role-dashboards.md) · [Close-out](docs/phase-3-ui-ux/05-phase-3-validation-gate.md#8-phase-3-close-out) |
-| 4 | Property Management Module | In progress — milestone 1 (foundation) complete | [API](apps/api/README.md) · [ADR-001](docs/decisions/ADR-001-authentication-managed-identity-provider.md) · [ADR-002](docs/decisions/ADR-002-accessibility-wcag-2-2-aa.md) · [ADR-003](docs/decisions/ADR-003-api-conventions.md) |
+| 4 | Property Management Module | In progress — milestones 1 (foundation) and 2 (properties, units, property types) complete | [API](apps/api/README.md) · [ADR-001](docs/decisions/ADR-001-authentication-managed-identity-provider.md) · [ADR-002](docs/decisions/ADR-002-accessibility-wcag-2-2-aa.md) · [ADR-003](docs/decisions/ADR-003-api-conventions.md) |
 | 5 | Client CRM Module | Not started | — |
 | 6 | Sales Pipeline Management | Not started | — |
 | 7 | Rental & Lease Management | Not started | — |

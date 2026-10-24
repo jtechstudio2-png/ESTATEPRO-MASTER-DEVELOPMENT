@@ -7,6 +7,7 @@ import { ProblemFilter } from '../src/common/problem.filter.js';
 import { ProblemError, Problems } from '../src/common/problem.js';
 import { flattenValidationErrors } from '../src/common/validation.js';
 import { ConfigError, loadConfig } from '../src/config/config.js';
+import { preferredLocales } from '../src/reference/picklists.js';
 
 const validEnv = {
   DATABASE_URL: 'postgres://a:b@localhost/db',
@@ -187,5 +188,14 @@ describe('audit diff', () => {
 
   it('returns null when nothing changed and treats undefined as null', () => {
     expect(diffForAudit({ a: null }, { a: undefined })).toBeNull();
+  });
+});
+
+describe('preferredLocales', () => {
+  it('orders Accept-Language tags by weight, adding base languages and dropping invalid tags', () => {
+    expect(preferredLocales(undefined)).toEqual([]);
+    expect(preferredLocales('ar-qa,en;q=0.8')).toEqual(['ar-QA', 'ar', 'en']);
+    expect(preferredLocales('en;q=0.5, fr-FR;q=0.9, de;q=abc, *, x-klingon, es;q=0')).toEqual(['fr-FR', 'fr', 'en']);
+    expect(preferredLocales('en-GB, en-GH, en')).toEqual(['en-GB', 'en', 'en-GH']);
   });
 });

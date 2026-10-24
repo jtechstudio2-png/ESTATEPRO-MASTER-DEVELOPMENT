@@ -143,6 +143,56 @@ export class Fixtures {
     await this.db.updateTable('companies').set({ status }).where('id', '=', companyId).execute();
   }
 
+  /** Inserts a listing directly (listings API arrives in milestone 3). */
+  async listing(companyId: string, unitId: string, agentMembershipId: string, officeId: string, status = 'available') {
+    return this.db
+      .insertInto('listings')
+      .values({
+        companyId,
+        reference: `LST-T-${this.uniqueSuffix()}`,
+        unitId,
+        listingType: 'sale',
+        status,
+        currencyCode: 'GHS',
+        price: '450000.00',
+        agentMembershipId,
+        officeId,
+        defaultLocaleCode: 'en-GH',
+        title: 'Test listing',
+      })
+      .returning('id')
+      .executeTakeFirstOrThrow();
+  }
+
+  /** A maintenance request on a property with an active assignment (for the "assigned" scope). */
+  async assignWorkOrder(companyId: string, propertyId: string, assigneeMembershipId: string, reporterMembershipId: string) {
+    const sla = await this.db.selectFrom('slaPolicies').select('id').where('priorityCode', '=', 'routine').where('companyId', 'is', null).executeTakeFirstOrThrow();
+    const request = await this.db
+      .insertInto('maintenanceRequests')
+      .values({
+        companyId,
+        reference: `WO-T-${this.uniqueSuffix()}`,
+        propertyId,
+        source: 'staff',
+        reportedByMembershipId: reporterMembershipId,
+        categoryCode: 'plumbing',
+        title: 'Leak',
+        description: 'Kitchen tap leaking',
+        slaPolicyId: sla.id,
+        priorityCode: 'routine',
+        status: 'assigned',
+        responseDueAt: new Date(Date.now() + 86_400_000),
+        resolutionDueAt: new Date(Date.now() + 7 * 86_400_000),
+      })
+      .returning('id')
+      .executeTakeFirstOrThrow();
+    await this.db
+      .insertInto('maintenanceAssignments')
+      .values({ companyId, requestId: request.id, assigneeMembershipId, status: 'active' })
+      .execute();
+    return request;
+  }
+
   async setUserStatus(userId: string, status: 'pending' | 'active' | 'locked' | 'disabled') {
     await this.db.updateTable('users').set({ status }).where('id', '=', userId).execute();
   }

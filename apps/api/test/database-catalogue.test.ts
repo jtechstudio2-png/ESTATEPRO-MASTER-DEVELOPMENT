@@ -2,7 +2,13 @@ import { sql } from 'kysely';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { inject } from 'vitest';
 
-import { createKysely, type Db } from '../src/database/database.module.js';
+import { createKysely, type Db, SchemaCasePlugin } from '../src/database/database.module.js';
+
+class ExposedCasePlugin extends SchemaCasePlugin {
+  toSnake(name: string): string {
+    return this.snakeCase(name);
+  }
+}
 
 /**
  * Catalogue checks (audit item IS-11): structural guarantees that must hold for
@@ -43,5 +49,16 @@ describe('database catalogue', () => {
     const { rows } = await sql<{ bypass: boolean; superuser: boolean }>`
       select rolbypassrls as bypass, rolsuper as superuser from pg_roles where rolname = 'estatepro_app'`.execute(admin);
     expect(rows).toEqual([{ bypass: false, superuser: false }]);
+  });
+
+  it('maps every generated camelCase column name back to its schema column', async () => {
+    const plugin = new ExposedCasePlugin();
+    const columns = await sql<{ columnName: string }>`
+      SELECT DISTINCT column_name FROM information_schema.columns WHERE table_schema = 'public'
+    `.execute(admin);
+    const mismatched = columns.rows
+      .map((row) => row.columnName)
+      .filter((name) => plugin.toSnake(name.replace(/_([a-z0-9])/g, (_match: string, char: string) => char.toUpperCase())) !== name);
+    expect(mismatched).toEqual([]);
   });
 });

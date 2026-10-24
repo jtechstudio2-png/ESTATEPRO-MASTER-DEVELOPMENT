@@ -9,6 +9,27 @@ import type { DB } from './schema.js';
 // 'YYYY-MM-DD' strings instead of converting to a JavaScript Date in UTC.
 pg.types.setTypeParser(pg.types.builtins.DATE, (value: string) => value);
 
+/**
+ * Maps camelCase names to the schema's snake_case. Most columns with digits are
+ * written without an underscore (`phone_e164`, `last4`), but address columns put
+ * one before the number (`address_line_1`, `admin_area_1`); those are listed here.
+ * JSON column contents keep their stored keys.
+ */
+export class SchemaCasePlugin extends CamelCasePlugin {
+  static readonly digitSeparated = new Map<string, string>(
+    ['address_line_1', 'address_line_2', 'address_line_3', 'admin_area_1', 'admin_area_2'].map((name) => [name.replace(/_(\d)/g, '$1'), name]),
+  );
+
+  constructor() {
+    super({ maintainNestedObjectKeys: true });
+  }
+
+  protected override snakeCase(str: string): string {
+    const snake = super.snakeCase(str);
+    return SchemaCasePlugin.digitSeparated.get(snake) ?? snake;
+  }
+}
+
 const APP_DB = Symbol('APP_DB');
 const AUTH_DB = Symbol('AUTH_DB');
 
@@ -20,7 +41,7 @@ export function createKysely(connectionString: string, max: number, applicationN
     dialect: new PostgresDialect({
       pool: new pg.Pool({ connectionString, max, application_name: applicationName }),
     }),
-    plugins: [new CamelCasePlugin()],
+    plugins: [new SchemaCasePlugin()],
   });
 }
 
