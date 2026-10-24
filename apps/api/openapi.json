@@ -1,0 +1,418 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "Health_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "Me_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/api/v1/company": {
+      "get": {
+        "operationId": "Company_company",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Company"
+        ]
+      }
+    },
+    "/api/v1/offices": {
+      "get": {
+        "operationId": "Company_offices",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficeListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Company"
+        ]
+      }
+    },
+    "/api/v1/offices/{officeId}": {
+      "get": {
+        "operationId": "Company_office",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "officeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Company"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "EstatePro API",
+    "description": "Multi-tenant real estate and property management API. Conventions: docs/decisions/ADR-003-api-conventions.md",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "MembershipSummaryDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "companyStatus": {
+            "type": "string",
+            "enum": [
+              "trial",
+              "active",
+              "past_due",
+              "read_only",
+              "suspended",
+              "cancelled"
+            ]
+          },
+          "roleKey": {
+            "type": "string"
+          },
+          "roleName": {
+            "type": "string"
+          },
+          "membershipType": {
+            "type": "string",
+            "enum": [
+              "staff",
+              "portal"
+            ]
+          }
+        },
+        "required": [
+          "membershipId",
+          "companyId",
+          "companyName",
+          "companyStatus",
+          "roleKey",
+          "roleName",
+          "membershipType"
+        ]
+      },
+      "MeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "memberships"
+        ]
+      },
+      "CompanyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "tradingName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "businessTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headquartersCountryCode": {
+            "type": "string",
+            "example": "GH"
+          },
+          "baseCurrencyCode": {
+            "type": "string",
+            "example": "GHS"
+          },
+          "defaultLocaleCode": {
+            "type": "string",
+            "example": "en-GH"
+          },
+          "defaultTimezone": {
+            "type": "string",
+            "example": "Africa/Accra"
+          },
+          "fiscalYearStartMonth": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": [
+          "id",
+          "legalName",
+          "tradingName",
+          "status",
+          "businessTypes",
+          "headquartersCountryCode",
+          "baseCurrencyCode",
+          "defaultLocaleCode",
+          "defaultTimezone",
+          "fiscalYearStartMonth"
+        ]
+      },
+      "OfficeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "localeCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "workingDays": {
+            "description": "ISO weekdays, 1 = Monday",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "isHeadOffice": {
+            "type": "boolean"
+          },
+          "formattedAddress": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "countryCode",
+          "jurisdictionCode",
+          "currencyCode",
+          "localeCode",
+          "timezone",
+          "workingDays",
+          "isHeadOffice",
+          "formattedAddress",
+          "archivedAt"
+        ]
+      },
+      "OfficeListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfficeDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      }
+    }
+  }
+}
