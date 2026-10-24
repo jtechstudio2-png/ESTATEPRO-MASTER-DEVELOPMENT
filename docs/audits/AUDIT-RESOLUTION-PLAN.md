@@ -168,3 +168,23 @@ Phase 4 needs only the property register, record form, record page pattern, list
 | Accepted | 0 |
 
 **Critical findings: none open for Phase 4.** High findings A1–A3 block the start of Phase 7 rent features; IS-7 blocks Phase 5 sensitive fields; MD-7 and V-3 block production use in a market, not development.
+
+## 7. GitHub issue tracking
+
+Each tracked item has a GitHub issue in `jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT`, assigned to the repository owner as accountable person; the resolution owner (role) is stated in each issue.
+
+| Issue | Item |
+|---|---|
+| #1 | A1 — freeze posted rent charges |
+| #2 | A2 — payment amount below allocations |
+| #3 | A3 — reverse allocations before void/bounce/refund |
+| #4 | A4 — retention purge of document versions |
+| #5 | P1–P3 — landlord visibility of offers, deal progress, viewing feedback |
+| #6 | C1 — select the identity provider vendor |
+| #7 | MD-9, MD-10 — gallery/floor-plan manager and map search wireframes (Phase 4) |
+| #8 | MD-2, MD-3 — Admin dashboard layout and Agent desktop home (Phase 5) |
+| #9 | MD-4b — Landlord portal home (Phase 7) |
+| #10 | MD-4a — Technician job list (Phase 8) |
+| #11 | MD-1a, MD-1b — Platform Owner and Super Admin consoles (before Phase 14) |
+
+Other scheduled items (IS-3 to IS-11, R-5, MD-5 to MD-8, C1-F, V-3, V-4/V-5) are tracked in this register and reviewed at each phase close-out; issues are opened for them when their phase begins.
