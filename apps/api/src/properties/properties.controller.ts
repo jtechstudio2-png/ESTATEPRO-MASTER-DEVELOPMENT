@@ -22,6 +22,7 @@ import {
   CreateUnitBody,
   PropertyDto,
   PropertyPageDto,
+  UnitAvailabilityBody,
   UnitDto,
   UnitPageDto,
   UpdatePropertyBody,
@@ -235,6 +236,24 @@ export class PropertiesController {
   ): Promise<UnitDto> {
     const expected = requireIfMatch(ifMatch);
     const unit = await this.tenantDb.run(ctx, (tx) => this.units.update(tx, ctx, unitId, expected, body));
+    setVersionEtag(res, unit.version);
+    return unit;
+  }
+
+  @Post('units/:unitId/availability')
+  @RequirePermission('property.update')
+  @ApiHeader({ name: 'If-Match', required: true })
+  @ApiOkResponse({ type: UnitDto })
+  async setUnitAvailability(
+    @Tenant() ctx: TenantContext,
+    @Param('unitId', UUID_PARAM) unitId: string,
+    @Body() body: UnitAvailabilityBody,
+    @Headers('if-match') ifMatch: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<UnitDto> {
+    const expected = requireIfMatch(ifMatch);
+    const unit = await this.tenantDb.run(ctx, (tx) => this.units.setAvailability(tx, ctx, unitId, expected, body));
+    res.status(200);
     setVersionEtag(res, unit.version);
     return unit;
   }

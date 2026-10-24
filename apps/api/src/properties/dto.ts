@@ -21,10 +21,10 @@ import {
 
 import { AddressDto, AddressInput } from '../reference/address.js';
 
-const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
+export const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
 /** Optional in PATCH: undefined = unchanged, null = clear (where the field allows it). */
-const provided = (_object: unknown, value: unknown): boolean => value !== undefined && value !== null;
-const DATE = /^\d{4}-\d{2}-\d{2}$/;
+export const provided = (_object: unknown, value: unknown): boolean => value !== undefined && value !== null;
+export const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const LAND_AREA_UNITS = ['sqm', 'sqft', 'acre', 'hectare', 'plot'] as const;
 export const FLOOR_AREA_UNITS = ['sqm', 'sqft'] as const;
@@ -151,7 +151,7 @@ export class PropertySummaryDto {
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
 }
 
-class PageDto {
+export class PageDto {
   @ApiProperty() limit!: number;
   @ApiProperty({ type: String, nullable: true }) nextCursor!: string | null;
 }
@@ -214,6 +214,17 @@ export class UnitDto {
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
   @ApiProperty() version!: number;
+}
+
+export const UNIT_AVAILABILITY = ['available', 'under_maintenance', 'owner_occupied', 'unavailable'] as const;
+
+export class UnitAvailabilityBody {
+  @ApiProperty({ enum: UNIT_AVAILABILITY, description: '"under_maintenance" blocks new viewings and lettings without changing listing status' })
+  @IsIn(UNIT_AVAILABILITY)
+  availability!: (typeof UNIT_AVAILABILITY)[number];
+
+  @ApiPropertyOptional({ maxLength: 500 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(500) note?: string | null;
+  @ApiPropertyOptional({ format: 'date', description: 'Expected end of the restriction' }) @ValidateIf(provided) @Matches(DATE) until?: string | null;
 }
 
 export class UnitPageDto {

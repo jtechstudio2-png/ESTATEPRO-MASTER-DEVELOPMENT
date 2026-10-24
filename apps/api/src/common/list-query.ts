@@ -11,7 +11,7 @@ export const DEFAULT_LIMIT = 50;
 export const MAX_LIMIT = 100;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export type SortValueKind = 'text' | 'timestamp';
+export type SortValueKind = 'text' | 'timestamp' | 'numeric';
 
 export interface SortSpec<F extends string> {
   allowed: Record<F, SortValueKind>;
@@ -209,6 +209,7 @@ function decodeCursor(raw: unknown, kind: SortValueKind): Cursor | null {
     const { v, id } = decoded as Record<string, unknown>;
     if (typeof v !== 'string' || typeof id !== 'string' || !UUID.test(id)) return null;
     if (kind === 'timestamp' && Number.isNaN(Date.parse(v))) return null;
+    if (kind === 'numeric' && !/^-?\d{1,20}(\.\d{1,10})?$/.test(v)) return null;
     return { v, id };
   } catch {
     return null;
@@ -241,11 +242,12 @@ export function toPage<R, T>(
  * repeat or skip rows across pages).
  */
 export function sortValueSql(column: string, kind: SortValueKind): RawBuilder<string> {
-  return kind === 'timestamp' ? sql<string>`(${sql.ref(column)})::text` : sql<string>`${sql.ref(column)}`;
+  return kind === 'text' ? sql<string>`${sql.ref(column)}` : sql<string>`(${sql.ref(column)})::text`;
 }
 
 export function keysetCondition(column: string, idColumn: string, sort: ParsedSort<string>, cursor: Cursor): RawBuilder<boolean> {
   const operator = sort.direction === 'asc' ? sql.raw('>') : sql.raw('<');
-  const value = sort.kind === 'timestamp' ? sql`${cursor.v}::timestamptz` : sql`${cursor.v}`;
+  const value =
+    sort.kind === 'timestamp' ? sql`${cursor.v}::timestamptz` : sort.kind === 'numeric' ? sql`${cursor.v}::numeric` : sql`${cursor.v}`;
   return sql<boolean>`(${sql.ref(column)}, ${sql.ref(idColumn)}) ${operator} (${value}, ${cursor.id}::uuid)`;
 }

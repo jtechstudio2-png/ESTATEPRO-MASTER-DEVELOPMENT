@@ -63,8 +63,19 @@ The owner then signs in through the identity provider with that email (verified)
 | GET, POST | `/api/v1/properties/{id}/units` | `property.view`, `property.update` |
 | GET, PATCH | `/api/v1/units/{id}` | `property.view`, `property.update` |
 | POST | `/api/v1/units/{id}/archive`, `/restore` | `property.archive` |
+| POST | `/api/v1/units/{id}/availability` | `property.update` |
+| GET, POST | `/api/v1/listings` | `listing.view`, `listing.create` |
+| GET, PATCH | `/api/v1/listings/{id}` | `listing.view`, `listing.update` |
+| POST | `/api/v1/listings/{id}/publish`, `/unpublish`, `/status-transitions` | `listing.publish` (agents: own listings, ADR-004 D1) |
+| POST | `/api/v1/listings/{id}/assign` | `listing.update` with office or all scope (D4) |
+| POST | `/api/v1/listings/{id}/relist` | `listing.create` (D3) |
+| POST | `/api/v1/listings/{id}/archive`, `/restore` | `listing.archive` |
+| PUT, DELETE | `/api/v1/listings/{id}/translations/{locale}` | `listing.update` |
+| GET | `/api/v1/listings/{id}/status-history`, `/price-history`, `/history` | `listing.view` |
+| GET | `/api/v1/properties/{id}/listings`, `/api/v1/units/{id}/listings` | `listing.view` + property visible |
+| GET, PUT | `/api/v1/settings/listings` | `listing.view`, `settings.manage` |
 
-Lists use `limit`, `cursor`, `sort` and `filter[...]` (ADR-003 §6); see `openapi.json` for the filters each list accepts.
+Lists use `limit`, `cursor`, `sort` and `filter[...]` (ADR-003 §6); see `openapi.json` for the filters each list accepts. Listing rules are recorded in [ADR-004](../../docs/decisions/ADR-004-listing-rules.md). `test/listings.performance.test.ts` checks list queries at p95 < 1 s on 100,000 listings.
 
 ## Tests
 

@@ -8,8 +8,8 @@ import { type FieldError, Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import type { Tx } from '../database/database.module.js';
 import { checkPicklistCode } from '../reference/picklists.js';
-import type { CreateUnitBody, FloorAreaInput, UnitDto, UpdateUnitBody } from './dto.js';
-import { PropertiesService, nextReference, sameValue, toSquareMetres } from './properties.service.js';
+import type { CreateUnitBody, FloorAreaInput, UnitAvailabilityBody, UnitDto, UpdateUnitBody } from './dto.js';
+import { PropertiesService, isCalendarDate, nextReference, sameValue, toSquareMetres } from './properties.service.js';
 import { assertPropertyAccess } from './property-access.js';
 
 registerConstraintMessages({
@@ -156,6 +156,33 @@ export class UnitsService {
       changes: Object.keys(changes).length > 0 ? changes : null,
     });
     await this.audit.emit(tx, ctx, { eventType: 'unit.updated', aggregateType: 'unit', aggregateId: unitId, payload: { unitId, propertyId: current.propertyId } });
+    return this.get(tx, ctx, unitId);
+  }
+
+  /** Operational availability; "under_maintenance" blocks new lettings without changing listing status. */
+  async setAvailability(tx: Tx, ctx: TenantContext, unitId: string, expectedVersion: number, body: UnitAvailabilityBody): Promise<UnitDto> {
+    const current = await tx.selectFrom('units').selectAll().where('id', '=', unitId).forUpdate().executeTakeFirst();
+    if (!current) throw Problems.notFound();
+    const property = await this.loadProperty(tx, current.propertyId);
+    await assertPropertyAccess(tx, ctx, property, 'property.update');
+    if (current.archivedAt !== null) throw Problems.businessRule('Archived units cannot be edited. Restore the unit first.');
+    if (current.version !== expectedVersion) throw Problems.preconditionFailed();
+
+    const restricted = body.availability !== 'available';
+    const until = restricted ? (body.until ?? null) : null;
+    if (until !== null && !isCalendarDate(until)) throw Problems.validation([{ field: 'until', code: 'invalid', message: 'This is not a valid date.' }]);
+    const next = { availability: body.availability, availabilityNote: restricted ? (body.note ?? null) : null, availabilityUntil: until };
+    const changes = diffForAudit(current, next);
+    if (changes === null) return this.get(tx, ctx, unitId);
+
+    await tx.updateTable('units').set(next).where('id', '=', unitId).execute();
+    await this.audit.record(tx, ctx, { action: 'unit.availability_changed', entityType: 'unit', entityId: unitId, changes });
+    await this.audit.emit(tx, ctx, {
+      eventType: 'unit.availability_changed',
+      aggregateType: 'unit',
+      aggregateId: unitId,
+      payload: { unitId, propertyId: current.propertyId, from: current.availability, to: body.availability },
+    });
     return this.get(tx, ctx, unitId);
   }
 

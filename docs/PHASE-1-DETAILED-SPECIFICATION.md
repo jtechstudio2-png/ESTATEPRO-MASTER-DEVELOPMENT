@@ -373,7 +373,7 @@ Each journey lists the steps, the system touchpoints, and the controls that make
 | 9 | Repairs during tenancy | Tenant, PM, Technician | Work orders (see 7.3) | SLA |
 | 10 | Renewal window (90/60/30 days) | System, PM | Renewal task; landlord and tenant consulted; decision recorded | Escalation if no decision by 30 days |
 | 11a | Renew | PM | New lease linked to old; rent review applied | — |
-| 11b | End | PM | Notice recorded; move-out inspection; deposit return with itemised deductions; listing → Available | Deposit return deadline |
+| 11b | End | PM | Notice recorded; move-out inspection; deposit return with itemised deductions; rental relisted as a new listing (ADR-004 D3) | Deposit return deadline |
 
 ### 7.3 Maintenance: from report to close
 
@@ -678,7 +678,7 @@ Platform Owner and Super Admin are excluded from the Company table. They have no
 | Subscription & billing | CRUD (all) | R (all) | — | — | — | R (all) | — | — | — |
 | Users & roles | CRUD (all) | CRUD (all)¹ | R (br) | R (br) | — | R (all) | — | — | — |
 | Properties & units | CRUDX (all) | CRUDX (all) | CRUX (br) | CRUX (br) | CRU (own), R (br) | R (all) | R (asg) | R (link) | R (link) |
-| Listings | CRUDAX (all) | CRUDAX (all) | CRUDA (br) | CRUDA (br) | CRU (own)² | R (all) | — | R (link) | — |
+| Listings | CRUDAX (all) | CRUDAX (all) | CRUDA (br) | CRUDA (br) | CRU + publish (own)², R (br) | R (all) | — | R (link) | — |
 | Contacts | CRUDX (all) | CRUDX (all) | CRUDX (br) | CRUDX (br) | CRU (own) | R (all) | R (asg)³ | R (self) | R (self) |
 | KYC checks | CRUDA (all) | CRUDA (all) | CRUA (br) | CRUA (br) | CRU (own) | R (all) | — | — | — |
 | Leads | CRUDX (all) | CRUDX (all) | CRUDX (br) | CRUD (br) | CRU (own) | — | — | — | — |
@@ -703,7 +703,7 @@ Platform Owner and Super Admin are excluded from the Company table. They have no
 Notes:
 
 1. An Office Administrator cannot grant the Company Owner role or modify the Company Owner's account.
-2. Price reductions and status changes to Withdrawn above a configured threshold need manager approval.
+2. Agents publish and change the status of listings assigned to them. Price reductions on live listings above a configurable threshold (off by default; suggested 10%) need manager approval; only managers and admins reassign listings (ADR-004).
 3. Only the contact details needed for the job: name, phone, access notes.
 4. A seller-landlord sees offers and viewing feedback on their own listing.
 5. Agents can draft leases for their own lettings; a Property Manager approves activation.

@@ -988,6 +988,67 @@
         ]
       }
     },
+    "/api/v1/units/{unitId}/availability": {
+      "post": {
+        "operationId": "Properties_setUnitAvailability",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitAvailabilityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
     "/api/v1/units/{unitId}/archive": {
       "post": {
         "operationId": "Properties_archiveUnit",
@@ -1097,6 +1158,1189 @@
         ],
         "tags": [
           "Properties"
+        ]
+      }
+    },
+    "/api/v1/listings": {
+      "get": {
+        "operationId": "Listings_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[mandateExpiresOn][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[availableFrom][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[bedrooms][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[bedrooms][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[price][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[price][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[currencyCode]",
+            "required": false,
+            "in": "query",
+            "description": "Required (single) with a price range",
+            "schema": {}
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[isPublished]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[unitId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[agentMembershipId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated statuses",
+            "schema": {}
+          },
+          {
+            "name": "filter[listingType]",
+            "required": false,
+            "in": "query",
+            "description": "sale, rent",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Reference or title (any language) contains",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "reference",
+                "-reference",
+                "createdAt",
+                "-createdAt",
+                "updatedAt",
+                "-updatedAt",
+                "price",
+                "-price"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      },
+      "post": {
+        "operationId": "Listings_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/listings": {
+      "get": {
+        "operationId": "Listings_listForProperty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/units/{unitId}/listings": {
+      "get": {
+        "operationId": "Listings_listForUnit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}": {
+      "get": {
+        "operationId": "Listings_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      },
+      "patch": {
+        "operationId": "Listings_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateListingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/publish": {
+      "post": {
+        "operationId": "Listings_publish",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/unpublish": {
+      "post": {
+        "operationId": "Listings_unpublish",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/status-transitions": {
+      "post": {
+        "operationId": "Listings_changeStatus",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingStatusBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/assign": {
+      "post": {
+        "operationId": "Listings_assign",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAgentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/relist": {
+      "post": {
+        "operationId": "Listings_relist",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelistBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/archive": {
+      "post": {
+        "operationId": "Listings_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/restore": {
+      "post": {
+        "operationId": "Listings_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/translations/{localeCode}": {
+      "put": {
+        "operationId": "Listings_saveTranslation",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "localeCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the listing",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      },
+      "delete": {
+        "operationId": "Listings_removeTranslation",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "localeCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the listing",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed; the ETag header carries the listing’s new version"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/status-history": {
+      "get": {
+        "operationId": "Listings_statusHistory",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusHistoryPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/price-history": {
+      "get": {
+        "operationId": "Listings_priceHistory",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceHistoryPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/history": {
+      "get": {
+        "operationId": "Listings_history",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/settings/listings": {
+      "get": {
+        "operationId": "Listings_getSettings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      },
+      "put": {
+        "operationId": "Listings_saveSettings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
         ]
       }
     }
@@ -2426,6 +3670,1200 @@
             "type": "string"
           }
         }
+      },
+      "UnitAvailabilityBody": {
+        "type": "object",
+        "properties": {
+          "availability": {
+            "type": "string",
+            "enum": [
+              "available",
+              "under_maintenance",
+              "owner_occupied",
+              "unavailable"
+            ],
+            "description": "\"under_maintenance\" blocks new viewings and lettings without changing listing status"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 500
+          },
+          "until": {
+            "type": "object",
+            "format": "date",
+            "description": "Expected end of the restriction"
+          }
+        },
+        "required": [
+          "availability"
+        ]
+      },
+      "MoneyDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "example": "6000.00"
+          },
+          "currency": {
+            "type": "string",
+            "example": "GHS"
+          }
+        },
+        "required": [
+          "amount",
+          "currency"
+        ]
+      },
+      "ListingUnitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "available",
+              "under_maintenance",
+              "owner_occupied",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "unitLabel",
+          "bedrooms",
+          "availability"
+        ]
+      },
+      "ListingPropertyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "formattedAddress": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name",
+          "formattedAddress"
+        ]
+      },
+      "ListingOfficeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ]
+      },
+      "ListingAgentDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "membershipId",
+          "displayName"
+        ]
+      },
+      "ListingSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string",
+            "example": "LST-2026-000001"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "available",
+              "reserved",
+              "under_contract",
+              "sold",
+              "rented",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "isPublished": {
+            "type": "boolean"
+          },
+          "price": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/ListingUnitDto"
+          },
+          "property": {
+            "$ref": "#/components/schemas/ListingPropertyDto"
+          },
+          "office": {
+            "$ref": "#/components/schemas/ListingOfficeDto"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/ListingAgentDto"
+          },
+          "listedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "listingType",
+          "status",
+          "isPublished",
+          "price",
+          "rentFrequency",
+          "title",
+          "unit",
+          "property",
+          "office",
+          "agent",
+          "listedAt",
+          "archivedAt",
+          "updatedAt"
+        ]
+      },
+      "ListingPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListingSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "MoneyInput": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "example": "6000.00",
+            "description": "Decimal string; at most the currency’s minor units"
+          },
+          "currency": {
+            "type": "string",
+            "example": "GHS",
+            "description": "ISO 4217"
+          }
+        },
+        "required": [
+          "amount",
+          "currency"
+        ]
+      },
+      "FeeTermsInput": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string",
+            "enum": [
+              "percentage",
+              "fixed"
+            ]
+          },
+          "rate": {
+            "type": "string",
+            "description": "Percentage of the price, for basis \"percentage\" (e.g. \"2.5\")"
+          },
+          "amount": {
+            "description": "For basis \"fixed\"; in the listing currency",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "taxInclusive": {
+            "type": "boolean",
+            "description": "Whether the fee includes tax (VAT)"
+          }
+        },
+        "required": [
+          "basis",
+          "taxInclusive"
+        ]
+      },
+      "CreateListingBody": {
+        "type": "object",
+        "properties": {
+          "priceQualifierCode": {
+            "type": "object",
+            "description": "Code from the \"price_qualifier\" picklist"
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ],
+            "description": "Rentals only"
+          },
+          "advanceRentPeriods": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 520,
+            "description": "Rentals only: rent periods payable in advance (up to 10 years of weekly periods)"
+          },
+          "deposit": {
+            "description": "Rentals only; in the listing currency",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceCharge": {
+            "description": "Rentals only; in the listing currency",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceChargeFrequency": {
+            "type": "string",
+            "enum": [
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ],
+            "description": "Rentals only"
+          },
+          "minTermMonths": {
+            "type": "object",
+            "minimum": 1,
+            "maximum": 600,
+            "description": "Rentals only"
+          },
+          "availableFrom": {
+            "type": "object",
+            "format": "date"
+          },
+          "mandateTypeCode": {
+            "type": "object",
+            "description": "Code from the \"mandate_type\" picklist"
+          },
+          "mandateSignedOn": {
+            "type": "object",
+            "format": "date"
+          },
+          "mandateExpiresOn": {
+            "type": "object",
+            "format": "date"
+          },
+          "feeTerms": {
+            "description": "Agreed agency fee (staff only)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeTermsInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "type": "object",
+            "maxLength": 10000,
+            "description": "Plain text in the default language"
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Defaults to the property’s office"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          },
+          "price": {
+            "description": "Asking price or periodic rent; its currency is the listing currency",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200,
+            "description": "Title in the default language"
+          },
+          "defaultLocaleCode": {
+            "type": "string",
+            "description": "Defaults to the office locale"
+          },
+          "agentMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Defaults to the caller"
+          }
+        },
+        "required": [
+          "unitId",
+          "listingType",
+          "price",
+          "title"
+        ]
+      },
+      "FeeTermsDto": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string",
+            "enum": [
+              "percentage",
+              "fixed"
+            ]
+          },
+          "rate": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "taxInclusive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "basis",
+          "taxInclusive"
+        ]
+      },
+      "TranslationDto": {
+        "type": "object",
+        "properties": {
+          "localeCode": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "ai_draft",
+              "translation_service"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "localeCode",
+          "title",
+          "description",
+          "source",
+          "updatedAt"
+        ]
+      },
+      "ListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string",
+            "example": "LST-2026-000001"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "available",
+              "reserved",
+              "under_contract",
+              "sold",
+              "rented",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "isPublished": {
+            "type": "boolean"
+          },
+          "price": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/ListingUnitDto"
+          },
+          "property": {
+            "$ref": "#/components/schemas/ListingPropertyDto"
+          },
+          "office": {
+            "$ref": "#/components/schemas/ListingOfficeDto"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/ListingAgentDto"
+          },
+          "listedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priceQualifierCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "advanceRentPeriods": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "deposit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceCharge": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceChargeFrequency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "minTermMonths": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "availableFrom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "mandateTypeCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mandateSignedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "mandateExpiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "feeTerms": {
+            "description": "Only for staff who may edit the listing",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeTermsDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "defaultLocaleCode": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TranslationDto"
+            }
+          },
+          "publishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "listingType",
+          "status",
+          "isPublished",
+          "price",
+          "rentFrequency",
+          "title",
+          "unit",
+          "property",
+          "office",
+          "agent",
+          "listedAt",
+          "archivedAt",
+          "updatedAt",
+          "priceQualifierCode",
+          "advanceRentPeriods",
+          "deposit",
+          "serviceCharge",
+          "serviceChargeFrequency",
+          "minTermMonths",
+          "availableFrom",
+          "mandateTypeCode",
+          "mandateSignedOn",
+          "mandateExpiresOn",
+          "feeTerms",
+          "defaultLocaleCode",
+          "description",
+          "translations",
+          "publishedAt",
+          "closedAt",
+          "createdAt",
+          "version"
+        ]
+      },
+      "UpdateListingBody": {
+        "type": "object",
+        "properties": {
+          "priceQualifierCode": {
+            "type": "object",
+            "description": "Code from the \"price_qualifier\" picklist"
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ],
+            "description": "Rentals only"
+          },
+          "advanceRentPeriods": {
+            "type": "object",
+            "minimum": 0,
+            "maximum": 520,
+            "description": "Rentals only: rent periods payable in advance (up to 10 years of weekly periods)"
+          },
+          "deposit": {
+            "description": "Rentals only; in the listing currency",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceCharge": {
+            "description": "Rentals only; in the listing currency",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceChargeFrequency": {
+            "type": "string",
+            "enum": [
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ],
+            "description": "Rentals only"
+          },
+          "minTermMonths": {
+            "type": "object",
+            "minimum": 1,
+            "maximum": 600,
+            "description": "Rentals only"
+          },
+          "availableFrom": {
+            "type": "object",
+            "format": "date"
+          },
+          "mandateTypeCode": {
+            "type": "object",
+            "description": "Code from the \"mandate_type\" picklist"
+          },
+          "mandateSignedOn": {
+            "type": "object",
+            "format": "date"
+          },
+          "mandateExpiresOn": {
+            "type": "object",
+            "format": "date"
+          },
+          "feeTerms": {
+            "description": "Agreed agency fee (staff only)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeTermsInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "type": "object",
+            "maxLength": 10000,
+            "description": "Plain text in the default language"
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Defaults to the property’s office"
+          },
+          "price": {
+            "description": "A different currency is allowed on drafts only",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200,
+            "description": "Title in the default language"
+          },
+          "priceChangeReason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "description": "Required when a live listing’s price is reduced"
+          }
+        }
+      },
+      "ListingStatusBody": {
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "available",
+              "reserved",
+              "under_contract",
+              "sold",
+              "rented",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "description": "Required for withdrawn, expired and fell-through changes"
+          }
+        },
+        "required": [
+          "toStatus"
+        ]
+      },
+      "AssignAgentBody": {
+        "type": "object",
+        "properties": {
+          "agentMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "agentMembershipId"
+        ]
+      },
+      "RelistBody": {
+        "type": "object",
+        "properties": {
+          "agentMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Agent for the new listing; defaults to the previous agent (agents always get themselves)"
+          }
+        }
+      },
+      "TranslationBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "object",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "StatusHistoryEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changedByMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "fromStatus",
+          "toStatus",
+          "changedAt",
+          "changedByMembershipId",
+          "reason"
+        ]
+      },
+      "StatusHistoryPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusHistoryEntryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "PriceHistoryEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "oldPrice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "newPrice": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changedByMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "approvedByMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "oldPrice",
+          "newPrice",
+          "changedAt",
+          "changedByMembershipId",
+          "approvedByMembershipId",
+          "reason"
+        ]
+      },
+      "PriceHistoryPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceHistoryEntryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "HistoryEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string",
+            "example": "listing.updated"
+          },
+          "actorMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "changes": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true,
+            "description": "{\"field\": {\"old\": …, \"new\": …}}"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "occurredAt",
+          "action",
+          "actorMembershipId",
+          "actorName",
+          "changes",
+          "metadata"
+        ]
+      },
+      "HistoryPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoryEntryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "ListingSettingsDto": {
+        "type": "object",
+        "properties": {
+          "priceReductionApprovalPercent": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "requireSellerKyc": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "priceReductionApprovalPercent",
+          "requireSellerKyc"
+        ]
+      },
+      "ListingSettingsBody": {
+        "type": "object",
+        "properties": {
+          "priceReductionApprovalPercent": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Price reductions above this percentage need manager approval; null = off"
+          },
+          "requireSellerKyc": {
+            "type": "boolean",
+            "description": "Listings cannot be published until seller KYC is verified"
+          }
+        },
+        "required": [
+          "priceReductionApprovalPercent",
+          "requireSellerKyc"
+        ]
       }
     }
   }
