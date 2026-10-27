@@ -39,6 +39,29 @@ const configSchema = z.object({
   OIDC_MFA_AMR_VALUES: commaList.default(['mfa', 'otp', 'hwk', 'swk', 'fido']),
   /** Maximum age of `auth_time` for permissions flagged as sensitive (step-up). */
   STEP_UP_MAX_AGE_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900),
+
+  /**
+   * Object storage (ADR-005 M-D1): any S3-compatible service. Cloudflare R2:
+   * https://<account>.r2.cloudflarestorage.com with region "auto"; AWS S3:
+   * leave STORAGE_ENDPOINT unset and give the bucket's region.
+   */
+  STORAGE_ENDPOINT: z.url().optional(),
+  STORAGE_REGION: z.string().min(1).default('auto'),
+  STORAGE_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/),
+  STORAGE_ACCESS_KEY_ID: z.string().min(1),
+  STORAGE_SECRET_ACCESS_KEY: z.string().min(1),
+  /** Path-style addressing (needed by some S3-compatible services, e.g. SeaweedFS). */
+  STORAGE_FORCE_PATH_STYLE: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
+  /** Lifetime of signed upload (PUT) and download (GET) URLs. */
+  MEDIA_UPLOAD_URL_TTL_SECONDS: z.coerce.number().int().min(60).max(3_600).default(300),
+  MEDIA_DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900),
+
+  /** Malware scanner (clamd). Required by the worker; the API never scans. */
+  CLAMAV_HOST: z.string().min(1).optional(),
+  CLAMAV_PORT: z.coerce.number().int().min(1).max(65535).default(3310),
+  CLAMAV_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(300_000).default(60_000),
+  /** Connection with the estatepro_platform role (BYPASSRLS): worker queue claims and discovery only. */
+  PLATFORM_DATABASE_URL: z.url().optional(),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

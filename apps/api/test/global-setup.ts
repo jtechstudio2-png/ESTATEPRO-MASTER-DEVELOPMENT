@@ -1,5 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
+import { createConnection } from 'node:net';
 import { join } from 'node:path';
+
+import { CreateBucketCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
 
 import pg from 'pg';
 import type { TestProject } from 'vitest/node';
@@ -18,9 +21,23 @@ export interface TestDatabaseUrls {
   platform: string;
 }
 
+/**
+ * S3-compatible storage (SeaweedFS in development and CI) and clamd. Both are
+ * required: media tests exercise the real services and never skip.
+ */
+export interface TestServices {
+  storageEndpoint: string;
+  storageBucket: string;
+  storageAccessKeyId: string;
+  storageSecretAccessKey: string;
+  clamavHost: string;
+  clamavPort: number;
+}
+
 declare module 'vitest' {
   export interface ProvidedContext {
     databaseUrls: TestDatabaseUrls;
+    testServices: TestServices;
   }
 }
 
@@ -62,10 +79,53 @@ export default async function setup(project: TestProject): Promise<void> {
     return url.toString();
   };
 
+  project.provide('testServices', await prepareServices());
+
   project.provide('databaseUrls', {
     admin: databaseAdminUrl.toString(),
     app: roleUrl('estatepro_app'),
     auth: roleUrl('estatepro_auth'),
     platform: roleUrl('estatepro_platform'),
   });
+}
+
+async function prepareServices(): Promise<TestServices> {
+  const services: TestServices = {
+    storageEndpoint: process.env['TEST_STORAGE_ENDPOINT'] ?? 'http://127.0.0.1:8333',
+    storageBucket: process.env['TEST_STORAGE_BUCKET'] ?? 'estatepro-test-media',
+    storageAccessKeyId: process.env['TEST_STORAGE_ACCESS_KEY_ID'] ?? 'estatepro-test',
+    storageSecretAccessKey: process.env['TEST_STORAGE_SECRET_ACCESS_KEY'] ?? 'estatepro-test-secret',
+    clamavHost: process.env['TEST_CLAMAV_HOST'] ?? '127.0.0.1',
+    clamavPort: Number(process.env['TEST_CLAMAV_PORT'] ?? 3310),
+  };
+
+  const s3 = new S3Client({
+    endpoint: services.storageEndpoint,
+    region: 'us-east-1',
+    forcePathStyle: true,
+    credentials: { accessKeyId: services.storageAccessKeyId, secretAccessKey: services.storageSecretAccessKey },
+  });
+  try {
+    await s3.send(new HeadBucketCommand({ Bucket: services.storageBucket })).catch(async () => {
+      await s3.send(new CreateBucketCommand({ Bucket: services.storageBucket }));
+    });
+  } catch (error) {
+    throw new Error(`Test object storage is not reachable at ${services.storageEndpoint}: ${(error as Error).message}`);
+  } finally {
+    s3.destroy();
+  }
+
+  const pong = await new Promise<string>((resolve, reject) => {
+    const socket = createConnection({ host: services.clamavHost, port: services.clamavPort });
+    let reply = '';
+    socket.setTimeout(10_000, () => socket.destroy(new Error('timeout')));
+    socket.on('connect', () => socket.end('zPING\0'));
+    socket.on('data', (chunk) => (reply += chunk.toString('utf8')));
+    socket.on('end', () => resolve(reply));
+    socket.on('error', reject);
+  }).catch((error: Error) => {
+    throw new Error(`clamd is not reachable at ${services.clamavHost}:${services.clamavPort}: ${error.message}`);
+  });
+  if (!pong.startsWith('PONG')) throw new Error(`clamd did not answer PING (got "${pong}")`);
+  return services;
 }

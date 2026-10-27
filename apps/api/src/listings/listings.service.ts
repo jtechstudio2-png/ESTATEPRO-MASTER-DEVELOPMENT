@@ -7,7 +7,7 @@ import { registerConstraintMessages } from '../common/db-errors.js';
 import { keysetCondition, type Page, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
 import { decimalPlaces, type MoneyInput, toMoney, toScaled } from '../common/money.js';
 import { type FieldError, ProblemError, Problems } from '../common/problem.js';
-import type { PermissionScope, TenantContext } from '../common/request-context.js';
+import { actingMembership, type PermissionScope, type TenantContext } from '../common/request-context.js';
 import type { Tx } from '../database/database.module.js';
 import type { Listings } from '../database/schema.js';
 import { isCalendarDate, nextReference } from '../properties/properties.service.js';
@@ -230,6 +230,7 @@ export class ListingsService {
       defaultLocaleCode: row.defaultLocaleCode,
       description: row.description,
       translations: translations.map((t) => ({ ...t, updatedAt: t.updatedAt.toISOString() })),
+      media: await this.mediaSummary(tx, id),
       publishedAt: row.publishedAt?.toISOString() ?? null,
       closedAt: row.closedAt?.toISOString() ?? null,
       createdAt: row.createdAt.toISOString(),
@@ -421,6 +422,22 @@ export class ListingsService {
           approvedBy: t.approvedBy,
           approvedAt: t.approvedAt,
         })))
+        .execute();
+    }
+    // The new campaign starts with the same gallery (ADR-005 M-D5), minus archived media.
+    const gallery = await tx
+      .selectFrom('listingMedia as lm')
+      .innerJoin('propertyMedia as m', 'm.id', 'lm.mediaId')
+      .select(['lm.mediaId', 'lm.sortOrder', 'lm.isCover'])
+      .where('lm.listingId', '=', source.id)
+      .where('m.archivedAt', 'is', null)
+      .where('m.processingStatus', '=', 'ready')
+      .orderBy('lm.sortOrder')
+      .execute();
+    if (gallery.length > 0) {
+      await tx
+        .insertInto('listingMedia')
+        .values(gallery.map((item) => ({ companyId: ctx.companyId, listingId: created.id, mediaId: item.mediaId, sortOrder: item.sortOrder, isCover: item.isCover, addedBy: actingMembership(ctx) })))
         .execute();
     }
     await this.audit.record(tx, ctx, {
@@ -793,7 +810,52 @@ export class ListingsService {
     return this.get(tx, ctx, id);
   }
 
+  // --------------------------------------------------------------------------- background (worker)
+
+  /**
+   * Expires live listings whose mandate ended before today in the property's
+   * time zone (D3: terminal, unpublished). Runs as the system; idempotent.
+   */
+  async expireDue(tx: Tx, ctx: TenantContext): Promise<string[]> {
+    const due = await tx
+      .selectFrom('listings as l')
+      .innerJoin('units as u', 'u.id', 'l.unitId')
+      .innerJoin('properties as p', 'p.id', 'u.propertyId')
+      .select(['l.id', 'l.status', 'l.mandateExpiresOn', 'p.timezone'])
+      .where('l.status', 'in', ['available', 'reserved', 'under_contract'])
+      .where('l.archivedAt', 'is', null)
+      .where('l.mandateExpiresOn', 'is not', null)
+      // Coarse filter; the exact local-date comparison is below.
+      .where('l.mandateExpiresOn', '<', sql<string>`(now() at time zone 'UTC')::date + 1`)
+      .orderBy('l.id')
+      .forUpdate('l')
+      .execute();
+    const expired: string[] = [];
+    for (const listing of due) {
+      if (listing.mandateExpiresOn! >= todayIn(listing.timezone)) continue;
+      await tx.updateTable('listings').set({ status: 'expired', isPublished: false, closedAt: new Date() }).where('id', '=', listing.id).execute();
+      await this.recordStatus(tx, ctx, listing.id, listing.status as ListingStatus, 'expired', 'Mandate expired');
+      expired.push(listing.id);
+    }
+    return expired;
+  }
+
   // --------------------------------------------------------------------------- helpers
+
+  private async mediaSummary(tx: Tx, listingId: string) {
+    const row = await tx
+      .selectFrom('listingMedia as lm')
+      .innerJoin('propertyMedia as m', 'm.id', 'lm.mediaId')
+      .select([
+        sql<number>`count(*) filter (where m.media_type = 'photo')::int`.as('photoCount'),
+        sql<number>`count(*) filter (where m.media_type = 'floor_plan')::int`.as('floorPlanCount'),
+        sql<string | null>`(array_agg(lm.media_id) filter (where lm.is_cover))[1]`.as('coverMediaId'),
+      ])
+      .where('lm.listingId', '=', listingId)
+      .where('m.archivedAt', 'is', null)
+      .executeTakeFirstOrThrow();
+    return { photoCount: row.photoCount, floorPlanCount: row.floorPlanCount, coverMediaId: row.coverMediaId };
+  }
 
   private async insertListing(
     tx: Tx,
@@ -853,7 +915,7 @@ export class ListingsService {
   private async recordStatus(tx: Tx, ctx: TenantContext, id: string, from: ListingStatus | null, to: ListingStatus, reason: string | null): Promise<void> {
     await tx
       .insertInto('listingStatusHistory')
-      .values({ companyId: ctx.companyId, listingId: id, fromStatus: from, toStatus: to, changedBy: ctx.membershipId, reason })
+      .values({ companyId: ctx.companyId, listingId: id, fromStatus: from, toStatus: to, changedBy: actingMembership(ctx), reason })
       .execute();
     if (from !== null) {
       await this.audit.record(tx, ctx, {
@@ -1048,7 +1110,15 @@ export class ListingsService {
     if (listing.mandateExpiresOn !== null && listing.mandateExpiresOn < today) {
       blockers.push({ field: 'mandateExpiresOn', code: 'expired', message: 'The mandate has expired. Renew it before publishing.' });
     }
-    if ((await this.settings.get(tx)).requireSellerKyc) {
+    const settings = await this.settings.get(tx);
+    const media = await this.mediaSummary(tx, listing.id);
+    if (settings.minPhotosToPublish !== null && media.photoCount < settings.minPhotosToPublish) {
+      blockers.push({ field: 'media', code: 'photos', message: `At least ${settings.minPhotosToPublish} photos are required before publishing.` });
+    }
+    if (settings.requireFloorPlanToPublish && media.floorPlanCount === 0) {
+      blockers.push({ field: 'media', code: 'floor-plan', message: 'A floor plan is required before publishing.' });
+    }
+    if (settings.requireSellerKyc) {
       // Seller identity comes from ownership records (Phase 5); until then the setting blocks publishing.
       blockers.push({
         field: 'sellerKyc',

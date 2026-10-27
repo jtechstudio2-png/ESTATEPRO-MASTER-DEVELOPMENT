@@ -19,6 +19,7 @@ export default defineConfig({
         'src/database/schema.ts', // generated types
         'src/cli/provision-company.ts', // process entry; logic is in the tested service and argument parser
         'src/openapi/generate.ts', // script; the document it writes is verified by test/openapi.test.ts
+        'src/worker/main.ts', // process entry; the worker it builds is tested through createWorker
       ],
       reporter: ['text', 'json-summary'],
       thresholds: { lines: 95, statements: 95, functions: 95, branches: 90 },

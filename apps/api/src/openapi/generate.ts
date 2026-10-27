@@ -18,6 +18,9 @@ const GENERATION_DEFAULTS: Record<string, string> = {
   OIDC_AUDIENCE: 'estatepro-api',
   OIDC_JWKS_URL: 'https://idp.invalid/.well-known/jwks.json',
   OIDC_PROVIDER: 'openapi-generation',
+  STORAGE_BUCKET: 'openapi-generation',
+  STORAGE_ACCESS_KEY_ID: 'openapi',
+  STORAGE_SECRET_ACCESS_KEY: 'openapi',
   LOG_LEVEL: 'silent',
 };
 for (const [key, value] of Object.entries(GENERATION_DEFAULTS)) {

@@ -28,6 +28,35 @@ export interface TenantContext {
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
+  /** Set for background work (the worker): no user, audited as actor type "system". */
+  system?: true;
+}
+
+/**
+ * Context for background jobs acting on one company. Row-level security still
+ * applies (the company is set on the transaction); there is no user, no
+ * membership and no permission, so record-level checks must not be called.
+ */
+export function systemContext(companyId: string, requestId: string): TenantContext {
+  return {
+    companyId,
+    userId: '',
+    membershipId: '',
+    membershipType: 'staff',
+    roleKey: 'system',
+    contactId: null,
+    officeIds: [],
+    permissions: new Map(),
+    requestId,
+    ipAddress: null,
+    userAgent: null,
+    system: true,
+  };
+}
+
+/** The acting membership for "changed by" columns; null for the system. */
+export function actingMembership(ctx: TenantContext): string | null {
+  return ctx.system ? null : ctx.membershipId;
 }
 
 export interface EstateProRequest extends Request {

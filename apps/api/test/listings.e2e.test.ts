@@ -443,7 +443,7 @@ describe('listings (Phase 4 M3)', () => {
     it('requires manager approval for significant price reductions when configured (D2)', async () => {
       const auditBefore = await fx.db.selectFrom('auditLogs').select('id').where('companyId', '=', company.companyId).where('action', '=', 'settings.listings_updated').execute();
       const settings = await as('agentA').get('/api/v1/settings/listings').expect(200);
-      expect(settings.body).toEqual({ priceReductionApprovalPercent: null, requireSellerKyc: false });
+      expect(settings.body).toEqual({ priceReductionApprovalPercent: null, requireSellerKyc: false, minPhotosToPublish: null, requireFloorPlanToPublish: false });
       await as('agentA').put('/api/v1/settings/listings', { priceReductionApprovalPercent: 10, requireSellerKyc: false }).expect(403);
       await as('owner').put('/api/v1/settings/listings', { priceReductionApprovalPercent: 0, requireSellerKyc: false }).expect(422);
 
@@ -456,7 +456,7 @@ describe('listings (Phase 4 M3)', () => {
       const off = await as('agentA').patch(path, { price: ghs('50000.00'), priceChangeReason: 'No viewings in 6 weeks' }, 2).expect(200);
 
       const saved = await as('owner').put('/api/v1/settings/listings', { priceReductionApprovalPercent: 10, requireSellerKyc: false }).expect(200);
-      expect(saved.body).toEqual({ priceReductionApprovalPercent: 10, requireSellerKyc: false });
+      expect(saved.body).toEqual({ priceReductionApprovalPercent: 10, requireSellerKyc: false, minPhotosToPublish: null, requireFloorPlanToPublish: false });
       await as('owner').put('/api/v1/settings/listings', { priceReductionApprovalPercent: 10, requireSellerKyc: false }).expect(200);
       try {
         const within = await as('agentA').patch(path, { price: ghs('45000.00'), priceChangeReason: 'Exactly ten percent' }, off.body.version).expect(200);

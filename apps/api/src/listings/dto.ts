@@ -108,6 +108,12 @@ export class ListingSettingsBody {
   @ValidateIf((o: ListingSettingsBody) => o.priceReductionApprovalPercent !== null) @IsInt() @Min(1) @Max(100)
   priceReductionApprovalPercent!: number | null;
   @ApiProperty({ description: 'Listings cannot be published until seller KYC is verified' }) @IsBoolean() requireSellerKyc!: boolean;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 1, maximum: 60, description: 'Minimum photos to publish; null = off. Omitted = unchanged.' })
+  @ValidateIf((o: ListingSettingsBody) => o.minPhotosToPublish !== null && o.minPhotosToPublish !== undefined) @IsInt() @Min(1) @Max(60)
+  minPhotosToPublish?: number | null;
+  @ApiPropertyOptional({ description: 'A floor plan is required to publish. Omitted = unchanged.' })
+  @ValidateIf(provided) @IsBoolean()
+  requireFloorPlanToPublish?: boolean;
 }
 
 // ----------------------------------------------------------------------------- responses
@@ -115,6 +121,14 @@ export class ListingSettingsBody {
 export class ListingSettingsDto {
   @ApiProperty({ type: Number, nullable: true }) priceReductionApprovalPercent!: number | null;
   @ApiProperty() requireSellerKyc!: boolean;
+  @ApiProperty({ type: Number, nullable: true }) minPhotosToPublish!: number | null;
+  @ApiProperty() requireFloorPlanToPublish!: boolean;
+}
+
+export class ListingMediaSummaryDto {
+  @ApiProperty() photoCount!: number;
+  @ApiProperty() floorPlanCount!: number;
+  @ApiProperty({ type: String, nullable: true, format: 'uuid' }) coverMediaId!: string | null;
 }
 
 export class FeeTermsDto {
@@ -191,6 +205,7 @@ export class ListingDto extends ListingSummaryDto {
   @ApiProperty() defaultLocaleCode!: string;
   @ApiProperty({ type: String, nullable: true }) description!: string | null;
   @ApiProperty({ type: [TranslationDto] }) translations!: TranslationDto[];
+  @ApiProperty({ type: () => ListingMediaSummaryDto, description: 'Gallery summary (see GET /listings/{id}/media)' }) media!: ListingMediaSummaryDto;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) publishedAt!: string | null;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) closedAt!: string | null;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;

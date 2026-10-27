@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import type { TenantContext } from '../common/request-context.js';
+import { actingMembership, type TenantContext } from '../common/request-context.js';
 import type { Tx } from '../database/database.module.js';
 
 export interface AuditEntry {
@@ -52,9 +52,9 @@ export class AuditService {
       .insertInto('auditLogs')
       .values({
         companyId: ctx.companyId,
-        actorType: 'user',
-        actorUserId: ctx.userId,
-        actorMembershipId: ctx.membershipId,
+        actorType: ctx.system ? 'system' : 'user',
+        actorUserId: ctx.system ? null : ctx.userId,
+        actorMembershipId: actingMembership(ctx),
         action: entry.action,
         entityType: entry.entityType,
         entityId: entry.entityId,
@@ -75,7 +75,7 @@ export class AuditService {
         eventType: event.eventType,
         aggregateType: event.aggregateType,
         aggregateId: event.aggregateId,
-        payload: JSON.stringify({ ...event.payload, requestId: ctx.requestId, actorUserId: ctx.userId }),
+        payload: JSON.stringify({ ...event.payload, requestId: ctx.requestId, actorUserId: ctx.system ? null : ctx.userId }),
       })
       .execute();
   }

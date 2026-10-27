@@ -10,6 +10,7 @@ import { AppModule } from '../../src/app.module.js';
 import { configureApp } from '../../src/bootstrap.js';
 import { APP_CONFIG, type AppConfig, loadConfig } from '../../src/config/config.js';
 import { TestIdp } from './idp.js';
+import { testServiceEnv } from './services.js';
 
 export interface TestApp {
   app: NestExpressApplication;
@@ -37,6 +38,7 @@ export async function createTestApp(
     OIDC_AUDIENCE: idp.audience,
     OIDC_JWKS_URL: idp.jwksUrl,
     OIDC_PROVIDER: idp.provider,
+    ...testServiceEnv(),
     ...overrides,
   });
 

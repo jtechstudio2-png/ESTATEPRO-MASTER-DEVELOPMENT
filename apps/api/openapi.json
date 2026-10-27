@@ -2343,6 +2343,706 @@
           "Listings"
         ]
       }
+    },
+    "/api/v1/media/uploads": {
+      "post": {
+        "operationId": "Media_createUpload",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Upload the file with PUT to uploadUrl, then confirm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTicketDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/uploads/{uploadId}/confirm": {
+      "post": {
+        "operationId": "Media_confirmUpload",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Media created with processingStatus \"pending\"",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/media": {
+      "get": {
+        "operationId": "Media_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[unitId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[processingStatus]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[mediaType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "sortOrder",
+                "-sortOrder",
+                "createdAt",
+                "-createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/media/links": {
+      "post": {
+        "operationId": "Media_createLink",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "External video (YouTube, Vimeo) or virtual tour (Matterport)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{mediaId}": {
+      "get": {
+        "operationId": "Media_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      },
+      "patch": {
+        "operationId": "Media_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMediaBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{mediaId}/archive": {
+      "post": {
+        "operationId": "Media_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{mediaId}/restore": {
+      "post": {
+        "operationId": "Media_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{mediaId}/purge": {
+      "post": {
+        "operationId": "Media_purge",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Permanently deleted (erasure request; media must be archived and not under legal hold)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{mediaId}/legal-hold": {
+      "post": {
+        "operationId": "Media_legalHold",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalHoldBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/listings/{listingId}/media": {
+      "get": {
+        "operationId": "Media_listingGallery",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingGalleryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      },
+      "put": {
+        "operationId": "Media_setListingGallery",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the listing",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingMediaBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingGalleryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/settings/storage": {
+      "get": {
+        "operationId": "Media_storageUsage",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageUsageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Media"
+        ]
+      }
     }
   },
   "info": {
@@ -4192,6 +4892,29 @@
           "updatedAt"
         ]
       },
+      "ListingMediaSummaryDto": {
+        "type": "object",
+        "properties": {
+          "photoCount": {
+            "type": "number"
+          },
+          "floorPlanCount": {
+            "type": "number"
+          },
+          "coverMediaId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "photoCount",
+          "floorPlanCount",
+          "coverMediaId"
+        ]
+      },
       "ListingDto": {
         "type": "object",
         "properties": {
@@ -4373,6 +5096,14 @@
               "$ref": "#/components/schemas/TranslationDto"
             }
           },
+          "media": {
+            "description": "Gallery summary (see GET /listings/{id}/media)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListingMediaSummaryDto"
+              }
+            ]
+          },
           "publishedAt": {
             "type": [
               "string",
@@ -4425,6 +5156,7 @@
           "defaultLocaleCode",
           "description",
           "translations",
+          "media",
           "publishedAt",
           "closedAt",
           "createdAt",
@@ -4836,11 +5568,22 @@
           },
           "requireSellerKyc": {
             "type": "boolean"
+          },
+          "minPhotosToPublish": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "requireFloorPlanToPublish": {
+            "type": "boolean"
           }
         },
         "required": [
           "priceReductionApprovalPercent",
-          "requireSellerKyc"
+          "requireSellerKyc",
+          "minPhotosToPublish",
+          "requireFloorPlanToPublish"
         ]
       },
       "ListingSettingsBody": {
@@ -4858,11 +5601,706 @@
           "requireSellerKyc": {
             "type": "boolean",
             "description": "Listings cannot be published until seller KYC is verified"
+          },
+          "minPhotosToPublish": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 60,
+            "description": "Minimum photos to publish; null = off. Omitted = unchanged."
+          },
+          "requireFloorPlanToPublish": {
+            "type": "boolean",
+            "description": "A floor plan is required to publish. Omitted = unchanged."
           }
         },
         "required": [
           "priceReductionApprovalPercent",
           "requireSellerKyc"
+        ]
+      },
+      "CreateUploadBody": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unit the media belongs to; omit for the whole property"
+          },
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Add to this listing once processed (needs listing.update)"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "photo",
+              "floor_plan",
+              "site_plan",
+              "brochure"
+            ]
+          },
+          "fileName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg"
+          },
+          "size": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Exact size in bytes"
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA-256 of the file, hex"
+          }
+        },
+        "required": [
+          "propertyId",
+          "mediaType",
+          "fileName",
+          "contentType",
+          "size",
+          "sha256"
+        ]
+      },
+      "UploadTicketDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "description": "Signed URL; send the file with PUT and exactly the given headers"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "uploadUrl",
+          "method",
+          "headers",
+          "expiresAt"
+        ]
+      },
+      "MediaUrlsDto": {
+        "type": "object",
+        "properties": {
+          "thumb": {
+            "type": "string"
+          },
+          "small": {
+            "type": "string"
+          },
+          "medium": {
+            "type": "string"
+          },
+          "large": {
+            "type": "string"
+          },
+          "download": {
+            "type": "string",
+            "description": "PDF download (attachment)"
+          },
+          "external": {
+            "type": "string",
+            "description": "External video or tour"
+          }
+        }
+      },
+      "MediaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "photo",
+              "video",
+              "floor_plan",
+              "virtual_tour",
+              "site_plan",
+              "brochure"
+            ]
+          },
+          "processingStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "ready",
+              "failed",
+              "rejected"
+            ]
+          },
+          "rejectionReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "originalFilename": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mimeType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "height": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "pageCount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "storedBytes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Bytes stored (master and sizes)"
+          },
+          "externalProvider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "youtube",
+              "vimeo",
+              "matterport",
+              null
+            ]
+          },
+          "caption": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "altText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "roomLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "floorLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "urls": {
+            "description": "Signed URLs, valid for a short time",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MediaUrlsDto"
+              }
+            ]
+          },
+          "legalHold": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "purgeAfter": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Permanent deletion date for archived media"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "propertyId",
+          "unitId",
+          "mediaType",
+          "processingStatus",
+          "rejectionReason",
+          "originalFilename",
+          "mimeType",
+          "width",
+          "height",
+          "pageCount",
+          "storedBytes",
+          "externalProvider",
+          "caption",
+          "altText",
+          "roomLabel",
+          "floorLabel",
+          "sortOrder",
+          "urls",
+          "legalHold",
+          "archivedAt",
+          "purgeAfter",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "MediaPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CreateLinkBody": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "video",
+              "virtual_tour"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "YouTube or Vimeo (video), Matterport (virtual tour)"
+          },
+          "caption": {
+            "type": "object",
+            "maxLength": 300
+          },
+          "altText": {
+            "type": "object",
+            "maxLength": 250
+          }
+        },
+        "required": [
+          "mediaType",
+          "url"
+        ]
+      },
+      "UpdateMediaBody": {
+        "type": "object",
+        "properties": {
+          "caption": {
+            "type": "object",
+            "maxLength": 300
+          },
+          "altText": {
+            "type": "object",
+            "maxLength": 250,
+            "description": "Text alternative (WCAG 2.2 AA)"
+          },
+          "roomLabel": {
+            "type": "object",
+            "maxLength": 80
+          },
+          "floorLabel": {
+            "type": "object",
+            "maxLength": 60
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Order in the property gallery"
+          }
+        }
+      },
+      "ReasonBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "LegalHoldBody": {
+        "type": "object",
+        "properties": {
+          "hold": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "hold",
+          "reason"
+        ]
+      },
+      "ListingMediaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "photo",
+              "video",
+              "floor_plan",
+              "virtual_tour",
+              "site_plan",
+              "brochure"
+            ]
+          },
+          "processingStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "ready",
+              "failed",
+              "rejected"
+            ]
+          },
+          "rejectionReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "originalFilename": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mimeType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "height": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "pageCount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "storedBytes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Bytes stored (master and sizes)"
+          },
+          "externalProvider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "youtube",
+              "vimeo",
+              "matterport",
+              null
+            ]
+          },
+          "caption": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "altText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "roomLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "floorLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "urls": {
+            "description": "Signed URLs, valid for a short time",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MediaUrlsDto"
+              }
+            ]
+          },
+          "legalHold": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "purgeAfter": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Permanent deletion date for archived media"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          },
+          "position": {
+            "type": "number"
+          },
+          "isCover": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "propertyId",
+          "unitId",
+          "mediaType",
+          "processingStatus",
+          "rejectionReason",
+          "originalFilename",
+          "mimeType",
+          "width",
+          "height",
+          "pageCount",
+          "storedBytes",
+          "externalProvider",
+          "caption",
+          "altText",
+          "roomLabel",
+          "floorLabel",
+          "sortOrder",
+          "urls",
+          "legalHold",
+          "archivedAt",
+          "purgeAfter",
+          "createdAt",
+          "updatedAt",
+          "version",
+          "position",
+          "isCover"
+        ]
+      },
+      "ListingGalleryDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListingMediaDto"
+            }
+          },
+          "listingVersion": {
+            "type": "number",
+            "description": "Listing version (ETag) after the change"
+          }
+        },
+        "required": [
+          "data",
+          "listingVersion"
+        ]
+      },
+      "ListingMediaItemInput": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isCover": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "mediaId"
+        ]
+      },
+      "ListingMediaBody": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The full gallery in display order",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListingMediaItemInput"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "StorageUsageDto": {
+        "type": "object",
+        "properties": {
+          "planCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "starter"
+          },
+          "limitBytes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "usedBytes": {
+            "type": "number"
+          },
+          "reservedBytes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "planCode",
+          "limitBytes",
+          "usedBytes",
+          "reservedBytes"
         ]
       }
     }

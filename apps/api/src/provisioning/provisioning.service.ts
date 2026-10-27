@@ -23,6 +23,8 @@ export const provisionCompanySchema = z.object({
     .default(['agency']),
   status: z.enum(['trial', 'active']).default('trial'),
   trialDays: z.number().int().min(1).max(90).default(30),
+  /** Plan whose entitlements (for example the media storage quota) apply until billing (Phase 14) takes over. */
+  planCode: z.string().regex(/^[a-z][a-z0-9_]*$/).default('starter'),
   office: z.object({
     code: z.string().regex(/^[A-Z0-9][A-Z0-9-]{0,15}$/),
     name: z.string().trim().min(2).max(120),
@@ -127,6 +129,21 @@ export class ProvisioningService {
         .values({ companyId: company.id, billingEmail: input.owner.email, billingName: input.legalName })
         .execute();
 
+      const plan = await tx.selectFrom('plans').select('code').where('code', '=', input.planCode).where('isActive', '=', true).executeTakeFirst();
+      if (!plan) throw new ProvisioningError(`Plan ${input.planCode} does not exist.`);
+      await tx
+        .insertInto('subscriptions')
+        .values({
+          companyId: company.id,
+          planCode: plan.code,
+          status: input.status === 'trial' ? 'trialing' : 'active',
+          billingInterval: 'month',
+          currencyCode,
+          currentPeriodStart: sql<Date>`now()`,
+          currentPeriodEnd: input.status === 'trial' ? sql<Date>`now() + make_interval(days => ${input.trialDays})` : null,
+        })
+        .execute();
+
       const address = await tx
         .insertInto('addresses')
         .values({ companyId: company.id, countryCode: input.countryCode })
@@ -203,7 +220,7 @@ export class ProvisioningService {
           action: 'company.provisioned',
           entityType: 'company',
           entityId: company.id,
-          metadata: JSON.stringify({ slug: input.slug, ownerEmail: input.owner.email, officeId: office.id }),
+          metadata: JSON.stringify({ slug: input.slug, ownerEmail: input.owner.email, officeId: office.id, planCode: plan.code }),
         })
         .execute();
 

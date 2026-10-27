@@ -16,6 +16,9 @@ const validEnv = {
   OIDC_AUDIENCE: 'api',
   OIDC_JWKS_URL: 'https://idp.example/jwks',
   OIDC_PROVIDER: 'example-idp',
+  STORAGE_BUCKET: 'estatepro-media',
+  STORAGE_ACCESS_KEY_ID: 'key',
+  STORAGE_SECRET_ACCESS_KEY: 'secret',
 };
 
 describe('configuration', () => {

@@ -7,28 +7,38 @@ import type { ListingSettingsBody, ListingSettingsDto } from './dto.js';
 
 export const PRICE_APPROVAL_KEY = 'listing.price_reduction_approval_percent';
 export const SELLER_KYC_KEY = 'listing.require_seller_kyc';
+export const MIN_PHOTOS_KEY = 'listing.min_photos_to_publish';
+export const FLOOR_PLAN_KEY = 'listing.require_floor_plan_to_publish';
+const KEYS = [PRICE_APPROVAL_KEY, SELLER_KYC_KEY, MIN_PHOTOS_KEY, FLOOR_PLAN_KEY];
+
+const FIELDS: Array<{ field: keyof ListingSettingsDto; key: string; off: number | boolean | null }> = [
+  { field: 'priceReductionApprovalPercent', key: PRICE_APPROVAL_KEY, off: null },
+  { field: 'requireSellerKyc', key: SELLER_KYC_KEY, off: false },
+  { field: 'minPhotosToPublish', key: MIN_PHOTOS_KEY, off: null },
+  { field: 'requireFloorPlanToPublish', key: FLOOR_PLAN_KEY, off: false },
+];
 
 /**
- * Company listing settings (decision D2 and gap G4) and the resolution of
- * jurisdiction rules: office → company → jurisdiction (and its parent) →
- * definition default, so country rules live in data, not code.
+ * Company listing settings (decisions D2, G4 and the M4 publishing checks)
+ * and the resolution of jurisdiction rules: office → company → jurisdiction
+ * (and its parent) → definition default, so country rules live in data, not code.
  */
 @Injectable()
 export class ListingSettingsService {
   constructor(private readonly audit: AuditService) {}
 
   async get(tx: Tx): Promise<ListingSettingsDto> {
-    const rows = await tx
-      .selectFrom('companySettings')
-      .select(['key', 'value'])
-      .where('officeId', 'is', null)
-      .where('key', 'in', [PRICE_APPROVAL_KEY, SELLER_KYC_KEY])
-      .execute();
+    const rows = await tx.selectFrom('companySettings').select(['key', 'value']).where('officeId', 'is', null).where('key', 'in', KEYS).execute();
     const value = (key: string): unknown => rows.find((row) => row.key === key)?.value;
-    const percent = value(PRICE_APPROVAL_KEY);
+    const integer = (key: string, max: number): number | null => {
+      const raw = value(key);
+      return typeof raw === 'number' && Number.isInteger(raw) && raw >= 1 && raw <= max ? raw : null;
+    };
     return {
-      priceReductionApprovalPercent: typeof percent === 'number' && Number.isInteger(percent) && percent >= 1 && percent <= 100 ? percent : null,
+      priceReductionApprovalPercent: integer(PRICE_APPROVAL_KEY, 100),
       requireSellerKyc: value(SELLER_KYC_KEY) === true,
+      minPhotosToPublish: integer(MIN_PHOTOS_KEY, 60),
+      requireFloorPlanToPublish: value(FLOOR_PLAN_KEY) === true,
     };
   }
 
@@ -37,33 +47,23 @@ export class ListingSettingsService {
     const next: ListingSettingsDto = {
       priceReductionApprovalPercent: body.priceReductionApprovalPercent,
       requireSellerKyc: body.requireSellerKyc,
+      minPhotosToPublish: body.minPhotosToPublish === undefined ? before.minPhotosToPublish : body.minPhotosToPublish,
+      requireFloorPlanToPublish: body.requireFloorPlanToPublish ?? before.requireFloorPlanToPublish,
     };
-    if (before.priceReductionApprovalPercent === next.priceReductionApprovalPercent && before.requireSellerKyc === next.requireSellerKyc) {
-      return before;
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+    for (const { field } of FIELDS) {
+      if (before[field] !== next[field]) changes[field] = { old: before[field], new: next[field] };
     }
+    if (Object.keys(changes).length === 0) return before;
 
-    await tx
-      .deleteFrom('companySettings')
-      .where('officeId', 'is', null)
-      .where('key', 'in', [PRICE_APPROVAL_KEY, SELLER_KYC_KEY])
-      .execute();
-    const rows = [
-      ...(next.priceReductionApprovalPercent !== null ? [{ key: PRICE_APPROVAL_KEY, value: next.priceReductionApprovalPercent }] : []),
-      ...(next.requireSellerKyc ? [{ key: SELLER_KYC_KEY, value: true }] : []),
-    ];
+    await tx.deleteFrom('companySettings').where('officeId', 'is', null).where('key', 'in', KEYS).execute();
+    // Settings at their "off" value are not stored.
+    const rows = FIELDS.filter(({ field, off }) => next[field] !== off).map(({ field, key }) => ({ key, value: next[field] }));
     if (rows.length > 0) {
       await tx
         .insertInto('companySettings')
         .values(rows.map((row) => ({ companyId: ctx.companyId, officeId: null, key: row.key, value: JSON.stringify(row.value), updatedBy: ctx.userId })))
         .execute();
-    }
-
-    const changes: Record<string, { old: unknown; new: unknown }> = {};
-    if (before.priceReductionApprovalPercent !== next.priceReductionApprovalPercent) {
-      changes['priceReductionApprovalPercent'] = { old: before.priceReductionApprovalPercent, new: next.priceReductionApprovalPercent };
-    }
-    if (before.requireSellerKyc !== next.requireSellerKyc) {
-      changes['requireSellerKyc'] = { old: before.requireSellerKyc, new: next.requireSellerKyc };
     }
     await this.audit.record(tx, ctx, { action: 'settings.listings_updated', entityType: 'company', entityId: ctx.companyId, changes });
     return next;

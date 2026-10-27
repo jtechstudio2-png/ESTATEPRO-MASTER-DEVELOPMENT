@@ -7,7 +7,7 @@ export const USAGE = `Usage: provision-company --staff-email <email> --legal-nam
   --owner-email <email> --owner-name <name>
   [--trading-name <name>] [--jurisdiction <code>] [--currency <ISO3>] [--locale <code>]
   [--timezone <IANA>] [--business-types agency,property_manager,...] [--status trial|active]
-  [--trial-days <n>]
+  [--trial-days <n>] [--plan starter|professional|enterprise]
 
 Requires PLATFORM_DATABASE_URL (a connection as the estatepro_platform role).`;
 
@@ -30,6 +30,7 @@ export function parseProvisionArgs(argv: string[]): ProvisionCompanyInput {
       'business-types': { type: 'string' },
       status: { type: 'string' },
       'trial-days': { type: 'string' },
+      plan: { type: 'string' },
       'office-code': { type: 'string' },
       'office-name': { type: 'string' },
       'owner-email': { type: 'string' },
@@ -52,6 +53,7 @@ export function parseProvisionArgs(argv: string[]): ProvisionCompanyInput {
     businessTypes: values['business-types']?.split(',').map((type) => type.trim()) as ProvisionCompanyInput['businessTypes'],
     status: values.status as ProvisionCompanyInput['status'],
     trialDays: trialDays === undefined ? undefined : Number(trialDays),
+    planCode: values.plan,
     office: { code: values['office-code'] ?? '', name: values['office-name'] ?? '' },
     owner: { email: values['owner-email'] ?? '', displayName: values['owner-name'] ?? '' },
   };

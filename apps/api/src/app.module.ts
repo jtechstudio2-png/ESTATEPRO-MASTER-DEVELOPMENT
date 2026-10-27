@@ -13,6 +13,7 @@ import { DatabaseModule } from './database/database.module.js';
 import { HealthController } from './health/health.controller.js';
 import { MeController } from './me/me.controller.js';
 import { ListingsModule } from './listings/listings.module.js';
+import { MediaModule } from './media/media.module.js';
 import { PropertiesModule } from './properties/properties.module.js';
 
 @Module({
@@ -34,6 +35,7 @@ import { PropertiesModule } from './properties/properties.module.js';
     AuthModule,
     PropertiesModule,
     ListingsModule,
+    MediaModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],

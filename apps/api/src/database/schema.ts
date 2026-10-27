@@ -1080,6 +1080,16 @@ export interface LedgerEntries {
   reversalOfId: string | null;
 }
 
+export interface ListingMedia {
+  addedAt: Generated<Timestamp>;
+  addedBy: string | null;
+  companyId: string;
+  isCover: Generated<boolean>;
+  listingId: string;
+  mediaId: string;
+  sortOrder: Generated<number>;
+}
+
 export interface ListingPriceHistory {
   approvedBy: string | null;
   changedAt: Generated<Timestamp>;
@@ -1676,6 +1686,7 @@ export interface Properties {
 }
 
 export interface PropertyMedia {
+  altText: string | null;
   archivedAt: Timestamp | null;
   caption: string | null;
   checksumSha256: Buffer | null;
@@ -1683,21 +1694,36 @@ export interface PropertyMedia {
   createdAt: Generated<Timestamp>;
   derivatives: Generated<Json>;
   durationSeconds: number | null;
+  externalProvider: string | null;
   externalUrl: string | null;
+  floorLabel: string | null;
   heightPx: number | null;
   id: Generated<string>;
   isCover: Generated<boolean>;
+  legalHold: Generated<boolean>;
+  legalHoldReason: string | null;
+  legalHoldSetAt: Timestamp | null;
+  legalHoldSetBy: string | null;
+  /**
+   * Deprecated (ADR-005 M-D5): use listing_media. Always NULL from Phase 4 M4.
+   */
   listingId: string | null;
   mediaType: string;
   mimeType: string | null;
+  originalFilename: string | null;
+  pageCount: number | null;
+  processedAt: Timestamp | null;
   processingStatus: Generated<string>;
   propertyId: string;
+  rejectionReason: string | null;
   roomLabel: string | null;
   sizeBytes: Int8 | null;
   sortOrder: Generated<number>;
   storageKey: string | null;
   unitId: string | null;
+  updatedAt: Generated<Timestamp>;
   uploadedBy: string | null;
+  version: Generated<number>;
   widthPx: number | null;
 }
 
@@ -1963,6 +1989,13 @@ export interface Statements {
   voidReason: string | null;
 }
 
+export interface StorageUsage {
+  bytesReserved: Generated<Int8>;
+  bytesUsed: Generated<Int8>;
+  companyId: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface SubscriptionInvoices {
   companyId: string;
   createdAt: Generated<Timestamp>;
@@ -2134,6 +2167,25 @@ export interface Units {
   unitTypeId: string | null;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
+}
+
+export interface UploadSessions {
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string;
+  declaredMime: string;
+  declaredSize: Int8;
+  expiresAt: Timestamp;
+  fileName: string;
+  id: Generated<string>;
+  listingId: string | null;
+  mediaId: string | null;
+  mediaType: string;
+  propertyId: string;
+  quarantineKey: string;
+  sha256: Buffer;
+  status: Generated<string>;
+  unitId: string | null;
 }
 
 export interface UsageCounters {
@@ -2314,6 +2366,7 @@ export interface DB {
   leases: Leases;
   ledgerBalances: LedgerBalances;
   ledgerEntries: LedgerEntries;
+  listingMedia: ListingMedia;
   listingPriceHistory: ListingPriceHistory;
   listingPublications: ListingPublications;
   listings: Listings;
@@ -2370,6 +2423,7 @@ export interface DB {
   slaPolicies: SlaPolicies;
   statementLines: StatementLines;
   statements: Statements;
+  storageUsage: StorageUsage;
   subscriptionInvoices: SubscriptionInvoices;
   subscriptions: Subscriptions;
   supplierInvoices: SupplierInvoices;
@@ -2381,6 +2435,7 @@ export interface DB {
   teams: Teams;
   unitFeatures: UnitFeatures;
   units: Units;
+  uploadSessions: UploadSessions;
   usageCounters: UsageCounters;
   userCredentials: UserCredentials;
   users: Users;
