@@ -40,7 +40,6 @@
   "storage": "التخزين",
   "storageUsed": "{used} من {limit}",
   "storageUnlimited": "المستخدم {used}",
-  "countLink": "{label}: {count}",
   "unknownFile": "ملف بلا اسم",
   "nothing": "لا شيء في لوحتك بعد",
   "nothingDetail": "لا يملك دورك لوحات في هذا الجزء من EstatePro."

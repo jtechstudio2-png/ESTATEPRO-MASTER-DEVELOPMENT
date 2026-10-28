@@ -40,7 +40,6 @@
   "storage": "Storage",
   "storageUsed": "{used} of {limit}",
   "storageUnlimited": "{used} used",
-  "countLink": "{label}: {count}",
   "unknownFile": "Unnamed file",
   "nothing": "Nothing on your dashboard yet",
   "nothingDetail": "Your role has no dashboard panels in this part of EstatePro."

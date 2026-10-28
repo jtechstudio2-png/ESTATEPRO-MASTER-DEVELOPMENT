@@ -282,14 +282,15 @@ function DashboardPanel<T>({ title, result, rows, children }: { title: string; r
 }
 
 function CountList({ items }: { items: Array<{ label: string; count: number; href: string; warn?: boolean }> }) {
-  const t = useTranslations('dashboard');
   const format = useFormat();
   return (
     <ul className={styles.counts}>
       {items.map((item) => (
         <li key={item.label}>
-          <NextLink href={item.href} className={styles.countLink} aria-label={t('countLink', { label: item.label, count: format.number(item.count) })}>
+          {/* The name is the visible text (WCAG 2.5.3): "label: count". */}
+          <NextLink href={item.href} className={styles.countLink}>
             <span>{item.label}</span>
+            <span className="ep-visually-hidden">: </span>
             <span className={`ep-num ${styles.count} ${item.warn ? styles.warn : ''}`}>
               {item.warn ? <span aria-hidden="true">⚠ </span> : null}
               {format.number(item.count)}
