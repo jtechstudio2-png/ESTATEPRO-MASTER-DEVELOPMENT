@@ -35,10 +35,11 @@ export function PeoplePicker({ label, value, onChange, permission, officeId, err
   const t = useTranslations('form');
   const [text, setText] = useState(value?.displayName ?? '');
   const [term, setTerm] = useState('');
-  useEffect(() => setText(value?.displayName ?? ''), [value]);
   useEffect(() => {
     const trimmed = text.trim();
-    const timer = setTimeout(() => setTerm(trimmed.length >= 2 && trimmed !== value?.displayName ? trimmed : ''), 300);
+    // Showing the picked name is not a new search: keep the results as they are.
+    if (value && trimmed === value.displayName) return;
+    const timer = setTimeout(() => setTerm(trimmed.length >= 2 ? trimmed : ''), 300);
     return () => clearTimeout(timer);
   }, [text, value]);
   const members = useQuery({
@@ -51,7 +52,7 @@ export function PeoplePicker({ label, value, onChange, permission, officeId, err
   return (
     <ComboBox
       className={styles.field}
-      inputValue={text}
+      defaultInputValue={value?.displayName ?? ''}
       onInputChange={setText}
       selectedKey={value?.membershipId ?? null}
       onSelectionChange={(key) => {
@@ -60,7 +61,6 @@ export function PeoplePicker({ label, value, onChange, permission, officeId, err
       }}
       items={items}
       allowsEmptyCollection
-      menuTrigger="focus"
       isRequired={isRequired}
       isInvalid={error !== undefined}
       validationBehavior="aria"

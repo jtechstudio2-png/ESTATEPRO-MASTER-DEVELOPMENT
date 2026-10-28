@@ -2071,6 +2071,8 @@ export interface components {
             changedAt: string;
             /** Format: uuid */
             changedByMembershipId: string | null;
+            /** @description Name of the member; null for system changes */
+            changedByName: string | null;
             reason: string | null;
         };
         StatusHistoryPageDto: {
@@ -2086,8 +2088,10 @@ export interface components {
             changedAt: string;
             /** Format: uuid */
             changedByMembershipId: string | null;
+            changedByName: string | null;
             /** Format: uuid */
             approvedByMembershipId: string | null;
+            approvedByName: string | null;
             reason: string | null;
         };
         PriceHistoryPageDto: {

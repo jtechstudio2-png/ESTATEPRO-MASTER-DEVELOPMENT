@@ -170,9 +170,13 @@ describe('listings (Phase 4 M3)', () => {
       });
       expect(res.body.reference).toMatch(/^LST-\d{4}-\d{6}$/);
       const status = await as('agentA').get(`/api/v1/listings/${res.body.id}/status-history`).expect(200);
-      expect(status.body.data).toEqual([expect.objectContaining({ fromStatus: null, toStatus: 'draft', changedByMembershipId: agentA.membershipId })]);
+      expect(status.body.data).toEqual([
+        expect.objectContaining({ fromStatus: null, toStatus: 'draft', changedByMembershipId: agentA.membershipId, changedByName: 'agent user' }),
+      ]);
       const price = await as('agentA').get(`/api/v1/listings/${res.body.id}/price-history`).expect(200);
-      expect(price.body.data).toEqual([expect.objectContaining({ oldPrice: null, newPrice: { amount: '450000.00', currency: 'GHS' } })]);
+      expect(price.body.data).toEqual([
+        expect.objectContaining({ oldPrice: null, newPrice: { amount: '450000.00', currency: 'GHS' }, changedByName: 'agent user', approvedByName: null }),
+      ]);
       const events = await fx.db.selectFrom('outboxEvents').select('eventType').where('aggregateId', '=', res.body.id).execute();
       expect(events.map((e) => e.eventType).sort()).toEqual(['listing.created', 'listing.status_changed']);
     });

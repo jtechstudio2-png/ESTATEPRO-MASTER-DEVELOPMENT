@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import { LocationFilter, useLocationChip } from '@/components/map/location-filter';
+
 import { useSession } from '@/components/session';
 import { LinkButton } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
@@ -36,6 +38,8 @@ export function PropertyList() {
   const { offices } = useOffices();
   const types = usePropertyTypes({ appliesTo: undefined });
   const countries = useCountries();
+  const locationChip = useLocationChip();
+  const near = params.get('filter[near]') !== null;
 
   const sort = params.get('sort') ?? '-updatedAt';
   const query = new URLSearchParams(params.apiQuery);
@@ -74,8 +78,9 @@ export function PropertyList() {
     const def = filterDefs.find((item) => item.key === key)!;
     return <FilterSelect key={key} label={def.label} value={params.get(key)} onChange={(value) => params.set({ [key]: value })} options={def.options ?? []} />;
   };
+  if (locationChip) chips.push({ key: 'location', label: locationChip.label, onRemove: locationChip.clear });
   const moreActive = ['filter[locationStale]', 'filter[locality]', 'filter[adminArea1]', 'filter[archived]'].filter((key) => params.get(key) !== null).length;
-  const sortOptions = PROPERTY_SORTS.map((id) => ({ id, label: t(`sort.${id}`) }));
+  const sortOptions = [...PROPERTY_SORTS, ...(near ? (['distance'] as const) : [])].map((id) => ({ id, label: t(`sort.${id}`) }));
   const filtered = chips.length > 0;
 
   return (
@@ -109,6 +114,7 @@ export function PropertyList() {
         {countryOptions.length > 1 ? select('filter[countryCode]') : null}
         {select('filter[isManaged]')}
         {select('filter[hasLocation]')}
+        <LocationFilter />
         <MoreFilters activeCount={moreActive}>
           {select('filter[locationStale]')}
           <SearchBox label={t('locality')} value={params.get('filter[locality]') ?? ''} onChange={(value) => params.set({ 'filter[locality]': value || null })} />
@@ -152,7 +158,7 @@ export function PropertyList() {
           caption={nav('properties')}
           rows={result.rows}
           rowKey={(row) => row.id}
-          sortNote={list('sortedBy', { sort: t(`sort.${sort as (typeof PROPERTY_SORTS)[number]}`) })}
+          sortNote={list('sortedBy', { sort: t(`sort.${sort as (typeof PROPERTY_SORTS)[number] | 'distance'}`) })}
           identifier={{
             header: t('property'),
             href: (row) => `/properties/${row.id}`,
@@ -173,6 +179,9 @@ export function PropertyList() {
           columns={[
             { key: 'type', header: t('type'), cell: (row) => row.propertyType.name, onCard: true },
             { key: 'office', header: t('office'), cell: (row) => row.office.name, onCard: true },
+            ...(near
+              ? [{ key: 'distance', header: t('distance'), cell: (row: PropertySummaryDto) => (row.distanceMeters === null ? '—' : <span className="ep-num">{format.distance(row.distanceMeters)}</span>), align: 'end' as const }]
+              : []),
             { key: 'units', header: t('units'), cell: (row) => <span className="ep-num">{format.number(row.unitCount)}</span>, align: 'end' },
             {
               key: 'updated',

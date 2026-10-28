@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { useSession } from '@/components/session';
-import type { CountryListDto, OfficeListDto, PicklistDto, PropertyTypeListDto } from '@/lib/api-schema';
+import type { CountryListDto, CurrencyListDto, LocaleListDto, OfficeListDto, PicklistDto, PropertyTypeListDto } from '@/lib/api-schema';
 import { bff, query } from '@/lib/bff';
 
 const REFERENCE_STALE = 10 * 60_000;
@@ -39,4 +39,12 @@ export function usePicklist(listKey: string, countryCode?: string) {
     queryFn: () => bff<PicklistDto>(`reference/picklists/${listKey}${query({ countryCode, locale: session.locale })}`),
     staleTime: REFERENCE_STALE,
   });
+}
+
+export function useLocales() {
+  return useQuery({ queryKey: ['reference', 'locales'], queryFn: () => bff<LocaleListDto>('reference/locales'), staleTime: REFERENCE_STALE });
+}
+
+export function useCurrencies() {
+  return useQuery({ queryKey: ['reference', 'currencies'], queryFn: () => bff<CurrencyListDto>('reference/currencies'), staleTime: REFERENCE_STALE });
 }

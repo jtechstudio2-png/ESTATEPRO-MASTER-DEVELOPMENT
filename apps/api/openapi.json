@@ -8544,6 +8544,13 @@
             ],
             "format": "uuid"
           },
+          "changedByName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name of the member; null for system changes"
+          },
           "reason": {
             "type": [
               "string",
@@ -8557,6 +8564,7 @@
           "toStatus",
           "changedAt",
           "changedByMembershipId",
+          "changedByName",
           "reason"
         ]
       },
@@ -8609,12 +8617,24 @@
             ],
             "format": "uuid"
           },
+          "changedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "approvedByMembershipId": {
             "type": [
               "string",
               "null"
             ],
             "format": "uuid"
+          },
+          "approvedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "reason": {
             "type": [
@@ -8629,7 +8649,9 @@
           "newPrice",
           "changedAt",
           "changedByMembershipId",
+          "changedByName",
           "approvedByMembershipId",
+          "approvedByName",
           "reason"
         ]
       },

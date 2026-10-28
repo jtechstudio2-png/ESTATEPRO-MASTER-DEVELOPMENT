@@ -264,6 +264,7 @@ export class StatusHistoryEntryDto {
   @ApiProperty() toStatus!: string;
   @ApiProperty({ format: 'date-time' }) changedAt!: string;
   @ApiProperty({ type: String, nullable: true, format: 'uuid' }) changedByMembershipId!: string | null;
+  @ApiProperty({ type: String, nullable: true, description: 'Name of the member; null for system changes' }) changedByName!: string | null;
   @ApiProperty({ type: String, nullable: true }) reason!: string | null;
 }
 
@@ -278,7 +279,9 @@ export class PriceHistoryEntryDto {
   @ApiProperty({ type: MoneyDto }) newPrice!: MoneyDto;
   @ApiProperty({ format: 'date-time' }) changedAt!: string;
   @ApiProperty({ type: String, nullable: true, format: 'uuid' }) changedByMembershipId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) changedByName!: string | null;
   @ApiProperty({ type: String, nullable: true, format: 'uuid' }) approvedByMembershipId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) approvedByName!: string | null;
   @ApiProperty({ type: String, nullable: true }) reason!: string | null;
 }
 

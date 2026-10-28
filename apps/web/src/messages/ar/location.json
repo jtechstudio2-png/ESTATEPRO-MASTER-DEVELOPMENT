@@ -63,5 +63,7 @@
   "showMap": "الخريطة",
   "sortDistance": "المسافة، الأقرب أولاً",
   "distanceAway": "على بُعد {distance}",
-  "applyCoordinates": "نقل الدبوس إلى هذه الإحداثيات"
+  "applyCoordinates": "نقل الدبوس إلى هذه الإحداثيات",
+  "nearProperty": "بالقرب من عقار",
+  "placeSearch": "ابحث في العقارات"
 }

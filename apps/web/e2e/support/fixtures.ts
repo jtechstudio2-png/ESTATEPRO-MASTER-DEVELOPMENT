@@ -41,9 +41,9 @@ export const test = base.extend<{ state: E2eState }>({
 });
 
 /** Opens the select labelled `label` (its button is named "<value> <label>") and picks `option`. */
-export async function choose(page: Page, label: string, option: string, scope: Page | Locator = page): Promise<void> {
+export async function choose(page: Page, label: string, option: string | RegExp, scope: Page | Locator = page): Promise<void> {
   await scope.getByRole('button', { name: new RegExp(`(^|\\s)${escape(label)}(\\s|$)`) }).first().click();
-  await page.getByRole('option', { name: option, exact: true }).click();
+  await page.getByRole('option', typeof option === 'string' ? { name: option, exact: true } : { name: option }).click();
 }
 
 /** Picks a radio by clicking its visible label (the input itself is visually hidden). */

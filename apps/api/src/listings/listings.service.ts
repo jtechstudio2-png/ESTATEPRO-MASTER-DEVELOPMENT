@@ -405,7 +405,9 @@ export class ListingsService {
     await this.assertVisible(tx, ctx, id);
     let qb = tx
       .selectFrom('listingStatusHistory as h')
-      .select(['h.id', 'h.fromStatus', 'h.toStatus', 'h.changedAt', 'h.changedBy', 'h.reason'])
+      .leftJoin('companyMemberships as cm', 'cm.id', 'h.changedBy')
+      .leftJoin('users as cu', 'cu.id', 'cm.userId')
+      .select(['h.id', 'h.fromStatus', 'h.toStatus', 'h.changedAt', 'h.changedBy', 'h.reason', 'cu.displayName as changedByName'])
       .select(sortValueSql('h.changedAt', 'timestamp').as('cursorValue'))
       .where('h.listingId', '=', id);
     if (query.cursor) qb = qb.where(keysetCondition('h.changedAt', 'h.id', query.sort, query.cursor));
@@ -416,6 +418,7 @@ export class ListingsService {
       toStatus: r.toStatus,
       changedAt: r.changedAt.toISOString(),
       changedByMembershipId: r.changedBy,
+      changedByName: r.changedByName,
       reason: r.reason,
     }));
   }
@@ -425,7 +428,12 @@ export class ListingsService {
     let qb = tx
       .selectFrom('listingPriceHistory as h')
       .innerJoin('currencies as cur', 'cur.code', 'h.currencyCode')
+      .leftJoin('companyMemberships as cm', 'cm.id', 'h.changedBy')
+      .leftJoin('users as cu', 'cu.id', 'cm.userId')
+      .leftJoin('companyMemberships as am', 'am.id', 'h.approvedBy')
+      .leftJoin('users as au', 'au.id', 'am.userId')
       .select(['h.id', 'h.oldPrice', 'h.newPrice', 'h.currencyCode', 'cur.minorUnits', 'h.changedAt', 'h.changedBy', 'h.approvedBy', 'h.reason'])
+      .select(['cu.displayName as changedByName', 'au.displayName as approvedByName'])
       .select(sortValueSql('h.changedAt', 'timestamp').as('cursorValue'))
       .where('h.listingId', '=', id);
     if (query.cursor) qb = qb.where(keysetCondition('h.changedAt', 'h.id', query.sort, query.cursor));
@@ -436,7 +444,9 @@ export class ListingsService {
       newPrice: toMoney(r.newPrice, r.currencyCode, r.minorUnits),
       changedAt: r.changedAt.toISOString(),
       changedByMembershipId: r.changedBy,
+      changedByName: r.changedByName,
       approvedByMembershipId: r.approvedBy,
+      approvedByName: r.approvedByName,
       reason: r.reason,
     }));
   }

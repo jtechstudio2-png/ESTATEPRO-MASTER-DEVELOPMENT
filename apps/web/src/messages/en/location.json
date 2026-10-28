@@ -63,5 +63,7 @@
   "showMap": "Map",
   "sortDistance": "Distance, nearest first",
   "distanceAway": "{distance} away",
-  "applyCoordinates": "Move the pin to these coordinates"
+  "applyCoordinates": "Move the pin to these coordinates",
+  "nearProperty": "Near a property",
+  "placeSearch": "Search properties"
 }

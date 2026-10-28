@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 
+const UI_ONLY = ['cursor', 'view', 'tab', 'unit', 'source', 'nearLabel', 'media'];
+
 /**
  * List state lives in the URL (UI checklist §2): filters, sort and search use
  * the API's own parameter names (`filter[status]`, `sort`, `q`), so the page
@@ -56,9 +58,8 @@ export function useListParams() {
   /** The API query for this list: the URL's own parameters (no cursor). */
   const apiQuery = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete('cursor');
-    params.delete('view');
-    params.delete('tab');
+    // Interface-only parameters never go to the API.
+    for (const key of UI_ONLY) params.delete(key);
     return params;
   }, [searchParams]);
 
