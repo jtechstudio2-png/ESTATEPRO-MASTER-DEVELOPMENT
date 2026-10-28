@@ -51,6 +51,7 @@ export class AddressInput {
   localComponents?: Record<string, string>;
 
   @ApiPropertyOptional({
+    type: Number,
     minimum: -90,
     maximum: 90,
     nullable: true,
@@ -60,7 +61,7 @@ export class AddressInput {
   @IsLatitude()
   latitude?: number | null;
 
-  @ApiPropertyOptional({ minimum: -180, maximum: 180, nullable: true })
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: -180, maximum: 180 })
   @ValidateIf((_object: unknown, value: unknown) => value !== undefined && value !== null)
   @IsLongitude()
   longitude?: number | null;

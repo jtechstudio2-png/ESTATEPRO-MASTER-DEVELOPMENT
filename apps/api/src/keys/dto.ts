@@ -29,12 +29,12 @@ export class CreateKeySetBody {
 export class UpdateKeySetBody {
   @ApiPropertyOptional({ maxLength: 60 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(60) label?: string;
 
-  @ApiPropertyOptional({ maxLength: 500, nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 500 })
   @ValidateIf((_object: unknown, value: unknown) => value !== undefined && value !== null)
   @Transform(trim) @IsString() @MinLength(1) @MaxLength(500)
   description?: string | null;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid' })
   @ValidateIf((_object: unknown, value: unknown) => value !== undefined && value !== null)
   @IsUUID()
   unitId?: string | null;
@@ -74,12 +74,14 @@ export class KeyPropertyDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() reference!: string;
   @ApiProperty({ type: String, nullable: true }) name!: string | null;
+  @ApiProperty({ description: 'IANA time zone: due-back times are entered and shown in it', example: 'Africa/Accra' }) timezone!: string;
 }
 
 export class KeySetDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ type: KeyPropertyDto }) property!: KeyPropertyDto;
   @ApiProperty({ type: String, nullable: true, format: 'uuid' }) unitId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) unitLabel!: string | null;
   @ApiProperty() label!: string;
   @ApiProperty({ type: String, nullable: true }) description!: string | null;
   @ApiProperty({ enum: KEY_STATUSES }) status!: string;

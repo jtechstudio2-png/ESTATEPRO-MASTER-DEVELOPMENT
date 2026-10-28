@@ -62,6 +62,7 @@ export class KeysService {
     else qb = qb.where('k.status', '<>', 'retired');
     if (Array.isArray(filters['propertyId'])) qb = qb.where('k.propertyId', 'in', filters['propertyId']);
     if (Array.isArray(filters['unitId'])) qb = qb.where('k.unitId', 'in', filters['unitId']);
+    if (Array.isArray(filters['officeId'])) qb = qb.where('p.officeId', 'in', filters['officeId']);
     if (Array.isArray(filters['holderMembershipId'])) qb = qb.where('k.holderMembershipId', 'in', filters['holderMembershipId']);
     if (filters['overdue'] === true) qb = qb.where('k.status', '=', 'checked_out').where('k.dueBackAt', '<', sql<Date>`now()`);
     if (filters['overdue'] === false) qb = qb.where((eb) => eb.or([eb('k.dueBackAt', 'is', null), eb('k.dueBackAt', '>=', sql<Date>`now()`)]));
@@ -321,10 +322,13 @@ export class KeysService {
       .leftJoin('companyMemberships as hm', 'hm.id', 'k.holderMembershipId')
       .leftJoin('users as hu', 'hu.id', 'hm.userId')
       .leftJoin('contacts as hc', 'hc.id', 'k.holderContactId')
+      .leftJoin('units as u', 'u.id', 'k.unitId')
       .selectAll('k')
       .select([
         'p.reference as propertyReference',
         'p.name as propertyName',
+        'p.timezone as propertyTimezone',
+        'u.unitLabel',
         'hu.displayName as holderMemberName',
         'hc.displayName as holderContactName',
         sql<boolean>`k.status = 'checked_out' and k.due_back_at < now()`.as('isOverdue'),
@@ -346,6 +350,8 @@ function toKeySetDto(
   row: KeySetRow & {
     propertyReference: string;
     propertyName: string | null;
+    propertyTimezone: string;
+    unitLabel: string | null;
     holderMemberName: string | null;
     holderContactName: string | null;
     isOverdue: boolean | null;
@@ -353,8 +359,9 @@ function toKeySetDto(
 ): KeySetDto {
   return {
     id: row.id,
-    property: { id: row.propertyId, reference: row.propertyReference, name: row.propertyName },
+    property: { id: row.propertyId, reference: row.propertyReference, name: row.propertyName, timezone: row.propertyTimezone },
     unitId: row.unitId,
+    unitLabel: row.unitLabel,
     label: row.label,
     description: row.description,
     status: row.status,

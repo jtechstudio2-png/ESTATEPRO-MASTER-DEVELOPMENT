@@ -15,6 +15,7 @@ describe('key register (Phase 4 M5, ADR-006 L-D10)', () => {
   let unitId: string;
   let otherUnitId: string;
   let contractorId: string;
+  let kumasiOfficeId: string;
   const tokens: Record<string, string> = {};
   const members: Record<string, string> = {};
 
@@ -32,7 +33,7 @@ describe('key register (Phase 4 M5, ADR-006 L-D10)', () => {
     fx = new Fixtures();
     company = await fx.company();
     other = await fx.company();
-    const kumasiOfficeId = (await fx.office(company.companyId, 'KSI')).id;
+    kumasiOfficeId = (await fx.office(company.companyId, 'KSI')).id;
     const people = {
       owner: { userId: company.ownerUserId, membershipId: company.ownerMembershipId, companyId: company.companyId },
       agent: { ...(await fx.member(company.companyId, { roleKey: 'agent', officeIds: [company.officeId] })), companyId: company.companyId },
@@ -88,8 +89,9 @@ describe('key register (Phase 4 M5, ADR-006 L-D10)', () => {
       .expect(201);
     expect(created.headers['location']).toBe(`/api/v1/key-sets/${created.body.id}`);
     expect(created.body).toMatchObject({
-      property: { id: propertyId, reference: expect.any(String), name: 'Keys Court' },
+      property: { id: propertyId, reference: expect.any(String), name: 'Keys Court', timezone: 'Africa/Accra' },
       unitId,
+      unitLabel: expect.any(String),
       label: 'K-100',
       status: 'in_office',
       holder: null,
@@ -178,6 +180,10 @@ describe('key register (Phase 4 M5, ADR-006 L-D10)', () => {
     expect(notOverdue.body.data.map((k: { id: string }) => k.id)).not.toContain(keySet.id);
     const byHolder = await as('manager').get(`/api/v1/key-sets?filter[holderMembershipId]=${members['agent']}&filter[status]=checked_out`).expect(200);
     expect(byHolder.body.data.map((k: { id: string }) => k.id)).toEqual([keySet.id]);
+    const byOffice = await as('owner').get(`/api/v1/key-sets?filter[overdue]=true&filter[officeId]=${company.officeId}`).expect(200);
+    expect(byOffice.body.data.map((k: { id: string }) => k.id)).toEqual([keySet.id]);
+    const otherOffice = await as('owner').get(`/api/v1/key-sets?filter[overdue]=true&filter[officeId]=${kumasiOfficeId}`).expect(200);
+    expect(otherOffice.body.data).toEqual([]);
     const byDue = await as('manager').get('/api/v1/key-sets?sort=dueBackAt').expect(200);
     expect(byDue.body.data.map((k: { id: string }) => k.id)).toEqual([keySet.id]);
     const one = await as('manager').get(`/api/v1/key-sets/${keySet.id}`).expect(200);

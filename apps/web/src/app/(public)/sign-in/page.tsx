@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { buttonClass } from '@/components/ui/button';
+import { buttonClass } from '@/components/ui/button-class';
 import { Notice } from '@/components/ui/feedback';
 import { pageContext } from '@/server/context';
 import { safeReturnTo } from '@/server/return-to';

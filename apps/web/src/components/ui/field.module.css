@@ -166,3 +166,62 @@
   gap: var(--ep-space-3);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
+
+.comboRow {
+  display: flex;
+  align-items: stretch;
+}
+
+.comboRow .input {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.comboButton {
+  min-inline-size: var(--ep-control-height);
+  border: var(--ep-border-width) solid var(--ep-color-border-control);
+  border-inline-start: 0;
+  border-start-end-radius: var(--ep-radius-control);
+  border-end-end-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface-subtle);
+  color: var(--ep-color-text-primary);
+  cursor: pointer;
+}
+
+.segmentedGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-1);
+}
+
+.segmented {
+  display: inline-flex;
+  border: var(--ep-border-width) solid var(--ep-color-border-control);
+  border-radius: var(--ep-radius-control);
+  overflow: hidden;
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--ep-control-height);
+  padding-inline: var(--ep-space-3);
+  background: var(--ep-color-surface);
+  color: var(--ep-color-text-primary);
+  cursor: pointer;
+}
+
+.segment + .segment {
+  border-inline-start: var(--ep-border-width) solid var(--ep-color-border-control);
+}
+
+.segment[data-selected] {
+  background: var(--ep-color-brand);
+  color: var(--ep-color-on-brand);
+  font-weight: 600;
+}
+
+.segment[data-focus-visible] {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: -3px;
+}

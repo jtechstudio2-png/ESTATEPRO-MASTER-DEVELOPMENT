@@ -24,7 +24,8 @@ type Can = (permission: string) => Grant | undefined;
 export function buildNavigation(can: Can): NavSection[] {
   const sections: NavSection[] = [];
   const home: NavItem[] = [];
-  if (can('property.view') || can('key.view')) home.push({ id: 'dashboard', href: '/dashboard', label: 'dashboard', match: ['/dashboard'] });
+  // D-1 for those who run the book (listing.approve_price: Own, Adm, SM, PM); D-2 for key holders.
+  if (can('listing.approve_price') || can('key.view')) home.push({ id: 'dashboard', href: '/dashboard', label: 'dashboard', match: ['/dashboard'] });
   if (home.length > 0) sections.push({ id: 'home', label: 'home', items: home });
 
   const properties: NavItem[] = [];

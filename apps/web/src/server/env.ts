@@ -29,13 +29,19 @@ const schema = z
     MAP_GLYPHS_URL: z.string().default(''),
   })
   .superRefine((env, issues) => {
-    if (env.NODE_ENV === 'production' && env.OIDC_ALLOW_INSECURE) {
-      issues.addIssue({ code: 'custom', path: ['OIDC_ALLOW_INSECURE'], message: 'Not allowed in production.' });
+    // A production build may run over plain http only on this machine (end-to-end tests).
+    if (env.NODE_ENV === 'production' && env.OIDC_ALLOW_INSECURE && !isLoopback(env.OIDC_ISSUER)) {
+      issues.addIssue({ code: 'custom', path: ['OIDC_ALLOW_INSECURE'], message: 'Only allowed for a loopback issuer in production.' });
     }
-    if (env.NODE_ENV === 'production' && !env.WEB_ORIGIN.startsWith('https://')) {
+    if (env.NODE_ENV === 'production' && !env.WEB_ORIGIN.startsWith('https://') && !isLoopback(env.WEB_ORIGIN)) {
       issues.addIssue({ code: 'custom', path: ['WEB_ORIGIN'], message: 'Must be https in production.' });
     }
   });
+
+function isLoopback(url: string): boolean {
+  const host = new URL(url).hostname;
+  return host === '127.0.0.1' || host === 'localhost' || host === '[::1]';
+}
 
 export type WebEnv = z.infer<typeof schema>;
 

@@ -48,17 +48,17 @@ export class CreateLinkBody {
   @ApiPropertyOptional({ format: 'uuid' }) @ValidateIf(provided) @IsUUID() unitId?: string;
   @ApiProperty({ enum: LINK_MEDIA_TYPES }) @IsIn(LINK_MEDIA_TYPES) mediaType!: (typeof LINK_MEDIA_TYPES)[number];
   @ApiProperty({ description: 'YouTube or Vimeo (video), Matterport (virtual tour)' }) @IsString() @MaxLength(500) url!: string;
-  @ApiPropertyOptional({ maxLength: 300 }) @ValidateIf(provided) @Transform(trim) @IsString() @MaxLength(300) caption?: string | null;
-  @ApiPropertyOptional({ maxLength: 250 }) @ValidateIf(provided) @Transform(trim) @IsString() @MaxLength(250) altText?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 300 }) @ValidateIf(provided) @Transform(trim) @IsString() @MaxLength(300) caption?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 250 }) @ValidateIf(provided) @Transform(trim) @IsString() @MaxLength(250) altText?: string | null;
 }
 
 export class UpdateMediaBody {
-  @ApiPropertyOptional({ maxLength: 300 }) @ValidateIf(provided) @Transform(trim) @IsString() @MaxLength(300) caption?: string | null;
-  @ApiPropertyOptional({ maxLength: 250, description: 'Text alternative (WCAG 2.2 AA)' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 300 }) @ValidateIf(provided) @Transform(trim) @IsString() @MaxLength(300) caption?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 250, description: 'Text alternative (WCAG 2.2 AA)' })
   @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(250)
   altText?: string | null;
-  @ApiPropertyOptional({ maxLength: 80 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(80) roomLabel?: string | null;
-  @ApiPropertyOptional({ maxLength: 60 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(60) floorLabel?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 80 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(80) roomLabel?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 60 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(60) floorLabel?: string | null;
   @ApiPropertyOptional({ minimum: 0, maximum: 10_000, description: 'Order in the property gallery' })
   @ValidateIf(provided) @IsInt() @Min(0) @Max(10_000)
   sortOrder?: number;

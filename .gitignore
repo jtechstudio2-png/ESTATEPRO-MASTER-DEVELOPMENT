@@ -9,3 +9,4 @@ coverage/
 *.tsbuildinfo
 test-results/
 playwright-report/
+.state.json

@@ -4146,6 +4146,13 @@
             }
           },
           {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "description": "The property's office",
+            "schema": {}
+          },
+          {
             "name": "filter[holderMembershipId]",
             "required": false,
             "in": "query",
@@ -5116,6 +5123,13 @@
             }
           },
           {
+            "name": "filter[listingType]",
+            "required": false,
+            "in": "query",
+            "description": "rent, sale or rent,sale (default: both)",
+            "schema": {}
+          },
+          {
             "name": "filter[officeId]",
             "required": false,
             "in": "query",
@@ -6042,7 +6056,7 @@
           },
           "latitude": {
             "type": [
-              "object",
+              "number",
               "null"
             ],
             "minimum": -90,
@@ -6051,7 +6065,7 @@
           },
           "longitude": {
             "type": [
-              "object",
+              "number",
               "null"
             ],
             "minimum": -180,
@@ -6086,28 +6100,46 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Building or estate name"
           },
           "tenureCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Tenure code from the \"tenure\" picklist for the property’s country"
           },
           "tenureExpiresOn": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "titleReference": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Land registry / title number"
           },
           "yearBuilt": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 1000,
             "maximum": 2200
           },
           "floorsCount": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 300
           },
@@ -6698,28 +6730,46 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Building or estate name"
           },
           "tenureCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Tenure code from the \"tenure\" picklist for the property’s country"
           },
           "tenureExpiresOn": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "titleReference": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Land registry / title number"
           },
           "yearBuilt": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 1000,
             "maximum": 2200
           },
           "floorsCount": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 300
           },
@@ -6968,25 +7018,40 @@
         "type": "object",
         "properties": {
           "unitTypeId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "floorLabel": {
-            "type": "object"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "bedrooms": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 100
           },
           "bathrooms": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 100,
             "multipleOf": 0.5
           },
           "receptionRooms": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 100
           },
@@ -6994,16 +7059,25 @@
             "$ref": "#/components/schemas/FloorAreaInput"
           },
           "parkingSpaces": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 10000
           },
           "furnishingCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the \"furnishing\" picklist"
           },
           "energyRating": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Energy rating where the market uses one (e.g. EPC band)"
           },
           "featureCodes": {
@@ -7030,25 +7104,40 @@
         "type": "object",
         "properties": {
           "unitTypeId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "floorLabel": {
-            "type": "object"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "bedrooms": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 100
           },
           "bathrooms": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 100,
             "multipleOf": 0.5
           },
           "receptionRooms": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 100
           },
@@ -7056,16 +7145,25 @@
             "$ref": "#/components/schemas/FloorAreaInput"
           },
           "parkingSpaces": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 10000
           },
           "furnishingCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the \"furnishing\" picklist"
           },
           "energyRating": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Energy rating where the market uses one (e.g. EPC band)"
           },
           "featureCodes": {
@@ -7094,11 +7192,17 @@
             "description": "\"under_maintenance\" blocks new viewings and lettings without changing listing status"
           },
           "note": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 500
           },
           "until": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date",
             "description": "Expected end of the restriction"
           }
@@ -7593,7 +7697,10 @@
         "type": "object",
         "properties": {
           "priceQualifierCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the \"price_qualifier\" picklist"
           },
           "rentFrequency": {
@@ -7608,7 +7715,10 @@
             "description": "Rentals only"
           },
           "advanceRentPeriods": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 520,
             "description": "Rentals only: rent periods payable in advance (up to 10 years of weekly periods)"
@@ -7636,35 +7746,54 @@
             ]
           },
           "serviceChargeFrequency": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "monthly",
               "quarterly",
               "semi_annual",
-              "annual"
+              "annual",
+              null
             ],
             "description": "Rentals only"
           },
           "minTermMonths": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 1,
             "maximum": 600,
             "description": "Rentals only"
           },
           "availableFrom": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "mandateTypeCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the \"mandate_type\" picklist"
           },
           "mandateSignedOn": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "mandateExpiresOn": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "feeTerms": {
@@ -7679,7 +7808,10 @@
             ]
           },
           "description": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 10000,
             "description": "Plain text in the default language"
           },
@@ -8066,7 +8198,10 @@
         "type": "object",
         "properties": {
           "priceQualifierCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the \"price_qualifier\" picklist"
           },
           "rentFrequency": {
@@ -8081,7 +8216,10 @@
             "description": "Rentals only"
           },
           "advanceRentPeriods": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 520,
             "description": "Rentals only: rent periods payable in advance (up to 10 years of weekly periods)"
@@ -8109,35 +8247,54 @@
             ]
           },
           "serviceChargeFrequency": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "monthly",
               "quarterly",
               "semi_annual",
-              "annual"
+              "annual",
+              null
             ],
             "description": "Rentals only"
           },
           "minTermMonths": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 1,
             "maximum": 600,
             "description": "Rentals only"
           },
           "availableFrom": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "mandateTypeCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the \"mandate_type\" picklist"
           },
           "mandateSignedOn": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "mandateExpiresOn": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "feeTerms": {
@@ -8152,7 +8309,10 @@
             ]
           },
           "description": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 10000,
             "description": "Plain text in the default language"
           },
@@ -8297,7 +8457,10 @@
             "maxLength": 200
           },
           "description": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 10000
           }
         },
@@ -8909,11 +9072,17 @@
             "description": "YouTube or Vimeo (video), Matterport (virtual tour)"
           },
           "caption": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 300
           },
           "altText": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 250
           }
         },
@@ -8926,20 +9095,32 @@
         "type": "object",
         "properties": {
           "caption": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 300
           },
           "altText": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 250,
             "description": "Text alternative (WCAG 2.2 AA)"
           },
           "roomLabel": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 80
           },
           "floorLabel": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 60
           },
           "sortOrder": {
@@ -9498,7 +9679,7 @@
           },
           "unitId": {
             "type": [
-              "object",
+              "string",
               "null"
             ],
             "format": "uuid",
@@ -9622,12 +9803,18 @@
               "string",
               "null"
             ]
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone: due-back times are entered and shown in it",
+            "example": "Africa/Accra"
           }
         },
         "required": [
           "id",
           "reference",
-          "name"
+          "name",
+          "timezone"
         ]
       },
       "KeyHolderDto": {
@@ -9670,6 +9857,12 @@
               "null"
             ],
             "format": "uuid"
+          },
+          "unitLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "label": {
             "type": "string"
@@ -9741,6 +9934,7 @@
           "id",
           "property",
           "unitId",
+          "unitLabel",
           "label",
           "description",
           "status",
@@ -9813,14 +10007,14 @@
           },
           "description": {
             "type": [
-              "object",
+              "string",
               "null"
             ],
             "maxLength": 500
           },
           "unitId": {
             "type": [
-              "object",
+              "string",
               "null"
             ],
             "format": "uuid"

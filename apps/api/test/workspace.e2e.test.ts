@@ -295,6 +295,15 @@ describe('web interface read endpoints (Phase 4 M6)', () => {
       const office = await as('owner').get(`/api/v1/dashboards/property/listings?filter[officeId]=${kumasiOfficeId}`).expect(200);
       expect(office.body.photos).toBe(0);
       await as('owner').get('/api/v1/dashboards/property/listings?filter[officeId]=nope').expect(422);
+      // Rent / Sale / Both (D-1): the same counts as the list with filter[listingType].
+      const sale = await as('owner').get('/api/v1/dashboards/property/listings?filter[listingType]=sale').expect(200);
+      const saleList = await as('owner').get('/api/v1/listings?filter[attention]=price-stale&filter[listingType]=sale').expect(200);
+      expect(sale.body.priceStale).toBe(saleList.body.data.length);
+      const both = await as('owner').get('/api/v1/dashboards/property/listings?filter[listingType]=rent,sale').expect(200);
+      expect(both.body).toEqual(after.body);
+      const rent = await as('owner').get('/api/v1/dashboards/property/listings?filter[listingType]=rent').expect(200);
+      expect(rent.body.photos + sale.body.photos).toBe(after.body.photos);
+      await as('owner').get('/api/v1/dashboards/property/listings?filter[listingType]=lease').expect(422);
       await as('owner').put('/api/v1/settings/listings', { priceReductionApprovalPercent: null, requireSellerKyc: false, minPhotosToPublish: null, requireFloorPlanToPublish: false }).expect(200);
     });
   });

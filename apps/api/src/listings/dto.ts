@@ -28,9 +28,9 @@ export class FeeTermsInput {
 }
 
 class ListingFieldsBase {
-  @ApiPropertyOptional({ description: 'Code from the "price_qualifier" picklist' }) @ValidateIf(provided) @Matches(CODE) priceQualifierCode?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Code from the "price_qualifier" picklist' }) @ValidateIf(provided) @Matches(CODE) priceQualifierCode?: string | null;
   @ApiPropertyOptional({ enum: RENT_FREQUENCIES, description: 'Rentals only' }) @ValidateIf(provided) @IsIn(RENT_FREQUENCIES) rentFrequency?: string;
-  @ApiPropertyOptional({ minimum: 0, maximum: 520, description: 'Rentals only: rent periods payable in advance (up to 10 years of weekly periods)' })
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 520, description: 'Rentals only: rent periods payable in advance (up to 10 years of weekly periods)' })
   @ValidateIf(provided) @IsInt() @Min(0) @Max(520)
   advanceRentPeriods?: number | null;
   @ApiPropertyOptional({ type: MoneyInput, nullable: true, description: 'Rentals only; in the listing currency' })
@@ -39,18 +39,18 @@ class ListingFieldsBase {
   @ApiPropertyOptional({ type: MoneyInput, nullable: true, description: 'Rentals only; in the listing currency' })
   @ValidateIf(provided) @ValidateNested() @Type(() => MoneyInput)
   serviceCharge?: MoneyInput | null;
-  @ApiPropertyOptional({ enum: SERVICE_CHARGE_FREQUENCIES, description: 'Rentals only' })
+  @ApiPropertyOptional({ nullable: true, enum: SERVICE_CHARGE_FREQUENCIES, description: 'Rentals only' })
   @ValidateIf(provided) @IsIn(SERVICE_CHARGE_FREQUENCIES)
   serviceChargeFrequency?: string | null;
-  @ApiPropertyOptional({ minimum: 1, maximum: 600, description: 'Rentals only' }) @ValidateIf(provided) @IsInt() @Min(1) @Max(600) minTermMonths?: number | null;
-  @ApiPropertyOptional({ format: 'date' }) @ValidateIf(provided) @Matches(DATE) availableFrom?: string | null;
-  @ApiPropertyOptional({ description: 'Code from the "mandate_type" picklist' }) @ValidateIf(provided) @Matches(CODE) mandateTypeCode?: string | null;
-  @ApiPropertyOptional({ format: 'date' }) @ValidateIf(provided) @Matches(DATE) mandateSignedOn?: string | null;
-  @ApiPropertyOptional({ format: 'date' }) @ValidateIf(provided) @Matches(DATE) mandateExpiresOn?: string | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 1, maximum: 600, description: 'Rentals only' }) @ValidateIf(provided) @IsInt() @Min(1) @Max(600) minTermMonths?: number | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date' }) @ValidateIf(provided) @Matches(DATE) availableFrom?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Code from the "mandate_type" picklist' }) @ValidateIf(provided) @Matches(CODE) mandateTypeCode?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date' }) @ValidateIf(provided) @Matches(DATE) mandateSignedOn?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date' }) @ValidateIf(provided) @Matches(DATE) mandateExpiresOn?: string | null;
   @ApiPropertyOptional({ type: FeeTermsInput, nullable: true, description: 'Agreed agency fee (staff only)' })
   @ValidateIf(provided) @ValidateNested() @Type(() => FeeTermsInput)
   feeTerms?: FeeTermsInput | null;
-  @ApiPropertyOptional({ maxLength: 10_000, description: 'Plain text in the default language' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 10_000, description: 'Plain text in the default language' })
   @ValidateIf(provided) @IsString() @MaxLength(10_000)
   description?: string | null;
   @ApiPropertyOptional({ format: 'uuid', description: 'Defaults to the property’s office' }) @ValidateIf(provided) @IsUUID() officeId?: string;
@@ -101,7 +101,7 @@ export class RelistBody {
 
 export class TranslationBody {
   @ApiProperty({ minLength: 3, maxLength: 200 }) @Transform(trim) @IsString() @MinLength(3) @MaxLength(200) title!: string;
-  @ApiPropertyOptional({ maxLength: 10_000 }) @ValidateIf(provided) @IsString() @MaxLength(10_000) description?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 10_000 }) @ValidateIf(provided) @IsString() @MaxLength(10_000) description?: string | null;
 }
 
 export class ListingSettingsBody {

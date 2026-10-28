@@ -1,7 +1,7 @@
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['.next/**', 'coverage/**', 'test-results/**', 'playwright-report/**', 'next-env.d.ts', 'public/**'] },
+  { ignores: ['.next/**', 'coverage/**', 'test-results/**', 'playwright-report/**', 'next-env.d.ts', 'public/**', 'src/lib/api-schema.ts'] },
   ...tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {

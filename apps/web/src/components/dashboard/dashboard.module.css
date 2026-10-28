@@ -1,0 +1,101 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: var(--ep-space-4);
+  align-items: start;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--ep-space-4);
+}
+
+.filters > * {
+  min-inline-size: 200px;
+}
+
+.updated {
+  font-size: var(--ep-font-size-200);
+  color: var(--ep-color-text-secondary);
+}
+
+.counts,
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.counts > li + li,
+.list > li + li {
+  border-block-start: var(--ep-border-width) solid var(--ep-color-border);
+}
+
+.list > li {
+  padding-block: var(--ep-space-2);
+}
+
+.countLink {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ep-space-3);
+  min-block-size: 44px;
+  color: var(--ep-color-text-primary);
+  text-decoration: none;
+}
+
+.countLink:hover span:first-child {
+  text-decoration: underline;
+}
+
+.count {
+  font-weight: 700;
+  color: var(--ep-color-brand);
+  white-space: nowrap;
+}
+
+.warn {
+  color: var(--ep-color-danger);
+}
+
+.quiet {
+  color: var(--ep-color-text-secondary);
+}
+
+.tableRegion {
+  overflow-x: auto;
+}
+
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--ep-font-size-200);
+}
+
+.table th,
+.table td {
+  text-align: start;
+  padding: var(--ep-space-2);
+  border-block-end: var(--ep-border-width) solid var(--ep-color-border);
+  vertical-align: top;
+}
+
+.table thead th {
+  color: var(--ep-color-text-secondary);
+  font-weight: 600;
+}
+
+.keyRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ep-space-2);
+}
+
+.overdue {
+  color: var(--ep-color-danger);
+}

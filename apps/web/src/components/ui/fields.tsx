@@ -30,6 +30,8 @@ interface BaseFieldProps {
   isRequired?: boolean;
   isDisabled?: boolean;
   name?: string;
+  /** Id of the input, for links from the validation summary. */
+  id?: string;
 }
 
 function RequiredMark({ show }: { show: boolean | undefined }) {
@@ -56,7 +58,7 @@ interface TextFieldProps extends BaseFieldProps {
 }
 
 export function TextField({ label, description, error, isRequired, isDisabled, value, onChange, multiline, lang, dir, step, min, max, ...props }: TextFieldProps) {
-  const inputProps = { lang, dir, step, min, max, placeholder: props.placeholder, autoComplete: props.autoComplete, autoFocus: props.autoFocus };
+  const inputProps = { id: props.id, lang, dir, step, min, max, placeholder: props.placeholder, autoComplete: props.autoComplete, autoFocus: props.autoFocus };
   return (
     <AriaTextField
       className={styles.field}
@@ -99,7 +101,7 @@ interface SelectFieldProps extends BaseFieldProps {
   placeholder?: string;
 }
 
-export function SelectField({ label, description, error, isRequired, isDisabled, value, onChange, options, placeholder, name }: SelectFieldProps) {
+export function SelectField({ label, description, error, isRequired, isDisabled, value, onChange, options, placeholder, name, id }: SelectFieldProps) {
   return (
     <Select
       className={styles.field}
@@ -117,7 +119,7 @@ export function SelectField({ label, description, error, isRequired, isDisabled,
         {label}
         <RequiredMark show={isRequired} />
       </Label>
-      <AriaButton className={`${styles.select} ${styles.selectButton}`}>
+      <AriaButton id={id} className={`${styles.select} ${styles.selectButton}`}>
         <SelectValue />
         <span aria-hidden="true">▾</span>
       </AriaButton>
@@ -186,4 +188,20 @@ export function RadioGroupField({ label, description, error, isRequired, isDisab
 /** Lays short related fields side by side; stacks on narrow screens. */
 export function FieldRow({ children }: { children: ReactNode }) {
   return <div className={styles.row}>{children}</div>;
+}
+
+/** A small set of mutually exclusive views, e.g. Rent | Sale | Both (a radio group). */
+export function SegmentedControl({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Option[] }) {
+  return (
+    <RadioGroup className={styles.segmentedGroup} value={value} onChange={onChange} orientation="horizontal">
+      <Label className={styles.label}>{label}</Label>
+      <div className={styles.segmented}>
+        {options.map((option) => (
+          <Radio key={option.id} value={option.id} className={styles.segment}>
+            {option.label}
+          </Radio>
+        ))}
+      </div>
+    </RadioGroup>
+  );
 }

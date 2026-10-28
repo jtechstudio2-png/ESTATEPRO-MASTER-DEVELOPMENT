@@ -10,16 +10,7 @@ export const NAMESPACES = [
   'form',
   'auth',
   'dashboard',
-  'properties',
-  'units',
-  'listings',
-  'media',
-  'notes',
   'keys',
-  'location',
-  'settings',
-  'activity',
-  'enums',
 ] as const;
 
 export async function loadMessages(language: UiLanguage): Promise<Record<string, unknown>> {

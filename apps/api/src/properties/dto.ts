@@ -43,21 +43,21 @@ export class FloorAreaInput {
 }
 
 class PropertyFieldsBase {
-  @ApiPropertyOptional({ description: 'Building or estate name' })
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Building or estate name' })
   @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(200)
   name?: string | null;
 
-  @ApiPropertyOptional({ description: 'Tenure code from the "tenure" picklist for the property’s country' })
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Tenure code from the "tenure" picklist for the property’s country' })
   @ValidateIf(provided) @Matches(/^[a-z0-9][a-z0-9_]*$/)
   tenureCode?: string | null;
 
-  @ApiPropertyOptional({ format: 'date' }) @ValidateIf(provided) @Matches(DATE) tenureExpiresOn?: string | null;
-  @ApiPropertyOptional({ description: 'Land registry / title number' })
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date' }) @ValidateIf(provided) @Matches(DATE) tenureExpiresOn?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Land registry / title number' })
   @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(100)
   titleReference?: string | null;
 
-  @ApiPropertyOptional({ minimum: 1000, maximum: 2200 }) @ValidateIf(provided) @IsInt() @Min(1000) @Max(2200) yearBuilt?: number | null;
-  @ApiPropertyOptional({ minimum: 0, maximum: 300 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(300) floorsCount?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 1000, maximum: 2200 }) @ValidateIf(provided) @IsInt() @Min(1000) @Max(2200) yearBuilt?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 300 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(300) floorsCount?: number | null;
 
   @ApiPropertyOptional({ type: LandAreaInput })
   @ValidateIf(provided) @ValidateNested() @Type(() => LandAreaInput)
@@ -184,17 +184,17 @@ export class PropertyMapDto {
 // ----------------------------------------------------------------------------- units
 
 class UnitFieldsBase {
-  @ApiPropertyOptional({ format: 'uuid' }) @ValidateIf(provided) @IsUUID() unitTypeId?: string | null;
-  @ApiPropertyOptional() @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(40) floorLabel?: string | null;
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(100) bedrooms?: number | null;
-  @ApiPropertyOptional({ minimum: 0, maximum: 100, multipleOf: 0.5 })
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid' }) @ValidateIf(provided) @IsUUID() unitTypeId?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(40) floorLabel?: string | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 100 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(100) bedrooms?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 100, multipleOf: 0.5 })
   @ValidateIf(provided) @IsNumber({ maxDecimalPlaces: 1 }) @Min(0) @Max(100)
   bathrooms?: number | null;
-  @ApiPropertyOptional({ minimum: 0, maximum: 100 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(100) receptionRooms?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 100 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(100) receptionRooms?: number | null;
   @ApiPropertyOptional({ type: FloorAreaInput }) @ValidateIf(provided) @ValidateNested() @Type(() => FloorAreaInput) floorArea?: FloorAreaInput | null;
-  @ApiPropertyOptional({ minimum: 0, maximum: 10000 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(10_000) parkingSpaces?: number | null;
-  @ApiPropertyOptional({ description: 'Code from the "furnishing" picklist' }) @ValidateIf(provided) @Matches(/^[a-z0-9][a-z0-9_]*$/) furnishingCode?: string | null;
-  @ApiPropertyOptional({ description: 'Energy rating where the market uses one (e.g. EPC band)' })
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 10000 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(10_000) parkingSpaces?: number | null;
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Code from the "furnishing" picklist' }) @ValidateIf(provided) @Matches(/^[a-z0-9][a-z0-9_]*$/) furnishingCode?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Energy rating where the market uses one (e.g. EPC band)' })
   @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(10)
   energyRating?: string | null;
   @ApiPropertyOptional({ type: [String], description: 'Codes from the "feature" picklist; replaces the full set' })
@@ -243,8 +243,8 @@ export class UnitAvailabilityBody {
   @IsIn(UNIT_AVAILABILITY)
   availability!: (typeof UNIT_AVAILABILITY)[number];
 
-  @ApiPropertyOptional({ maxLength: 500 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(500) note?: string | null;
-  @ApiPropertyOptional({ format: 'date', description: 'Expected end of the restriction' }) @ValidateIf(provided) @Matches(DATE) until?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 500 }) @ValidateIf(provided) @Transform(trim) @IsString() @MinLength(1) @MaxLength(500) note?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'date', description: 'Expected end of the restriction' }) @ValidateIf(provided) @Matches(DATE) until?: string | null;
 }
 
 export class UnitPageDto {

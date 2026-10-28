@@ -6,11 +6,9 @@ import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react
 
 import styles from './button.module.css';
 
-export type ButtonVariant = 'secondary' | 'primary' | 'danger' | 'quiet';
+import { type ButtonVariant, buttonClass } from './button-class';
 
-export function buttonClass(variant: ButtonVariant = 'secondary', size: 'normal' | 'small' = 'normal'): string {
-  return [styles.button, variant === 'secondary' ? '' : styles[variant], size === 'small' ? styles.small : ''].filter(Boolean).join(' ');
-}
+export { type ButtonVariant, buttonClass };
 
 interface ButtonProps extends Omit<AriaButtonProps, 'className' | 'children'> {
   variant?: ButtonVariant;

@@ -35,6 +35,7 @@ const KEY_FILTERS: FilterSpec = {
   propertyId: { type: 'uuid', multi: true },
   unitId: { type: 'uuid', multi: true },
   holderMembershipId: { type: 'uuid', multi: true },
+  officeId: { type: 'uuid', multi: true },
 };
 
 @ApiTags('Key register')
@@ -58,6 +59,7 @@ export class KeysController {
   @ApiQuery({ name: 'filter[propertyId]', required: false })
   @ApiQuery({ name: 'filter[unitId]', required: false })
   @ApiQuery({ name: 'filter[holderMembershipId]', required: false })
+  @ApiQuery({ name: 'filter[officeId]', required: false, description: "The property's office" })
   @ApiOkResponse({ type: KeySetPageDto })
   async list(@Tenant() ctx: TenantContext, @Query() query: ListQueryInput): Promise<KeySetPageDto> {
     const parsed = parseListQuery<KeySetSortField>(query, KEY_SORT, KEY_FILTERS);

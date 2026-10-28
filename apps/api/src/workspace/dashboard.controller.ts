@@ -70,6 +70,16 @@ function officeFilter(filter: Record<string, unknown> | undefined): string[] | n
   return ids;
 }
 
+function listingTypeFilter(filter: Record<string, unknown> | undefined): string[] | null {
+  const value = filter?.['listingType'];
+  if (value === undefined) return null;
+  const types = typeof value === 'string' ? value.split(',').map((type) => type.trim()) : [];
+  if (types.length === 0 || !types.every((type) => type === 'rent' || type === 'sale')) {
+    throw Problems.validation([{ field: 'filter[listingType]', code: 'invalid', message: 'Use rent, sale or rent,sale.' }]);
+  }
+  return types;
+}
+
 /**
  * Property dashboard panels (Phase 3 06 §3, limited to Phase 4 data; M6 API
  * gap A-5). One endpoint per panel so panels load and fail independently.
@@ -89,10 +99,12 @@ export class PropertyDashboardController {
   @Get('listings')
   @RequirePermission('listing.view')
   @ApiQuery({ name: 'filter[officeId]', required: false })
+  @ApiQuery({ name: 'filter[listingType]', required: false, description: 'rent, sale or rent,sale (default: both)' })
   @ApiOkResponse({ type: ListingAttentionDto, description: `Counts match GET /listings?filter[attention]=${ATTENTION_KINDS.join('|')}` })
   async listingAttention(@Tenant() ctx: TenantContext, @Query('filter') filter: Record<string, unknown> | undefined): Promise<ListingAttentionDto> {
     const offices = officeFilter(filter);
-    const counts = await this.tenantDb.run(ctx, (tx) => this.listings.attentionCounts(tx, ctx, ctx.permissions.get('listing.view')!.scope, offices));
+    const types = listingTypeFilter(filter);
+    const counts = await this.tenantDb.run(ctx, (tx) => this.listings.attentionCounts(tx, ctx, ctx.permissions.get('listing.view')!.scope, offices, types));
     return {
       notReady: counts['not-ready'],
       photos: counts['photos'],

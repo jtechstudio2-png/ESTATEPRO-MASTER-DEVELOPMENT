@@ -39,7 +39,7 @@ export class UpdateNoteBody {
   @ApiPropertyOptional({ enum: NOTE_CATEGORIES }) @ValidateIf(provided) @IsIn(NOTE_CATEGORIES) category?: string;
   @ApiPropertyOptional({ enum: NOTE_VISIBILITIES }) @ValidateIf(provided) @IsIn(NOTE_VISIBILITIES) visibility?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true, description: 'null moves the note to the whole property' })
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'null moves the note to the whole property' })
   @ValidateIf((_object: unknown, value: unknown) => value !== undefined && value !== null)
   @IsUUID()
   unitId?: string | null;

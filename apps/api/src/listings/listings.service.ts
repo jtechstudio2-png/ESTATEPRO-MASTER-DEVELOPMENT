@@ -327,10 +327,17 @@ export class ListingsService {
   }
 
   /** Listings needing attention, counted with the caller's listing scope (property dashboard, A-5). */
-  async attentionCounts(tx: Tx, ctx: TenantContext, scope: PermissionScope, officeIds: string[] | null): Promise<Record<AttentionKind, number>> {
+  async attentionCounts(
+    tx: Tx,
+    ctx: TenantContext,
+    scope: PermissionScope,
+    officeIds: string[] | null,
+    listingTypes: string[] | null = null,
+  ): Promise<Record<AttentionKind, number>> {
     const rules = await this.attentionRulesFor(tx);
     let qb = tx.selectFrom('listings as l').where(listingScopeSql(scope, ctx, 'l')).where('l.archivedAt', 'is', null);
     if (officeIds !== null) qb = qb.where('l.officeId', 'in', officeIds);
+    if (listingTypes !== null) qb = qb.where('l.listingType', 'in', listingTypes);
     const row = await qb
       .select(
         ATTENTION_KINDS.map((kind) => sql<number>`count(*) filter (where ${attentionSql(kind, rules)})::int`.as(kind)),

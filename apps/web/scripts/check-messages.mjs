@@ -56,8 +56,12 @@ for (const language of languages) {
 }
 
 const load = readFileSync(join(root, 'messages/load.ts'), 'utf8');
+const loaded = [...load.slice(load.indexOf('NAMESPACES'), load.indexOf('] as const')).matchAll(/'(\w+)'/g)].map((match) => match[1]);
 for (const file of namespaces) {
-  if (!load.includes(`'${file.replace(/\.json$/, '')}'`)) problems.push(`messages/load.ts does not load ${file}`);
+  if (!loaded.includes(file.replace(/\.json$/, ''))) problems.push(`messages/load.ts does not load ${file}`);
+}
+for (const namespace of loaded) {
+  if (!namespaces.includes(`${namespace}.json`)) problems.push(`messages/load.ts loads ${namespace}, which has no message file`);
 }
 
 const english = messages.en;
@@ -95,13 +99,21 @@ function walk(dir) {
 }
 for (const file of walk(root)) {
   const source = readFileSync(file, 'utf8');
-  const bindings = new Map();
-  for (const match of source.matchAll(/const (\w+) = (?:await )?(?:useTranslations|getTranslations)\('([\w.]+)'\)/g)) bindings.set(match[1], match[2]);
-  for (const [name, namespace] of bindings) {
-    const pattern = new RegExp(`\\b${name}(?:\\.rich|\\.markup)?\\('([\\w.]+)'`, 'g');
-    for (const match of source.matchAll(pattern)) {
-      const key = `${namespace}.${match[1]}`;
-      if (!(key in english)) problems.push(`${file.slice(root.length)}: unknown message ${key}`);
+  // Each binding applies from where it is declared to the next declaration of the same name.
+  const bindings = [...source.matchAll(/const (\w+) = (?:await )?(?:useTranslations|getTranslations)\('([\w.]+)'\)/g)].map((match) => ({
+    name: match[1],
+    namespace: match[2],
+    start: match.index,
+  }));
+  for (const [index, binding] of bindings.entries()) {
+    const next = bindings.slice(index + 1).find((other) => other.name === binding.name);
+    const region = source.slice(binding.start, next ? next.start : source.length);
+    const pattern = new RegExp(`\\b${binding.name}(?:\\.rich|\\.markup|\\.has)?\\('([\\w.]+)'`, 'g');
+    for (const match of region.matchAll(pattern)) {
+      const key = `${binding.namespace}.${match[1]}`;
+      if (!(key in english) && !region.slice(match.index - 1, match.index + binding.name.length + 5).includes('.has(')) {
+        problems.push(`${file.slice(root.length)}: unknown message ${key}`);
+      }
     }
   }
 }
