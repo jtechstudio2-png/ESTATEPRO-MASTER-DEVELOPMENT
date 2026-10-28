@@ -18,8 +18,11 @@ export default defineConfig({
     css: { modules: { classNameStrategy: 'non-scoped' } },
     coverage: {
       provider: 'v8',
-      include: ['src/lib/**/*.ts', 'src/server/**/*.ts', 'src/components/**/*.{ts,tsx}', 'src/middleware.ts', 'src/app/**/route.ts'],
+      // The logic layer. Screens are covered by the Playwright suite (e2e/), one spec per wireframe group.
+      include: ['src/lib/**/*.ts', 'src/server/**/*.ts', 'src/middleware.ts', 'src/app/**/route.ts'],
+      exclude: ['src/lib/api-schema.ts'],
       reporter: ['text', 'json-summary'],
+      thresholds: { statements: 95, branches: 88, functions: 95, lines: 95 },
     },
   },
 });

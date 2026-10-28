@@ -24,7 +24,8 @@ function problem(status: number, code: string, title: string, detail: string): N
  */
 async function proxy(request: Request, context: { params: Promise<{ path: string[] }> }): Promise<NextResponse> {
   const { path } = await context.params;
-  if (path.length === 0 || !path.every((segment) => SEGMENT.test(segment))) {
+  // "." and ".." would step outside /api/v1 once the URL is resolved.
+  if (path.length === 0 || !path.every((segment) => SEGMENT.test(segment) && segment !== '.' && segment !== '..')) {
     return problem(404, 'not-found', 'Not found', 'No endpoint matches this path.');
   }
   const session = await currentSession();
