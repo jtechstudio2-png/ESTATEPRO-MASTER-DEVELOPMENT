@@ -1,0 +1,126 @@
+.region {
+  overflow-x: auto;
+  background: var(--ep-color-surface);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+}
+
+.region:focus-visible {
+  outline: 2px solid var(--ep-color-focus);
+}
+
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--ep-font-size-200);
+}
+
+.caption {
+  text-align: start;
+  padding: var(--ep-space-3) var(--ep-space-4);
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-100);
+}
+
+.table th,
+.table td {
+  padding: var(--ep-space-2) var(--ep-space-3);
+  text-align: start;
+  vertical-align: top;
+  border-block-end: var(--ep-border-width) solid var(--ep-color-border);
+  block-size: var(--ep-row-height);
+}
+
+.table thead th {
+  font-size: var(--ep-font-size-100);
+  color: var(--ep-color-text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--ep-color-surface);
+}
+
+.table tbody th {
+  font-weight: 600;
+  position: sticky;
+  inset-inline-start: 0;
+  background: var(--ep-color-surface);
+}
+
+.end {
+  text-align: end !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.secondary {
+  display: block;
+  font-weight: 400;
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-100);
+}
+
+.cards {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: var(--ep-space-2);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-2);
+  padding: var(--ep-space-3);
+  background: var(--ep-color-surface);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ep-space-2);
+  align-items: flex-start;
+}
+
+.cardFields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ep-space-1) var(--ep-space-2);
+  margin: 0;
+  font-size: var(--ep-font-size-200);
+}
+
+.cardFields dt {
+  color: var(--ep-color-text-secondary);
+}
+
+.cardFields dd {
+  margin: 0;
+}
+
+.sortNote {
+  font-size: var(--ep-font-size-100);
+  color: var(--ep-color-text-secondary);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ep-space-2);
+}
+
+@media (max-width: 767px) {
+  .region {
+    display: none;
+  }
+
+  .cards {
+    display: flex;
+  }
+}

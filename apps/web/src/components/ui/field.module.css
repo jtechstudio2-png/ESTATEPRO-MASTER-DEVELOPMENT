@@ -1,0 +1,168 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-1);
+  min-inline-size: 0;
+}
+
+.label {
+  font-size: var(--ep-font-size-200);
+  font-weight: 600;
+}
+
+.required {
+  font-weight: 400;
+  color: var(--ep-color-text-secondary);
+  margin-inline-start: var(--ep-space-1);
+}
+
+.input,
+.select {
+  min-block-size: var(--ep-control-height);
+  inline-size: 100%;
+  padding-inline: var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border-control);
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface);
+  color: var(--ep-color-text-primary);
+  font: inherit;
+  font-size: var(--ep-font-size-300);
+}
+
+.textarea {
+  min-block-size: 96px;
+  padding-block: var(--ep-space-2);
+  resize: vertical;
+}
+
+.input[data-focused],
+.input:focus-visible,
+.select[data-focus-visible] {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: 1px;
+}
+
+.input[data-invalid],
+.input[aria-invalid='true'],
+.select[data-invalid] {
+  border-color: var(--ep-color-danger);
+  border-width: 2px;
+}
+
+.description {
+  font-size: var(--ep-font-size-100);
+  color: var(--ep-color-text-secondary);
+}
+
+.error {
+  font-size: var(--ep-font-size-200);
+  color: var(--ep-color-danger);
+  font-weight: 600;
+}
+
+.selectButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ep-space-2);
+  text-align: start;
+  cursor: pointer;
+}
+
+.popover {
+  min-inline-size: var(--trigger-width);
+  max-block-size: 320px;
+  overflow: auto;
+  background: var(--ep-color-surface);
+  border: var(--ep-border-width) solid var(--ep-color-border-control);
+  border-radius: var(--ep-radius-panel);
+  box-shadow: var(--ep-shadow-overlay);
+  z-index: var(--ep-z-dialog);
+}
+
+.option {
+  padding: var(--ep-space-2) var(--ep-space-3);
+  cursor: pointer;
+  outline: none;
+}
+
+.option[data-focused] {
+  background: var(--ep-color-surface-subtle);
+}
+
+.option[data-selected] {
+  font-weight: 600;
+}
+
+.option[data-disabled] {
+  color: var(--ep-color-text-secondary);
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ep-space-2);
+  min-block-size: 32px;
+  cursor: pointer;
+}
+
+.box {
+  inline-size: 20px;
+  block-size: 20px;
+  border: 2px solid var(--ep-color-border-control);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  background: var(--ep-color-surface);
+  flex: none;
+}
+
+.checkbox[data-selected] .box {
+  background: var(--ep-color-brand);
+  border-color: var(--ep-color-brand);
+  color: var(--ep-color-on-brand);
+}
+
+.checkbox[data-focus-visible] .box,
+.radio[data-focus-visible] .dot {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: 2px;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-1);
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ep-space-2);
+  min-block-size: 32px;
+  cursor: pointer;
+}
+
+.radio[data-disabled] {
+  cursor: not-allowed;
+  color: var(--ep-color-text-secondary);
+}
+
+.dot {
+  inline-size: 20px;
+  block-size: 20px;
+  border: 2px solid var(--ep-color-border-control);
+  border-radius: 50%;
+  flex: none;
+  background: var(--ep-color-surface);
+}
+
+.radio[data-selected] .dot {
+  border: 6px solid var(--ep-color-brand);
+}
+
+.row {
+  display: grid;
+  gap: var(--ep-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}

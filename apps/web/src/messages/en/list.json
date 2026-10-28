@@ -1,0 +1,23 @@
+{
+  "filters": "Filters",
+  "activeFilters": "Active filters:",
+  "removeFilter": "Remove filter {filter}",
+  "clearAll": "Clear all",
+  "loadMore": "Load more",
+  "loadedMore": "{count, plural, one {Loaded # more row} other {Loaded # more rows}}",
+  "shown": "{count, plural, one {# shown} other {# shown}}",
+  "shownMore": "{count} shown · more available",
+  "sortedBy": "Sorted by: {sort}",
+  "sort": "Sort",
+  "search": "Search",
+  "emptyFiltered": "Nothing matches these filters",
+  "emptyFilteredDetail": "Change or clear the filters to see more.",
+  "moreFilters": "More filters",
+  "any": "Any",
+  "view": "View",
+  "listView": "List",
+  "mapView": "Map",
+  "bulkActions": "Bulk actions",
+  "bulkResult": "{done} done, {failed} not changed",
+  "bulkFailedRow": "{name}: {reason}"
+}

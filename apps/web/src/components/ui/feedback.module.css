@@ -1,0 +1,116 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ep-space-1);
+  padding: 0 var(--ep-space-2);
+  border: var(--ep-border-width) solid currentcolor;
+  border-radius: 999px;
+  font-size: var(--ep-font-size-100);
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  background: var(--ep-color-surface);
+}
+
+.success {
+  color: var(--ep-color-success);
+}
+
+.info {
+  color: var(--ep-color-info);
+}
+
+.warning {
+  color: var(--ep-color-warning);
+}
+
+.danger {
+  color: var(--ep-color-danger);
+}
+
+.neutral {
+  color: var(--ep-color-text-secondary);
+}
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-2);
+  padding: var(--ep-space-3) var(--ep-space-4);
+  border: var(--ep-border-width) solid currentcolor;
+  border-inline-start-width: 4px;
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface);
+}
+
+.notice > * {
+  color: var(--ep-color-text-primary);
+}
+
+.noticeTitle {
+  font-weight: 700;
+}
+
+.reference {
+  font-size: var(--ep-font-size-100);
+  color: var(--ep-color-text-secondary);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ep-space-3);
+  padding: var(--ep-space-6);
+  border: var(--ep-border-width) dashed var(--ep-color-border-control);
+  border-radius: var(--ep-radius-panel);
+  background: var(--ep-color-surface);
+}
+
+.skeleton {
+  display: block;
+  block-size: 1em;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--ep-color-surface-subtle), var(--ep-color-border), var(--ep-color-surface-subtle));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.progress {
+  block-size: 3px;
+  inline-size: 100%;
+  background: var(--ep-color-surface-subtle);
+  overflow: hidden;
+}
+
+.progress::after {
+  content: '';
+  display: block;
+  block-size: 100%;
+  inline-size: 30%;
+  background: var(--ep-color-info);
+  animation: slide 1s linear infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .progress::after {
+    animation: none;
+  }
+}

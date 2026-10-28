@@ -1,0 +1,90 @@
+/*
+ * EstatePro design tokens (Phase 3 01 §6, M6 verification report §16).
+ * Contrast of every pair is measured in docs/phase-3-ui-ux/01 and checked by
+ * the end-to-end accessibility tests (axe). Layout uses logical properties only.
+ */
+:root {
+  --ep-color-canvas: #f5f7fa;
+  --ep-color-surface: #ffffff;
+  --ep-color-surface-subtle: #eef2f6;
+  --ep-color-text-primary: #17212f;
+  --ep-color-text-secondary: #526173;
+  --ep-color-border: #d7dee7;
+  --ep-color-border-control: #7b8899;
+  --ep-color-brand: #173d63;
+  --ep-color-brand-hover: #102f4d;
+  --ep-color-on-brand: #ffffff;
+  --ep-color-focus: #0b6e99;
+  --ep-color-success: #176b45;
+  --ep-color-warning: #8a5200;
+  --ep-color-danger: #b42318;
+  --ep-color-on-danger: #ffffff;
+  --ep-color-danger-hover: #8f1c13;
+  --ep-color-info: #175cd3;
+
+  /* M6 additions */
+  --ep-color-overlay-scrim: rgb(23 33 47 / 60%);
+  --ep-color-media-placeholder: #e3e8ef;
+  --ep-color-dropzone-border: var(--ep-color-border-control);
+  --ep-color-dropzone-active: var(--ep-color-info);
+  --ep-color-map-cluster: var(--ep-color-brand);
+  --ep-color-map-selection: var(--ep-color-focus);
+  --ep-color-map-area-fill: rgb(23 92 211 / 12%);
+  --ep-color-audience-internal: var(--ep-color-text-secondary);
+  --ep-color-audience-landlord: var(--ep-color-info);
+  --ep-color-audience-tenant: var(--ep-color-warning);
+
+  --ep-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+  --ep-font-family-arabic: 'Noto Sans Arabic', 'Segoe UI', Tahoma, system-ui, sans-serif;
+  --ep-font-size-100: 12px;
+  --ep-font-size-200: 14px;
+  --ep-font-size-300: 16px;
+  --ep-font-size-400: 18px;
+  --ep-font-size-500: 20px;
+  --ep-font-size-600: 24px;
+  --ep-line-height-tight: 1.25;
+  --ep-line-height-body: 1.5;
+  --ep-control-height: 40px;
+  --ep-row-height: 48px;
+  --ep-motion-duration: 120ms;
+  --ep-motion-map: 200ms;
+
+  --ep-space-1: 4px;
+  --ep-space-2: 8px;
+  --ep-space-3: 12px;
+  --ep-space-4: 16px;
+  --ep-space-5: 20px;
+  --ep-space-6: 24px;
+  --ep-space-8: 32px;
+  --ep-space-map-control: 8px;
+  --ep-radius-control: 6px;
+  --ep-radius-panel: 8px;
+  --ep-border-width: 1px;
+  --ep-shadow-overlay: 0 8px 24px rgb(23 33 47 / 18%);
+
+  --ep-size-thumb-sm: 96px;
+  --ep-size-thumb-md: 160px;
+  --ep-size-thumb-lg: 320px;
+  --ep-ratio-media: 4 / 3;
+
+  --ep-z-map-controls: 10;
+  --ep-z-sticky: 20;
+  --ep-z-drawer: 30;
+  --ep-z-dialog: 40;
+  --ep-z-toast: 50;
+
+  --ep-sidebar-width: 240px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --ep-control-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ep-motion-duration: 0ms;
+    --ep-motion-map: 0ms;
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "filters": "عوامل التصفية",
+  "activeFilters": "عوامل التصفية النشطة:",
+  "removeFilter": "إزالة عامل التصفية {filter}",
+  "clearAll": "مسح الكل",
+  "loadMore": "تحميل المزيد",
+  "loadedMore": "{count, plural, zero {لم يتم تحميل صفوف} one {تم تحميل صف واحد إضافي} two {تم تحميل صفين إضافيين} few {تم تحميل # صفوف إضافية} many {تم تحميل # صفًا إضافيًا} other {تم تحميل # صف إضافي}}",
+  "shown": "{count, plural, zero {لا يوجد شيء معروض} one {عنصر واحد معروض} two {عنصران معروضان} few {# عناصر معروضة} many {# عنصرًا معروضًا} other {# عنصر معروض}}",
+  "shownMore": "{count} معروض · يوجد المزيد",
+  "sortedBy": "الترتيب حسب: {sort}",
+  "sort": "الترتيب",
+  "search": "بحث",
+  "emptyFiltered": "لا شيء يطابق عوامل التصفية هذه",
+  "emptyFilteredDetail": "غيّر عوامل التصفية أو امسحها لرؤية المزيد.",
+  "moreFilters": "مزيد من عوامل التصفية",
+  "any": "الكل",
+  "view": "العرض",
+  "listView": "قائمة",
+  "mapView": "خريطة",
+  "bulkActions": "إجراءات جماعية",
+  "bulkResult": "تم تنفيذ {done}، ولم يتغير {failed}",
+  "bulkFailedRow": "{name}: {reason}"
+}

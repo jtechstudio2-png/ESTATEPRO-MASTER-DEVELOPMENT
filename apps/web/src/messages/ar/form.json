@@ -1,0 +1,5 @@
+{
+  "required": "مطلوب",
+  "errorSummary": "توجد مشكلة",
+  "chars": "{count} من {max} حرفًا"
+}

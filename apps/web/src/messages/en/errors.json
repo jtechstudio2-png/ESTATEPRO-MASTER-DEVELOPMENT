@@ -1,0 +1,22 @@
+{
+  "serverTitle": "Something went wrong on our side",
+  "serverDetail": "Your change was not saved. Try again in a moment.",
+  "offlineTitle": "You appear to be offline",
+  "offlineDetail": "Check your connection and try again. Nothing was saved.",
+  "sessionTitle": "Your session has ended",
+  "sessionDetail": "Sign in again to continue.",
+  "forbiddenTitle": "You do not have access",
+  "forbiddenDetail": "Your role does not allow this. Ask a company administrator if you need it.",
+  "mfaTitle": "Confirm it is you",
+  "mfaAction": "Sign in again to continue",
+  "notFoundTitle": "Not found",
+  "notFoundDetail": "This record does not exist or you do not have access to it.",
+  "rateTitle": "Too many requests",
+  "rateDetail": "Wait {seconds} seconds and try again.",
+  "searchTimeoutTitle": "This search took too long",
+  "searchTimeoutDetail": "Narrow the area or add a filter, then try again.",
+  "retry": "Try again",
+  "reference": "Reference for support: {id}",
+  "fixFields": "{count, plural, one {Fix # field to continue.} other {Fix # fields to continue.}}",
+  "home": "Go to the dashboard"
+}

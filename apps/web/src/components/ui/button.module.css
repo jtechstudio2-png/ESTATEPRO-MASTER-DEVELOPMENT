@@ -1,0 +1,88 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ep-space-2);
+  min-block-size: var(--ep-control-height);
+  min-inline-size: 44px;
+  padding-inline: var(--ep-space-4);
+  border: var(--ep-border-width) solid var(--ep-color-border-control);
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface);
+  color: var(--ep-color-text-primary);
+  font: inherit;
+  font-size: var(--ep-font-size-200);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--ep-motion-duration);
+  white-space: nowrap;
+}
+
+.button[data-hovered] {
+  background: var(--ep-color-surface-subtle);
+}
+
+.button[data-focus-visible] {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: 2px;
+}
+
+.button[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.primary {
+  background: var(--ep-color-brand);
+  border-color: var(--ep-color-brand);
+  color: var(--ep-color-on-brand);
+}
+
+.primary[data-hovered] {
+  background: var(--ep-color-brand-hover);
+}
+
+.danger {
+  background: var(--ep-color-danger);
+  border-color: var(--ep-color-danger);
+  color: var(--ep-color-on-danger);
+}
+
+.danger[data-hovered] {
+  background: var(--ep-color-danger-hover);
+}
+
+.quiet {
+  border-color: transparent;
+  background: transparent;
+}
+
+.small {
+  min-block-size: 32px;
+  padding-inline: var(--ep-space-3);
+}
+
+.busy {
+  inline-size: 14px;
+  block-size: 14px;
+  border: 2px solid currentcolor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .busy {
+    animation: none;
+    border-inline-end-color: currentcolor;
+    opacity: 0.6;
+  }
+}
