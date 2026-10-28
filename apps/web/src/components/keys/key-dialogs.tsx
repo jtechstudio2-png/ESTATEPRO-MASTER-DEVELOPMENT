@@ -433,7 +433,7 @@ function KeyHistoryDrawer({ keySet, onOpenChange }: { keySet: KeySetDto; onOpenC
       ) : list.isError ? (
         <ErrorNotice error={list.error} onRetry={() => void list.refetch()} />
       ) : list.rows.length === 0 ? (
-        <EmptyState title={t('noMovements')} />
+        <EmptyState headingLevel={3} title={t('noMovements')} />
       ) : (
         <>
           <ol className={styles.timeline}>

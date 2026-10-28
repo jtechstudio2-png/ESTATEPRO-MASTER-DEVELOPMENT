@@ -30,7 +30,7 @@ export function blockerHref(listing: Pick<ListingDto, 'id' | 'property' | 'unit'
     case 'photos':
       return `/listings/${listing.id}/gallery`;
     case 'floor-plan':
-      return `/properties/${listing.property.id}/media?type=floor_plan`;
+      return `/properties/${listing.property.id}/media?type=plans`;
     case 'expired':
     case 'missing':
       return `/listings/${listing.id}/edit`;

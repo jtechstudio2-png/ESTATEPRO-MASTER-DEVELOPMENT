@@ -100,10 +100,11 @@ export function ErrorNotice({ error, onRetry }: { error: unknown; onRetry?: () =
   );
 }
 
-export function EmptyState({ title, children, action }: { title: ReactNode; children?: ReactNode; action?: ReactNode }) {
+export function EmptyState({ title, children, action, headingLevel = 2 }: { title: ReactNode; children?: ReactNode; action?: ReactNode; headingLevel?: 2 | 3 | 4 }) {
+  const Heading = `h${headingLevel}` as const;
   return (
     <div className={styles.empty}>
-      <h2>{title}</h2>
+      <Heading>{title}</Heading>
       {children ? <p>{children}</p> : null}
       {action}
     </div>

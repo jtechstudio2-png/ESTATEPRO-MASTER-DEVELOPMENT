@@ -83,7 +83,7 @@ export function ActivityTab({ propertyId }: { propertyId: string }) {
       ) : result.isError ? (
         <ErrorNotice error={result.error} onRetry={() => void result.refetch()} />
       ) : result.rows.length === 0 ? (
-        <EmptyState title={t('empty')} />
+        <EmptyState headingLevel={3} title={t('empty')} />
       ) : (
         <>
           <ol className={styles.feed} aria-label={t('list')}>

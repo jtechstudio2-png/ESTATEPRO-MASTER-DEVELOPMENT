@@ -136,7 +136,7 @@ export function UnitsTab({ propertyId }: { propertyId: string }) {
       ) : result.isError ? (
         <ErrorNotice error={result.error} onRetry={() => void result.refetch()} />
       ) : result.rows.length === 0 ? (
-        <EmptyState title={chips.length > 0 ? t('emptyFiltered') : t('empty')}>{chips.length > 0 ? list('emptyFilteredDetail') : t('emptyDetail')}</EmptyState>
+        <EmptyState headingLevel={3} title={chips.length > 0 ? t('emptyFiltered') : t('empty')}>{chips.length > 0 ? list('emptyFilteredDetail') : t('emptyDetail')}</EmptyState>
       ) : (
         <DataTable
           caption={t('list')}

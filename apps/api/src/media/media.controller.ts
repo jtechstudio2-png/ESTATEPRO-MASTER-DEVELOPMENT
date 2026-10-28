@@ -15,6 +15,7 @@ import {
   LegalHoldBody,
   ListingGalleryDto,
   ListingMediaBody,
+  MediaDetailDto,
   MediaDto,
   MediaPageDto,
   ReasonBody,
@@ -114,8 +115,8 @@ export class MediaController {
 
   @Get('media/:mediaId')
   @RequirePermission('property.view')
-  @ApiOkResponse({ type: MediaDto })
-  async get(@Tenant() ctx: TenantContext, @Param('mediaId', UUID_PARAM) id: string, @Res({ passthrough: true }) res: Response): Promise<MediaDto> {
+  @ApiOkResponse({ type: MediaDetailDto })
+  async get(@Tenant() ctx: TenantContext, @Param('mediaId', UUID_PARAM) id: string, @Res({ passthrough: true }) res: Response): Promise<MediaDetailDto> {
     const media = await this.tenantDb.run(ctx, (tx) => this.media.get(tx, ctx, id));
     setVersionEtag(res, media.version);
     return media;

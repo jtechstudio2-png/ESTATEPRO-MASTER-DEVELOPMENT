@@ -434,6 +434,10 @@ describe('media gallery, uploads and worker (Phase 4 M4)', () => {
       const media = await processed((await upload(await photoWithGps(800, 600))).id);
       const gallery = await as('owner').put(`/api/v1/listings/${listing.id}/media`, { items: [{ mediaId: media.id }] }, listing.version).expect(200);
       expect(gallery.body.data[0]).toMatchObject({ id: media.id, isCover: true, position: 0 });
+      // G-3: the listings that show the item, and who uploaded it.
+      const detail = await as('owner').get(`/api/v1/media/${media.id}`).expect(200);
+      expect(detail.body.usedIn).toEqual([{ listingId: listing.id, reference: listing.reference, isCover: true }]);
+      expect(detail.body.uploadedByName).toEqual(expect.any(String));
 
       const path = `/api/v1/media/${media.id}`;
       await as('owner').post(`${path}/purge`, { reason: 'Owner asked' }).expect(422);

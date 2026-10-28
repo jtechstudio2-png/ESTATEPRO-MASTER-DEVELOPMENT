@@ -2238,6 +2238,57 @@ export interface components {
             caption?: string | null;
             altText?: string | null;
         };
+        MediaUsageDto: {
+            /** Format: uuid */
+            listingId: string;
+            reference: string;
+            isCover: boolean;
+        };
+        MediaDetailDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            propertyId: string;
+            /** Format: uuid */
+            unitId: string | null;
+            /** @enum {string} */
+            mediaType: "photo" | "video" | "floor_plan" | "virtual_tour" | "site_plan" | "brochure";
+            /** @enum {string} */
+            processingStatus: "pending" | "ready" | "failed" | "rejected";
+            rejectionReason: string | null;
+            originalFilename: string | null;
+            mimeType: string | null;
+            width: number | null;
+            height: number | null;
+            pageCount: number | null;
+            /** @description Bytes stored (master and sizes) */
+            storedBytes: number | null;
+            /** @enum {string|null} */
+            externalProvider: "youtube" | "vimeo" | "matterport" | null;
+            caption: string | null;
+            altText: string | null;
+            roomLabel: string | null;
+            floorLabel: string | null;
+            sortOrder: number;
+            /** @description Signed URLs, valid for a short time */
+            urls: components["schemas"]["MediaUrlsDto"];
+            legalHold: boolean;
+            /** Format: date-time */
+            archivedAt: string | null;
+            /**
+             * Format: date-time
+             * @description Permanent deletion date for archived media
+             */
+            purgeAfter: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+            /** @description Listings showing this item that the caller may view (G-3) */
+            usedIn: components["schemas"]["MediaUsageDto"][];
+            uploadedByName: string | null;
+        };
         UpdateMediaBody: {
             caption?: string | null;
             /** @description Text alternative (WCAG 2.2 AA) */
@@ -2814,6 +2865,8 @@ export type MediaUrlsDto = components['schemas']['MediaUrlsDto'];
 export type MediaDto = components['schemas']['MediaDto'];
 export type MediaPageDto = components['schemas']['MediaPageDto'];
 export type CreateLinkBody = components['schemas']['CreateLinkBody'];
+export type MediaUsageDto = components['schemas']['MediaUsageDto'];
+export type MediaDetailDto = components['schemas']['MediaDetailDto'];
 export type UpdateMediaBody = components['schemas']['UpdateMediaBody'];
 export type ReasonBody = components['schemas']['ReasonBody'];
 export type LegalHoldBody = components['schemas']['LegalHoldBody'];
@@ -4281,7 +4334,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MediaDto"];
+                    "application/json": components["schemas"]["MediaDetailDto"];
                 };
             };
         };

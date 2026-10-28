@@ -181,7 +181,7 @@ export function ListingHistoryTab({ id }: { id: string }) {
       ) : history.isError ? (
         <ErrorNotice error={history.error} onRetry={() => void history.refetch()} />
       ) : history.rows.length === 0 ? (
-        <EmptyState title={h('empty')} />
+        <EmptyState headingLevel={3} title={h('empty')} />
       ) : (
         <>
           <ol className={styles.history} aria-label={h('list')}>

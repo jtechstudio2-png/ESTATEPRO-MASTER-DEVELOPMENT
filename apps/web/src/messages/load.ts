@@ -17,6 +17,7 @@ export const NAMESPACES = [
   'location',
   'units',
   'listings',
+  'media',
 ] as const;
 
 export async function loadMessages(language: UiLanguage): Promise<Record<string, unknown>> {

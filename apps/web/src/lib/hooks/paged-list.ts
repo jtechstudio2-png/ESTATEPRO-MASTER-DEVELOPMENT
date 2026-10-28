@@ -16,7 +16,7 @@ export interface Page<T> {
  * A cursor-paginated API list with "Load more" (UI checklist §3). New pages
  * are announced politely; a filter change (new query) starts from page one.
  */
-export function usePagedList<T>(path: string, query: URLSearchParams, options: { limit?: number; enabled?: boolean; noun?: string } = {}) {
+export function usePagedList<T>(path: string, query: URLSearchParams, options: { limit?: number; enabled?: boolean; noun?: string; refetchInterval?: (rows: T[]) => number | false } = {}) {
   const t = useTranslations('list');
   const announce = useAnnounce();
   const base = new URLSearchParams(query);
@@ -32,6 +32,9 @@ export function usePagedList<T>(path: string, query: URLSearchParams, options: {
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.page.nextCursor,
     enabled: options.enabled ?? true,
+    ...(options.refetchInterval
+      ? { refetchInterval: (query: { state: { data?: { pages: Array<Page<T>> } } }) => options.refetchInterval!(query.state.data?.pages.flatMap((page) => page.data) ?? []) }
+      : {}),
   });
   const rows = result.data?.pages.flatMap((page) => page.data) ?? [];
   const pageCount = result.data?.pages.length ?? 0;

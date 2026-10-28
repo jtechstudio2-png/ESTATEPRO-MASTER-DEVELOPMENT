@@ -130,6 +130,17 @@ export class MediaPageDto {
   @ApiProperty({ type: PageDto }) page!: PageDto;
 }
 
+export class MediaUsageDto {
+  @ApiProperty({ format: 'uuid' }) listingId!: string;
+  @ApiProperty() reference!: string;
+  @ApiProperty() isCover!: boolean;
+}
+
+export class MediaDetailDto extends MediaDto {
+  @ApiProperty({ type: [MediaUsageDto], description: 'Listings showing this item that the caller may view (G-3)' }) usedIn!: MediaUsageDto[];
+  @ApiProperty({ type: String, nullable: true }) uploadedByName!: string | null;
+}
+
 export class ListingMediaDto extends MediaDto {
   @ApiProperty() position!: number;
   @ApiProperty() isCover!: boolean;

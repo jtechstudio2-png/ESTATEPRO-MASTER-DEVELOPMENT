@@ -20,6 +20,7 @@ import type {
   LegalHoldBody,
   ListingGalleryDto,
   ListingMediaBody,
+  MediaDetailDto,
   MediaDto,
   MediaUrlsDto,
   StorageUsageDto,
@@ -228,9 +229,28 @@ export class MediaService {
     return { data: await Promise.all(page.data.map((row) => this.toDto(row))), page: page.page };
   }
 
-  async get(tx: Tx, ctx: TenantContext, id: string): Promise<MediaDto> {
+  async get(tx: Tx, ctx: TenantContext, id: string): Promise<MediaDetailDto> {
     const row = await this.loadVisibleMedia(tx, ctx, id, 'property.view');
-    return this.toDto(row);
+    const usage = await tx
+      .selectFrom('listingMedia as lm')
+      .innerJoin('listings as l', 'l.id', 'lm.listingId')
+      .select(['l.id', 'l.reference', 'l.officeId', 'l.agentMembershipId', 'lm.isCover'])
+      .where('lm.mediaId', '=', id)
+      .orderBy('l.reference')
+      .execute();
+    const uploader = row.uploadedBy
+      ? await tx
+          .selectFrom('companyMemberships as m')
+          .innerJoin('users as u', 'u.id', 'm.userId')
+          .select('u.displayName')
+          .where('m.id', '=', row.uploadedBy)
+          .executeTakeFirst()
+      : undefined;
+    return {
+      ...(await this.toDto(row)),
+      usedIn: usage.filter((listing) => hasListingPermission(ctx, listing, 'listing.view')).map((listing) => ({ listingId: listing.id, reference: listing.reference, isCover: listing.isCover })),
+      uploadedByName: uploader?.displayName ?? null,
+    };
   }
 
   // --------------------------------------------------------------------------- edits
