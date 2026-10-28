@@ -34,6 +34,7 @@ import type {
   ListingDto,
   ListingListItemDto,
   ListingMapDto,
+  ListingReadinessDto,
   ListingStatus,
   ListingSummaryDto,
   PriceHistoryEntryDto,
@@ -134,7 +135,8 @@ export class ListingsService {
     await this.prepareLocationSearch(tx, location);
     const distance = location.near ? sql.ref<string>('mu.distance') : null;
     const sortExpression = query.sort.field === 'distance' ? distance! : sql.ref(`l.${query.sort.field}`);
-    let qb = this.filteredQuery(tx, ctx, scope, query.filters, query.q, location).select([
+    const rules = await this.attentionRules(tx, query.filters);
+    let qb = this.filteredQuery(tx, ctx, scope, query.filters, query.q, location, rules).select([
       'l.id',
       sortValueSql(sortExpression, query.sort.kind).as('cursorValue'),
       (distance ?? sql<string | null>`null`).as('distanceMeters'),
@@ -163,7 +165,7 @@ export class ListingsService {
   async map(tx: Tx, ctx: TenantContext, scope: PermissionScope, filters: ParsedFilters, q: string | null, location: LocationFilter): Promise<ListingMapDto> {
     const bbox = requireViewport(location);
     await this.prepareLocationSearch(tx, location);
-    const filtered = this.filteredQuery(tx, ctx, scope, filters, q, location);
+    const filtered = this.filteredQuery(tx, ctx, scope, filters, q, location, await this.attentionRules(tx, filters));
     const points = filtered
       .innerJoin('units as u', 'u.id', 'l.unitId')
       .innerJoin('currencies as cur', 'cur.code', 'l.currencyCode')
@@ -217,7 +219,15 @@ export class ListingsService {
    * Scope and filters on listings alone (the list chooses its page of ids here
    * before joining details). Location filters match through the unit's property address.
    */
-  private filteredQuery(tx: Tx, ctx: TenantContext, scope: PermissionScope, filters: ParsedFilters, q: string | null, location: LocationFilter) {
+  private filteredQuery(
+    tx: Tx,
+    ctx: TenantContext,
+    scope: PermissionScope,
+    filters: ParsedFilters,
+    q: string | null,
+    location: LocationFilter,
+    rules: AttentionRules | null,
+  ) {
     let qb = hasLocationFilter(location)
       ? // Joins "mu" (its columns are read with sql.ref); typed as the plain listings query.
         (tx
@@ -288,7 +298,54 @@ export class ListingsService {
           .union(eb.selectFrom('listingTranslations as lt').select('lt.listingId as id').where('lt.title', 'ilike', contains)),
       );
     }
+    const attention = filters['attention'];
+    if (Array.isArray(attention) && rules !== null) {
+      qb = qb.where(sql<boolean>`(${sql.join(attention.map((kind) => attentionSql(kind as AttentionKind, rules)), sql` or `)})`);
+    }
     return qb;
+  }
+
+  /**
+   * Whether a listing can be published now, with the same blockers publishing
+   * would report (M6 API gap A-10). Closed listings report "closed".
+   */
+  async readiness(tx: Tx, ctx: TenantContext, id: string): Promise<ListingReadinessDto> {
+    await this.assertVisible(tx, ctx, id);
+    const listing = await tx.selectFrom('listings').selectAll().where('id', '=', id).executeTakeFirstOrThrow();
+    if (listing.archivedAt !== null) {
+      return { canPublish: false, isPublished: listing.isPublished, blockers: [{ field: 'archivedAt', code: 'archived', message: 'Archived listings cannot be published.' }] };
+    }
+    if (listing.status !== 'draft' && !isLive(listing.status)) {
+      return {
+        canPublish: false,
+        isPublished: false,
+        blockers: [{ field: 'status', code: 'closed', message: 'Closed listings cannot be published. Relist the unit to market it again.' }],
+      };
+    }
+    const blockers = await this.publishBlockers(tx, listing);
+    return { canPublish: !listing.isPublished && blockers.length === 0, isPublished: listing.isPublished, blockers };
+  }
+
+  /** Listings needing attention, counted with the caller's listing scope (property dashboard, A-5). */
+  async attentionCounts(tx: Tx, ctx: TenantContext, scope: PermissionScope, officeIds: string[] | null): Promise<Record<AttentionKind, number>> {
+    const rules = await this.attentionRulesFor(tx);
+    let qb = tx.selectFrom('listings as l').where(listingScopeSql(scope, ctx, 'l')).where('l.archivedAt', 'is', null);
+    if (officeIds !== null) qb = qb.where('l.officeId', 'in', officeIds);
+    const row = await qb
+      .select(
+        ATTENTION_KINDS.map((kind) => sql<number>`count(*) filter (where ${attentionSql(kind, rules)})::int`.as(kind)),
+      )
+      .executeTakeFirstOrThrow();
+    return row;
+  }
+
+  private async attentionRules(tx: Tx, filters: ParsedFilters): Promise<AttentionRules | null> {
+    return Array.isArray(filters['attention']) ? this.attentionRulesFor(tx) : null;
+  }
+
+  private async attentionRulesFor(tx: Tx): Promise<AttentionRules> {
+    const settings = await this.settings.get(tx);
+    return { minPhotos: settings.minPhotosToPublish, requireFloorPlan: settings.requireFloorPlanToPublish };
   }
 
   /** Property and unit sub-lists: the parent must be visible to the caller. */
@@ -1384,6 +1441,57 @@ interface SummaryRow {
   listedAt: Date | null;
   archivedAt: Date | null;
   updatedAt: Date;
+}
+
+export const ATTENTION_KINDS = ['not-ready', 'photos', 'floor-plan', 'mandate-expiring', 'cover-alt', 'price-stale'] as const;
+export type AttentionKind = (typeof ATTENTION_KINDS)[number];
+interface AttentionRules {
+  minPhotos: number | null;
+  requireFloorPlan: boolean;
+}
+const PRICE_STALE_DAYS = 60;
+const MANDATE_WARNING_DAYS = 14;
+
+/**
+ * "Needs attention" conditions on alias l, shared by filter[attention] on the
+ * listing list and the property dashboard counts, so every count links to
+ * exactly the listings it counted.
+ *   not-ready         drafts that fail a media, mandate or unit check of publishing
+ *                     (company document and seller-identity rules are shown per listing)
+ *   photos            open listings with fewer photos than the company minimum
+ *   floor-plan        open listings without a floor plan when one is required
+ *   mandate-expiring  live listings whose mandate ends within 14 days (property's date)
+ *   cover-alt         open listings whose cover photo has no alt text
+ *   price-stale       available listings whose price has not changed for 60 days
+ */
+function attentionSql(kind: AttentionKind, rules: AttentionRules) {
+  const open = sql`l.status in ('draft', 'available', 'reserved', 'under_contract')`;
+  const media = (type: string) => sql`(select count(*) from listing_media lm join property_media m on m.id = lm.media_id
+      where lm.listing_id = l.id and m.archived_at is null and m.media_type = ${type})`;
+  const photosShort = rules.minPhotos === null ? sql`false` : sql`${media('photo')} < ${rules.minPhotos}`;
+  const planMissing = rules.requireFloorPlan ? sql`${media('floor_plan')} = 0` : sql`false`;
+  const propertyToday = sql`(select (now() at time zone p.timezone)::date from units u join properties p on p.id = u.property_id where u.id = l.unit_id)`;
+  switch (kind) {
+    case 'photos':
+      return sql<boolean>`(${open} and ${photosShort})`;
+    case 'floor-plan':
+      return sql<boolean>`(${open} and ${planMissing})`;
+    case 'mandate-expiring':
+      return sql<boolean>`(l.status in ('available', 'reserved', 'under_contract') and l.mandate_expires_on is not null
+        and l.mandate_expires_on between ${propertyToday} and ${propertyToday} + ${MANDATE_WARNING_DAYS}::int)`;
+    case 'cover-alt':
+      return sql<boolean>`(${open} and exists (select 1 from listing_media lm join property_media m on m.id = lm.media_id
+        where lm.listing_id = l.id and lm.is_cover and coalesce(btrim(m.alt_text), '') = ''))`;
+    case 'price-stale':
+      return sql<boolean>`(l.status = 'available' and coalesce(
+        (select max(h.changed_at) from listing_price_history h where h.listing_id = l.id), l.listed_at, l.created_at)
+        < now() - make_interval(days => ${PRICE_STALE_DAYS}))`;
+    case 'not-ready':
+      return sql<boolean>`(l.status = 'draft' and (${photosShort} or ${planMissing}
+        or (l.mandate_expires_on is not null and l.mandate_expires_on < ${propertyToday})
+        or exists (select 1 from units u join properties p on p.id = u.property_id
+                    where u.id = l.unit_id and (u.archived_at is not null or p.archived_at is not null or u.availability = 'unavailable'))))`;
+  }
 }
 
 function listingsFrom(tx: Tx) {

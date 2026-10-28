@@ -23,6 +23,7 @@ import {
   ListingDto,
   ListingMapDto,
   ListingPageDto,
+  ListingReadinessDto,
   ListingSettingsBody,
   ListingSettingsDto,
   ListingStatusBody,
@@ -33,7 +34,7 @@ import {
   UpdateListingBody,
 } from './dto.js';
 import { ListingSettingsService } from './listing-settings.service.js';
-import { type ListingSortField, ListingsService } from './listings.service.js';
+import { ATTENTION_KINDS, type ListingSortField, ListingsService } from './listings.service.js';
 
 const UUID_PARAM = new ParseUUIDPipe({ exceptionFactory: () => Problems.notFound() });
 const LOCALE_PARAM = /^[a-z]{2,3}(-[A-Z]{2})?$/;
@@ -58,6 +59,7 @@ const LIST_FILTERS: FilterSpec = {
   bedrooms: { type: 'range', pattern: /^\d{1,3}$/ },
   availableFrom: { type: 'range', pattern: DATE_RANGE },
   mandateExpiresOn: { type: 'range', pattern: DATE_RANGE },
+  attention: { type: 'enum', values: ATTENTION_KINDS, multi: true },
   ...LOCATION_FILTERS,
 };
 
@@ -107,6 +109,7 @@ export class ListingsController {
   @ApiQuery({ name: 'filter[bedrooms][lte]', required: false })
   @ApiQuery({ name: 'filter[availableFrom][lte]', required: false })
   @ApiQuery({ name: 'filter[mandateExpiresOn][lte]', required: false })
+  @ApiQuery({ name: 'filter[attention]', required: false, description: `Needs attention: ${ATTENTION_KINDS.join(', ')}` })
   @LocationQueryDocs()
   @ApiOkResponse({ type: ListingPageDto })
   async list(@Tenant() ctx: TenantContext, @Scope() scope: PermissionScope, @Query() query: ListQueryInput): Promise<ListingPageDto> {
@@ -213,6 +216,13 @@ export class ListingsController {
   ): Promise<ListingDto> {
     const expected = requireIfMatch(ifMatch);
     return this.respond(res, await this.tenantDb.run(ctx, (tx) => this.listings.update(tx, ctx, id, expected, body)));
+  }
+
+  @Get('listings/:listingId/readiness')
+  @RequirePermission('listing.view')
+  @ApiOkResponse({ type: ListingReadinessDto })
+  async readiness(@Tenant() ctx: TenantContext, @Param('listingId', UUID_PARAM) id: string): Promise<ListingReadinessDto> {
+    return this.tenantDb.run(ctx, (tx) => this.listings.readiness(tx, ctx, id));
   }
 
   @Post('listings/:listingId/publish')

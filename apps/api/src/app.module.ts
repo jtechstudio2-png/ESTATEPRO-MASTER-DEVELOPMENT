@@ -17,6 +17,7 @@ import { KeysModule } from './keys/keys.module.js';
 import { LocationModule } from './location/location.module.js';
 import { MediaModule } from './media/media.module.js';
 import { NotesModule } from './notes/notes.module.js';
+import { WorkspaceModule } from './workspace/workspace.module.js';
 import { PropertiesModule } from './properties/properties.module.js';
 
 @Module({
@@ -44,6 +45,7 @@ import { PropertiesModule } from './properties/properties.module.js';
     LocationModule,
     NotesModule,
     KeysModule,
+    WorkspaceModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],

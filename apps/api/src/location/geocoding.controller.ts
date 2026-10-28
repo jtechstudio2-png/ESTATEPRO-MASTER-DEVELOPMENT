@@ -42,7 +42,7 @@ export class GeocodingController {
    * sent with the property's address.
    */
   @Get('geocoding/suggestions')
-  @RequirePermission('property.update')
+  @RequirePermission('property.view')
   @ApiQuery({ name: 'q', required: true, description: 'Address text, 3–200 characters' })
   @ApiQuery({ name: 'countryCode', required: true, description: 'ISO 3166-1 alpha-2' })
   @ApiQuery({ name: 'near', required: false, description: 'latitude,longitude to rank nearby results first' })
@@ -55,6 +55,10 @@ export class GeocodingController {
     @Query('near') near: unknown,
     @Query('language') language: unknown,
   ): Promise<GeocodeSuggestionListDto> {
+    // Anyone who may add or edit a property may look up its location (M6 U-10).
+    if (!ctx.permissions.has('property.create') && !ctx.permissions.has('property.update')) {
+      throw Problems.forbidden('Address suggestions are for people who add or edit properties.');
+    }
     const errors: FieldError[] = [];
     const text = typeof q === 'string' ? q.trim() : '';
     if (text.length < 3 || text.length > 200) errors.push({ field: 'q', code: 'length', message: 'Search text must be 3 to 200 characters.' });

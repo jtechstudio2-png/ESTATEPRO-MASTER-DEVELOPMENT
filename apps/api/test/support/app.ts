@@ -30,7 +30,7 @@ export async function createTestApp(
 
   const config = loadConfig({
     NODE_ENV: 'test',
-    LOG_LEVEL: 'silent',
+    LOG_LEVEL: process.env['TEST_LOG_LEVEL'] ?? 'silent',
     DATABASE_URL: urls.app,
     AUTH_DATABASE_URL: urls.auth,
     DATABASE_POOL_MAX: '4',

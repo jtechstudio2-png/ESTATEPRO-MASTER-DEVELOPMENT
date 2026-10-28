@@ -28,7 +28,17 @@ import type { Tx } from '../database/database.module.js';
 import type { Addresses, DB } from '../database/schema.js';
 import { type GeocodeSource, type NormalisedAddress, toAddressDto, validateAddress } from '../reference/address.js';
 import { checkPicklistCode } from '../reference/picklists.js';
-import type { CreatePropertyBody, LandAreaInput, PropertyDto, PropertyMapDto, PropertySummaryDto, UpdatePropertyBody } from './dto.js';
+import { listingScopeSql } from '../listings/listing-access.js';
+import type {
+  CreatePropertyBody,
+  LandAreaInput,
+  PropertyDto,
+  PropertyHistoryEntryDto,
+  PropertyMapDto,
+  PropertySummaryCountsDto,
+  PropertySummaryDto,
+  UpdatePropertyBody,
+} from './dto.js';
 import { assertPropertyAccess, canUseOffice, propertyScopeSql } from './property-access.js';
 
 registerConstraintMessages({
@@ -94,6 +104,8 @@ export class PropertiesService {
         'a.formatted',
         'a.latitude',
         'a.longitude',
+        'a.geocodeSource',
+        'a.locationStale',
         'p.isManaged',
         'p.archivedAt',
         'p.updatedAt',
@@ -120,6 +132,8 @@ export class PropertiesService {
       formattedAddress: row.formatted,
       latitude: row.latitude === null ? null : Number(row.latitude),
       longitude: row.longitude === null ? null : Number(row.longitude),
+      geocodeSource: row.geocodeSource,
+      locationStale: row.locationStale,
       distanceMeters: row.distanceMeters === null ? null : Number(row.distanceMeters),
       unitCount: row.unitCount ?? 0,
       isManaged: row.isManaged,
@@ -175,12 +189,120 @@ export class PropertiesService {
     if (Array.isArray(filters['propertyTypeId'])) qb = qb.where('p.propertyTypeId', 'in', filters['propertyTypeId']);
     if (Array.isArray(filters['countryCode'])) qb = qb.where('a.countryCode', 'in', filters['countryCode']);
     if (typeof filters['isManaged'] === 'boolean') qb = qb.where('p.isManaged', '=', filters['isManaged']);
+    if (typeof filters['locationStale'] === 'boolean') qb = qb.where('a.locationStale', '=', filters['locationStale']);
     if (q !== null) {
       const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
       qb = qb.where((eb) => eb.or([eb('p.reference', 'ilike', pattern), eb('p.name', 'ilike', pattern), eb('a.formatted', 'ilike', pattern)]));
     }
     for (const condition of locationConditions(location, 'a')) qb = qb.where(condition);
     return qb;
+  }
+
+  /** Counts for the property's tabs (M6 API gap A-8); sections the member cannot see are null. */
+  async summary(tx: Tx, ctx: TenantContext, id: string): Promise<PropertySummaryCountsDto> {
+    await this.get(tx, ctx, id);
+    const can = (permission: string) => ctx.permissions.has(permission);
+    const units = await tx
+      .selectFrom('units')
+      .select([
+        sql<number>`count(*)::int`.as('total'),
+        sql<number>`count(*) filter (where availability = 'available')::int`.as('available'),
+        sql<number>`count(*) filter (where availability = 'under_maintenance')::int`.as('underMaintenance'),
+        sql<number>`count(*) filter (where availability = 'unavailable')::int`.as('unavailable'),
+      ])
+      .where('propertyId', '=', id)
+      .where('archivedAt', 'is', null)
+      .executeTakeFirstOrThrow();
+    const media = await tx
+      .selectFrom('propertyMedia')
+      .select([
+        sql<number>`count(*) filter (where media_type = 'photo' and processing_status = 'ready')::int`.as('photos'),
+        sql<number>`count(*) filter (where media_type in ('floor_plan', 'site_plan', 'brochure') and processing_status = 'ready')::int`.as('plans'),
+        sql<number>`count(*) filter (where media_type in ('video', 'virtual_tour'))::int`.as('links'),
+        sql<number>`count(*) filter (where processing_status = 'pending')::int`.as('processing'),
+        sql<number>`count(*) filter (where processing_status in ('rejected', 'failed'))::int`.as('rejected'),
+      ])
+      .where('propertyId', '=', id)
+      .where('archivedAt', 'is', null)
+      .executeTakeFirstOrThrow();
+    const listings = can('listing.view')
+      ? await tx
+          .selectFrom('listings as l')
+          .innerJoin('units as u', 'u.id', 'l.unitId')
+          .select([
+            sql<number>`count(*) filter (where l.status in ('available', 'reserved', 'under_contract'))::int`.as('live'),
+            sql<number>`count(*) filter (where l.status = 'draft')::int`.as('draft'),
+          ])
+          .where('u.propertyId', '=', id)
+          .where('l.archivedAt', 'is', null)
+          .where(listingScopeSql(ctx.permissions.get('listing.view')!.scope, ctx, 'l'))
+          .executeTakeFirstOrThrow()
+      : null;
+    const notes = can('property_note.view')
+      ? await tx
+          .selectFrom('propertyNotes')
+          .select([sql<number>`count(*)::int`.as('total'), sql<number>`count(*) filter (where is_pinned)::int`.as('pinned')])
+          .where('propertyId', '=', id)
+          .where('archivedAt', 'is', null)
+          .executeTakeFirstOrThrow()
+      : null;
+    const keys = can('key.view')
+      ? await tx
+          .selectFrom('keySets')
+          .select([
+            sql<number>`count(*) filter (where status <> 'retired')::int`.as('active'),
+            sql<number>`count(*) filter (where status = 'checked_out')::int`.as('out'),
+            sql<number>`count(*) filter (where status = 'checked_out' and due_back_at < now())::int`.as('overdue'),
+          ])
+          .where('propertyId', '=', id)
+          .executeTakeFirstOrThrow()
+      : null;
+    return { units, media, listings, notes, keys };
+  }
+
+  /**
+   * Audit entries for the property and its units, media, notes, key sets and
+   * listings (A-4). Each kind appears only with its view permission. Entries
+   * hold metadata only: note text is never in the audit log (ADR-006 L-D7).
+   */
+  async history(tx: Tx, ctx: TenantContext, id: string, query: ParsedListQuery<'occurredAt'>): Promise<Page<PropertyHistoryEntryDto>> {
+    await this.get(tx, ctx, id);
+    const can = (permission: string) => ctx.permissions.has(permission);
+    const related = sql<boolean>`(
+         (a.entity_type = 'property' and a.entity_id = ${id}::uuid)
+      or (a.entity_type = 'unit' and a.entity_id in (select u.id from units u where u.property_id = ${id}::uuid))
+      or (a.entity_type = 'media' and a.entity_id in (select m.id from property_media m where m.property_id = ${id}::uuid))
+      ${can('property_note.view') ? sql`or (a.entity_type = 'property_note' and a.entity_id in (select n.id from property_notes n where n.property_id = ${id}::uuid))` : sql``}
+      ${can('key.view') ? sql`or (a.entity_type = 'key_set' and a.entity_id in (select k.id from key_sets k where k.property_id = ${id}::uuid))` : sql``}
+      ${
+        can('listing.view')
+          ? sql`or (a.entity_type = 'listing' and a.entity_id in (select l.id from listings l join units u on u.id = l.unit_id
+               where u.property_id = ${id}::uuid and ${listingScopeSql(ctx.permissions.get('listing.view')!.scope, ctx, 'l')}))`
+          : sql``
+      })`;
+    let qb = tx
+      .selectFrom('auditLogs as a')
+      .leftJoin('companyMemberships as m', 'm.id', 'a.actorMembershipId')
+      .leftJoin('users as us', 'us.id', 'm.userId')
+      .select(['a.id', 'a.occurredAt', 'a.action', 'a.entityType', 'a.entityId', 'a.actorType', 'a.actorMembershipId', 'us.displayName', 'a.changes', 'a.metadata'])
+      .select(sortValueSql('a.occurredAt', 'timestamp').as('cursorValue'))
+      .where(related);
+    const types = query.filters['entityType'];
+    if (Array.isArray(types)) qb = qb.where('a.entityType', 'in', types);
+    if (query.cursor) qb = qb.where(keysetCondition('a.occurredAt', 'a.id', query.sort, query.cursor));
+    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.id', query.sort.direction).limit(query.limit + 1).execute();
+    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({
+      id: r.id,
+      occurredAt: r.occurredAt.toISOString(),
+      action: r.action,
+      entityType: r.entityType ?? 'property',
+      entityId: r.entityId,
+      actorType: r.actorType,
+      actorMembershipId: r.actorMembershipId,
+      actorName: r.displayName,
+      changes: (r.changes ?? null) as Record<string, unknown> | null,
+      metadata: (r.metadata ?? {}) as Record<string, unknown>,
+    }));
   }
 
   async get(tx: Tx, ctx: TenantContext, id: string): Promise<PropertyDto> {

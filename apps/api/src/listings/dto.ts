@@ -215,6 +215,18 @@ export class ListingDto extends ListingSummaryDto {
   @ApiProperty() version!: number;
 }
 
+export class ReadinessBlockerDto {
+  @ApiProperty() field!: string;
+  @ApiProperty({ enum: ['archived', 'closed', 'unavailable', 'expired', 'photos', 'floor-plan', 'unverified', 'missing'] }) code!: string;
+  @ApiProperty() message!: string;
+}
+
+export class ListingReadinessDto {
+  @ApiProperty({ description: 'True when publishing would succeed now' }) canPublish!: boolean;
+  @ApiProperty() isPublished!: boolean;
+  @ApiProperty({ type: [ReadinessBlockerDto] }) blockers!: ReadinessBlockerDto[];
+}
+
 export class ListingListItemDto extends ListingSummaryDto {
   @ApiProperty({ type: Number, nullable: true, description: 'Metres from filter[near]; null without it' }) distanceMeters!: number | null;
 }

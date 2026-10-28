@@ -10,5 +10,6 @@ import { ListingsService } from './listings.service.js';
   imports: [LocationModule],
   controllers: [ListingsController],
   providers: [ListingsService, ListingSettingsService, IdempotencyService],
+  exports: [ListingsService],
 })
 export class ListingsModule {}

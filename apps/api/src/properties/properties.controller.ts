@@ -25,7 +25,9 @@ import {
   CreatePropertyBody,
   CreateUnitBody,
   PropertyDto,
+  PropertyHistoryPageDto,
   PropertyMapDto,
+  PropertySummaryCountsDto,
   PropertyPageDto,
   UnitAvailabilityBody,
   UnitDto,
@@ -47,6 +49,7 @@ const PROPERTY_FILTERS: FilterSpec = {
   countryCode: { type: 'code', pattern: /^[A-Z]{2}$/, multi: true },
   isManaged: { type: 'boolean' },
   archived: { type: 'archived' },
+  locationStale: { type: 'boolean' },
   ...LOCATION_FILTERS,
 };
 
@@ -78,6 +81,7 @@ export class PropertiesController {
   @ApiQuery({ name: 'filter[countryCode]', required: false, description: 'Comma-separated ISO country codes' })
   @ApiQuery({ name: 'filter[isManaged]', required: false, enum: ['true', 'false'] })
   @ApiQuery({ name: 'filter[archived]', required: false, enum: ['false', 'true', 'all'] })
+  @ApiQuery({ name: 'filter[locationStale]', required: false, enum: ['true', 'false'] })
   @LocationQueryDocs()
   @ApiOkResponse({ type: PropertyPageDto })
   async list(@Tenant() ctx: TenantContext, @Scope() scope: PermissionScope, @Query() query: ListQueryInput): Promise<PropertyPageDto> {
@@ -133,6 +137,28 @@ export class PropertiesController {
     const property = await this.tenantDb.run(ctx, (tx) => this.properties.get(tx, ctx, id));
     setVersionEtag(res, property.version);
     return property;
+  }
+
+  @Get('properties/:propertyId/summary')
+  @RequirePermission('property.view')
+  @ApiOkResponse({ type: PropertySummaryCountsDto })
+  async summary(@Tenant() ctx: TenantContext, @Param('propertyId', UUID_PARAM) id: string): Promise<PropertySummaryCountsDto> {
+    return this.tenantDb.run(ctx, (tx) => this.properties.summary(tx, ctx, id));
+  }
+
+  @Get('properties/:propertyId/history')
+  @RequirePermission('property.view')
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'filter[entityType]', required: false, description: 'property, unit, media, property_note, key_set, listing' })
+  @ApiOkResponse({ type: PropertyHistoryPageDto })
+  async history(@Tenant() ctx: TenantContext, @Param('propertyId', UUID_PARAM) id: string, @Query() query: ListQueryInput): Promise<PropertyHistoryPageDto> {
+    const parsed = parseListQuery<'occurredAt'>(
+      query,
+      { allowed: { occurredAt: 'timestamp' }, default: { field: 'occurredAt', direction: 'desc' } },
+      { entityType: { type: 'enum', values: ['property', 'unit', 'media', 'property_note', 'key_set', 'listing'], multi: true } },
+    );
+    return this.tenantDb.run(ctx, (tx) => this.properties.history(tx, ctx, id, parsed));
   }
 
   @Patch('properties/:propertyId')

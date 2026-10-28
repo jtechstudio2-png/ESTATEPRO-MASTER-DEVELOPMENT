@@ -145,6 +145,8 @@ export class PropertySummaryDto {
   @ApiProperty({ type: String, nullable: true }) formattedAddress!: string | null;
   @ApiProperty({ type: Number, nullable: true }) latitude!: number | null;
   @ApiProperty({ type: Number, nullable: true }) longitude!: number | null;
+  @ApiProperty({ type: String, nullable: true, enum: ['manual_pin', 'geocoder', 'postcode_centroid', 'import'] }) geocodeSource!: string | null;
+  @ApiProperty({ description: 'The address changed after the point was confirmed' }) locationStale!: boolean;
   @ApiProperty({ type: Number, nullable: true, description: 'Metres from filter[near]; null without it' }) distanceMeters!: number | null;
   @ApiProperty() unitCount!: number;
   @ApiProperty() isManaged!: boolean;
@@ -247,5 +249,62 @@ export class UnitAvailabilityBody {
 
 export class UnitPageDto {
   @ApiProperty({ type: [UnitDto] }) data!: UnitDto[];
+  @ApiProperty({ type: PageDto }) page!: PageDto;
+}
+
+class UnitCountsDto {
+  @ApiProperty() total!: number;
+  @ApiProperty() available!: number;
+  @ApiProperty() underMaintenance!: number;
+  @ApiProperty() unavailable!: number;
+}
+
+class MediaCountsDto {
+  @ApiProperty({ description: 'Ready photos' }) photos!: number;
+  @ApiProperty({ description: 'Ready floor plans, site plans and brochures' }) plans!: number;
+  @ApiProperty({ description: 'Video and tour links' }) links!: number;
+  @ApiProperty() processing!: number;
+  @ApiProperty() rejected!: number;
+}
+
+class ListingCountsDto {
+  @ApiProperty() live!: number;
+  @ApiProperty() draft!: number;
+}
+
+class NoteCountsDto {
+  @ApiProperty() total!: number;
+  @ApiProperty() pinned!: number;
+}
+
+class KeyCountsDto {
+  @ApiProperty() active!: number;
+  @ApiProperty() out!: number;
+  @ApiProperty() overdue!: number;
+}
+
+export class PropertySummaryCountsDto {
+  @ApiProperty({ type: UnitCountsDto }) units!: UnitCountsDto;
+  @ApiProperty({ type: MediaCountsDto }) media!: MediaCountsDto;
+  @ApiProperty({ type: ListingCountsDto, nullable: true, description: 'null without listing.view' }) listings!: ListingCountsDto | null;
+  @ApiProperty({ type: NoteCountsDto, nullable: true, description: 'null without property_note.view' }) notes!: NoteCountsDto | null;
+  @ApiProperty({ type: KeyCountsDto, nullable: true, description: 'null without key.view' }) keys!: KeyCountsDto | null;
+}
+
+export class PropertyHistoryEntryDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ format: 'date-time' }) occurredAt!: string;
+  @ApiProperty({ example: 'property.updated' }) action!: string;
+  @ApiProperty({ enum: ['property', 'unit', 'media', 'property_note', 'key_set', 'listing'] }) entityType!: string;
+  @ApiProperty({ type: String, nullable: true, format: 'uuid' }) entityId!: string | null;
+  @ApiProperty({ enum: ['user', 'system'] }) actorType!: string;
+  @ApiProperty({ type: String, nullable: true, format: 'uuid' }) actorMembershipId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) actorName!: string | null;
+  @ApiProperty({ type: 'object', nullable: true, additionalProperties: true }) changes!: Record<string, unknown> | null;
+  @ApiProperty({ type: 'object', additionalProperties: true }) metadata!: Record<string, unknown>;
+}
+
+export class PropertyHistoryPageDto {
+  @ApiProperty({ type: [PropertyHistoryEntryDto] }) data!: PropertyHistoryEntryDto[];
   @ApiProperty({ type: PageDto }) page!: PageDto;
 }
