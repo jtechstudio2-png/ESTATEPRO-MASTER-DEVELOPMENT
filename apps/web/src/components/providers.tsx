@@ -1,15 +1,16 @@
 'use client';
 
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { type AbstractIntlMessages, NextIntlClientProvider } from 'next-intl';
+import { type AbstractIntlMessages, NextIntlClientProvider, useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { I18nProvider, RouterProvider } from 'react-aria-components';
 
-import { setCsrfToken } from '@/lib/bff';
+import { SESSION_ENDED_EVENT, setCsrfToken } from '@/lib/bff';
 import { ApiError } from '@/lib/problem';
 
 import { AnnouncerProvider } from './announcer';
+import { hasUnsavedChanges } from './ui/unsaved-guard';
 import { type MapConfig, MapConfigProvider } from './map/map-config';
 
 interface ProvidersProps {
@@ -36,14 +37,6 @@ export function Providers({ children, locale, language, timeZone, messages, csrf
     () =>
       new QueryClient({
         defaultOptions: { queries: { retry, staleTime: 30_000, refetchOnWindowFocus: true }, mutations: { retry: false } },
-        queryCache: new QueryCache({
-          onError: (error) => {
-            // The session ended: go to sign-in and come back here afterwards.
-            if (error instanceof ApiError && error.status === 401) {
-              window.location.assign(`/sign-in?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-            }
-          },
-        }),
       }),
   );
   setCsrfToken(csrfToken);
@@ -62,11 +55,68 @@ export function Providers({ children, locale, language, timeZone, messages, csrf
         <RouterProvider navigate={(href) => router.push(href)}>
           <QueryClientProvider client={queryClient}>
             <MapConfigProvider value={mapConfig}>
-              <AnnouncerProvider>{children}</AnnouncerProvider>
+              <AnnouncerProvider>
+                <SessionEnded companyId={companyId} />
+                {children}
+              </AnnouncerProvider>
             </MapConfigProvider>
           </QueryClientProvider>
         </RouterProvider>
       </I18nProvider>
     </NextIntlClientProvider>
+  );
+}
+
+/**
+ * The session ended (a 401 from the BFF). With nothing unsaved, go to
+ * sign-in and come back here afterwards. With unsaved changes (X-3), keep
+ * the page and its draft in memory and offer sign-in in a new tab; nothing
+ * is written to device storage. Back on this page, the new session's CSRF
+ * token is picked up, provided it is for the same company.
+ */
+function SessionEnded({ companyId }: { companyId: string | null }) {
+  const t = useTranslations('errors');
+  const [kept, setKept] = useState(false);
+  const [problem, setProblem] = useState<'signedOut' | 'otherCompany' | null>(null);
+  useEffect(() => {
+    const ended = () => {
+      if (hasUnsavedChanges()) {
+        setKept(true);
+        return;
+      }
+      window.location.assign(`/sign-in?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    };
+    window.addEventListener(SESSION_ENDED_EVENT, ended);
+    return () => window.removeEventListener(SESSION_ENDED_EVENT, ended);
+  }, []);
+
+  const resume = async () => {
+    const response = await fetch('/auth/csrf', { credentials: 'same-origin', cache: 'no-store' }).catch(() => null);
+    if (!response?.ok) {
+      setProblem('signedOut');
+      return;
+    }
+    const current = (await response.json()) as { csrfToken: string; companyId: string | null };
+    if (current.companyId !== companyId) {
+      setProblem('otherCompany');
+      return;
+    }
+    setCsrfToken(current.csrfToken);
+    setProblem(null);
+    setKept(false);
+  };
+
+  if (!kept) return null;
+  return (
+    <div role="alert" className="ep-session-ended">
+      <strong>{t('sessionTitle')}</strong> {t('sessionKeptDetail')}{' '}
+      <a href="/sign-in?returnTo=%2Fdashboard" target="_blank" rel="noopener">
+        {t('signInNewTab')}
+      </a>{' '}
+      <button type="button" onClick={() => void resume()}>
+        {t('sessionSignedIn')}
+      </button>
+      {problem ? <span>{problem === 'signedOut' ? t('sessionStillSignedOut') : t('sessionOtherCompany')}</span> : null}
+    </div>
   );
 }

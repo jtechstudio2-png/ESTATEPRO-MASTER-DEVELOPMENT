@@ -175,5 +175,9 @@
     "meter": "Storage used",
     "archivedNote": "Archived items count until they are deleted.",
     "reservedLabel": "Reserved for uploads"
-  }
+  },
+  "batchRoom": "Room",
+  "batchRoomHint": "Applied to every photo added now, for example Kitchen.",
+  "mobileData": "{count, plural, =0 {You are on mobile data.} one {# upload on mobile data.} other {# uploads on mobile data.}}",
+  "waitForWifi": "Wait for Wi-Fi"
 }

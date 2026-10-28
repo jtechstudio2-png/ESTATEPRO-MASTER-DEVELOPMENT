@@ -251,5 +251,35 @@
     "zone_number": "Zone",
     "street_number": "Street",
     "building_number": "Building"
+  },
+  "field": {
+    "label": "Field actions",
+    "directions": "Directions",
+    "opensMapsApp": "(opens your maps app)",
+    "map": "Map",
+    "addPhotos": "Add photos",
+    "addNote": "Add note",
+    "keys": "Keys",
+    "startVisit": "Field visit",
+    "visitTitle": "Field visit · {name}",
+    "checklist": "Visit checklist",
+    "checklistNote": "A guide for this visit; the ticks are not saved.",
+    "unit": "Unit",
+    "wholeProperty": "Whole property",
+    "steps": {
+      "access": "Confirm access",
+      "photos": "Capture condition photos",
+      "feedback": "Record client feedback",
+      "keys": "Return keys"
+    },
+    "feedbackHint": "Write it in the visit notes below.",
+    "keysWithYou": "Keys you hold for this property",
+    "noKeysWithYou": "You are not holding keys for this property.",
+    "visitNotes": "Visit notes",
+    "visitNotesHint": "Saved as a Viewing note, visible to staff only.",
+    "notesRequired": "Enter the visit notes.",
+    "noSecrets": "Do not write alarm codes or passwords in notes.",
+    "saveVisit": "Save visit",
+    "saved": "Visit saved as a Viewing note."
   }
 }

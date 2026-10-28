@@ -1,4 +1,8 @@
-/* M-2 / M-3: list and map side by side from 1024 px; one pane at a time below (X-5). */
+/*
+ * M-2 / M-3: phones show one pane at a time with a switch (X-5). Tablets
+ * show both (T-2): side by side in landscape, the map over the list in
+ * portrait. From 1024 px the list and map sit side by side.
+ */
 .layout {
   display: grid;
   gap: var(--ep-space-4);
@@ -14,14 +18,9 @@
   display: none;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .paneSwitch {
     display: none;
-  }
-
-  .layout {
-    grid-template-columns: minmax(300px, 2fr) 3fr;
-    align-items: start;
   }
 
   .layout[data-pane] .results,
@@ -30,6 +29,18 @@
   }
 
   .mapPane {
+    order: -1;
+  }
+}
+
+@media (min-width: 768px) and (orientation: landscape), (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(280px, 2fr) 3fr;
+    align-items: start;
+  }
+
+  .mapPane {
+    order: 0;
     position: sticky;
     inset-block-start: var(--ep-space-4);
   }

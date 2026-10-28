@@ -18,5 +18,10 @@
   "retry": "Try again",
   "reference": "Reference for support: {id}",
   "fixFields": "{count, plural, one {Fix # field to continue.} other {Fix # fields to continue.}}",
-  "home": "Go to the dashboard"
+  "home": "Go to the dashboard",
+  "sessionKeptDetail": "Your changes are still on this page. Sign in again in a new tab, then come back and save.",
+  "signInNewTab": "Sign in in a new tab",
+  "sessionSignedIn": "I have signed in",
+  "sessionStillSignedOut": "You are not signed in yet.",
+  "sessionOtherCompany": "You signed in to a different company. Switch back to this company in the other tab, then try again."
 }

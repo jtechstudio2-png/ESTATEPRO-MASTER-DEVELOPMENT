@@ -136,3 +136,16 @@
   border-radius: var(--ep-radius-panel);
   background: var(--ep-color-surface-subtle);
 }
+
+/* X-3: the composer takes the whole screen on phones. */
+@media (max-width: 767px) {
+  .composer {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background: var(--ep-color-surface);
+  }
+}

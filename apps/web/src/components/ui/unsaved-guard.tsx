@@ -6,6 +6,13 @@ import { useEffect, useState } from 'react';
 
 import { ConfirmDialog } from './dialog';
 
+/** Forms on the page with unsaved changes (read when the session ends, X-3). */
+let dirtyForms = 0;
+
+export function hasUnsavedChanges(): boolean {
+  return dirtyForms > 0;
+}
+
 /**
  * UnsavedChangesGuard (P-3): asks before leaving a form with unsaved changes,
  * both for in-app links and for closing or reloading the tab.
@@ -17,6 +24,7 @@ export function UnsavedChangesGuard({ dirty }: { dirty: boolean }) {
 
   useEffect(() => {
     if (!dirty) return;
+    dirtyForms += 1;
     const beforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
     };
@@ -33,6 +41,7 @@ export function UnsavedChangesGuard({ dirty }: { dirty: boolean }) {
     window.addEventListener('beforeunload', beforeUnload);
     document.addEventListener('click', click, true);
     return () => {
+      dirtyForms -= 1;
       window.removeEventListener('beforeunload', beforeUnload);
       document.removeEventListener('click', click, true);
     };

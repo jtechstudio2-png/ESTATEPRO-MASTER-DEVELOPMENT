@@ -8,9 +8,9 @@ import { useAnnounce } from '@/components/announcer';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Notice } from '@/components/ui/feedback';
-import { FieldRow, SelectField } from '@/components/ui/fields';
+import { Checkbox, FieldRow, SelectField, TextField } from '@/components/ui/fields';
 import type { ListingPageDto, MediaDto, UnitPageDto } from '@/lib/api-schema';
-import { bff } from '@/lib/bff';
+import { bff, bffRequest } from '@/lib/bff';
 import { useFormat } from '@/lib/hooks/format';
 import { useRefreshAll } from '@/lib/mutations';
 import { ApiError } from '@/lib/problem';
@@ -28,9 +28,30 @@ interface QueueItem {
   reason: string | null;
   mediaId: string | null;
   controller: AbortController | null;
+  /** Room label for the batch the file was added with (X-2), set once it is ready. */
+  roomLabel: string | null;
 }
 
 const NONE = '__none__';
+const ACTIVE: Stage[] = ['hashing', 'uploading', 'confirming'];
+
+interface NetworkInformation extends EventTarget {
+  type?: string;
+}
+
+/** Whether the device says it is on mobile data (Network Information API, where the browser has it). */
+function useOnMobileData(): boolean {
+  const [cellular, setCellular] = useState(false);
+  useEffect(() => {
+    const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
+    if (!connection) return;
+    const read = () => setCellular(connection.type === 'cellular');
+    read();
+    connection.addEventListener('change', read);
+    return () => connection.removeEventListener('change', read);
+  }, []);
+  return cellular;
+}
 
 /**
  * G-2 upload panel: checks type and size first, hashes in the browser, puts
@@ -64,7 +85,11 @@ export function UploadPanel({
   const [attachTo, setAttachTo] = useState(listingId ?? NONE);
   const [quotaFull, setQuotaFull] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [room, setRoom] = useState('');
+  const [waitForWifi, setWaitForWifi] = useState(false);
+  const onMobileData = useOnMobileData();
   const announced = useRef(new Map<string, number>());
+  const running = useRef(false);
 
   useEffect(() => setMediaType(mode === 'photos' ? 'photo' : 'floor_plan'), [mode]);
   const units = useQuery({ queryKey: ['record', 'units-for-select', propertyId], queryFn: () => bff<UnitPageDto>(`properties/${propertyId}/units?limit=100`), enabled: isOpen });
@@ -80,6 +105,15 @@ export function UploadPanel({
     queryKey: ['upload-processing', pending.map((item) => item.mediaId).join(',')],
     queryFn: async () => {
       const results = await Promise.all(pending.map((item) => bff<MediaDto>(`media/${item.mediaId}`)));
+      // The batch's room label is set once processing has finished (X-2).
+      await Promise.all(
+        results
+          .filter((media) => media.processingStatus === 'ready')
+          .map((media) => {
+            const roomLabel = pending.find((item) => item.mediaId === media.id)?.roomLabel;
+            return roomLabel && media.roomLabel !== roomLabel ? bffRequest(`media/${media.id}`, { method: 'PATCH', version: media.version, body: { roomLabel } }) : Promise.resolve(null);
+          }),
+      );
       setQueue((current) =>
         current.map((item) => {
           const media = results.find((result) => result.id === item.mediaId);
@@ -143,14 +177,24 @@ export function UploadPanel({
         reason: problem ? (problem.code === 'size' ? t('tooBig', { limit: format.bytes(problem.limit!) }) : t('wrongType', { type: file.type || file.name.split('.').pop() || '?' })) : null,
         mediaId: null,
         controller: null,
+        roomLabel: mediaType === 'photo' && room.trim() ? room.trim() : null,
       };
     });
     setQueue((current) => [...current, ...items]);
-    // One at a time keeps memory use low for hashing and gives clear progress.
-    void (async () => {
-      for (const item of items) if (item.stage === 'waiting') await start(item);
-    })();
   };
+
+  // One upload at a time keeps memory use low for hashing and gives clear
+  // progress; on mobile data the queue can wait for Wi-Fi.
+  const paused = waitForWifi && onMobileData;
+  const next = queue.find((item) => item.stage === 'waiting');
+  const busy = queue.some((item) => ACTIVE.includes(item.stage));
+  useEffect(() => {
+    if (paused || busy || !next || running.current) return;
+    running.current = true;
+    void start(next).finally(() => {
+      running.current = false;
+    });
+  }, [paused, busy, next]);
 
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
@@ -229,7 +273,16 @@ export function UploadPanel({
             }}
           />
         </div>
+        {mode === 'photos' ? <TextField label={t('batchRoom')} value={room} onChange={setRoom} maxLength={60} description={t('batchRoomHint')} dir="auto" /> : null}
         {quotaFull ? <Notice tone="danger" title={t('quota')} /> : null}
+        {onMobileData ? (
+          <Notice tone="info">
+            {t('mobileData', { count: queue.filter((item) => item.stage === 'waiting' || ACTIVE.includes(item.stage)).length })}
+            <Checkbox isSelected={waitForWifi} onChange={setWaitForWifi}>
+              {t('waitForWifi')}
+            </Checkbox>
+          </Notice>
+        ) : null}
         {mode === 'photos' ? <p className={styles.quiet}>ⓘ {t('gpsNote')}</p> : null}
         {queue.length > 0 ? (
           <>

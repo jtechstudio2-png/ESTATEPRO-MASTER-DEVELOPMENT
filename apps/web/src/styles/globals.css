@@ -122,3 +122,31 @@ bdi,
 [dir='rtl'] .ep-mirror {
   transform: scaleX(-1);
 }
+
+/* Session ended with unsaved changes on the page (X-3): the draft stays; sign in in a new tab. */
+.ep-session-ended {
+  position: fixed;
+  inset-inline: var(--ep-space-3);
+  inset-block-end: var(--ep-space-3);
+  z-index: 1000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ep-space-2);
+  padding: var(--ep-space-3) var(--ep-space-4);
+  border: var(--ep-border-width) solid var(--ep-color-warning);
+  border-radius: var(--ep-radius-panel);
+  background: var(--ep-color-surface);
+  box-shadow: 0 4px 16px rgb(23 33 47 / 20%);
+}
+
+.ep-session-ended button {
+  min-block-size: 44px;
+  padding-inline: var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border-control);
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface);
+  color: var(--ep-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}

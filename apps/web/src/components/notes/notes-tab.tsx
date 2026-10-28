@@ -16,6 +16,7 @@ import { FormProblem, fieldErrorsOf } from '@/components/ui/form-problem';
 import { Cluster, formClass, Panel } from '@/components/ui/layout';
 import { FilterSelect, LoadMore } from '@/components/ui/list-controls';
 import { ActionsMenu, type MenuAction } from '@/components/ui/menu';
+import { UnsavedChangesGuard } from '@/components/ui/unsaved-guard';
 import { When } from '@/components/ui/when';
 import type { CreateNoteBody, MemberListDto, NoteDto, NoteRevisionPageDto, UnitPageDto, UpdateNoteBody } from '@/lib/api-schema';
 import { bff, bffRequest, newIdempotencyKey, query } from '@/lib/bff';
@@ -57,7 +58,12 @@ export function NotesTab({ propertyId }: { propertyId: string }) {
   const property = useProperty(propertyId);
   const manage = can('property_note.manage') && !readOnly;
   const canCreate = can('property_note.create') && !readOnly && property.data?.archivedAt === null;
-  const [composer, setComposer] = useState<NoteDto | 'new' | null>(null);
+  // "Add note" from the field actions (X-1) opens the composer straight away.
+  const [composer, setComposerState] = useState<NoteDto | 'new' | null>(() => (params.get('compose') === '1' ? 'new' : null));
+  const setComposer = (next: NoteDto | 'new' | null) => {
+    setComposerState(next);
+    if (next === null && params.get('compose') !== null) params.set({ compose: null });
+  };
   const [dialog, setDialog] = useState<NoteDialog | null>(null);
   const units = useQuery({ queryKey: ['record', 'units-for-select', propertyId], queryFn: () => bff<UnitPageDto>(`properties/${propertyId}/units?limit=100`) });
   const authors = useQuery({ queryKey: ['members', 'note-authors'], queryFn: () => bff<MemberListDto>(`members${query({ 'filter[permission]': 'property_note.create' })}`), staleTime: 300_000 });
@@ -140,7 +146,7 @@ export function NotesTab({ propertyId }: { propertyId: string }) {
         ) : undefined
       }
     >
-      {composer !== null ? <NoteComposer propertyId={propertyId} note={composer === 'new' ? null : composer} units={units.data?.data ?? []} pinnedCount={pinnedCount} onClose={() => setComposer(null)} /> : null}
+      {composer !== null && (composer !== 'new' || canCreate) ? <NoteComposer propertyId={propertyId} note={composer === 'new' ? null : composer} units={units.data?.data ?? []} pinnedCount={pinnedCount} onClose={() => setComposer(null)} /> : null}
       <nav aria-label={t('filters.label')} className={styles.categories}>
         {categories.map((category) => {
           const href =
@@ -286,8 +292,15 @@ function NoteComposer({ propertyId, note, units, pinnedCount, onClose }: { prope
   };
 
   const errors = { ...fieldErrorsOf(error), ...clientErrors };
+  const dirty =
+    body.trimEnd() !== (note?.body ?? '') ||
+    category !== (note?.category ?? 'general') ||
+    visibility !== (note?.visibility ?? 'internal') ||
+    (unitId === WHOLE ? null : unitId) !== (note?.unitId ?? null) ||
+    isPinned !== (note?.isPinned ?? false);
   return (
     <section aria-label={note ? t('editorTitle') : t('composerTitle')} className={styles.composer}>
+      <UnsavedChangesGuard dirty={dirty} />
       <h3 className={styles.groupHeading}>{note ? t('editorTitle') : t('composerTitle')}</h3>
       <form
         className={formClass}

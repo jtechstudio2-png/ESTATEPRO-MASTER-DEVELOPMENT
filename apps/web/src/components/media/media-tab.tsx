@@ -85,7 +85,12 @@ export function MediaTab({ propertyId }: { propertyId: string }) {
   });
   const rows = result.rows;
 
-  const [upload, setUpload] = useState<'photos' | 'plans' | null>(null);
+  // "Add photos" from the field actions (X-1, T-1) opens the upload panel straight away.
+  const [upload, setUploadState] = useState<'photos' | 'plans' | null>(() => (params.get('upload') === 'photos' ? 'photos' : null));
+  const setUpload = (next: 'photos' | 'plans' | null) => {
+    setUploadState(next);
+    if (next === null && params.get('upload') !== null) params.set({ upload: null });
+  };
   const [addingLink, setAddingLink] = useState(false);
   const opened = params.get('media');
   const [lifecycle, setLifecycle] = useState<{ media: MediaDto; action: MediaLifecycle } | null>(null);

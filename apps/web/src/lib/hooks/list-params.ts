@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 
-const UI_ONLY = ['cursor', 'view', 'tab', 'unit', 'source', 'nearLabel', 'media', 'holderName', 'pane'];
+const UI_ONLY = ['cursor', 'view', 'tab', 'unit', 'source', 'nearLabel', 'media', 'holderName', 'pane', 'compose', 'upload'];
 
 /**
  * List state lives in the URL (UI checklist §2): filters, sort and search use

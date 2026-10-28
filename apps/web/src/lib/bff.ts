@@ -2,6 +2,9 @@ import { ApiError, NetworkError, problemFromResponse } from './problem';
 
 let csrfToken: string | null = null;
 
+/** Raised once per 401 from the BFF; the app providers decide what to do (sign in, or keep the page). */
+export const SESSION_ENDED_EVENT = 'estatepro:session-ended';
+
 /** Set once by the app providers from the server-rendered session (never stored in the browser). */
 export function setCsrfToken(token: string | null): void {
   csrfToken = token;
@@ -44,6 +47,7 @@ export async function bffRequest<T>(path: string, options: BffOptions = {}): Pro
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
     throw new NetworkError();
   }
+  if (response.status === 401 && typeof window !== 'undefined') window.dispatchEvent(new Event(SESSION_ENDED_EVENT));
   if (!response.ok) throw await problemFromResponse(response);
   const etag = response.headers.get('etag');
   const match = etag !== null ? /^"(\d+)"$/.exec(etag) : null;

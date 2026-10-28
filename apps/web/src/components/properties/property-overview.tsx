@@ -15,6 +15,7 @@ import { useFormat } from '@/lib/hooks/format';
 import { useCountries, usePicklist } from '@/lib/hooks/reference';
 
 import styles from './properties.module.css';
+import { FieldActions } from './field-visit';
 import { useProperty, usePropertySummary } from './use-property';
 
 /** The address lines in the country's order, with its local components (e.g. GhanaPost GPS). */
@@ -58,6 +59,7 @@ export function PropertyOverview({ id }: { id: string }) {
 
   const main = (
     <>
+      <FieldActions property={record} />
       {can('property_note.view') ? (
         <Panel title={t('pinnedNotes')}>
           {pinned.isPending ? (

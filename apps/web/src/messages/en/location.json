@@ -74,5 +74,6 @@
   "radiusCancel": "Cancel radius",
   "showOnMap": "Show {name} on the map",
   "zoomToSearch": "Move the map to an area, then choose Search this area.",
-  "nearPlace": "Near…"
+  "nearPlace": "Near…",
+  "canvasLabel": "{label}: arrow keys move the map, plus and minus zoom"
 }

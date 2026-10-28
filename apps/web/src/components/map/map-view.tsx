@@ -133,13 +133,14 @@ export const MapView = forwardRef<MapHandle, MapViewProps>(function MapView(
           locale: {
             'NavigationControl.ZoomIn': t('zoomIn'),
             'NavigationControl.ZoomOut': t('zoomOut'),
-            'Map.Title': label,
+            'Map.Title': t('canvasLabel', { label }),
           },
         });
         map.touchZoomRotate.disableRotation();
         if (interactive) map.addControl(new maplibre.NavigationControl({ showCompass: false }), rtl ? 'top-left' : 'top-right');
         if (config.tilesUrl) map.addControl(new maplibre.AttributionControl({ compact: false }), rtl ? 'bottom-left' : 'bottom-right');
-        map.getCanvas().setAttribute('aria-label', label);
+        // The canvas pans with the arrow keys and zooms with + and −; its name says so.
+        map.getCanvas().setAttribute('aria-label', t('canvasLabel', { label }));
         map.on('load', () => {
           if (!map) return;
           map.addSource('area', { type: 'geojson', data: EMPTY });
