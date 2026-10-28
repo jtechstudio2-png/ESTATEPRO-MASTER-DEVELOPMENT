@@ -180,10 +180,10 @@ Requirements carry IDs so later phases, tests and tickets can reference them. Pr
 | PRP-04 | Listings per unit for sale or rent: asking price or rent, rent frequency, availability date, description, status | M |
 | PRP-05 | Listing statuses: Draft, Available, Reserved, Under Contract, Sold, Rented, Withdrawn. Unit operational flag: Under Maintenance (blocks new viewings and lettings) | M |
 | PRP-06 | Media: photos (ordered, with cover image), videos (upload or external link), floor plans, virtual-tour links | M |
-| PRP-07 | Internal notes, key and access information, and a status-history log | M |
-| PRP-08 | Location search: map view, radius and polygon search, filters by price, type, bedrooms and status | M |
+| PRP-07 | Internal notes, key and access information, and a status-history log. Notes have audiences (internal, landlord, tenant), revision history and their own permissions; tenant notes reference a unit; the key register tracks check-out and check-in (ADR-006) | M |
+| PRP-08 | Location search: map view, radius and polygon search, filters by price, type, bedrooms and status. Radius up to 50 km, polygons up to 100 points, map results clustered above 500; locations are confirmed by a user, geocoding only suggests (ADR-006) | M |
 | PRP-09 | Compliance documents per property or unit with expiry dates (e.g. safety certificates, insurance) | M |
-| PRP-10 | Listing feed export to the Company website and portals | S |
+| PRP-10 | Listing feed export to the Company website and portals, with a public location precision per listing: exact, approximate, area only or hidden (ADR-006) | S |
 | PRP-11 | Developments: a project with phases, unit inventory, price lists and reservation tracking | S |
 
 ### 5.3 CRM (CRM)
@@ -710,6 +710,7 @@ Notes:
 6. Landlords approve quotes above their management agreement's limit.
 7. Supplier users can upload an invoice against their assigned work order.
 8. A Sales Manager approves commissions for their team; agents never approve their own.
+9. Property notes: Sales and Property Managers (branch) and admins manage notes and are the only roles that can make a note visible to landlords or tenants; agents view and add notes in their branch; accountants view. Keys: agents check keys out and in for their branch; managers and admins add and retire key sets (ADR-006).
 9. Landlord income and expenditure summary for their own portfolio.
 
 ### 11.3 Platform roles

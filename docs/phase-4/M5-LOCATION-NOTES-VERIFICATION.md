@@ -2,10 +2,32 @@
 
 | | |
 |---|---|
-| Status | For product-owner review. No M5 code has been written. |
+| Status | **Approved** — all decisions L-D1 to L-D10 accepted by the product owner ("Milestone 5 Decisions Approved"), recorded in [ADR-006](../decisions/ADR-006-location-notes-keys.md). Additional requirement: public location precision levels (§17.1). |
 | Scope | Milestone 5 of Phase 4: location (PostGIS) search for properties and listings, and property notes |
 | Branch | `phase-4/property-management` at `115060f` (audit branch `audit/pre-phase-4` remains unmerged) |
 | Sources checked | Phase 1 detailed specification (P1-D) §5.2 PRP-01, PRP-07, PRP-08, PRP-10, NFR table, §9 stack, §11 permissions, §14.5 retention, §15 data protection; Phase 2 design doc (PostGIS deferral note) and migrations 0002, 0003, 0005, 0006, 0013, 0014, 0015; Phase 3 wireframes and validation gate items 3 and 6; ADR-002 (accessibility), ADR-003 (API conventions), ADR-004, ADR-005; the M2 address code (`src/reference/address.ts`) and the property and listing access rules |
+
+## Decision record
+
+| ID | Approved decision |
+|---|---|
+| L-D1 | Calculated spatial point on `addresses`, indexed per company |
+| L-D2 | Geocoding suggestions only; every stored location is confirmed by a user; Mapbox approved as the suggestion provider, configured by environment |
+| L-D3 | MapLibre with self-hosted OpenStreetMap tiles |
+| L-D4 | Radius search up to 50 km, map viewport search, polygon search up to 100 points, clustering above 500 records |
+| L-D5 | Reject coordinates at 0,0 and outside country boundaries |
+| L-D6 | Dedicated note permissions: View Notes, Create Notes, Manage Notes |
+| L-D7 | Separate note revision history; audit logs never store note text |
+| L-D8 | Only managers and admins may expose notes externally; tenant-visible notes must reference a unit |
+| L-D9 | `properties.internal_notes` migrated into pinned notes, removed from API responses and deprecated |
+| L-D10 | Key register included in Milestone 5 (§8.4) |
+| Additional | Future public location precision levels documented: Exact, Approximate, Area Only, Hidden (§17.1) |
+
+Changes to this report after approval:
+
+- §9: "Managers" in L-D8 includes sales managers, so they receive `property_note.manage` (office scope) alongside property managers.
+- §8.4 (new): key register design.
+- §17.1 (new): public location precision.
 
 ## 0. Summary
 
@@ -193,6 +215,37 @@ The test also asserts that the plan uses the spatial index, so a regression show
 - **Edits:** use `If-Match`; each edit stores the previous body as a revision. Creates use `Idempotency-Key` (ADR-003).
 - **Out of scope:** mentions, attachments (Documents module), replies, and portal reading (issue #12).
 
+### 8.4 Key register (L-D10, PRP-07)
+
+The Phase 2 tables `key_sets` and `key_movements` are used as designed. Milestone 5 adds:
+
+- **Current holder on the key set:** `holder_membership_id`, `holder_contact_id`, `checked_out_at` and `due_back_at`, kept in step with the movement log, so the overdue list needs no scan of history.
+- **Housekeeping columns:** `updated_at`, `version`, `created_by` and `retired_at`.
+
+| Current status | Allowed movement | New status |
+|---|---|---|
+| `in_office` | check out (to a staff member or a contact; due-back time optional) | `checked_out` |
+| `in_office`, `checked_out` | report lost | `lost` |
+| `checked_out`, `with_owner` | check in | `in_office` |
+| `lost` | found | `in_office` |
+| `in_office`, `with_owner`, `lost` | retire (`key.manage`) | `retired` |
+
+A key set can be created as `in_office` or `with_owner`.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET` / `POST /properties/{id}/key-sets` | List a property's key sets; add a key set |
+| `GET` / `PATCH /key-sets/{id}` | Read a key set; edit its label, description or unit |
+| `POST /key-sets/{id}/check-out`, `/check-in`, `/report-lost`, `/found`, `/retire` | Movement actions |
+| `GET /key-sets/{id}/movements` | Movement history |
+| `GET /key-sets?filter[status]=checked_out&filter[overdue]=true` | Company-wide list of keys out and overdue |
+
+Every movement is audited. Rules:
+
+- Movements are append-only.
+- A staff holder must be an active member of the company.
+- Permissions are `key.view`, `key.issue` and `key.manage` (ADR-006).
+
 ## 9. Note permissions (L-D6)
 
 No note permissions exist today. Reusing `property.view` would expose internal notes, including access instructions, to every agent in the office, so new permissions are recommended:
@@ -207,7 +260,7 @@ No note permissions exist today. Reusing `property.view` would expose internal n
 |---|---|
 | Company owner, office administrator | all three (all) |
 | Property manager | all three (office) |
-| Sales manager | view, create (office) |
+| Sales manager | all three (office) |
 | Agent | view, create (office) |
 | Accountant | view (all) |
 | Maintenance staff | none. Access details reach technicians through work orders, not the notes list. |
@@ -334,6 +387,19 @@ None of these changes break M1–M4 data. The generated column rewrites `address
 | Website and portal feeds (PRP-10) | Listings need a **location display precision** (exact / approximate / area only) before any public map. Feeds emit WGS 84 coordinates from `addresses`. Self-hosted tiles also suit a public website without per-view fees. |
 | CRM requirement matching | `requirements.locations` (jsonb, format undefined, gap G9) should use the same radius and polygon shapes as M5 so matching reuses the same query code. M5 documents the format but does not implement matching. |
 | Mobile and offline | Not in scope. PMTiles allows offline basemaps later. |
+
+### 17.1 Public location precision (additional requirement)
+
+Exact locations stay staff-only. When PRP-10 publishes listings to websites and portals, each listing gets a public location precision:
+
+| Level | What the public sees |
+|---|---|
+| **Exact** | The confirmed point |
+| **Approximate** | A point moved 250–500 m, fixed once per listing so it cannot be averaged out. This is the default for occupied homes. |
+| **Area Only** | The locality name and its centre, with no point for the property |
+| **Hidden** | No map position and no coordinates in feeds |
+
+Feeds and public search read only the derived public point. The full rules are in [ADR-006](../decisions/ADR-006-location-notes-keys.md#public-location-precision-future-prp-10). Milestone 5 implements none of it; it only keeps the confirmed point as the single source from which the public point is derived.
 
 ## 18. Gaps found
 
