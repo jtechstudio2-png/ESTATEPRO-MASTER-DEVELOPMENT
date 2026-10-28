@@ -37,8 +37,8 @@
   "edited": "edited",
   "migrated": "moved from the property's internal notes",
   "redacted": "[Redacted]",
-  "redactedBy": "Redacted {when}",
-  "archivedOn": "Archived {when}: {reason}",
+  "redactedBy": "Redacted <when></when>",
+  "archivedOn": "Archived <when></when>: {reason}",
   "empty": "No notes yet",
   "emptyDetail": "Add what staff need to know about this property: access, viewings, maintenance and more.",
   "emptyFiltered": "No notes match these filters",
@@ -95,5 +95,6 @@
   "redactConfirm": "Redact note",
   "archivedDone": "Note archived.",
   "restoredDone": "Note restored.",
-  "redactedDone": "Note redacted."
+  "redactedDone": "Note redacted.",
+  "categoryLabel": "Category"
 }
