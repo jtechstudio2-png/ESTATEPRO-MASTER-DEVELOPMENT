@@ -1,22 +1,34 @@
-import { Injectable } from '@nestjs/common';
-import { type ExpressionBuilder, sql } from 'kysely';
+import { Inject, Injectable } from '@nestjs/common';
+import { type ExpressionBuilder, type Selectable, sql } from 'kysely';
 
 import { AuditService, diffForAudit } from '../audit/audit.service.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
 import {
   keysetCondition,
-  type ParsedListQuery,
   type Page,
+  type ParsedFilters,
+  type ParsedListQuery,
   sortValueSql,
   toPage,
 } from '../common/list-query.js';
+import { APP_CONFIG, type AppConfig } from '../config/config.js';
+import {
+  assertDistanceSort,
+  assertUsablePolygon,
+  distanceSql,
+  hasLocationFilter,
+  configureSearchTransaction,
+  locationConditions,
+  type LocationFilter,
+} from '../location/location-filter.js';
+import { mapResult, requireViewport } from '../location/map-results.js';
 import { type FieldError, Problems } from '../common/problem.js';
 import type { PermissionScope, TenantContext } from '../common/request-context.js';
 import type { Tx } from '../database/database.module.js';
-import type { DB } from '../database/schema.js';
-import { type NormalisedAddress, toAddressDto, validateAddress } from '../reference/address.js';
+import type { Addresses, DB } from '../database/schema.js';
+import { type GeocodeSource, type NormalisedAddress, toAddressDto, validateAddress } from '../reference/address.js';
 import { checkPicklistCode } from '../reference/picklists.js';
-import type { CreatePropertyBody, LandAreaInput, PropertyDto, PropertySummaryDto, UpdatePropertyBody } from './dto.js';
+import type { CreatePropertyBody, LandAreaInput, PropertyDto, PropertyMapDto, PropertySummaryDto, UpdatePropertyBody } from './dto.js';
 import { assertPropertyAccess, canUseOffice, propertyScopeSql } from './property-access.js';
 
 registerConstraintMessages({
@@ -28,7 +40,7 @@ const SQM_PER_UNIT: Record<string, number | null> = { sqm: 1, sqft: 0.09290304, 
 export const OPEN_LISTING_STATUSES = ['draft', 'available', 'reserved', 'under_contract'] as const;
 export const LIVE_LEASE_STATUSES = ['pending_signature', 'active', 'periodic', 'notice_given'] as const;
 
-export type PropertySortField = 'reference' | 'createdAt' | 'updatedAt';
+export type PropertySortField = 'reference' | 'createdAt' | 'updatedAt' | 'distance';
 
 export function toSquareMetres(value: number, unit: string): number | null {
   const factor = SQM_PER_UNIT[unit];
@@ -51,32 +63,48 @@ interface ResolvedPlacement {
 
 @Injectable()
 export class PropertiesService {
-  constructor(private readonly audit: AuditService) {}
+  constructor(
+    private readonly audit: AuditService,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
+  ) {}
 
-  async list(tx: Tx, ctx: TenantContext, scope: PermissionScope, query: ParsedListQuery<PropertySortField>): Promise<Page<PropertySummaryDto>> {
-    const sortColumn = `p.${query.sort.field}`;
-    let qb = this.summaryQuery(tx)
-      .select(sortValueSql(sortColumn, query.sort.kind).as('cursorValue'))
-      .where(propertyScopeSql(scope, ctx, 'p'));
-
-    const { filters } = query;
-    const archived = filters['archived'] ?? 'false';
-    if (archived === 'false') qb = qb.where('p.archivedAt', 'is', null);
-    if (archived === 'true') qb = qb.where('p.archivedAt', 'is not', null);
-    if (Array.isArray(filters['officeId'])) qb = qb.where('p.officeId', 'in', filters['officeId']);
-    if (Array.isArray(filters['propertyTypeId'])) qb = qb.where('p.propertyTypeId', 'in', filters['propertyTypeId']);
-    if (Array.isArray(filters['countryCode'])) qb = qb.where('a.countryCode', 'in', filters['countryCode']);
-    if (typeof filters['isManaged'] === 'boolean') qb = qb.where('p.isManaged', '=', filters['isManaged']);
-    if (query.q !== null) {
-      const pattern = `%${query.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-      qb = qb.where((eb) =>
-        eb.or([eb('p.reference', 'ilike', pattern), eb('p.name', 'ilike', pattern), eb('a.formatted', 'ilike', pattern)]),
-      );
-    }
-    if (query.cursor) qb = qb.where(keysetCondition(sortColumn, 'p.id', query.sort, query.cursor));
+  async list(
+    tx: Tx,
+    ctx: TenantContext,
+    scope: PermissionScope,
+    query: ParsedListQuery<PropertySortField>,
+    location: LocationFilter,
+  ): Promise<Page<PropertySummaryDto>> {
+    assertDistanceSort(query.sort.field, location);
+    await this.prepareLocationSearch(tx, location);
+    const sortExpression = query.sort.field === 'distance' ? distanceSql(location, 'a') : sql.ref(`p.${query.sort.field}`);
+    let qb = this.filteredQuery(tx, ctx, scope, query.filters, query.q, location)
+      .select((eb) => [
+        'p.id',
+        'p.reference',
+        'p.name',
+        'p.propertyTypeId',
+        'pt.code as propertyTypeCode',
+        'pt.name as propertyTypeName',
+        'p.officeId',
+        'o.code as officeCode',
+        'o.name as officeName',
+        'a.countryCode',
+        'a.locality',
+        'a.formatted',
+        'a.latitude',
+        'a.longitude',
+        'p.isManaged',
+        'p.archivedAt',
+        'p.updatedAt',
+        unitCountSubquery(eb),
+        sortValueSql(sortExpression, query.sort.kind).as('cursorValue'),
+        (location.near ? distanceSql(location, 'a') : sql<string | null>`null`).as('distanceMeters'),
+      ]);
+    if (query.cursor) qb = qb.where(keysetCondition(sortExpression, 'p.id', query.sort, query.cursor));
 
     const rows = await qb
-      .orderBy(sql.ref(sortColumn), query.sort.direction)
+      .orderBy(sortExpression, query.sort.direction)
       .orderBy('p.id', query.sort.direction)
       .limit(query.limit + 1)
       .execute();
@@ -90,11 +118,69 @@ export class PropertiesService {
       countryCode: row.countryCode,
       locality: row.locality,
       formattedAddress: row.formatted,
+      latitude: row.latitude === null ? null : Number(row.latitude),
+      longitude: row.longitude === null ? null : Number(row.longitude),
+      distanceMeters: row.distanceMeters === null ? null : Number(row.distanceMeters),
       unitCount: row.unitCount ?? 0,
       isManaged: row.isManaged,
       archivedAt: row.archivedAt?.toISOString() ?? null,
       updatedAt: row.updatedAt.toISOString(),
     }));
+  }
+
+  /** Map view (ADR-006 L-D4): points in the viewport, or clusters above 500. */
+  async map(tx: Tx, ctx: TenantContext, scope: PermissionScope, filters: ParsedFilters, q: string | null, location: LocationFilter): Promise<PropertyMapDto> {
+    const bbox = requireViewport(location);
+    await this.prepareLocationSearch(tx, location);
+    const located = this.filteredQuery(tx, ctx, scope, filters, q, location).where('a.location', 'is not', null);
+    const points = located
+      .select(['p.id', 'p.reference', 'p.name', 'pt.code as propertyTypeCode', 'p.isManaged', 'a.latitude', 'a.longitude'])
+      .orderBy('p.id');
+    return mapResult(tx, points, located.select(['a.latitude', 'a.longitude']), bbox, (row) => ({
+      id: row.id,
+      reference: row.reference,
+      name: row.name,
+      propertyTypeCode: row.propertyTypeCode,
+      isManaged: row.isManaged,
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
+    }));
+  }
+
+  private async prepareLocationSearch(tx: Tx, location: LocationFilter): Promise<void> {
+    if (!hasLocationFilter(location)) return;
+    await configureSearchTransaction(tx, this.config.SEARCH_STATEMENT_TIMEOUT_MS);
+    await assertUsablePolygon(tx, location);
+  }
+
+  /** Scope, list filters, text search and location conditions shared by the list and the map. */
+  private filteredQuery(
+    tx: Tx,
+    ctx: TenantContext,
+    scope: PermissionScope,
+    filters: ParsedFilters,
+    q: string | null,
+    location: LocationFilter,
+  ) {
+    let qb = tx
+      .selectFrom('properties as p')
+      .innerJoin('addresses as a', 'a.id', 'p.addressId')
+      .innerJoin('offices as o', 'o.id', 'p.officeId')
+      .innerJoin('propertyTypes as pt', 'pt.id', 'p.propertyTypeId')
+      .where(propertyScopeSql(scope, ctx, 'p'));
+    const archived = filters['archived'] ?? 'false';
+    if (archived === 'false') qb = qb.where('p.archivedAt', 'is', null);
+    if (archived === 'true') qb = qb.where('p.archivedAt', 'is not', null);
+    if (Array.isArray(filters['officeId'])) qb = qb.where('p.officeId', 'in', filters['officeId']);
+    if (Array.isArray(filters['propertyTypeId'])) qb = qb.where('p.propertyTypeId', 'in', filters['propertyTypeId']);
+    if (Array.isArray(filters['countryCode'])) qb = qb.where('a.countryCode', 'in', filters['countryCode']);
+    if (typeof filters['isManaged'] === 'boolean') qb = qb.where('p.isManaged', '=', filters['isManaged']);
+    if (q !== null) {
+      const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+      qb = qb.where((eb) => eb.or([eb('p.reference', 'ilike', pattern), eb('p.name', 'ilike', pattern), eb('a.formatted', 'ilike', pattern)]));
+    }
+    for (const condition of locationConditions(location, 'a')) qb = qb.where(condition);
+    return qb;
   }
 
   async get(tx: Tx, ctx: TenantContext, id: string): Promise<PropertyDto> {
@@ -150,7 +236,6 @@ export class PropertiesService {
           floorsCount: body.floorsCount ?? null,
           ...land,
           isManaged: body.isManaged ?? false,
-          internalNotes: body.internalNotes ?? null,
           createdBy: ctx.membershipId,
         })
         .returning('id')
@@ -244,18 +329,19 @@ export class PropertiesService {
     if (errors.length > 0) throw Problems.validation(errors);
 
     const patch: Record<string, unknown> = { officeId, propertyTypeId, jurisdictionCode, timezone, tenureCode };
-    for (const field of ['name', 'tenureExpiresOn', 'titleReference', 'yearBuilt', 'floorsCount', 'isManaged', 'internalNotes'] as const) {
+    for (const field of ['name', 'tenureExpiresOn', 'titleReference', 'yearBuilt', 'floorsCount', 'isManaged'] as const) {
       if (body[field] !== undefined) patch[field] = body[field];
     }
     if (body.landArea !== undefined) Object.assign(patch, landAreaColumns(body.landArea));
     const effective = Object.fromEntries(
       Object.entries(patch).filter(([key, value]) => !sameValue((current as Record<string, unknown>)[key], value)),
     );
-    const addressDiff = newAddress ? diffForAudit(addressSnapshot(toAddressDto(currentAddress)), addressSnapshot(newAddress)) : null;
+    const nextAddress = newAddress ? addressUpdateColumns(currentAddress, newAddress) : null;
+    const addressDiff = nextAddress ? diffForAudit(addressSnapshot(currentAddress), addressSnapshot(nextAddress)) : null;
     if (Object.keys(effective).length === 0 && addressDiff === null) return this.get(tx, ctx, id);
 
-    if (newAddress !== null && addressDiff !== null) {
-      await tx.updateTable('addresses').set(addressColumns(newAddress)).where('id', '=', current.addressId).execute();
+    if (nextAddress !== null && addressDiff !== null) {
+      await tx.updateTable('addresses').set(nextAddress).where('id', '=', current.addressId).execute();
     }
     // An address-only edit still touches the property so its version (ETag) changes.
     const updated = await tx
@@ -274,6 +360,20 @@ export class PropertiesService {
       entityId: id,
       changes: Object.keys(changes).length > 0 ? changes : null,
     });
+    if (addressDiff?.['latitude'] !== undefined || addressDiff?.['longitude'] !== undefined) {
+      await this.audit.record(tx, ctx, {
+        action: 'property.location_changed',
+        entityType: 'property',
+        entityId: id,
+        changes: {
+          location: {
+            old: pointOf(currentAddress.latitude, currentAddress.longitude),
+            new: pointOf(nextAddress!.latitude, nextAddress!.longitude),
+          },
+        },
+        metadata: { geocodeSource: nextAddress!.geocodeSource, geocodeAccuracy: nextAddress!.geocodeAccuracy },
+      });
+    }
     await this.audit.emit(tx, ctx, { eventType: 'property.updated', aggregateType: 'property', aggregateId: id, payload: { propertyId: id } });
     return this.get(tx, ctx, id);
   }
@@ -438,32 +538,6 @@ export class PropertiesService {
     return errors;
   }
 
-  private summaryQuery(tx: Tx) {
-    return tx
-      .selectFrom('properties as p')
-      .innerJoin('addresses as a', 'a.id', 'p.addressId')
-      .innerJoin('offices as o', 'o.id', 'p.officeId')
-      .innerJoin('propertyTypes as pt', 'pt.id', 'p.propertyTypeId')
-      .select((eb) => [
-        'p.id',
-        'p.reference',
-        'p.name',
-        'p.propertyTypeId',
-        'pt.code as propertyTypeCode',
-        'pt.name as propertyTypeName',
-        'p.officeId',
-        'o.code as officeCode',
-        'o.name as officeName',
-        'a.countryCode',
-        'a.locality',
-        'a.formatted',
-        'p.isManaged',
-        'p.archivedAt',
-        'p.updatedAt',
-        unitCountSubquery(eb),
-      ]);
-  }
-
   private detailQuery(tx: Tx) {
     return tx
       .selectFrom('properties as p')
@@ -489,6 +563,10 @@ export class PropertiesService {
         'a.formatted',
         'a.latitude',
         'a.longitude',
+        'a.geocodeSource',
+        'a.geocodeAccuracy',
+        'a.geocodedAt',
+        'a.locationStale',
         unitCountSubquery(eb),
       ]);
   }
@@ -522,12 +600,74 @@ export function sameValue(stored: unknown, requested: unknown): boolean {
   return JSON.stringify(stored ?? null) === JSON.stringify(requested ?? null);
 }
 
-/** Plain-object view of an address for audit diffs (coordinates already numbers). */
-function addressSnapshot(address: Omit<NormalisedAddress, 'formatted'> & { formatted: string | null }): Record<string, unknown> {
-  return { ...address };
+type AddressRow = Selectable<Addresses>;
+type AddressColumns = ReturnType<typeof addressColumns>;
+
+/** Plain-object view of an address for audit diffs: coordinates as numbers, no timestamps. */
+function addressSnapshot(address: AddressRow | AddressColumns): Record<string, unknown> {
+  const localComponents = typeof address.localComponents === 'string' ? (JSON.parse(address.localComponents) as unknown) : address.localComponents;
+  return {
+    countryCode: address.countryCode,
+    addressLine1: address.addressLine1,
+    addressLine2: address.addressLine2,
+    addressLine3: address.addressLine3,
+    dependentLocality: address.dependentLocality,
+    locality: address.locality,
+    adminArea2: address.adminArea2,
+    adminArea1: address.adminArea1,
+    postalCode: address.postalCode,
+    localComponents,
+    formatted: address.formatted,
+    latitude: address.latitude === null ? null : Number(address.latitude),
+    longitude: address.longitude === null ? null : Number(address.longitude),
+    geocodeSource: address.geocodeSource,
+    geocodeAccuracy: address.geocodeAccuracy,
+    locationStale: address.locationStale,
+  };
+}
+
+function pointOf(latitude: string | number | null, longitude: string | number | null) {
+  return latitude === null || longitude === null ? null : { latitude: Number(latitude), longitude: Number(longitude) };
+}
+
+const LOCATING_FIELDS = [
+  'countryCode', 'addressLine1', 'addressLine2', 'addressLine3', 'dependentLocality',
+  'locality', 'adminArea2', 'adminArea1', 'postalCode', 'localComponents',
+] as const;
+
+/**
+ * Columns for an address edit (ADR-006 L-D2). Coordinates that were not sent
+ * are kept, never cleared silently; when the address text changes under a
+ * kept point, the point is flagged for checking.
+ */
+function addressUpdateColumns(current: AddressRow, next: NormalisedAddress): AddressColumns {
+  const columns = addressColumns(next);
+  if (next.location.kind !== 'keep') {
+    const sameConfirmedPoint =
+      next.location.kind === 'set' &&
+      current.latitude !== null &&
+      Number(current.latitude) === next.location.latitude &&
+      Number(current.longitude) === next.location.longitude &&
+      current.geocodeSource === next.location.source &&
+      current.geocodeAccuracy === next.location.accuracy;
+    return sameConfirmedPoint ? { ...columns, geocodedAt: current.geocodedAt } : columns;
+  }
+  const before = addressSnapshot(current);
+  const after = addressSnapshot(columns);
+  const textChanged = LOCATING_FIELDS.some((field) => JSON.stringify(before[field] ?? null) !== JSON.stringify(after[field] ?? null));
+  return {
+    ...columns,
+    latitude: current.latitude === null ? null : Number(current.latitude),
+    longitude: current.longitude === null ? null : Number(current.longitude),
+    geocodeSource: current.geocodeSource as GeocodeSource | null,
+    geocodeAccuracy: current.geocodeAccuracy,
+    geocodedAt: current.geocodedAt,
+    locationStale: current.latitude !== null && (current.locationStale || textChanged),
+  };
 }
 
 function addressColumns(address: NormalisedAddress) {
+  const point = address.location.kind === 'set' ? address.location : null;
   return {
     countryCode: address.countryCode,
     addressLine1: address.addressLine1,
@@ -540,8 +680,12 @@ function addressColumns(address: NormalisedAddress) {
     postalCode: address.postalCode,
     localComponents: JSON.stringify(address.localComponents),
     formatted: address.formatted,
-    latitude: address.latitude,
-    longitude: address.longitude,
+    latitude: point?.latitude ?? null,
+    longitude: point?.longitude ?? null,
+    geocodeSource: point?.source ?? null,
+    geocodeAccuracy: point?.accuracy ?? null,
+    geocodedAt: point ? new Date() : null,
+    locationStale: false,
   };
 }
 
@@ -587,7 +731,6 @@ function toPropertyDto(row: Awaited<ReturnType<ReturnType<PropertiesService['det
             unit: row.landAreaInputUnit,
           },
     isManaged: row.isManaged,
-    internalNotes: row.internalNotes,
     customFields: (row.customFields ?? {}) as Record<string, unknown>,
     unitCount: row.unitCount ?? 0,
     archivedAt: row.archivedAt?.toISOString() ?? null,

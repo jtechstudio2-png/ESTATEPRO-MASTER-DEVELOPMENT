@@ -19,6 +19,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import { MapClusterDto } from '../location/map-results.js';
 import { AddressDto, AddressInput } from '../reference/address.js';
 
 export const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
@@ -63,8 +64,6 @@ class PropertyFieldsBase {
   landArea?: LandAreaInput | null;
 
   @ApiPropertyOptional({ description: 'Under a management agreement' }) @ValidateIf(provided) @IsBoolean() isManaged?: boolean;
-
-  @ApiPropertyOptional() @ValidateIf(provided) @IsString() @MaxLength(10_000) internalNotes?: string | null;
 
   @ApiPropertyOptional({ description: 'Defaults to the office jurisdiction when in the same country' })
   @ValidateIf(provided) @Matches(/^[A-Z]{2}(-[A-Z0-9]{1,3})?$/)
@@ -125,7 +124,6 @@ export class PropertyDto {
   @ApiProperty({ type: Number, nullable: true }) floorsCount!: number | null;
   @ApiProperty({ type: AreaDto, nullable: true }) landArea!: AreaDto | null;
   @ApiProperty() isManaged!: boolean;
-  @ApiProperty({ type: String, nullable: true }) internalNotes!: string | null;
   @ApiProperty({ type: 'object', additionalProperties: true, description: 'Company custom fields (read-only in Phase 4)' })
   customFields!: Record<string, unknown>;
   @ApiProperty({ description: 'Units that are not archived' }) unitCount!: number;
@@ -145,6 +143,9 @@ export class PropertySummaryDto {
   @ApiProperty() countryCode!: string;
   @ApiProperty({ type: String, nullable: true }) locality!: string | null;
   @ApiProperty({ type: String, nullable: true }) formattedAddress!: string | null;
+  @ApiProperty({ type: Number, nullable: true }) latitude!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) longitude!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Metres from filter[near]; null without it' }) distanceMeters!: number | null;
   @ApiProperty() unitCount!: number;
   @ApiProperty() isManaged!: boolean;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) archivedAt!: string | null;
@@ -159,6 +160,23 @@ export class PageDto {
 export class PropertyPageDto {
   @ApiProperty({ type: [PropertySummaryDto] }) data!: PropertySummaryDto[];
   @ApiProperty({ type: PageDto }) page!: PageDto;
+}
+
+export class PropertyMapPointDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() reference!: string;
+  @ApiProperty({ type: String, nullable: true }) name!: string | null;
+  @ApiProperty() propertyTypeCode!: string;
+  @ApiProperty() isManaged!: boolean;
+  @ApiProperty() latitude!: number;
+  @ApiProperty() longitude!: number;
+}
+
+export class PropertyMapDto {
+  @ApiProperty({ description: 'Matching properties with a location in the viewport' }) total!: number;
+  @ApiProperty({ description: 'True when more than 500 match: clusters are returned instead of points' }) clustered!: boolean;
+  @ApiProperty({ type: [PropertyMapPointDto] }) points!: PropertyMapPointDto[];
+  @ApiProperty({ type: [MapClusterDto] }) clusters!: MapClusterDto[];
 }
 
 // ----------------------------------------------------------------------------- units

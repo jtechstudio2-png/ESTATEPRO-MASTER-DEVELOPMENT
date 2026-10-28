@@ -241,13 +241,21 @@ export function toPage<R, T>(
  * timestamp keeps its microseconds (a JavaScript Date would drop them and
  * repeat or skip rows across pages).
  */
-export function sortValueSql(column: string, kind: SortValueKind): RawBuilder<string> {
-  return kind === 'text' ? sql<string>`${sql.ref(column)}` : sql<string>`(${sql.ref(column)})::text`;
+export function sortValueSql(column: string | RawBuilder<unknown>, kind: SortValueKind): RawBuilder<string> {
+  const target = typeof column === 'string' ? sql.ref(column) : column;
+  return kind === 'text' ? sql<string>`${target}` : sql<string>`(${target})::text`;
 }
 
-export function keysetCondition(column: string, idColumn: string, sort: ParsedSort<string>, cursor: Cursor): RawBuilder<boolean> {
+/** `column` is a column name, or an expression for computed sorts such as distance. */
+export function keysetCondition(
+  column: string | RawBuilder<unknown>,
+  idColumn: string,
+  sort: ParsedSort<string>,
+  cursor: Cursor,
+): RawBuilder<boolean> {
+  const target = typeof column === 'string' ? sql.ref(column) : column;
   const operator = sort.direction === 'asc' ? sql.raw('>') : sql.raw('<');
   const value =
     sort.kind === 'timestamp' ? sql`${cursor.v}::timestamptz` : sort.kind === 'numeric' ? sql`${cursor.v}::numeric` : sql`${cursor.v}`;
-  return sql<boolean>`(${sql.ref(column)}, ${sql.ref(idColumn)}) ${operator} (${value}, ${cursor.id}::uuid)`;
+  return sql<boolean>`(${target}, ${sql.ref(idColumn)}) ${operator} (${value}, ${cursor.id}::uuid)`;
 }

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsIn,
   IsLatitude,
   IsLongitude,
   IsObject,
@@ -9,10 +10,15 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 import type { FieldError } from '../common/problem.js';
 import type { Tx } from '../database/database.module.js';
+
+export const GEOCODE_SOURCES = ['manual_pin', 'geocoder', 'postcode_centroid', 'import'] as const;
+export type GeocodeSource = (typeof GEOCODE_SOURCES)[number];
+export const GEOCODE_ACCURACIES = ['rooftop', 'street', 'postcode', 'locality'] as const;
 
 const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
 
@@ -44,8 +50,33 @@ export class AddressInput {
   @IsObject()
   localComponents?: Record<string, string>;
 
-  @ApiPropertyOptional({ minimum: -90, maximum: 90 }) @IsOptional() @IsLatitude() latitude?: number;
-  @ApiPropertyOptional({ minimum: -180, maximum: 180 }) @IsOptional() @IsLongitude() longitude?: number;
+  @ApiPropertyOptional({
+    minimum: -90,
+    maximum: 90,
+    nullable: true,
+    description: 'Confirmed by the user (ADR-006 L-D2). On update: omit to keep the stored point, null (with longitude) to remove it.',
+  })
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined && value !== null)
+  @IsLatitude()
+  latitude?: number | null;
+
+  @ApiPropertyOptional({ minimum: -180, maximum: 180, nullable: true })
+  @ValidateIf((_object: unknown, value: unknown) => value !== undefined && value !== null)
+  @IsLongitude()
+  longitude?: number | null;
+
+  @ApiPropertyOptional({
+    enum: GEOCODE_SOURCES,
+    description: 'How the point was found; defaults to manual_pin. Only with coordinates.',
+  })
+  @IsOptional()
+  @IsIn(GEOCODE_SOURCES)
+  geocodeSource?: GeocodeSource;
+
+  @ApiPropertyOptional({ enum: GEOCODE_ACCURACIES, description: 'Precision of the point, e.g. from a geocoder suggestion' })
+  @IsOptional()
+  @IsIn(GEOCODE_ACCURACIES)
+  geocodeAccuracy?: (typeof GEOCODE_ACCURACIES)[number];
 }
 
 export class AddressDto {
@@ -62,6 +93,11 @@ export class AddressDto {
   @ApiProperty({ type: String, nullable: true }) formatted!: string | null;
   @ApiProperty({ type: Number, nullable: true }) latitude!: number | null;
   @ApiProperty({ type: Number, nullable: true }) longitude!: number | null;
+  @ApiProperty({ type: String, nullable: true, enum: GEOCODE_SOURCES }) geocodeSource!: string | null;
+  @ApiProperty({ type: String, nullable: true, enum: GEOCODE_ACCURACIES }) geocodeAccuracy!: string | null;
+  @ApiProperty({ type: String, nullable: true, format: 'date-time', description: 'When the point was last confirmed' })
+  geocodedAt!: string | null;
+  @ApiProperty({ description: 'The address changed after the point was confirmed: check the pin' }) locationStale!: boolean;
 }
 
 interface FieldRule {
@@ -98,8 +134,8 @@ export interface NormalisedAddress {
   postalCode: string | null;
   localComponents: Record<string, string>;
   formatted: string;
-  latitude: number | null;
-  longitude: number | null;
+  /** 'keep' (update only): coordinates were not sent, the stored point stays. */
+  location: { kind: 'set'; latitude: number; longitude: number; source: GeocodeSource; accuracy: string | null } | { kind: 'clear' } | { kind: 'keep' };
 }
 
 const FIELD_MAP: Array<[keyof AddressFormat, 'locality' | 'adminArea1' | 'adminArea2' | 'postalCode']> = [
@@ -122,7 +158,7 @@ export async function validateAddress(
   const errors: FieldError[] = [];
   const country = await tx
     .selectFrom('countries')
-    .select(['code', 'name', 'addressFormat'])
+    .select(['code', 'name', 'addressFormat', 'boundsSouth', 'boundsWest', 'boundsNorth', 'boundsEast'])
     .where('code', '=', input.countryCode)
     .where('isActive', '=', true)
     .executeTakeFirst();
@@ -191,8 +227,12 @@ export async function validateAddress(
       message: 'Enter the street address or the local address reference.',
     });
   }
-  if ((input.latitude === undefined) !== (input.longitude === undefined)) {
+  if ((input.latitude === undefined) !== (input.longitude === undefined) || (input.latitude === null) !== (input.longitude === null)) {
     errors.push({ field: `${prefix}.latitude`, code: 'pair', message: 'Give both latitude and longitude, or neither.' });
+  } else if (typeof input.latitude === 'number' && typeof input.longitude === 'number') {
+    errors.push(...checkCoordinates(country, input.latitude, input.longitude, prefix));
+  } else if (input.geocodeSource !== undefined || input.geocodeAccuracy !== undefined) {
+    errors.push({ field: `${prefix}.geocodeSource`, code: 'needs-coordinates', message: 'A location source needs latitude and longitude.' });
   }
 
   if (errors.length > 0) return { errors, address: null };
@@ -228,10 +268,42 @@ export async function validateAddress(
       postalCode,
       localComponents,
       formatted,
-      latitude: input.latitude ?? null,
-      longitude: input.longitude ?? null,
+      location:
+        typeof input.latitude === 'number' && typeof input.longitude === 'number'
+          ? {
+              kind: 'set',
+              latitude: input.latitude,
+              longitude: input.longitude,
+              source: input.geocodeSource ?? 'manual_pin',
+              accuracy: input.geocodeAccuracy ?? null,
+            }
+          : input.latitude === null
+            ? { kind: 'clear' }
+            : { kind: 'keep' },
     },
   };
+}
+
+interface CountryBounds {
+  name: string;
+  boundsSouth: string | null;
+  boundsWest: string | null;
+  boundsNorth: string | null;
+  boundsEast: string | null;
+}
+
+/** ADR-006 L-D5: no (0, 0) and nothing outside the country's bounding box. */
+export function checkCoordinates(country: CountryBounds, latitude: number, longitude: number, prefix: string): FieldError[] {
+  if (latitude === 0 && longitude === 0) {
+    return [{ field: `${prefix}.latitude`, code: 'invalid-coordinates', message: 'The location 0,0 is not a real address. Place the pin again.' }];
+  }
+  const { boundsSouth, boundsWest, boundsNorth, boundsEast } = country;
+  if (boundsSouth === null || boundsWest === null || boundsNorth === null || boundsEast === null) return [];
+  const inside =
+    latitude >= Number(boundsSouth) && latitude <= Number(boundsNorth) && longitude >= Number(boundsWest) && longitude <= Number(boundsEast);
+  return inside
+    ? []
+    : [{ field: `${prefix}.latitude`, code: 'outside-country', message: `This location is outside ${country.name}. Check the pin and the country.` }];
 }
 
 export function toAddressDto(row: {
@@ -248,6 +320,10 @@ export function toAddressDto(row: {
   formatted: string | null;
   latitude: string | null;
   longitude: string | null;
+  geocodeSource: string | null;
+  geocodeAccuracy: string | null;
+  geocodedAt: Date | null;
+  locationStale: boolean;
 }): AddressDto {
   return {
     countryCode: row.countryCode,
@@ -263,5 +339,9 @@ export function toAddressDto(row: {
     formatted: row.formatted,
     latitude: row.latitude === null ? null : Number(row.latitude),
     longitude: row.longitude === null ? null : Number(row.longitude),
+    geocodeSource: row.geocodeSource,
+    geocodeAccuracy: row.geocodeAccuracy,
+    geocodedAt: row.geocodedAt?.toISOString() ?? null,
+    locationStale: row.locationStale,
   };
 }

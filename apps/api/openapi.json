@@ -358,6 +358,60 @@
             }
           },
           {
+            "name": "filter[near]",
+            "required": false,
+            "in": "query",
+            "description": "Centre for a radius search: latitude,longitude",
+            "schema": {}
+          },
+          {
+            "name": "filter[radius]",
+            "required": false,
+            "in": "query",
+            "description": "Radius in metres (1–50000); with filter[near]",
+            "schema": {}
+          },
+          {
+            "name": "filter[bbox]",
+            "required": false,
+            "in": "query",
+            "description": "Map viewport: west,south,east,north",
+            "schema": {}
+          },
+          {
+            "name": "filter[polygon]",
+            "required": false,
+            "in": "query",
+            "description": "Area drawn on the map: \"longitude latitude\" pairs separated by commas, 3–100 points",
+            "schema": {}
+          },
+          {
+            "name": "filter[hasLocation]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[locality]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated town or city names (case-insensitive)",
+            "schema": {}
+          },
+          {
+            "name": "filter[adminArea1]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated regions (case-insensitive)",
+            "schema": {}
+          },
+          {
             "name": "filter[archived]",
             "required": false,
             "in": "query",
@@ -421,7 +475,9 @@
                 "createdAt",
                 "-createdAt",
                 "updatedAt",
-                "-updatedAt"
+                "-updatedAt",
+                "distance",
+                "-distance"
               ],
               "type": "string"
             }
@@ -502,6 +558,101 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PropertyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/properties/map": {
+      "get": {
+        "operationId": "Properties_map",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[near]",
+            "required": false,
+            "in": "query",
+            "description": "Centre for a radius search: latitude,longitude",
+            "schema": {}
+          },
+          {
+            "name": "filter[radius]",
+            "required": false,
+            "in": "query",
+            "description": "Radius in metres (1–50000); with filter[near]",
+            "schema": {}
+          },
+          {
+            "name": "filter[bbox]",
+            "required": false,
+            "in": "query",
+            "description": "Map viewport: west,south,east,north",
+            "schema": {}
+          },
+          {
+            "name": "filter[polygon]",
+            "required": false,
+            "in": "query",
+            "description": "Area drawn on the map: \"longitude latitude\" pairs separated by commas, 3–100 points",
+            "schema": {}
+          },
+          {
+            "name": "filter[hasLocation]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[locality]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated town or city names (case-insensitive)",
+            "schema": {}
+          },
+          {
+            "name": "filter[adminArea1]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated regions (case-insensitive)",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyMapDto"
                 }
               }
             }
@@ -1161,6 +1312,69 @@
         ]
       }
     },
+    "/api/v1/geocoding/suggestions": {
+      "get": {
+        "operationId": "Geocoding_suggest",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "description": "Result language, e.g. en or ar",
+            "schema": {}
+          },
+          {
+            "name": "near",
+            "required": false,
+            "in": "query",
+            "description": "latitude,longitude to rank nearby results first",
+            "schema": {}
+          },
+          {
+            "name": "countryCode",
+            "required": true,
+            "in": "query",
+            "description": "ISO 3166-1 alpha-2",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Address text, 3–200 characters",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeocodeSuggestionListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Location"
+        ]
+      }
+    },
     "/api/v1/listings": {
       "get": {
         "operationId": "Listings_list",
@@ -1172,6 +1386,60 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "filter[near]",
+            "required": false,
+            "in": "query",
+            "description": "Centre for a radius search: latitude,longitude",
+            "schema": {}
+          },
+          {
+            "name": "filter[radius]",
+            "required": false,
+            "in": "query",
+            "description": "Radius in metres (1–50000); with filter[near]",
+            "schema": {}
+          },
+          {
+            "name": "filter[bbox]",
+            "required": false,
+            "in": "query",
+            "description": "Map viewport: west,south,east,north",
+            "schema": {}
+          },
+          {
+            "name": "filter[polygon]",
+            "required": false,
+            "in": "query",
+            "description": "Area drawn on the map: \"longitude latitude\" pairs separated by commas, 3–100 points",
+            "schema": {}
+          },
+          {
+            "name": "filter[hasLocation]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[locality]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated town or city names (case-insensitive)",
+            "schema": {}
+          },
+          {
+            "name": "filter[adminArea1]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated regions (case-insensitive)",
+            "schema": {}
           },
           {
             "name": "filter[mandateExpiresOn][lte]",
@@ -1299,7 +1567,9 @@
                 "updatedAt",
                 "-updatedAt",
                 "price",
-                "-price"
+                "-price",
+                "distance",
+                "-distance"
               ],
               "type": "string"
             }
@@ -1380,6 +1650,137 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Listings"
+        ]
+      }
+    },
+    "/api/v1/listings/map": {
+      "get": {
+        "operationId": "Listings_map",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[near]",
+            "required": false,
+            "in": "query",
+            "description": "Centre for a radius search: latitude,longitude",
+            "schema": {}
+          },
+          {
+            "name": "filter[radius]",
+            "required": false,
+            "in": "query",
+            "description": "Radius in metres (1–50000); with filter[near]",
+            "schema": {}
+          },
+          {
+            "name": "filter[bbox]",
+            "required": false,
+            "in": "query",
+            "description": "Map viewport: west,south,east,north",
+            "schema": {}
+          },
+          {
+            "name": "filter[polygon]",
+            "required": false,
+            "in": "query",
+            "description": "Area drawn on the map: \"longitude latitude\" pairs separated by commas, 3–100 points",
+            "schema": {}
+          },
+          {
+            "name": "filter[hasLocation]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[locality]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated town or city names (case-insensitive)",
+            "schema": {}
+          },
+          {
+            "name": "filter[adminArea1]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated regions (case-insensitive)",
+            "schema": {}
+          },
+          {
+            "name": "filter[bedrooms][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[price][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[price][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[currencyCode]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[listingType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingMapDto"
                 }
               }
             }
@@ -3043,6 +3444,1201 @@
           "Media"
         ]
       }
+    },
+    "/api/v1/properties/{propertyId}/notes": {
+      "get": {
+        "operationId": "Notes_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[authorId]",
+            "required": false,
+            "in": "query",
+            "description": "Membership ids",
+            "schema": {}
+          },
+          {
+            "name": "filter[visibility]",
+            "required": false,
+            "in": "query",
+            "description": "internal, landlord, tenant",
+            "schema": {}
+          },
+          {
+            "name": "filter[category]",
+            "required": false,
+            "in": "query",
+            "description": "general, access, viewing, maintenance, legal, owner",
+            "schema": {}
+          },
+          {
+            "name": "filter[unitId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[pinned]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "createdAt",
+                "-createdAt",
+                "updatedAt",
+                "-updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotePageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      },
+      "post": {
+        "operationId": "Notes_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      }
+    },
+    "/api/v1/property-notes/{noteId}": {
+      "get": {
+        "operationId": "Notes_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      },
+      "patch": {
+        "operationId": "Notes_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      }
+    },
+    "/api/v1/property-notes/{noteId}/archive": {
+      "post": {
+        "operationId": "Notes_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      }
+    },
+    "/api/v1/property-notes/{noteId}/restore": {
+      "post": {
+        "operationId": "Notes_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      }
+    },
+    "/api/v1/property-notes/{noteId}/redact": {
+      "post": {
+        "operationId": "Notes_redact",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedactNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      }
+    },
+    "/api/v1/property-notes/{noteId}/revisions": {
+      "get": {
+        "operationId": "Notes_revisions",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "noteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "required": false,
+            "in": "query",
+            "description": "Revisions older than this one",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteRevisionPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Property notes"
+        ]
+      }
+    },
+    "/api/v1/key-sets": {
+      "get": {
+        "operationId": "Keys_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[holderMembershipId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[unitId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[overdue]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "in_office, checked_out, with_owner, lost, retired (default: all but retired)",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "label",
+                "-label",
+                "updatedAt",
+                "-updatedAt",
+                "dueBackAt",
+                "-dueBackAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/properties/{propertyId}/key-sets": {
+      "get": {
+        "operationId": "Keys_listForProperty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      },
+      "post": {
+        "operationId": "Keys_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeySetBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}": {
+      "get": {
+        "operationId": "Keys_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      },
+      "patch": {
+        "operationId": "Keys_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeySetBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}/check-out": {
+      "post": {
+        "operationId": "Keys_checkOut",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckOutBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}/check-in": {
+      "post": {
+        "operationId": "Keys_checkIn",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}/report-lost": {
+      "post": {
+        "operationId": "Keys_reportLost",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}/found": {
+      "post": {
+        "operationId": "Keys_found",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyNoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}/retire": {
+      "post": {
+        "operationId": "Keys_retire",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetireKeySetBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
+    },
+    "/api/v1/key-sets/{keySetId}/movements": {
+      "get": {
+        "operationId": "Keys_movements",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keySetId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyMovementPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Key register"
+        ]
+      }
     }
   },
   "info": {
@@ -3499,6 +5095,25 @@
               "null"
             ]
           },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distanceMeters": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Metres from filter[near]; null without it"
+          },
           "unitCount": {
             "type": "number"
           },
@@ -3526,6 +5141,9 @@
           "countryCode",
           "locality",
           "formattedAddress",
+          "latitude",
+          "longitude",
+          "distanceMeters",
           "unitCount",
           "isManaged",
           "archivedAt",
@@ -3566,6 +5184,105 @@
         "required": [
           "data",
           "page"
+        ]
+      },
+      "PropertyMapPointDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "propertyTypeCode": {
+            "type": "string"
+          },
+          "isManaged": {
+            "type": "boolean"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name",
+          "propertyTypeCode",
+          "isManaged",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "MapClusterDto": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "description": "Records in this cell"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Average position of the records"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "bounds": {
+            "description": "west, south, east, north of the records in the cell (zoom here to expand)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "latitude",
+          "longitude",
+          "bounds"
+        ]
+      },
+      "PropertyMapDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Matching properties with a location in the viewport"
+          },
+          "clustered": {
+            "type": "boolean",
+            "description": "True when more than 500 match: clusters are returned instead of points"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PropertyMapPointDto"
+            }
+          },
+          "clusters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapClusterDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "clustered",
+          "points",
+          "clusters"
         ]
       },
       "LandAreaInput": {
@@ -3637,14 +5354,41 @@
             }
           },
           "latitude": {
-            "type": "number",
+            "type": [
+              "object",
+              "null"
+            ],
             "minimum": -90,
-            "maximum": 90
+            "maximum": 90,
+            "description": "Confirmed by the user (ADR-006 L-D2). On update: omit to keep the stored point, null (with longitude) to remove it."
           },
           "longitude": {
-            "type": "number",
+            "type": [
+              "object",
+              "null"
+            ],
             "minimum": -180,
             "maximum": 180
+          },
+          "geocodeSource": {
+            "type": "string",
+            "enum": [
+              "manual_pin",
+              "geocoder",
+              "postcode_centroid",
+              "import"
+            ],
+            "description": "How the point was found; defaults to manual_pin. Only with coordinates."
+          },
+          "geocodeAccuracy": {
+            "type": "string",
+            "enum": [
+              "rooftop",
+              "street",
+              "postcode",
+              "locality"
+            ],
+            "description": "Precision of the point, e.g. from a geocoder suggestion"
           }
         },
         "required": [
@@ -3686,9 +5430,6 @@
           "isManaged": {
             "type": "boolean",
             "description": "Under a management agreement"
-          },
-          "internalNotes": {
-            "type": "object"
           },
           "jurisdictionCode": {
             "type": "string",
@@ -3799,6 +5540,44 @@
               "number",
               "null"
             ]
+          },
+          "geocodeSource": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "manual_pin",
+              "geocoder",
+              "postcode_centroid",
+              "import",
+              null
+            ]
+          },
+          "geocodeAccuracy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "rooftop",
+              "street",
+              "postcode",
+              "locality",
+              null
+            ]
+          },
+          "geocodedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the point was last confirmed"
+          },
+          "locationStale": {
+            "type": "boolean",
+            "description": "The address changed after the point was confirmed: check the pin"
           }
         },
         "required": [
@@ -3814,7 +5593,11 @@
           "localComponents",
           "formatted",
           "latitude",
-          "longitude"
+          "longitude",
+          "geocodeSource",
+          "geocodeAccuracy",
+          "geocodedAt",
+          "locationStale"
         ]
       },
       "AreaDto": {
@@ -3916,12 +5699,6 @@
           "isManaged": {
             "type": "boolean"
           },
-          "internalNotes": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "customFields": {
             "type": "object",
             "additionalProperties": true,
@@ -3972,7 +5749,6 @@
           "floorsCount",
           "landArea",
           "isManaged",
-          "internalNotes",
           "customFields",
           "unitCount",
           "archivedAt",
@@ -4017,9 +5793,6 @@
           "isManaged": {
             "type": "boolean",
             "description": "Under a management agreement"
-          },
-          "internalNotes": {
-            "type": "object"
           },
           "jurisdictionCode": {
             "type": "string",
@@ -4398,6 +6171,57 @@
           "availability"
         ]
       },
+      "GeocodeSuggestionDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "accuracy": {
+            "type": "string",
+            "enum": [
+              "rooftop",
+              "street",
+              "postcode",
+              "locality"
+            ]
+          },
+          "geocodeSource": {
+            "type": "string",
+            "enum": [
+              "geocoder"
+            ],
+            "description": "Send back as address.geocodeSource when the user accepts the suggestion"
+          }
+        },
+        "required": [
+          "label",
+          "latitude",
+          "longitude",
+          "accuracy",
+          "geocodeSource"
+        ]
+      },
+      "GeocodeSuggestionListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeocodeSuggestionDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "MoneyDto": {
         "type": "object",
         "properties": {
@@ -4473,13 +6297,27 @@
               "string",
               "null"
             ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
           "id",
           "reference",
           "name",
-          "formattedAddress"
+          "formattedAddress",
+          "latitude",
+          "longitude"
         ]
       },
       "ListingOfficeDto": {
@@ -4518,7 +6356,7 @@
           "displayName"
         ]
       },
-      "ListingSummaryDto": {
+      "ListingListItemDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -4601,6 +6439,13 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "distanceMeters": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Metres from filter[near]; null without it"
           }
         },
         "required": [
@@ -4618,7 +6463,8 @@
           "agent",
           "listedAt",
           "archivedAt",
-          "updatedAt"
+          "updatedAt",
+          "distanceMeters"
         ]
       },
       "ListingPageDto": {
@@ -4627,7 +6473,7 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ListingSummaryDto"
+              "$ref": "#/components/schemas/ListingListItemDto"
             }
           },
           "page": {
@@ -4637,6 +6483,123 @@
         "required": [
           "data",
           "page"
+        ]
+      },
+      "ListingMapPointDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "available",
+              "reserved",
+              "under_contract",
+              "sold",
+              "rented",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "price": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ]
+          },
+          "bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "coverMediaId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Cover photo (GET /media/{id} for its URLs)"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "listingType",
+          "status",
+          "price",
+          "rentFrequency",
+          "bedrooms",
+          "propertyId",
+          "coverMediaId",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "ListingMapDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Matching listings with a location in the viewport"
+          },
+          "clustered": {
+            "type": "boolean",
+            "description": "True when more than 500 match: clusters are returned instead of points"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListingMapPointDto"
+            }
+          },
+          "clusters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapClusterDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "clustered",
+          "points",
+          "clusters"
         ]
       },
       "MoneyInput": {
@@ -6301,6 +8264,700 @@
           "limitBytes",
           "usedBytes",
           "reservedBytes"
+        ]
+      },
+      "NoteMemberDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "membershipId",
+          "displayName"
+        ]
+      },
+      "NoteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string",
+            "description": "Plain text; \"[Redacted]\" after redaction"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "general",
+              "access",
+              "viewing",
+              "maintenance",
+              "legal",
+              "owner"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "internal",
+              "landlord",
+              "tenant"
+            ]
+          },
+          "isPinned": {
+            "type": "boolean"
+          },
+          "pinnedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "user",
+              "migrated"
+            ],
+            "description": "migrated: moved from the former property internal notes field"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NoteMemberDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NoteMemberDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revisionCount": {
+            "type": "number",
+            "description": "Earlier versions of the text kept in the history"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "redactedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "propertyId",
+          "unitId",
+          "body",
+          "category",
+          "visibility",
+          "isPinned",
+          "pinnedAt",
+          "source",
+          "author",
+          "updatedBy",
+          "revisionCount",
+          "archivedAt",
+          "archivedReason",
+          "redactedAt",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "NotePageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CreateNoteBody": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000,
+            "description": "Plain text"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "general",
+              "access",
+              "viewing",
+              "maintenance",
+              "legal",
+              "owner"
+            ],
+            "default": "general"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "internal",
+              "landlord",
+              "tenant"
+            ],
+            "default": "internal",
+            "description": "landlord and tenant need Manage Notes; tenant needs a unit (ADR-006 L-D8)"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unit of this property"
+          },
+          "isPinned": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "UpdateNoteBody": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "general",
+              "access",
+              "viewing",
+              "maintenance",
+              "legal",
+              "owner"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "internal",
+              "landlord",
+              "tenant"
+            ]
+          },
+          "unitId": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "null moves the note to the whole property"
+          },
+          "isPinned": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArchiveNoteBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "RedactNoteBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "erasure_request",
+              "sensitive_data",
+              "other"
+            ],
+            "description": "Recorded in the audit log; the note text never is"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "NoteRevisionDto": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number",
+            "description": "The note version this text belonged to"
+          },
+          "body": {
+            "type": "string"
+          },
+          "writtenBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NoteMemberDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "writtenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the text was replaced"
+          },
+          "redactedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revision",
+          "body",
+          "writtenBy",
+          "writtenAt",
+          "supersededAt",
+          "redactedAt"
+        ]
+      },
+      "NoteRevisionPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteRevisionDto"
+            }
+          },
+          "nextBefore": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Pass as ?before= for older revisions"
+          }
+        },
+        "required": [
+          "data",
+          "nextBefore"
+        ]
+      },
+      "KeyPropertyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name"
+        ]
+      },
+      "KeyHolderDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "member",
+              "contact"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "displayName"
+        ]
+      },
+      "KeySetDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "property": {
+            "$ref": "#/components/schemas/KeyPropertyDto"
+          },
+          "unitId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_office",
+              "checked_out",
+              "with_owner",
+              "lost",
+              "retired"
+            ]
+          },
+          "holder": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KeyHolderDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checkedOutAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dueBackAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "isOverdue": {
+            "type": "boolean",
+            "description": "Checked out and past its due-back time"
+          },
+          "retiredAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "property",
+          "unitId",
+          "label",
+          "description",
+          "status",
+          "holder",
+          "checkedOutAt",
+          "dueBackAt",
+          "isOverdue",
+          "retiredAt",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "KeySetPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KeySetDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CreateKeySetBody": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Key tag number, unique among active key sets",
+            "maxLength": 60
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "What the set contains, e.g. \"2 front door, 1 gate fob\""
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A unit of this property"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_office",
+              "with_owner"
+            ],
+            "default": "in_office",
+            "description": "Where the keys are when registered"
+          }
+        },
+        "required": [
+          "label"
+        ]
+      },
+      "UpdateKeySetBody": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "description": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "unitId": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "CheckOutBody": {
+        "type": "object",
+        "properties": {
+          "holderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Staff member taking the keys (or holderContactId)"
+          },
+          "holderContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Contact taking the keys, e.g. a contractor (or holderMembershipId)"
+          },
+          "dueBackAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the keys must be back"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "KeyNoteBody": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "RetireKeySetBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "KeyMovementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "movement": {
+            "type": "string",
+            "enum": [
+              "check_out",
+              "check_in",
+              "lost",
+              "found"
+            ]
+          },
+          "holder": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KeyHolderDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dueBackAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordedBy": {
+            "$ref": "#/components/schemas/KeyHolderDto"
+          }
+        },
+        "required": [
+          "id",
+          "movement",
+          "holder",
+          "dueBackAt",
+          "note",
+          "occurredAt",
+          "recordedBy"
+        ]
+      },
+      "KeyMovementPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KeyMovementDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
         ]
       }
     }

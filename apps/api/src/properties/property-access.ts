@@ -87,3 +87,34 @@ export function canUseOffice(ctx: TenantContext, scope: PermissionScope, officeI
   if (scope === 'office' || scope === 'own') return ctx.officeIds.includes(officeId);
   return false;
 }
+
+/** Whether the member's grant of `permission` covers the property (by the grant's scope). */
+export async function propertyCovered(tx: Tx, ctx: TenantContext, propertyId: string, permission: string): Promise<boolean> {
+  const grant = ctx.permissions.get(permission);
+  if (!grant) return false;
+  const found = await tx
+    .selectFrom('properties as p')
+    .select('p.id')
+    .where('p.id', '=', propertyId)
+    .where(propertyScopeSql(grant.scope, ctx, 'p'))
+    .executeTakeFirst();
+  return found !== undefined;
+}
+
+/**
+ * For records that hang off a property (notes, key sets): 404 when the
+ * member's `viewPermission` does not cover the property, 403 when the
+ * action's permission does not.
+ */
+export async function assertPropertyRecordAccess(
+  tx: Tx,
+  ctx: TenantContext,
+  propertyId: string,
+  viewPermission: string,
+  actionPermission?: string,
+): Promise<void> {
+  if (!(await propertyCovered(tx, ctx, propertyId, viewPermission))) throw Problems.notFound();
+  if (actionPermission !== undefined && !(await propertyCovered(tx, ctx, propertyId, actionPermission))) {
+    throw Problems.forbidden('Your role does not allow this action for this property.');
+  }
+}

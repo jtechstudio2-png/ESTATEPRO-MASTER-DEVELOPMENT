@@ -29,6 +29,22 @@ Changes to this report after approval:
 - §8.4 (new): key register design.
 - §17.1 (new): public location precision.
 
+## Implementation notes (Milestone 5 delivered)
+
+Where implementation refined the design above:
+
+- **Viewport and polygon edges** are straight lines in latitude and longitude, as they are drawn on the map, not great-circle arcs (§5.3). Each shape is densified for the spatial index's prefilter, then tested exactly. The radius is still measured in metres on the spheroid.
+- **Query planning.** PostGIS underestimates how many addresses an area holds. The listing search therefore:
+  - computes the matching units once per query, in a materialized CTE;
+  - fixes the join order (address → property → unit) for that transaction;
+  - turns off JIT compilation for location searches.
+- **Timeouts.** A search that hits `SEARCH_STATEMENT_TIMEOUT_MS` answers `search-timeout` (503) instead of failing generically.
+- **Map endpoints** count and cluster first, from positions only, and load point details only when 500 or fewer records match.
+- **Polygon area** is capped at 25,000 km² and the viewport span at 30 degrees, both validated before the search runs.
+- **Pinned notes.** List order uses `filter[pinned]=true` for the pinned notes and creation time for the rest. The limit of 5 pinned notes is enforced per property under a row lock.
+- **Note history.** Revisions record who wrote each earlier text and when it was replaced. The author and `manage` holders can read them.
+- **Redaction** replaces the note and every revision with "[Redacted]", through `app.redact_property_note`, which only works on the caller's company.
+
 ## 0. Summary
 
 The specification fixes the shape of this milestone:

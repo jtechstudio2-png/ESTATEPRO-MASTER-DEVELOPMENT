@@ -13,7 +13,10 @@ import { DatabaseModule } from './database/database.module.js';
 import { HealthController } from './health/health.controller.js';
 import { MeController } from './me/me.controller.js';
 import { ListingsModule } from './listings/listings.module.js';
+import { KeysModule } from './keys/keys.module.js';
+import { LocationModule } from './location/location.module.js';
 import { MediaModule } from './media/media.module.js';
+import { NotesModule } from './notes/notes.module.js';
 import { PropertiesModule } from './properties/properties.module.js';
 
 @Module({
@@ -26,6 +29,8 @@ import { PropertiesModule } from './properties/properties.module.js';
           level: config.LOG_LEVEL,
           genReqId: (req) => (req as unknown as EstateProRequest).requestId,
           redact: { paths: ['req.headers.authorization', 'req.headers.cookie'], censor: '[redacted]' },
+          // Address search text is never logged (ADR-006 L-D2).
+          serializers: { req: (req: { url?: string }) => ({ ...req, url: withoutSearchText(req.url) }) },
           customProps: (req) => ({ companyId: (req as unknown as EstateProRequest).tenant?.companyId }),
         },
       }),
@@ -36,9 +41,17 @@ import { PropertiesModule } from './properties/properties.module.js';
     PropertiesModule,
     ListingsModule,
     MediaModule,
+    LocationModule,
+    NotesModule,
+    KeysModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],
 })
 export class AppModule {}
 
+
+/** Drops the query string of geocoding requests, which carries address text. */
+export function withoutSearchText(url: string | undefined): string | undefined {
+  return url !== undefined && url.includes('/geocoding/') ? url.split('?')[0] : url;
+}

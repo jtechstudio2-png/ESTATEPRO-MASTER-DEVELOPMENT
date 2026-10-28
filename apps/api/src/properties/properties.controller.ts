@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Patch, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Inject, Param, ParseUUIDPipe, Patch, Post, Query, Req, Res } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -12,15 +12,20 @@ import type { Response } from 'express';
 import { RequirePermission, Scope, Tenant } from '../auth/decorators.js';
 import { IdempotencyService } from '../common/idempotency.service.js';
 import { requireIfMatch, setVersionEtag } from '../common/http.js';
-import { type ListQueryInput, parseListQuery } from '../common/list-query.js';
+import { type FilterSpec, type ListQueryInput, parseListQuery, type SortSpec } from '../common/list-query.js';
 import { Problems } from '../common/problem.js';
 import type { EstateProRequest, PermissionScope, TenantContext } from '../common/request-context.js';
+import { APP_CONFIG, type AppConfig } from '../config/config.js';
 import { TenantDb } from '../database/database.module.js';
+import { LocationQueryDocs } from '../location/location-docs.js';
+import { LOCATION_FILTERS, parseLocationFilter } from '../location/location-filter.js';
+import { RateLimiter } from '../location/rate-limiter.js';
 import {
   ArchiveBody,
   CreatePropertyBody,
   CreateUnitBody,
   PropertyDto,
+  PropertyMapDto,
   PropertyPageDto,
   UnitAvailabilityBody,
   UnitDto,
@@ -30,6 +35,20 @@ import {
 } from './dto.js';
 import { PropertiesService, type PropertySortField } from './properties.service.js';
 import { type UnitSortField, UnitsService } from './units.service.js';
+
+const PROPERTY_SORT = {
+  allowed: { reference: 'text', createdAt: 'timestamp', updatedAt: 'timestamp', distance: 'numeric' },
+  default: { field: 'updatedAt', direction: 'desc' },
+} as const satisfies SortSpec<PropertySortField>;
+
+const PROPERTY_FILTERS: FilterSpec = {
+  officeId: { type: 'uuid', multi: true },
+  propertyTypeId: { type: 'uuid', multi: true },
+  countryCode: { type: 'code', pattern: /^[A-Z]{2}$/, multi: true },
+  isManaged: { type: 'boolean' },
+  archived: { type: 'archived' },
+  ...LOCATION_FILTERS,
+};
 
 /** Malformed ids are answered like unknown ids (404), never as validation errors. */
 const UUID_PARAM = new ParseUUIDPipe({ exceptionFactory: () => Problems.notFound() });
@@ -44,33 +63,40 @@ export class PropertiesController {
     private readonly properties: PropertiesService,
     private readonly units: UnitsService,
     private readonly idempotency: IdempotencyService,
+    private readonly limiter: RateLimiter,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
   @Get('properties')
   @RequirePermission('property.view')
   @ApiQuery({ name: 'limit', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 } })
   @ApiQuery({ name: 'cursor', required: false })
-  @ApiQuery({ name: 'sort', required: false, enum: ['reference', '-reference', 'createdAt', '-createdAt', 'updatedAt', '-updatedAt'] })
+  @ApiQuery({ name: 'sort', required: false, enum: ['reference', '-reference', 'createdAt', '-createdAt', 'updatedAt', '-updatedAt', 'distance', '-distance'] })
   @ApiQuery({ name: 'q', required: false, description: 'Reference, name or address contains' })
   @ApiQuery({ name: 'filter[officeId]', required: false, description: 'Comma-separated office ids' })
   @ApiQuery({ name: 'filter[propertyTypeId]', required: false, description: 'Comma-separated type ids' })
   @ApiQuery({ name: 'filter[countryCode]', required: false, description: 'Comma-separated ISO country codes' })
   @ApiQuery({ name: 'filter[isManaged]', required: false, enum: ['true', 'false'] })
   @ApiQuery({ name: 'filter[archived]', required: false, enum: ['false', 'true', 'all'] })
+  @LocationQueryDocs()
   @ApiOkResponse({ type: PropertyPageDto })
   async list(@Tenant() ctx: TenantContext, @Scope() scope: PermissionScope, @Query() query: ListQueryInput): Promise<PropertyPageDto> {
-    const parsed = parseListQuery<PropertySortField>(
-      query,
-      { allowed: { reference: 'text', createdAt: 'timestamp', updatedAt: 'timestamp' }, default: { field: 'updatedAt', direction: 'desc' } },
-      {
-        officeId: { type: 'uuid', multi: true },
-        propertyTypeId: { type: 'uuid', multi: true },
-        countryCode: { type: 'code', pattern: /^[A-Z]{2}$/, multi: true },
-        isManaged: { type: 'boolean' },
-        archived: { type: 'archived' },
-      },
-    );
-    return this.tenantDb.run(ctx, (tx) => this.properties.list(tx, ctx, scope, parsed));
+    const parsed = parseListQuery<PropertySortField>(query, PROPERTY_SORT, PROPERTY_FILTERS);
+    const location = parseLocationFilter(parsed.filters);
+    return this.tenantDb.run(ctx, (tx) => this.properties.list(tx, ctx, scope, parsed, location));
+  }
+
+  @Get('properties/map')
+  @RequirePermission('property.view')
+  @ApiQuery({ name: 'filter[bbox]', required: true, description: 'Map viewport: west,south,east,north' })
+  @ApiQuery({ name: 'q', required: false })
+  @LocationQueryDocs()
+  @ApiOkResponse({ type: PropertyMapDto })
+  async map(@Tenant() ctx: TenantContext, @Scope() scope: PermissionScope, @Query() query: ListQueryInput): Promise<PropertyMapDto> {
+    this.limiter.take(`map:${ctx.membershipId}`, this.config.MAP_RATE_LIMIT_PER_MINUTE);
+    const parsed = parseListQuery<PropertySortField>(query, PROPERTY_SORT, PROPERTY_FILTERS);
+    const location = parseLocationFilter(parsed.filters);
+    return this.tenantDb.run(ctx, (tx) => this.properties.map(tx, ctx, scope, parsed.filters, parsed.q, location));
   }
 
   @Post('properties')

@@ -60,11 +60,21 @@ export interface Addresses {
   createdAt: Generated<Timestamp>;
   dependentLocality: string | null;
   formatted: string | null;
+  geocodeAccuracy: string | null;
+  geocodedAt: Timestamp | null;
   geocodeSource: string | null;
   id: Generated<string>;
   latitude: Numeric | null;
   localComponents: Generated<Json>;
   locality: string | null;
+  /**
+   * Calculated from latitude/longitude (ADR-006 L-D1). Never written by the application.
+   */
+  location: Generated<string | null>;
+  /**
+   * The address text changed after the point was confirmed; the point should be checked.
+   */
+  locationStale: Generated<boolean>;
   longitude: Numeric | null;
   postalCode: string | null;
   updatedAt: Generated<Timestamp>;
@@ -449,6 +459,13 @@ export interface Contacts {
 export interface Countries {
   addressFormat: Generated<Json>;
   areaDisplayUnit: Generated<string>;
+  boundsEast: Numeric | null;
+  boundsNorth: Numeric | null;
+  /**
+   * Bounding box of the country (with a small margin), used to reject misplaced coordinates.
+   */
+  boundsSouth: Numeric | null;
+  boundsWest: Numeric | null;
   code: string;
   defaultCurrencyCode: string;
   defaultLocaleCode: string;
@@ -914,19 +931,28 @@ export interface KeyMovements {
   id: Generated<string>;
   keySetId: string;
   movement: string;
+  note: string | null;
   occurredAt: Generated<Timestamp>;
   recordedBy: string;
 }
 
 export interface KeySets {
+  checkedOutAt: Timestamp | null;
   companyId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   description: string | null;
+  dueBackAt: Timestamp | null;
+  holderContactId: string | null;
+  holderMembershipId: string | null;
   id: Generated<string>;
   label: string;
   propertyId: string;
+  retiredAt: Timestamp | null;
   status: Generated<string>;
   unitId: string | null;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
 }
 
 export interface KycChecks {
@@ -1666,6 +1692,9 @@ export interface Properties {
   developmentPhaseId: string | null;
   floorsCount: number | null;
   id: Generated<string>;
+  /**
+   * Deprecated (ADR-006 L-D9): moved to property_notes; not used by the API; to be dropped.
+   */
   internalNotes: string | null;
   isManaged: Generated<boolean>;
   jurisdictionCode: string;
@@ -1727,16 +1756,40 @@ export interface PropertyMedia {
   widthPx: number | null;
 }
 
-export interface PropertyNotes {
+export interface PropertyNoteRevisions {
   body: string;
   companyId: string;
+  noteId: string;
+  redactedAt: Timestamp | null;
+  revision: number;
+  supersededAt: Generated<Timestamp>;
+  supersededBy: string | null;
+  writtenAt: Timestamp;
+  writtenBy: string | null;
+}
+
+export interface PropertyNotes {
+  archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
+  /**
+   * Plain text. Previous text is in property_note_revisions; never copied into audit_logs (L-D7).
+   */
+  body: string;
+  category: Generated<string>;
+  companyId: string;
   createdAt: Generated<Timestamp>;
-  createdBy: string;
+  createdBy: string | null;
   id: Generated<string>;
   isPinned: Generated<boolean>;
+  pinnedAt: Timestamp | null;
   propertyId: string;
+  redactedAt: Timestamp | null;
+  redactedBy: string | null;
+  source: Generated<string>;
   unitId: string | null;
   updatedAt: Generated<Timestamp>;
+  updatedBy: string | null;
   version: Generated<number>;
   visibility: Generated<string>;
 }
@@ -2406,6 +2459,7 @@ export interface DB {
   platformStaff: PlatformStaff;
   properties: Properties;
   propertyMedia: PropertyMedia;
+  propertyNoteRevisions: PropertyNoteRevisions;
   propertyNotes: PropertyNotes;
   propertyOwnerships: PropertyOwnerships;
   propertyTypes: PropertyTypes;

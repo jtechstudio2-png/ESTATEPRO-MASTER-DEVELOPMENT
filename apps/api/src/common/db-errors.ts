@@ -46,6 +46,8 @@ export function problemFromPostgresError(error: PostgresError): ProblemError | n
       return error.message.includes('row-level security')
         ? Problems.forbidden()
         : Problems.businessRule(known ?? 'This record cannot be changed in its current state.');
+    case '57014': // query_canceled: a search hit its statement_timeout (ADR-006)
+      return Problems.searchTooSlow();
     case '40001': // serialization_failure
     case '40P01': // deadlock_detected
       return Problems.conflict('The record was changed at the same time by another request. Try again.');

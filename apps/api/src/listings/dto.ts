@@ -4,6 +4,7 @@ import { IsBoolean, IsIn, IsInt, IsString, IsUUID, Matches, Max, MaxLength, Min,
 
 import { MoneyDto, MoneyInput } from '../common/money.js';
 import { DATE, PageDto, provided, trim } from '../properties/dto.js';
+import { MapClusterDto } from '../location/map-results.js';
 
 export const LISTING_TYPES = ['sale', 'rent'] as const;
 export const LISTING_STATUSES = ['draft', 'available', 'reserved', 'under_contract', 'sold', 'rented', 'withdrawn', 'expired'] as const;
@@ -151,6 +152,8 @@ export class ListingPropertyDto {
   @ApiProperty() reference!: string;
   @ApiProperty({ type: String, nullable: true }) name!: string | null;
   @ApiProperty({ type: String, nullable: true }) formattedAddress!: string | null;
+  @ApiProperty({ type: Number, nullable: true }) latitude!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) longitude!: number | null;
 }
 
 export class ListingOfficeDto {
@@ -212,9 +215,35 @@ export class ListingDto extends ListingSummaryDto {
   @ApiProperty() version!: number;
 }
 
+export class ListingListItemDto extends ListingSummaryDto {
+  @ApiProperty({ type: Number, nullable: true, description: 'Metres from filter[near]; null without it' }) distanceMeters!: number | null;
+}
+
 export class ListingPageDto {
-  @ApiProperty({ type: [ListingSummaryDto] }) data!: ListingSummaryDto[];
+  @ApiProperty({ type: [ListingListItemDto] }) data!: ListingListItemDto[];
   @ApiProperty({ type: PageDto }) page!: PageDto;
+}
+
+export class ListingMapPointDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() reference!: string;
+  @ApiProperty({ enum: LISTING_TYPES }) listingType!: string;
+  @ApiProperty({ enum: LISTING_STATUSES }) status!: string;
+  @ApiProperty({ type: MoneyDto }) price!: MoneyDto;
+  @ApiProperty({ type: String, nullable: true, enum: RENT_FREQUENCIES }) rentFrequency!: string | null;
+  @ApiProperty({ type: Number, nullable: true }) bedrooms!: number | null;
+  @ApiProperty({ format: 'uuid' }) propertyId!: string;
+  @ApiProperty({ type: String, nullable: true, format: 'uuid', description: 'Cover photo (GET /media/{id} for its URLs)' })
+  coverMediaId!: string | null;
+  @ApiProperty() latitude!: number;
+  @ApiProperty() longitude!: number;
+}
+
+export class ListingMapDto {
+  @ApiProperty({ description: 'Matching listings with a location in the viewport' }) total!: number;
+  @ApiProperty({ description: 'True when more than 500 match: clusters are returned instead of points' }) clustered!: boolean;
+  @ApiProperty({ type: [ListingMapPointDto] }) points!: ListingMapPointDto[];
+  @ApiProperty({ type: [MapClusterDto] }) clusters!: MapClusterDto[];
 }
 
 export class StatusHistoryEntryDto {

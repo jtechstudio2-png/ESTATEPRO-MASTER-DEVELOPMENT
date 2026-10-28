@@ -1,15 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { type Selectable, sql } from 'kysely';
 
 import { AuditService, diffForAudit } from '../audit/audit.service.js';
 import { todayIn } from '../common/dates.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
-import { keysetCondition, type Page, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
+import { keysetCondition, type Page, type ParsedFilters, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
 import { decimalPlaces, type MoneyInput, toMoney, toScaled } from '../common/money.js';
 import { type FieldError, ProblemError, Problems } from '../common/problem.js';
 import { actingMembership, type PermissionScope, type TenantContext } from '../common/request-context.js';
+import { APP_CONFIG, type AppConfig } from '../config/config.js';
 import type { Tx } from '../database/database.module.js';
 import type { Listings } from '../database/schema.js';
+import {
+  assertDistanceSort,
+  assertUsablePolygon,
+  distanceSql,
+  hasLocationFilter,
+  configureSearchTransaction,
+  locationConditions,
+  type LocationFilter,
+  NO_LOCATION_FILTER,
+} from '../location/location-filter.js';
+import { mapResult, requireViewport } from '../location/map-results.js';
 import { isCalendarDate, nextReference } from '../properties/properties.service.js';
 import { propertyScopeSql } from '../properties/property-access.js';
 import { checkPicklistCode } from '../reference/picklists.js';
@@ -20,6 +32,8 @@ import type {
   FeeTermsInput,
   HistoryEntryDto,
   ListingDto,
+  ListingListItemDto,
+  ListingMapDto,
   ListingStatus,
   ListingSummaryDto,
   PriceHistoryEntryDto,
@@ -52,7 +66,7 @@ registerConstraintMessages({
   listings_company_id_reference_key: 'This listing reference is already in use.',
 });
 
-export type ListingSortField = 'reference' | 'createdAt' | 'updatedAt' | 'price';
+export type ListingSortField = 'reference' | 'createdAt' | 'updatedAt' | 'price' | 'distance';
 type ListingRow = Selectable<Listings>;
 
 /** Commercial terms of a listing after a create or edit, validated as a whole. */
@@ -99,6 +113,7 @@ export class ListingsService {
   constructor(
     private readonly audit: AuditService,
     private readonly settings: ListingSettingsService,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
   // --------------------------------------------------------------------------- reads
@@ -108,14 +123,112 @@ export class ListingsService {
    * the page of ids is chosen from listings alone (filters, scope, sort,
    * keyset), then details are joined for that page only.
    */
-  async list(tx: Tx, ctx: TenantContext, scope: PermissionScope, query: ParsedListQuery<ListingSortField>): Promise<Page<ListingSummaryDto>> {
-    const sortColumn = `l.${query.sort.field}`;
-    let qb = tx
-      .selectFrom('listings as l')
-      .select(['l.id', sortValueSql(sortColumn, query.sort.kind).as('cursorValue')])
-      .where(listingScopeSql(scope, ctx, 'l'));
+  async list(
+    tx: Tx,
+    ctx: TenantContext,
+    scope: PermissionScope,
+    query: ParsedListQuery<ListingSortField>,
+    location: LocationFilter = NO_LOCATION_FILTER,
+  ): Promise<Page<ListingListItemDto>> {
+    assertDistanceSort(query.sort.field, location);
+    await this.prepareLocationSearch(tx, location);
+    const distance = location.near ? sql.ref<string>('mu.distance') : null;
+    const sortExpression = query.sort.field === 'distance' ? distance! : sql.ref(`l.${query.sort.field}`);
+    let qb = this.filteredQuery(tx, ctx, scope, query.filters, query.q, location).select([
+      'l.id',
+      sortValueSql(sortExpression, query.sort.kind).as('cursorValue'),
+      (distance ?? sql<string | null>`null`).as('distanceMeters'),
+    ]);
+    if (query.cursor) qb = qb.where(keysetCondition(sortExpression, 'l.id', query.sort, query.cursor));
 
-    const { filters } = query;
+    const ids = await qb
+      .orderBy(sortExpression, query.sort.direction)
+      .orderBy('l.id', query.sort.direction)
+      .limit(query.limit + 1)
+      .execute();
+    if (ids.length === 0) return { data: [], page: { limit: query.limit, nextCursor: null } };
+
+    const details = await this.summaryQuery(tx)
+      .where('l.id', 'in', ids.map((row) => row.id))
+      .execute();
+    const byId = new Map(details.map((row) => [row.id, row]));
+    const rows = ids.map((row) => ({ ...byId.get(row.id)!, cursorValue: row.cursorValue, distanceMeters: row.distanceMeters }));
+    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({
+      ...toSummaryDto(row),
+      distanceMeters: row.distanceMeters === null ? null : Number(row.distanceMeters),
+    }));
+  }
+
+  /** Map view (ADR-006 L-D4): listings in the viewport, or clusters above 500. */
+  async map(tx: Tx, ctx: TenantContext, scope: PermissionScope, filters: ParsedFilters, q: string | null, location: LocationFilter): Promise<ListingMapDto> {
+    const bbox = requireViewport(location);
+    await this.prepareLocationSearch(tx, location);
+    const filtered = this.filteredQuery(tx, ctx, scope, filters, q, location);
+    const points = filtered
+      .innerJoin('units as u', 'u.id', 'l.unitId')
+      .innerJoin('currencies as cur', 'cur.code', 'l.currencyCode')
+      .select((eb) => [
+        'l.id',
+        'l.reference',
+        'l.listingType',
+        'l.status',
+        'l.price',
+        'l.currencyCode',
+        'cur.minorUnits',
+        'l.rentFrequency',
+        'u.bedrooms',
+        'u.propertyId',
+        sql.ref<string>('mu.latitude').as('latitude'),
+        sql.ref<string>('mu.longitude').as('longitude'),
+        eb
+          .selectFrom('listingMedia as lm')
+          .select('lm.mediaId')
+          .whereRef('lm.listingId', '=', 'l.id')
+          .where('lm.isCover', '=', true)
+          .limit(1)
+          .as('coverMediaId'),
+      ])
+      .orderBy('l.id');
+    const positions = filtered.select([sql.ref<string>('mu.latitude').as('latitude'), sql.ref<string>('mu.longitude').as('longitude')]);
+    return mapResult(tx, points, positions, bbox, (row) => ({
+      id: row.id,
+      reference: row.reference,
+      listingType: row.listingType,
+      status: row.status,
+      price: toMoney(row.price, row.currencyCode, row.minorUnits),
+      rentFrequency: row.rentFrequency,
+      bedrooms: row.bedrooms,
+      propertyId: row.propertyId,
+      coverMediaId: row.coverMediaId,
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
+    }));
+  }
+
+  private async prepareLocationSearch(tx: Tx, location: LocationFilter): Promise<void> {
+    if (!hasLocationFilter(location)) return;
+    await configureSearchTransaction(tx, this.config.SEARCH_STATEMENT_TIMEOUT_MS);
+    // Keep the written join order of matchedUnits (see there); local to this transaction.
+    await sql`select set_config('join_collapse_limit', '1', true), set_config('from_collapse_limit', '1', true)`.execute(tx);
+    await assertUsablePolygon(tx, location);
+  }
+
+  /**
+   * Scope and filters on listings alone (the list chooses its page of ids here
+   * before joining details). Location filters match through the unit's property address.
+   */
+  private filteredQuery(tx: Tx, ctx: TenantContext, scope: PermissionScope, filters: ParsedFilters, q: string | null, location: LocationFilter) {
+    let qb = hasLocationFilter(location)
+      ? // Joins "mu" (its columns are read with sql.ref); typed as the plain listings query.
+        (tx
+          .with(
+            (cte) => cte('mu').materialized(),
+            (db) => db.selectFrom(matchedUnits(location).as('m')).selectAll(),
+          )
+          .selectFrom('listings as l')
+          .innerJoin('mu', 'mu.unitId', 'l.unitId') as unknown as ReturnType<typeof listingsFrom>)
+      : listingsFrom(tx);
+    qb = qb.where(listingScopeSql(scope, ctx, 'l'));
     const archived = filters['archived'] ?? 'false';
     if (archived === 'false') qb = qb.where('l.archivedAt', 'is', null);
     if (archived === 'true') qb = qb.where('l.archivedAt', 'is not', null);
@@ -164,9 +277,9 @@ export class ListingsService {
     if (mandateExpiresOn?.gte !== undefined) qb = qb.where('l.mandateExpiresOn', '>=', mandateExpiresOn.gte);
     if (mandateExpiresOn?.lte !== undefined) qb = qb.where('l.mandateExpiresOn', '<=', mandateExpiresOn.lte);
 
-    if (query.q !== null) {
+    if (q !== null) {
       // Each branch can use its trigram index; OR across tables could not.
-      const contains = `%${query.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+      const contains = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
       qb = qb.where('l.id', 'in', (eb) =>
         eb
           .selectFrom('listings as s')
@@ -175,21 +288,7 @@ export class ListingsService {
           .union(eb.selectFrom('listingTranslations as lt').select('lt.listingId as id').where('lt.title', 'ilike', contains)),
       );
     }
-    if (query.cursor) qb = qb.where(keysetCondition(sortColumn, 'l.id', query.sort, query.cursor));
-
-    const ids = await qb
-      .orderBy(sql.ref(sortColumn), query.sort.direction)
-      .orderBy('l.id', query.sort.direction)
-      .limit(query.limit + 1)
-      .execute();
-    if (ids.length === 0) return { data: [], page: { limit: query.limit, nextCursor: null } };
-
-    const details = await this.summaryQuery(tx)
-      .where('l.id', 'in', ids.map((row) => row.id))
-      .execute();
-    const byId = new Map(details.map((row) => [row.id, row]));
-    const rows = ids.map((row) => ({ ...byId.get(row.id)!, cursorValue: row.cursorValue }));
-    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => toSummaryDto(row));
+    return qb;
   }
 
   /** Property and unit sub-lists: the parent must be visible to the caller. */
@@ -1191,6 +1290,8 @@ export class ListingsService {
         'p.reference as propertyReference',
         'p.name as propertyName',
         'a.formatted',
+        'a.latitude',
+        'a.longitude',
         'l.officeId',
         'o.code as officeCode',
         'o.name as officeName',
@@ -1273,6 +1374,8 @@ interface SummaryRow {
   propertyReference: string;
   propertyName: string | null;
   formatted: string | null;
+  latitude: string | null;
+  longitude: string | null;
   officeId: string;
   officeCode: string;
   officeName: string;
@@ -1281,6 +1384,28 @@ interface SummaryRow {
   listedAt: Date | null;
   archivedAt: Date | null;
   updatedAt: Date;
+}
+
+function listingsFrom(tx: Tx) {
+  return tx.selectFrom('listings as l');
+}
+
+/**
+ * Units whose property address matches the location filter, with the distance
+ * from the centre when there is one. A materialized CTE, so it is computed once
+ * per query; it is written address → property → unit and planned in that order
+ * (prepareLocationSearch fixes join order) because PostGIS underestimates how
+ * many addresses an area holds, which otherwise invites a cross join.
+ */
+function matchedUnits(location: LocationFilter) {
+  const conditions = locationConditions(location, 'la');
+  const distance = location.near ? distanceSql(location, 'la') : sql`null::numeric`;
+  return sql<{ unitId: string; distance: string | null; latitude: string; longitude: string }>`(
+    select lu.id as unit_id, ${distance} as distance, la.latitude, la.longitude
+      from addresses la
+      join properties lp on lp.address_id = la.id
+      join units lu on lu.property_id = lp.id
+     where ${sql.join(conditions, sql` and `)})`;
 }
 
 function toSummaryDto(row: SummaryRow): ListingSummaryDto {
@@ -1294,7 +1419,14 @@ function toSummaryDto(row: SummaryRow): ListingSummaryDto {
     rentFrequency: row.rentFrequency,
     title: row.title,
     unit: { id: row.unitId, reference: row.unitReference, unitLabel: row.unitLabel, bedrooms: row.bedrooms, availability: row.availability },
-    property: { id: row.propertyId, reference: row.propertyReference, name: row.propertyName, formattedAddress: row.formatted },
+    property: {
+      id: row.propertyId,
+      reference: row.propertyReference,
+      name: row.propertyName,
+      formattedAddress: row.formatted,
+      latitude: row.latitude === null ? null : Number(row.latitude),
+      longitude: row.longitude === null ? null : Number(row.longitude),
+    },
     office: { id: row.officeId, code: row.officeCode, name: row.officeName },
     agent: { membershipId: row.agentMembershipId, displayName: row.agentName },
     listedAt: row.listedAt?.toISOString() ?? null,

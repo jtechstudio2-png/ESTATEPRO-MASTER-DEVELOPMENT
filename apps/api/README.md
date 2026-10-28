@@ -21,7 +21,9 @@ Decisions: [ADR-001 authentication](../../docs/decisions/ADR-001-authentication-
 
 ```bash
 pnpm install
-# PostgreSQL 16+ with a superuser; the tests build their own database from database/migrations.
+# PostgreSQL 16+ with PostGIS 3 and a UTF-8 character-type locale (C.UTF-8 or en_US.UTF-8, needed for
+# Arabic trigram search) and a superuser; the tests build their own database from database/migrations.
+# Docker: postgis/postgis:16-3.4 · Debian/Ubuntu: apt install postgresql-16-postgis-3
 export TEST_DATABASE_ADMIN_URL=postgres://postgres:postgres@127.0.0.1:5432/postgres
 # Media tests need S3-compatible storage, clamd and Poppler (pdfinfo, pdftoppm); they never skip.
 docker run -d --name seaweedfs -p 8333:8333 -v "$PWD/dev/seaweed":/config chrislusf/seaweedfs:3.80 \
@@ -94,12 +96,32 @@ The owner then signs in through the identity provider with that email (verified)
 | POST | `/api/v1/media/{id}/purge`, `/legal-hold` | `property.archive` with `all` scope |
 | GET, PUT | `/api/v1/listings/{id}/media` | `listing.view`, `listing.update` |
 | GET | `/api/v1/settings/storage` | `property.view` |
+| GET | `/api/v1/properties/map`, `/api/v1/listings/map` | `property.view`, `listing.view` (viewport required; rate-limited) |
+| GET | `/api/v1/geocoding/suggestions` | `property.update` (suggestions only; rate-limited) |
+| GET, POST | `/api/v1/properties/{id}/notes` | `property_note.view`, `property_note.create` |
+| GET, PATCH | `/api/v1/property-notes/{id}` | `property_note.view`; authors edit with `property_note.create`, others need `property_note.manage` |
+| POST | `/api/v1/property-notes/{id}/archive`, `/restore` | author with `property_note.create`, or `property_note.manage` |
+| POST | `/api/v1/property-notes/{id}/redact` | `property_note.manage` |
+| GET | `/api/v1/property-notes/{id}/revisions` | author or `property_note.manage` |
+| GET | `/api/v1/key-sets`, `/api/v1/properties/{id}/key-sets`, `/api/v1/key-sets/{id}`, `/key-sets/{id}/movements` | `key.view` |
+| POST, PATCH | `/api/v1/properties/{id}/key-sets`, `/api/v1/key-sets/{id}`, `/key-sets/{id}/retire` | `key.manage` |
+| POST | `/api/v1/key-sets/{id}/check-out`, `/check-in`, `/report-lost`, `/found` | `key.issue` |
 
-Lists use `limit`, `cursor`, `sort` and `filter[...]` (ADR-003 §6); see `openapi.json` for the filters each list accepts. Listing rules are recorded in [ADR-004](../../docs/decisions/ADR-004-listing-rules.md); media in [ADR-005](../../docs/decisions/ADR-005-media-architecture.md) and the [Media Ownership and Retention Policy](../../docs/policies/MEDIA-OWNERSHIP-AND-RETENTION-POLICY.md). `test/listings.performance.test.ts` checks list queries at p95 < 1 s on 100,000 listings.
+Lists use `limit`, `cursor`, `sort` and `filter[...]` (ADR-003 §6); see `openapi.json` for the filters each list accepts. Listing rules are recorded in [ADR-004](../../docs/decisions/ADR-004-listing-rules.md); media in [ADR-005](../../docs/decisions/ADR-005-media-architecture.md) and the [Media Ownership and Retention Policy](../../docs/policies/MEDIA-OWNERSHIP-AND-RETENTION-POLICY.md); location, notes and keys in [ADR-006](../../docs/decisions/ADR-006-location-notes-keys.md). `test/listings.performance.test.ts` checks list queries at p95 < 1 s on 100,000 listings.
+
+### Location search (ADR-006)
+
+- The property and listing lists, and their `/map` endpoints, accept `filter[near]=lat,lng` with `filter[radius]` (metres, up to 50 km), `filter[bbox]=west,south,east,north`, `filter[polygon]` (up to 100 "longitude latitude" points), `filter[hasLocation]`, `filter[locality]` and `filter[adminArea1]`. `sort=distance` needs `filter[near]`; results then carry `distanceMeters`.
+- Map endpoints return points, or grid clusters above 500 matches. Scope and row-level security apply before counting.
+- Stored coordinates are always confirmed by a user. `address.geocodeSource` records how a point was found (`manual_pin` by default, `geocoder` for an accepted suggestion). Points at 0,0 or outside the country's bounding box are rejected. Editing an address without coordinates keeps the point and sets `locationStale`; send `latitude: null, longitude: null` to remove it.
+- Geocoding suggestions use Mapbox when `GEOCODER_PROVIDER=mapbox` and `MAPBOX_ACCESS_TOKEN` are set; otherwise the endpoint answers `geocoding-unavailable` and pins still work. Address search text is never logged.
+- Searches run with `SEARCH_STATEMENT_TIMEOUT_MS` (default 5 s; a timeout answers `search-timeout`, 503). Rate limits (`MAP_RATE_LIMIT_PER_MINUTE`, `GEOCODER_RATE_LIMIT_PER_MINUTE`) are per API instance.
+- `properties.internalNotes` is no longer part of the API: migration 0019 moved its text into pinned property notes.
 
 ## Tests
 
 - Real PostgreSQL, real JWT signatures (a test identity provider serves a JWKS over HTTP), no mocked business rules.
 - Coverage thresholds: 95% lines, statements and functions; 90% branches.
 - Media tests run against SeaweedFS (S3 API), real clamd and Poppler; performance tests check listing search (100,000 listings, p95 < 1 s) and photo processing (12 MP, under 3 s each).
+- Location tests run on PostGIS; `test/location.performance.test.ts` checks radius, distance paging, map, clustering, polygon and notes targets on 100,000 listings, and that the spatial index is used. The geocoder is tested against a local stub of the Mapbox API. `test/migration-0019.test.ts` upgrades a database holding pre-M5 data.
 - `test/support/probe.controller.ts` is a test-only controller for guard behaviour; it is never registered by `AppModule`.

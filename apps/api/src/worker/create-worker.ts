@@ -33,7 +33,7 @@ export function createWorker(
       queue: new JobQueue(platformDb),
       storage,
       processor: new MediaProcessor(tenantDb, storage, scanner, audit),
-      listings: new ListingsService(audit, new ListingSettingsService(audit)),
+      listings: new ListingsService(audit, new ListingSettingsService(audit), config),
       audit,
       logger,
     },

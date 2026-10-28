@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Patch, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiHeader, ApiNoContentResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 
@@ -8,7 +8,11 @@ import { requireIfMatch, setVersionEtag } from '../common/http.js';
 import { type FilterSpec, type ListQueryInput, parseListQuery } from '../common/list-query.js';
 import { Problems } from '../common/problem.js';
 import type { EstateProRequest, PermissionScope, TenantContext } from '../common/request-context.js';
+import { APP_CONFIG, type AppConfig } from '../config/config.js';
 import { TenantDb } from '../database/database.module.js';
+import { LocationQueryDocs } from '../location/location-docs.js';
+import { LOCATION_FILTERS, parseLocationFilter } from '../location/location-filter.js';
+import { RateLimiter } from '../location/rate-limiter.js';
 import { ArchiveBody } from '../properties/dto.js';
 import {
   AssignAgentBody,
@@ -17,6 +21,7 @@ import {
   LISTING_STATUSES,
   LISTING_TYPES,
   ListingDto,
+  ListingMapDto,
   ListingPageDto,
   ListingSettingsBody,
   ListingSettingsDto,
@@ -35,7 +40,7 @@ const LOCALE_PARAM = /^[a-z]{2,3}(-[A-Z]{2})?$/;
 const DATE_RANGE = /^\d{4}-\d{2}-\d{2}$/;
 
 const LIST_SORT = {
-  allowed: { reference: 'text', createdAt: 'timestamp', updatedAt: 'timestamp', price: 'numeric' },
+  allowed: { reference: 'text', createdAt: 'timestamp', updatedAt: 'timestamp', price: 'numeric', distance: 'numeric' },
   default: { field: 'updatedAt', direction: 'desc' },
 } as const;
 
@@ -53,6 +58,7 @@ const LIST_FILTERS: FilterSpec = {
   bedrooms: { type: 'range', pattern: /^\d{1,3}$/ },
   availableFrom: { type: 'range', pattern: DATE_RANGE },
   mandateExpiresOn: { type: 'range', pattern: DATE_RANGE },
+  ...LOCATION_FILTERS,
 };
 
 const HISTORY_SORT = { allowed: { changedAt: 'timestamp' }, default: { field: 'changedAt', direction: 'asc' } } as const;
@@ -72,13 +78,19 @@ export class ListingsController {
     private readonly listings: ListingsService,
     private readonly settings: ListingSettingsService,
     private readonly idempotency: IdempotencyService,
+    private readonly limiter: RateLimiter,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
   @Get('listings')
   @RequirePermission('listing.view')
   @ApiQuery({ name: 'limit', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 } })
   @ApiQuery({ name: 'cursor', required: false })
-  @ApiQuery({ name: 'sort', required: false, enum: ['reference', '-reference', 'createdAt', '-createdAt', 'updatedAt', '-updatedAt', 'price', '-price'] })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    enum: ['reference', '-reference', 'createdAt', '-createdAt', 'updatedAt', '-updatedAt', 'price', '-price', 'distance', '-distance'],
+  })
   @ApiQuery({ name: 'q', required: false, description: 'Reference or title (any language) contains' })
   @ApiQuery({ name: 'filter[listingType]', required: false, description: 'sale, rent' })
   @ApiQuery({ name: 'filter[status]', required: false, description: 'Comma-separated statuses' })
@@ -95,10 +107,31 @@ export class ListingsController {
   @ApiQuery({ name: 'filter[bedrooms][lte]', required: false })
   @ApiQuery({ name: 'filter[availableFrom][lte]', required: false })
   @ApiQuery({ name: 'filter[mandateExpiresOn][lte]', required: false })
+  @LocationQueryDocs()
   @ApiOkResponse({ type: ListingPageDto })
   async list(@Tenant() ctx: TenantContext, @Scope() scope: PermissionScope, @Query() query: ListQueryInput): Promise<ListingPageDto> {
     const parsed = parseListingQuery(query);
-    return this.tenantDb.run(ctx, (tx) => this.listings.list(tx, ctx, scope, parsed));
+    const location = parseLocationFilter(parsed.filters);
+    return this.tenantDb.run(ctx, (tx) => this.listings.list(tx, ctx, scope, parsed, location));
+  }
+
+  @Get('listings/map')
+  @RequirePermission('listing.view')
+  @ApiQuery({ name: 'filter[bbox]', required: true, description: 'Map viewport: west,south,east,north' })
+  @ApiQuery({ name: 'q', required: false })
+  @ApiQuery({ name: 'filter[status]', required: false })
+  @ApiQuery({ name: 'filter[listingType]', required: false })
+  @ApiQuery({ name: 'filter[currencyCode]', required: false })
+  @ApiQuery({ name: 'filter[price][gte]', required: false })
+  @ApiQuery({ name: 'filter[price][lte]', required: false })
+  @ApiQuery({ name: 'filter[bedrooms][gte]', required: false })
+  @LocationQueryDocs()
+  @ApiOkResponse({ type: ListingMapDto })
+  async map(@Tenant() ctx: TenantContext, @Scope() scope: PermissionScope, @Query() query: ListQueryInput): Promise<ListingMapDto> {
+    this.limiter.take(`map:${ctx.membershipId}`, this.config.MAP_RATE_LIMIT_PER_MINUTE);
+    const parsed = parseListingQuery(query);
+    const location = parseLocationFilter(parsed.filters);
+    return this.tenantDb.run(ctx, (tx) => this.listings.map(tx, ctx, scope, parsed.filters, parsed.q, location));
   }
 
   @Get('properties/:propertyId/listings')

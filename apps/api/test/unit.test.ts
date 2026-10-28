@@ -62,6 +62,7 @@ describe('PostgreSQL error mapping', () => {
     ['22P02', 422, 'business-rule-violated'],
     ['40001', 409, 'conflict'],
     ['40P01', 409, 'conflict'],
+    ['57014', 503, 'search-timeout'],
   ])('maps %s to %i', (code, status, type) => {
     const problem = problemFromPostgresError(pgError(code));
     expect(problem?.status).toBe(status);

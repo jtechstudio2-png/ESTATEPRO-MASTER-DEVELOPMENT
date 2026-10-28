@@ -62,6 +62,26 @@ const configSchema = z.object({
   CLAMAV_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(300_000).default(60_000),
   /** Connection with the estatepro_platform role (BYPASSRLS): worker queue claims and discovery only. */
   PLATFORM_DATABASE_URL: z.url().optional(),
+
+  /**
+   * Address suggestions (ADR-006 L-D2). Suggestions only: a user confirms every
+   * stored location. "none" disables the suggestions endpoint; pins still work.
+   */
+  GEOCODER_PROVIDER: z.enum(['none', 'mapbox']).default('none'),
+  /** Mapbox token with permanent geocoding enabled (results may be stored). */
+  MAPBOX_ACCESS_TOKEN: z.string().min(1).optional(),
+  MAPBOX_API_URL: z.url().default('https://api.mapbox.com'),
+  GEOCODER_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(5_000),
+  /** Per company, per API instance. */
+  GEOCODER_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(10_000).default(60),
+  /** Map endpoints, per member, per API instance. */
+  MAP_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(10_000).default(240),
+  /** Upper bound for one location search query (statement_timeout). */
+  SEARCH_STATEMENT_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
+}).superRefine((config, issues) => {
+  if (config.GEOCODER_PROVIDER === 'mapbox' && config.MAPBOX_ACCESS_TOKEN === undefined) {
+    issues.addIssue({ code: 'custom', path: ['MAPBOX_ACCESS_TOKEN'], message: 'Required when GEOCODER_PROVIDER is mapbox.' });
+  }
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

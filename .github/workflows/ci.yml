@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     services:
       postgres:
-        image: postgres:16
+        image: postgis/postgis:16-3.4
         env:
           POSTGRES_PASSWORD: postgres
         ports: ['5432:5432']
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-24.04
     services:
       postgres:
-        image: postgres:16
+        image: postgis/postgis:16-3.4
         env:
           POSTGRES_PASSWORD: postgres
         ports: ['5432:5432']

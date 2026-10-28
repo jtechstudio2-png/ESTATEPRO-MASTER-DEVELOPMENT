@@ -20,6 +20,7 @@ export class ProblemFilter implements ExceptionFilter {
       this.logger.error({ err: exception, requestId: req.requestId }, 'Unhandled error');
     }
 
+    for (const [name, value] of Object.entries(problem.headers)) res.setHeader(name, value);
     res
       .status(problem.status)
       .type('application/problem+json')

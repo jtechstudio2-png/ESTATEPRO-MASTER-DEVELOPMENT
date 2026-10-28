@@ -34,6 +34,8 @@ export class ProblemError extends Error {
     readonly title: string,
     readonly detail?: string,
     readonly extras: Pick<ProblemBody, 'errors' | 'conflictingResource'> = {},
+    /** Response headers that belong with this problem (e.g. Retry-After). */
+    readonly headers: Readonly<Record<string, string>> = {},
   ) {
     super(detail ?? title);
     this.name = 'ProblemError';
@@ -107,6 +109,27 @@ export const Problems = {
       'Idempotency key reused',
       'This Idempotency-Key was already used with a different request.',
     ),
+
+  tooManyRequests: (retryAfterSeconds: number) =>
+    new ProblemError(
+      429,
+      'too-many-requests',
+      'Too many requests',
+      `Too many requests for this feature. Try again in ${retryAfterSeconds} seconds.`,
+      {},
+      { 'Retry-After': String(retryAfterSeconds) },
+    ),
+
+  searchTooSlow: () =>
+    new ProblemError(
+      503,
+      'search-timeout',
+      'Search took too long',
+      'This search covers too much at once. Zoom in, draw a smaller area or add filters, then try again.',
+    ),
+
+  geocodingUnavailable: (detail = 'Address suggestions are not available. Place the pin on the map or enter the coordinates.') =>
+    new ProblemError(503, 'geocoding-unavailable', 'Geocoding unavailable', detail),
 
   preconditionRequired: (detail = 'Send the If-Match header with the version you are updating.') =>
     new ProblemError(428, 'precondition-required', 'Precondition required', detail),
