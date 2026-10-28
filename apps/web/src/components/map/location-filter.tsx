@@ -34,9 +34,10 @@ export function useLocationChip(): { label: string; clear: () => void } | null {
 
 /**
  * LocationFilter (L-1, P-1): near a property or the device position, within a
- * radius (0.5–50 km, ADR-006). Drawing an area is on the map (M-2, M-3).
+ * radius (0.5–50 km, ADR-006). Drawing an area is on the map (M-2, M-3),
+ * where this button is labelled "Near…" beside the map's own radius tool.
  */
-export function LocationFilter() {
+export function LocationFilter({ label }: { label?: string } = {}) {
   const t = useTranslations('location');
   const common = useTranslations('common');
   const format = useFormat();
@@ -79,7 +80,7 @@ export function LocationFilter() {
     <>
       <div>
         <Button onPress={() => setOpen(true)} aria-haspopup="dialog">
-          {t('radius')}
+          {label ?? t('radius')}
           <span aria-hidden="true"> ▾</span>
         </Button>
       </div>

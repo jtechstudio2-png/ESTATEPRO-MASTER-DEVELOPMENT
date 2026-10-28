@@ -65,5 +65,14 @@
   "distanceAway": "{distance} away",
   "applyCoordinates": "Move the pin to these coordinates",
   "nearProperty": "Near a property",
-  "placeSearch": "Search properties"
+  "placeSearch": "Search properties",
+  "mapListings": "Listings map",
+  "mapProperties": "Properties map",
+  "radiusHelp": "Click the map to set the centre. With the keyboard: arrow keys move the crosshair, Space sets the centre. Escape cancels.",
+  "radiusCentreSet": "Centre set.",
+  "radiusApply": "Search this radius",
+  "radiusCancel": "Cancel radius",
+  "showOnMap": "Show {name} on the map",
+  "zoomToSearch": "Move the map to an area, then choose Search this area.",
+  "nearPlace": "Near…"
 }

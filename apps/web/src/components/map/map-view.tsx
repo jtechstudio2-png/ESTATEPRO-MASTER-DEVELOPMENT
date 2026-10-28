@@ -31,6 +31,8 @@ export interface MapHandle {
   getBounds: () => Bbox | null;
   getCenter: () => LngLat | null;
   getZoom: () => number;
+  /** Moves the view by screen pixels (keyboard crosshair, M-2). */
+  panBy: (offset: [number, number]) => void;
 }
 
 interface MapViewProps {
@@ -108,6 +110,7 @@ export const MapView = forwardRef<MapHandle, MapViewProps>(function MapView(
       return center ? [center.lng, center.lat] : null;
     },
     getZoom: () => mapRef.current?.getZoom() ?? 0,
+    panBy: (offset) => mapRef.current?.panBy(offset, { duration: 0 }),
   }));
 
   useEffect(() => {
