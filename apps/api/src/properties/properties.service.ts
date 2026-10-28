@@ -289,6 +289,10 @@ export class PropertiesService {
       .where(related);
     const types = query.filters['entityType'];
     if (Array.isArray(types)) qb = qb.where('a.entityType', 'in', types);
+    // P-6 date filter: whole UTC days.
+    const occurred = query.filters['occurredAt'] as { gte?: string; lte?: string } | undefined;
+    if (occurred?.gte) qb = qb.where('a.occurredAt', '>=', sql<Date>`${occurred.gte}::date`);
+    if (occurred?.lte) qb = qb.where('a.occurredAt', '<', sql<Date>`${occurred.lte}::date + 1`);
     if (query.cursor) qb = qb.where(keysetCondition('a.occurredAt', 'a.id', query.sort, query.cursor));
     const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.id', query.sort.direction).limit(query.limit + 1).execute();
     return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({

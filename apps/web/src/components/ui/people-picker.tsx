@@ -67,7 +67,7 @@ export function PeoplePicker({ label, value, onChange, permission, officeId, err
     >
       <Label className={styles.label}>
         {label}
-        {isRequired ? <span className={styles.required}>({t('required')})</span> : null}
+        {isRequired ? <span className={styles.required}> ({t('required')})</span> : null}
       </Label>
       <div className={styles.comboRow}>
         <Input className={styles.input} />

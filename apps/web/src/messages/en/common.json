@@ -70,5 +70,6 @@
   "moveDown": "Move down",
   "moveTo": "Move to position…",
   "position": "Position",
-  "of": "{index} of {total}"
+  "of": "{index} of {total}",
+  "reasonRequired": "Enter a reason."
 }

@@ -36,7 +36,7 @@ interface BaseFieldProps {
 
 function RequiredMark({ show }: { show: boolean | undefined }) {
   const t = useTranslations('form');
-  return show ? <span className={styles.required}>({t('required')})</span> : null;
+  return show ? <span className={styles.required}> ({t('required')})</span> : null;
 }
 
 interface TextFieldProps extends BaseFieldProps {

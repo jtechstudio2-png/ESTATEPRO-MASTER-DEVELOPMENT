@@ -70,5 +70,6 @@
   "moveDown": "نقل لأسفل",
   "moveTo": "نقل إلى موضع…",
   "position": "الموضع",
-  "of": "{index} من {total}"
+  "of": "{index} من {total}",
+  "reasonRequired": "أدخل السبب."
 }

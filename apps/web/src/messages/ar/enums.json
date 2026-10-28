@@ -1,0 +1,39 @@
+{
+  "availability": {
+    "available": "متاحة",
+    "under_maintenance": "قيد الصيانة",
+    "owner_occupied": "يشغلها المالك",
+    "unavailable": "غير متاحة"
+  },
+  "geocodeSource": {
+    "manual_pin": "محدد على الخريطة",
+    "geocoder": "من البحث عن العنوان",
+    "postcode_centroid": "مركز الرمز البريدي",
+    "import": "مستورد"
+  },
+  "geocodeAccuracy": {
+    "rooftop": "المبنى",
+    "street": "الشارع",
+    "postcode": "الرمز البريدي",
+    "locality": "المنطقة فقط"
+  },
+  "appliesTo": {
+    "property": "العقار",
+    "unit": "الوحدة",
+    "both": "العقار والوحدة"
+  },
+  "usageClass": {
+    "residential": "سكني",
+    "commercial": "تجاري",
+    "industrial": "صناعي",
+    "land": "أرض",
+    "mixed_use": "متعدد الاستخدامات",
+    "hospitality": "ضيافة",
+    "agricultural": "زراعي",
+    "other": "أخرى"
+  },
+  "yesNo": {
+    "true": "نعم",
+    "false": "لا"
+  }
+}

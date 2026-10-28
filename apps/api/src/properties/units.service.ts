@@ -47,6 +47,10 @@ export class UnitsService {
     if (archived === 'false') qb = qb.where('u.archivedAt', 'is', null);
     if (archived === 'true') qb = qb.where('u.archivedAt', 'is not', null);
     if (Array.isArray(query.filters['availability'])) qb = qb.where('u.availability', 'in', query.filters['availability']);
+    if (query.q !== null) {
+      const pattern = `%${query.q.replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
+      qb = qb.where((eb) => eb.or([eb('u.unitLabel', 'ilike', pattern), eb('u.reference', 'ilike', pattern)]));
+    }
     if (query.cursor) qb = qb.where(keysetCondition(sortColumn, 'u.id', query.sort, query.cursor));
     const rows = await qb
       .orderBy(sql.ref(sortColumn), query.sort.direction)

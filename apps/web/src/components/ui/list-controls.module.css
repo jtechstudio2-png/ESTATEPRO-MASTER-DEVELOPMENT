@@ -63,3 +63,33 @@
   font-size: var(--ep-font-size-200);
   color: var(--ep-color-text-secondary);
 }
+
+.filter {
+  flex: 0 1 200px;
+  min-inline-size: 160px;
+}
+
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--ep-space-3);
+  padding: var(--ep-space-3);
+  border: var(--ep-border-width) dashed var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ep-space-3);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ep-space-3);
+}

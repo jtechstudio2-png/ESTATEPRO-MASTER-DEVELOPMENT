@@ -1,0 +1,42 @@
+.feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 9rem 10rem minmax(0, 1fr);
+  gap: var(--ep-space-3);
+  padding-block: var(--ep-space-2);
+  border-block-end: var(--ep-border-width) solid var(--ep-color-border);
+  font-size: var(--ep-font-size-200);
+}
+
+.when,
+.fields {
+  color: var(--ep-color-text-secondary);
+}
+
+.who {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.what {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .entry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-3);
+}

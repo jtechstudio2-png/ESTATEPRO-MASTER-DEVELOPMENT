@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test as base } from '@playwright/test';
+import { expect, type Locator, type Page, test as base } from '@playwright/test';
 
 import { e2eState, type E2eState } from './state';
 
@@ -39,3 +39,14 @@ export const test = base.extend<{ state: E2eState }>({
     await use(e2eState());
   },
 });
+
+/** Opens the select labelled `label` (its button is named "<value> <label>") and picks `option`. */
+export async function choose(page: Page, label: string, option: string, scope: Page | Locator = page): Promise<void> {
+  await scope.getByRole('button', { name: new RegExp(`(^|\\s)${escape(label)}(\\s|$)`) }).first().click();
+  await page.getByRole('option', { name: option, exact: true }).click();
+}
+
+/** Picks a radio by clicking its visible label (the input itself is visually hidden). */
+export async function pickRadio(scope: Page | Locator, name: string): Promise<void> {
+  await scope.locator('label').filter({ hasText: new RegExp(`^\\s*${escape(name)}\\s*$`) }).first().click();
+}

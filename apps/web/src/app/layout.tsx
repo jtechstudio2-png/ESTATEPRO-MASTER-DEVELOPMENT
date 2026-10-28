@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
 import { pageContext } from '@/server/context';
+import { env } from '@/server/env';
 
 export const metadata: Metadata = {
   title: { default: 'EstatePro', template: '%s · EstatePro' },
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           messages={messages}
           csrfToken={context.csrfToken}
           companyId={context.session?.company.id ?? null}
+          mapConfig={{ tilesUrl: env().MAP_TILES_URL, glyphsUrl: env().MAP_GLYPHS_URL }}
         >
           {children}
         </Providers>

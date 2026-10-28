@@ -10,3 +10,4 @@ coverage/
 test-results/
 playwright-report/
 .state.json
+apps/web/public/basemap/maplibre-gl-worker.mjs

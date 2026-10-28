@@ -241,6 +241,15 @@ describe('web interface read endpoints (Phase 4 M6)', () => {
 
       const onlyKeys = await as('owner').get(`/api/v1/properties/${propertyId}/history?filter[entityType]=key_set`).expect(200);
       expect(onlyKeys.body.data.map((e: { action: string }) => e.action)).toEqual(['key_set.created']);
+      // P-6 date filter (whole UTC days).
+      const today = new Date().toISOString().slice(0, 10);
+      const sinceToday = await as('owner').get(`/api/v1/properties/${propertyId}/history?filter[occurredAt][gte]=${today}&filter[occurredAt][lte]=${today}`).expect(200);
+      expect(sinceToday.body.data.length).toBe(history.body.data.length);
+      const future = await as('owner').get(`/api/v1/properties/${propertyId}/history?filter[occurredAt][gte]=2999-01-01`).expect(200);
+      expect(future.body.data).toEqual([]);
+      const past = await as('owner').get(`/api/v1/properties/${propertyId}/history?filter[occurredAt][lte]=2000-01-01`).expect(200);
+      expect(past.body.data).toEqual([]);
+      await as('owner').get(`/api/v1/properties/${propertyId}/history?filter[occurredAt][gte]=yesterday`).expect(422);
       const paged = await as('owner').get(`/api/v1/properties/${propertyId}/history?limit=2`).expect(200);
       const next = await as('owner').get(`/api/v1/properties/${propertyId}/history?limit=2&cursor=${paged.body.page.nextCursor}`).expect(200);
       expect(next.body.data[0].occurredAt <= paged.body.data[1].occurredAt).toBe(true);

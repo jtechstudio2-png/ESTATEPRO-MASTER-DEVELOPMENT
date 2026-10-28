@@ -59,7 +59,7 @@ class PropertyFieldsBase {
   @ApiPropertyOptional({ type: Number, nullable: true, minimum: 1000, maximum: 2200 }) @ValidateIf(provided) @IsInt() @Min(1000) @Max(2200) yearBuilt?: number | null;
   @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 300 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(300) floorsCount?: number | null;
 
-  @ApiPropertyOptional({ type: LandAreaInput })
+  @ApiPropertyOptional({ type: LandAreaInput, nullable: true })
   @ValidateIf(provided) @ValidateNested() @Type(() => LandAreaInput)
   landArea?: LandAreaInput | null;
 
@@ -191,7 +191,7 @@ class UnitFieldsBase {
   @ValidateIf(provided) @IsNumber({ maxDecimalPlaces: 1 }) @Min(0) @Max(100)
   bathrooms?: number | null;
   @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 100 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(100) receptionRooms?: number | null;
-  @ApiPropertyOptional({ type: FloorAreaInput }) @ValidateIf(provided) @ValidateNested() @Type(() => FloorAreaInput) floorArea?: FloorAreaInput | null;
+  @ApiPropertyOptional({ type: FloorAreaInput, nullable: true }) @ValidateIf(provided) @ValidateNested() @Type(() => FloorAreaInput) floorArea?: FloorAreaInput | null;
   @ApiPropertyOptional({ type: Number, nullable: true, minimum: 0, maximum: 10000 }) @ValidateIf(provided) @IsInt() @Min(0) @Max(10_000) parkingSpaces?: number | null;
   @ApiPropertyOptional({ type: String, nullable: true, description: 'Code from the "furnishing" picklist' }) @ValidateIf(provided) @Matches(/^[a-z0-9][a-z0-9_]*$/) furnishingCode?: string | null;
   @ApiPropertyOptional({ type: String, nullable: true, description: 'Energy rating where the market uses one (e.g. EPC band)' })

@@ -630,6 +630,13 @@ describe('properties, units and property types (Phase 4 M2)', () => {
       const available = await as('agentA').get(`/api/v1/properties/${building.id}/units?filter[availability]=available&sort=-createdAt&limit=100`).expect(200);
       expect(available.body.data.length).toBeGreaterThanOrEqual(5);
       await as('agentA').get(`/api/v1/properties/${building.id}/units?filter[availability]=broken`).expect(422);
+      // P-4 label search: label or reference contains the text; LIKE wildcards are literal.
+      const search = await as('agentA').get(`/api/v1/properties/${building.id}/units?q=b2`).expect(200);
+      expect(search.body.data.map((u: { unitLabel: string }) => u.unitLabel)).toEqual(['B2']);
+      const byReference = await as('agentA').get(`/api/v1/properties/${building.id}/units?q=${search.body.data[0].reference}`).expect(200);
+      expect(byReference.body.data).toHaveLength(1);
+      expect((await as('agentA').get(`/api/v1/properties/${building.id}/units?q=B%25`).expect(200)).body.data).toEqual([]);
+      await as('agentA').get(`/api/v1/properties/${building.id}/units?q=x`).expect(422);
       await as('otherAgent', other.companyId).get(`/api/v1/properties/${building.id}/units`).expect(404);
     });
 

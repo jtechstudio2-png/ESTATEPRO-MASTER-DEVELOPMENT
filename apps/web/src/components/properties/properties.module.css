@@ -1,0 +1,49 @@
+.address {
+  display: flex;
+  flex-direction: column;
+  font-style: normal;
+}
+
+.localComponent {
+  font-size: var(--ep-font-size-200);
+  color: var(--ep-color-text-secondary);
+}
+
+.quiet {
+  color: var(--ep-color-text-secondary);
+}
+
+.warn {
+  color: var(--ep-color-warning);
+}
+
+.pinned {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-3);
+}
+
+.noteBody {
+  margin: var(--ep-space-1) 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.summary {
+  margin: 0;
+  padding-inline-start: var(--ep-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-2);
+}
+
+.mapBox {
+  inline-size: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--ep-radius-control);
+  overflow: hidden;
+  border: var(--ep-border-width) solid var(--ep-color-border);
+}

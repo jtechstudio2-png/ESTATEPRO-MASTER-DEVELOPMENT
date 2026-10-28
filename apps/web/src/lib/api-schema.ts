@@ -1445,7 +1445,7 @@ export interface components {
             titleReference?: string | null;
             yearBuilt?: number | null;
             floorsCount?: number | null;
-            landArea?: components["schemas"]["LandAreaInput"];
+            landArea?: components["schemas"]["LandAreaInput"] | null;
             /** @description Under a management agreement */
             isManaged?: boolean;
             /** @description Defaults to the office jurisdiction when in the same country */
@@ -1611,7 +1611,7 @@ export interface components {
             titleReference?: string | null;
             yearBuilt?: number | null;
             floorsCount?: number | null;
-            landArea?: components["schemas"]["LandAreaInput"];
+            landArea?: components["schemas"]["LandAreaInput"] | null;
             /** @description Under a management agreement */
             isManaged?: boolean;
             /** @description Defaults to the office jurisdiction when in the same country */
@@ -1679,7 +1679,7 @@ export interface components {
             bedrooms?: number | null;
             bathrooms?: number | null;
             receptionRooms?: number | null;
-            floorArea?: components["schemas"]["FloorAreaInput"];
+            floorArea?: components["schemas"]["FloorAreaInput"] | null;
             parkingSpaces?: number | null;
             /** @description Code from the "furnishing" picklist */
             furnishingCode?: string | null;
@@ -1699,7 +1699,7 @@ export interface components {
             bedrooms?: number | null;
             bathrooms?: number | null;
             receptionRooms?: number | null;
-            floorArea?: components["schemas"]["FloorAreaInput"];
+            floorArea?: components["schemas"]["FloorAreaInput"] | null;
             parkingSpaces?: number | null;
             /** @description Code from the "furnishing" picklist */
             furnishingCode?: string | null;
@@ -3236,6 +3236,10 @@ export interface operations {
     Properties_history: {
         parameters: {
             query?: {
+                /** @description Up to and including this date (YYYY-MM-DD, UTC) */
+                "filter[occurredAt][lte]"?: unknown;
+                /** @description From this date (YYYY-MM-DD, UTC) */
+                "filter[occurredAt][gte]"?: unknown;
                 /** @description property, unit, media, property_note, key_set, listing */
                 "filter[entityType]"?: unknown;
                 cursor?: unknown;
@@ -3316,6 +3320,8 @@ export interface operations {
     Properties_listUnits: {
         parameters: {
             query?: {
+                /** @description Unit label or reference contains (2–100 characters) */
+                q?: unknown;
                 "filter[archived]"?: "false" | "true" | "all";
                 /** @description Comma-separated availability values */
                 "filter[availability]"?: unknown;

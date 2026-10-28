@@ -846,6 +846,20 @@
             }
           },
           {
+            "name": "filter[occurredAt][lte]",
+            "required": false,
+            "in": "query",
+            "description": "Up to and including this date (YYYY-MM-DD, UTC)",
+            "schema": {}
+          },
+          {
+            "name": "filter[occurredAt][gte]",
+            "required": false,
+            "in": "query",
+            "description": "From this date (YYYY-MM-DD, UTC)",
+            "schema": {}
+          },
+          {
             "name": "filter[entityType]",
             "required": false,
             "in": "query",
@@ -1018,6 +1032,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Unit label or reference contains (2–100 characters)",
+            "schema": {}
           },
           {
             "name": "filter[archived]",
@@ -6144,7 +6165,14 @@
             "maximum": 300
           },
           "landArea": {
-            "$ref": "#/components/schemas/LandAreaInput"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LandAreaInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "isManaged": {
             "type": "boolean",
@@ -6774,7 +6802,14 @@
             "maximum": 300
           },
           "landArea": {
-            "$ref": "#/components/schemas/LandAreaInput"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LandAreaInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "isManaged": {
             "type": "boolean",
@@ -7056,7 +7091,14 @@
             "maximum": 100
           },
           "floorArea": {
-            "$ref": "#/components/schemas/FloorAreaInput"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FloorAreaInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "parkingSpaces": {
             "type": [
@@ -7142,7 +7184,14 @@
             "maximum": 100
           },
           "floorArea": {
-            "$ref": "#/components/schemas/FloorAreaInput"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FloorAreaInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "parkingSpaces": {
             "type": [

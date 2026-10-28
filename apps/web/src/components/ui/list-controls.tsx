@@ -1,10 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { Input, Label, SearchField } from 'react-aria-components';
 
 import { Button } from './button';
+import { SelectField } from './fields';
 import fieldStyles from './field.module.css';
 import styles from './list-controls.module.css';
 
@@ -93,3 +94,47 @@ export function LoadMore({ hasMore, loading, onLoad, shown }: { hasMore: boolean
     </>
   );
 }
+
+const ANY = '__any__';
+
+/** A filter drop-down with "Any" first; null means the filter is off. */
+export function FilterSelect({ label, value, onChange, options }: { label: string; value: string | null; onChange: (value: string | null) => void; options: Array<{ id: string; label: string }> }) {
+  const t = useTranslations('list');
+  return (
+    <div className={styles.filter}>
+      <SelectField label={label} value={value ?? ANY} onChange={(next) => onChange(next === ANY ? null : next)} options={[{ id: ANY, label: t('any') }, ...options]} />
+    </div>
+  );
+}
+
+/** "Sorted by: …" with the sorts the API allows (UI checklist §1). */
+export function SortSelect({ value, onChange, options }: { value: string; onChange: (value: string) => void; options: Array<{ id: string; label: string }> }) {
+  const t = useTranslations('list');
+  return (
+    <div className={styles.filter}>
+      <SelectField label={t('sort')} value={value} onChange={onChange} options={options} />
+    </div>
+  );
+}
+
+/** "More filters": the less used filters behind a disclosure (UI checklist §2). */
+export function MoreFilters({ children, activeCount }: { children: ReactNode; activeCount: number }) {
+  const t = useTranslations('list');
+  const [open, setOpen] = useState(activeCount > 0);
+  const id = useId();
+  return (
+    <>
+      <div className={styles.filter}>
+        <Button onPress={() => setOpen(!open)} aria-expanded={open} aria-controls={id}>
+          {t('moreFilters')}
+          {activeCount > 0 ? ` (${activeCount})` : ''}
+        </Button>
+      </div>
+      <div id={id} hidden={!open} className={styles.more} style={{ flexBasis: '100%' }}>
+        {children}
+      </div>
+    </>
+  );
+}
+
+export const listStyles = styles;

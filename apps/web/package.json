@@ -12,10 +12,11 @@
     "test": "vitest run --coverage",
     "test:e2e": "playwright test",
     "messages:check": "node scripts/check-messages.mjs",
-    "api:types": "openapi-typescript ../api/openapi.json -o src/lib/api-schema.ts --root-types --root-types-no-schema-prefix"
+    "api:types": "openapi-typescript ../api/openapi.json -o src/lib/api-schema.ts --root-types --root-types-no-schema-prefix",
+    "predev": "node scripts/copy-map-assets.mjs",
+    "prebuild": "node scripts/copy-map-assets.mjs"
   },
   "dependencies": {
-    "@mapbox/mapbox-gl-rtl-text": "1.0.0",
     "@tanstack/react-query": "5.105.0",
     "maplibre-gl": "6.16.0",
     "next": "15.5.28",
@@ -35,6 +36,7 @@
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.8",
+    "@types/geojson": "7946.0.16",
     "@types/node": "22.20.5",
     "@types/pg": "8.23.1",
     "@types/react": "19.1.17",

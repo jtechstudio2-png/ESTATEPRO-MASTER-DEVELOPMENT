@@ -45,6 +45,14 @@ export function useListParams() {
     [pathname, router, searchParams],
   );
 
+  /** Replaces the whole query (saved views). */
+  const replaceAll = useCallback(
+    (query: string) => {
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router],
+  );
+
   /** The API query for this list: the URL's own parameters (no cursor). */
   const apiQuery = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -54,5 +62,5 @@ export function useListParams() {
     return params;
   }, [searchParams]);
 
-  return { get, getList, set, clear, apiQuery, searchParams };
+  return { get, getList, set, clear, replaceAll, apiQuery, searchParams };
 }

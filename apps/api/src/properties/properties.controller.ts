@@ -151,12 +151,17 @@ export class PropertiesController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'filter[entityType]', required: false, description: 'property, unit, media, property_note, key_set, listing' })
+  @ApiQuery({ name: 'filter[occurredAt][gte]', required: false, description: 'From this date (YYYY-MM-DD, UTC)' })
+  @ApiQuery({ name: 'filter[occurredAt][lte]', required: false, description: 'Up to and including this date (YYYY-MM-DD, UTC)' })
   @ApiOkResponse({ type: PropertyHistoryPageDto })
   async history(@Tenant() ctx: TenantContext, @Param('propertyId', UUID_PARAM) id: string, @Query() query: ListQueryInput): Promise<PropertyHistoryPageDto> {
     const parsed = parseListQuery<'occurredAt'>(
       query,
       { allowed: { occurredAt: 'timestamp' }, default: { field: 'occurredAt', direction: 'desc' } },
-      { entityType: { type: 'enum', values: ['property', 'unit', 'media', 'property_note', 'key_set', 'listing'], multi: true } },
+      {
+        entityType: { type: 'enum', values: ['property', 'unit', 'media', 'property_note', 'key_set', 'listing'], multi: true },
+        occurredAt: { type: 'range', pattern: /^\d{4}-\d{2}-\d{2}$/ },
+      },
     );
     return this.tenantDb.run(ctx, (tx) => this.properties.history(tx, ctx, id, parsed));
   }
@@ -222,6 +227,7 @@ export class PropertiesController {
   @ApiQuery({ name: 'sort', required: false, enum: ['unitLabel', '-unitLabel', 'createdAt', '-createdAt', 'updatedAt', '-updatedAt'] })
   @ApiQuery({ name: 'filter[availability]', required: false, description: 'Comma-separated availability values' })
   @ApiQuery({ name: 'filter[archived]', required: false, enum: ['false', 'true', 'all'] })
+  @ApiQuery({ name: 'q', required: false, description: 'Unit label or reference contains (2–100 characters)' })
   @ApiOkResponse({ type: UnitPageDto })
   async listUnits(
     @Tenant() ctx: TenantContext,
