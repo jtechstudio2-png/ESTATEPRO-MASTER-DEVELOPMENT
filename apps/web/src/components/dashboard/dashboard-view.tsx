@@ -150,9 +150,9 @@ export function DashboardView() {
             {(data) => (
               <CountList
                 items={[
-                  { label: t('keysOverdue'), count: data.overdue, href: listLink('/keys', { 'filter[overdue]': 'true', 'filter[status]': 'checked_out' }), warn: data.overdue > 0 },
-                  { label: t('keysOut'), count: data.out, href: listLink('/keys', { 'filter[status]': 'checked_out' }) },
-                  { label: t('keysLost'), count: data.lost, href: listLink('/keys', { 'filter[status]': 'lost' }), warn: data.lost > 0 },
+                  { label: t('keysOverdue'), count: data.overdue, href: listLink('/keys', { tab: 'overdue' }), warn: data.overdue > 0 },
+                  { label: t('keysOut'), count: data.out, href: listLink('/keys', { tab: 'out' }) },
+                  { label: t('keysLost'), count: data.lost, href: listLink('/keys', { tab: 'lost' }), warn: data.lost > 0 },
                 ]}
               />
             )}

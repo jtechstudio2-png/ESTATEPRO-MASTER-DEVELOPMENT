@@ -176,8 +176,15 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       dueBackAt: new Date(Date.now() + 3_600_000).toISOString(),
       note: 'Viewing with tenant',
     }, 1);
-    // The due-back time has passed: the set is overdue (D-1, D-2, K-2).
-    await db.query(`UPDATE key_sets SET due_back_at = now() - interval '2 hours' WHERE id = $1`, [keySet.id]);
+    // A second set for the key register specs, so they leave Osu Court's counts alone.
+    const villaKeys = await accraApi.call<{ id: string }>('POST', `properties/${laboneVilla.id}/key-sets`, { label: 'Villa spare', status: 'in_office' });
+    await accraApi.call('POST', `key-sets/${villaKeys.id}/check-out`, {
+      holderMembershipId: managerMembership,
+      dueBackAt: new Date(Date.now() + 3_600_000).toISOString(),
+      note: 'Contractor visit',
+    }, 1);
+    // The due-back times have passed: both sets are overdue (D-1, D-2, K-2).
+    await db.query(`UPDATE key_sets SET due_back_at = now() - interval '2 hours' WHERE id = ANY($1)`, [[keySet.id, villaKeys.id]]);
 
     const dohaApi = new Api(options, users.arabic.email, doha.companyId);
     const dohaTypes = await dohaApi.call<{ data: Array<{ id: string; code: string }> }>('GET', 'property-types?limit=200');

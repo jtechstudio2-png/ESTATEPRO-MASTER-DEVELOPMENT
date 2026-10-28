@@ -13,7 +13,9 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
-  workers: process.env['CI'] ? 2 : 3,
+  // The specs share one seeded database and change the same records (the
+  // seeded listing, Osu Court's notes and keys), so files run one after another.
+  workers: 1,
   retries: 0,
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {

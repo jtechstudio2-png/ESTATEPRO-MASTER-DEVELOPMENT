@@ -91,5 +91,15 @@
   "myKeysEmpty": "لا توجد مفاتيح بحوزتك.",
   "list": "مجموعات المفاتيح",
   "openProperty": "فتح العقار",
-  "required": "أدخل {field}."
+  "required": "أدخل {field}.",
+  "statusLabel": "الحالة",
+  "actionsHeader": "الإجراءات",
+  "office": "المكتب",
+  "newTitle": "إضافة مجموعة مفاتيح",
+  "chooseProperty": "لأي عقار هذه المفاتيح؟",
+  "propertySearch": "ابحث عن عقار",
+  "propertySearchHint": "اكتب حرفين على الأقل من الاسم أو المرجع أو العنوان.",
+  "noProperties": "لا توجد عقارات مطابقة.",
+  "addTo": "إضافة مجموعة مفاتيح إلى {property}",
+  "choose": "اختيار"
 }

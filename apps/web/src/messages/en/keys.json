@@ -91,5 +91,15 @@
   "myKeysEmpty": "You are not holding any keys.",
   "list": "Key sets",
   "openProperty": "Open property",
-  "required": "Enter {field}."
+  "required": "Enter {field}.",
+  "statusLabel": "Status",
+  "actionsHeader": "Actions",
+  "office": "Office",
+  "newTitle": "Add key set",
+  "chooseProperty": "Which property are the keys for?",
+  "propertySearch": "Find property",
+  "propertySearchHint": "Type at least 2 characters of the name, reference or address.",
+  "noProperties": "No properties match.",
+  "addTo": "Add key set to {property}",
+  "choose": "Choose"
 }

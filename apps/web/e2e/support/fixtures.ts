@@ -27,6 +27,8 @@ function escape(text: string): string {
 
 /** axe with WCAG 2.1 A and AA rules (UI checklist §8). */
 export async function expectAccessible(page: Page, options: { exclude?: string[] } = {}): Promise<void> {
+  // A soft navigation (a filter written to the URL) streams the new <title> in; scan the settled page.
+  await expect.poll(() => page.title()).not.toBe('');
   let builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']);
   for (const selector of options.exclude ?? []) builder = builder.exclude(selector);
   const result = await builder.analyze();

@@ -321,11 +321,14 @@ export function KeySetFormDialog({
   propertyName,
   keySet,
   onOpenChange,
+  onSaved,
 }: {
   propertyId: string;
   propertyName: string;
   keySet?: KeySetDto;
   onOpenChange: (open: boolean) => void;
+  /** Called after a successful save, before the dialog closes. */
+  onSaved?: () => void;
 }) {
   const t = useTranslations('keys');
   const common = useTranslations('common');
@@ -366,6 +369,7 @@ export function KeySetFormDialog({
       }
       announce(t('saved', { tag: label.trim() }));
       await refresh();
+      onSaved?.();
       onOpenChange(false);
     } catch (caught) {
       setError(caught);

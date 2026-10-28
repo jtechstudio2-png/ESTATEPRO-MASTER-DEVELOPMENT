@@ -50,3 +50,10 @@
 .myKeys > li + li {
   border-block-start: var(--ep-border-width) solid var(--ep-color-border);
 }
+
+.rowActions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ep-space-2);
+}

@@ -21,8 +21,8 @@ interface DataTableProps<R> {
   caption: string;
   rows: R[];
   rowKey: (row: R) => string;
-  /** First column: reference and name, linking to the record (UI checklist §1). */
-  identifier: { header: ReactNode; href: (row: R) => string; label: (row: R) => ReactNode; secondary?: (row: R) => ReactNode };
+  /** First column: reference and name, linking to the record when it has a page of its own (UI checklist §1). */
+  identifier: { header: ReactNode; href?: (row: R) => string; label: (row: R) => ReactNode; secondary?: (row: R) => ReactNode };
   status?: { header: ReactNode; cell: (row: R) => ReactNode };
   columns: Array<Column<R>>;
   /** Primary row action and the overflow menu (last column). */
@@ -71,7 +71,7 @@ export function DataTable<R>({ caption, rows, rowKey, identifier, status, column
                   </td>
                 ) : null}
                 <th scope="row">
-                  <NextLink href={identifier.href(row)}>{identifier.label(row)}</NextLink>
+                  {identifier.href ? <NextLink href={identifier.href(row)}>{identifier.label(row)}</NextLink> : identifier.label(row)}
                   {identifier.secondary ? <span className={styles.secondary}>{identifier.secondary(row)}</span> : null}
                 </th>
                 {status ? <td>{status.cell(row)}</td> : null}
@@ -91,9 +91,13 @@ export function DataTable<R>({ caption, rows, rowKey, identifier, status, column
           <li key={rowKey(row)} className={styles.card}>
             <div className={styles.cardHead}>
               <div>
-                <NextLink href={identifier.href(row)}>
+                {identifier.href ? (
+                  <NextLink href={identifier.href(row)}>
+                    <strong>{identifier.label(row)}</strong>
+                  </NextLink>
+                ) : (
                   <strong>{identifier.label(row)}</strong>
-                </NextLink>
+                )}
                 {identifier.secondary ? <span className={styles.secondary}>{identifier.secondary(row)}</span> : null}
               </div>
               {status ? status.cell(row) : null}
