@@ -24,7 +24,7 @@ if [[ -f "$report" ]]; then
     if (kind === "playwright") {
       const walk = (s, path) => {
         for (const spec of s.specs ?? []) for (const t of spec.tests ?? [])
-          if (t.results?.some((x) => x.status !== "passed" && x.status !== "skipped")) failed.push(`${spec.file}: ${spec.title}: ${(t.results.at(-1)?.error?.message ?? "").split("\n")[0].slice(0, 160)}`);
+          if (t.results?.some((x) => x.status !== "passed" && x.status !== "skipped")) failed.push(`${spec.file}: ${spec.title}: ${(t.results.at(-1)?.error?.message ?? "").replace(/\u001b\[[0-9;]*m/g, "").split("\n").filter((line) => line.trim()).slice(0, 12).join(" ¦ ").slice(0, 1500)}`);
         for (const child of s.suites ?? []) walk(child, path);
       };
       for (const s of r.suites ?? []) walk(s, "");
