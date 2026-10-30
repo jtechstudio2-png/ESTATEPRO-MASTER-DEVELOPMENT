@@ -75,9 +75,12 @@ describe('tenant transactions and the audit writer', () => {
       await audit.emit(tx, ctx, { eventType: 'office.viewed', aggregateType: 'office', aggregateId: company.officeId, payload: { a: 1 } });
     });
 
-    const logs = await fx.db.selectFrom('auditLogs').selectAll().where('requestId', '=', 'req-infra-1').orderBy('occurredAt').execute();
+    // Both rows share the transaction's timestamp (now() is fixed per
+    // transaction), so they are matched by action, not by position.
+    const logs = await fx.db.selectFrom('auditLogs').selectAll().where('requestId', '=', 'req-infra-1').execute();
     expect(logs).toHaveLength(2);
-    expect(logs[0]).toMatchObject({
+    const byAction = new Map(logs.map((log) => [log.action, log]));
+    expect(byAction.get('office.viewed')).toMatchObject({
       companyId: company.companyId,
       actorType: 'user',
       actorUserId: company.ownerUserId,
@@ -87,7 +90,7 @@ describe('tenant transactions and the audit writer', () => {
       ipAddress: '203.0.113.7',
       userAgent: 'vitest',
     });
-    expect(logs[1]).toMatchObject({ changes: null, metadata: {} });
+    expect(byAction.get('office.checked')).toMatchObject({ changes: null, metadata: {} });
 
     const event = await fx.db.selectFrom('outboxEvents').selectAll().where('aggregateId', '=', company.officeId).where('eventType', '=', 'office.viewed').executeTakeFirstOrThrow();
     expect(event.payload).toEqual({ a: 1, requestId: 'req-infra-1', actorUserId: company.ownerUserId });

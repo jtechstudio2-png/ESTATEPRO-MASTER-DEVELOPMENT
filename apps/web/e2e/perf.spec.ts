@@ -51,7 +51,7 @@ async function measure(page: Page, screen: string, url: string, ready: (page: Pa
   return { screen, readyMs, lcpMs: Math.round(timing.lcp), domContentLoadedMs: Math.round(timing.dcl), scriptKb: Math.round(timing.scriptBytes / 1024), requests: timing.requests };
 }
 
-test('main screens load within budget', async ({ page, state }) => {
+test('main screens load within budget', { tag: '@performance' }, async ({ page, state }) => {
   test.setTimeout(180_000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await signIn(page, state.users.owner.email, { company: state.companies.accra.name });

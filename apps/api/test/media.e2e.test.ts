@@ -595,7 +595,8 @@ describe('media gallery, uploads and worker (Phase 4 M4)', () => {
       expect((await as('owner').get(`/api/v1/listings/${running.id}`).expect(200)).body.status).toBe('available');
       const history = await fx.db.selectFrom('listingStatusHistory').selectAll().where('listingId', '=', ended.id).where('toStatus', '=', 'expired').executeTakeFirstOrThrow();
       expect(history).toMatchObject({ changedBy: null, reason: 'Mandate expired' });
-      const audit = await fx.db.selectFrom('auditLogs').select(['actorType', 'actorUserId']).where('entityId', '=', ended.id).where('action', '=', 'listing.status_changed').executeTakeFirstOrThrow();
+      const audit = await fx.db.selectFrom('auditLogs').select(['actorType', 'actorUserId']).where('entityId', '=', ended.id).where('action', '=', 'listing.status_changed').orderBy('occurredAt', 'desc').executeTakeFirstOrThrow();
+      // Publishing also wrote a listing.status_changed row (by the user); the latest is the expiry.
       expect(audit).toEqual({ actorType: 'system', actorUserId: null });
       // A second pass in the same hour is idempotent.
       await worker.runOnce();

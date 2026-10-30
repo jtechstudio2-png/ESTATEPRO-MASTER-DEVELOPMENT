@@ -1,0 +1,133 @@
+name: Performance
+
+# Performance budgets, outside the blocking CI gate: nightly, on every release
+# and on demand. Results are kept as artifacts; a failure here is a
+# performance regression to investigate, not a broken build.
+#
+# The standard GitHub runner for private repositories has 2 vCPU. Budgets
+# are those of the tests (API p95 and per-photo processing, web time to
+# data, LCP and script size); production-like budgets are confirmed by the
+# launch load test on fixed hardware.
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # nightly, 02:17 UTC
+  release:
+    types: [published]
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  api-performance:
+    name: API performance (100,000 listings, GIS, media processing)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start resource monitor
+        run: bash .github/scripts/monitor.sh start
+      - name: Start test services
+        run: bash .github/scripts/start-test-services.sh
+      - name: Performance tests
+        run: pnpm --filter @estatepro/api test:performance 2>&1 | tee "$RUNNER_TEMP/api-performance.log"
+      - name: Diagnostics and measured values
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/monitor.sh stop
+          bash .github/scripts/ci-diagnostics.sh "API performance (100,000 listings, GIS, media processing)" apps/api/test-results/vitest-performance.json vitest
+          { echo; echo "#### Measured"; grep -E "p95|s/photo" "$RUNNER_TEMP/api-performance.log" | sed 's/^/    /'; } >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-performance
+          path: |
+            apps/api/test-results
+            ${{ runner.temp }}/api-performance.log
+            ${{ runner.temp }}/monitor.log
+          retention-days: 90
+
+  web-performance:
+    name: Web performance (time to data, LCP, script size)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      E2E_DATABASE_ADMIN_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+      PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/playwright-performance.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start resource monitor
+        run: bash .github/scripts/monitor.sh start
+      - name: Start test services
+        run: bash .github/scripts/start-test-services.sh
+      - name: Install Chromium for Playwright
+        run: pnpm --filter @estatepro/web exec playwright install --with-deps chromium
+      - name: Build the API
+        run: pnpm --filter @estatepro/api build
+      - name: Performance spec
+        run: pnpm --filter @estatepro/web test:e2e:performance --reporter=list,json
+      - name: Diagnostics and measured values
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/monitor.sh stop
+          bash .github/scripts/ci-diagnostics.sh "Web performance (time to data, LCP, script size)" apps/web/test-results/playwright-performance.json playwright
+          { echo; echo "#### Measured"; echo '```json'; cat apps/web/test-results/perf.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-performance
+          path: |
+            apps/web/test-results
+            ${{ runner.temp }}/monitor.log
+          retention-days: 90

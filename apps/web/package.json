@@ -11,6 +11,8 @@
     "lint": "eslint . && stylelint \"src/**/*.css\"",
     "test": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:ci": "playwright test --grep-invert @performance",
+    "test:e2e:performance": "playwright test --grep @performance",
     "messages:check": "node scripts/check-messages.mjs",
     "api:types": "openapi-typescript ../api/openapi.json -o src/lib/api-schema.ts --root-types --root-types-no-schema-prefix",
     "predev": "node scripts/copy-map-assets.mjs",

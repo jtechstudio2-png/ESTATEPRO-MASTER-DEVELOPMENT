@@ -1,21 +1,27 @@
 name: CI
 
+# Correctness gate: every job here blocks merging to main (branch protection).
+# Performance tests run in performance.yml (nightly and on releases).
+
 on:
   push:
     branches: [main, 'phase-*/**']
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # Manual runs (used to verify stability) never cancel each other.
+  group: ci-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'auto' }}
   cancel-in-progress: true
 
 jobs:
   database:
     name: Database migrations and SQL tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     services:
       postgres:
         image: postgis/postgis:16-3.4
@@ -36,6 +42,11 @@ jobs:
   api:
     name: API lint, typecheck, build and tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     services:
       postgres:
         image: postgis/postgis:16-3.4
@@ -54,26 +65,39 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Start resource monitor
+        run: bash .github/scripts/monitor.sh start
       - name: Start S3-compatible storage (SeaweedFS), ClamAV and Poppler for media tests
-        run: |
-          mkdir -p "$RUNNER_TEMP/seaweed"
-          printf '%s' '{"identities":[{"name":"estatepro","credentials":[{"accessKey":"estatepro-test","secretKey":"estatepro-test-secret"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' > "$RUNNER_TEMP/seaweed/s3.json"
-          docker run -d --name seaweedfs -p 8333:8333 -v "$RUNNER_TEMP/seaweed":/config chrislusf/seaweedfs:3.80 server -s3 -s3.port=8333 -s3.config=/config/s3.json -dir=/data
-          docker run -d --name clamav -p 3310:3310 clamav/clamav:1.4
-          sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
-          # clamd starts after the first signature download (about 1-3 minutes).
-          for i in $(seq 1 90); do (printf 'zPING\0' | nc -q1 127.0.0.1 3310 | grep -q PONG) && break; sleep 4; done
-          printf 'zPING\0' | nc -q1 127.0.0.1 3310 | grep -q PONG
-          curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8333/
+        run: bash .github/scripts/start-test-services.sh
       - run: pnpm --filter @estatepro/api lint
       - run: pnpm --filter @estatepro/api typecheck
       - run: pnpm --filter @estatepro/api build
       - name: Tests with coverage thresholds (includes the OpenAPI contract check)
-        run: pnpm --filter @estatepro/api test
+        run: pnpm --filter @estatepro/api test:ci
+      - name: Diagnostics
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/monitor.sh stop
+          bash .github/scripts/ci-diagnostics.sh "API lint, typecheck, build and tests" apps/api/test-results/vitest.json vitest
+      - name: Keep test report and resource samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-diagnostics
+          path: |
+            apps/api/test-results
+            ${{ runner.temp }}/monitor.log
+            ${{ runner.temp }}/diagnostics.md
+          retention-days: 14
+          if-no-files-found: ignore
 
   web:
     name: Web lint, typecheck, messages, unit tests and build
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     services:
       postgres:
         image: postgis/postgis:16-3.4
@@ -105,7 +129,12 @@ jobs:
   web-e2e:
     name: Web end-to-end (Playwright, axe, English and Arabic, 320 px to desktop)
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     needs: [web, api]
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     services:
       postgres:
         image: postgis/postgis:16-3.4
@@ -116,6 +145,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       E2E_DATABASE_ADMIN_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+      PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/playwright.json
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -124,27 +154,70 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Start resource monitor
+        run: bash .github/scripts/monitor.sh start
       - name: Start S3-compatible storage (SeaweedFS) and ClamAV for uploads
-        run: |
-          mkdir -p "$RUNNER_TEMP/seaweed"
-          printf '%s' '{"identities":[{"name":"estatepro","credentials":[{"accessKey":"estatepro-test","secretKey":"estatepro-test-secret"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' > "$RUNNER_TEMP/seaweed/s3.json"
-          docker run -d --name seaweedfs -p 8333:8333 -v "$RUNNER_TEMP/seaweed":/config chrislusf/seaweedfs:3.80 server -s3 -s3.port=8333 -s3.config=/config/s3.json -dir=/data
-          docker run -d --name clamav -p 3310:3310 clamav/clamav:1.4
-          sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
-          for i in $(seq 1 90); do (printf 'zPING\0' | nc -q1 127.0.0.1 3310 | grep -q PONG) && break; sleep 4; done
-          printf 'zPING\0' | nc -q1 127.0.0.1 3310 | grep -q PONG
+        run: bash .github/scripts/start-test-services.sh
       - name: Install Chromium for Playwright
         run: pnpm --filter @estatepro/web exec playwright install --with-deps chromium
       - name: Build the API (the e2e harness runs its built output)
         run: pnpm --filter @estatepro/api build
-      - name: End-to-end suite
-        run: pnpm --filter @estatepro/web test:e2e
-      - name: Keep the report and traces of failures
-        if: failure()
+      - name: End-to-end suite (functional and accessibility; performance runs nightly)
+        run: pnpm --filter @estatepro/web test:e2e:ci --reporter=list,json
+      - name: Diagnostics
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/monitor.sh stop
+          bash .github/scripts/ci-diagnostics.sh "Web end-to-end (Playwright, axe, English and Arabic, 320 px to desktop)" apps/web/test-results/playwright.json playwright
+      - name: Keep the report, traces and resource samples
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: |
             apps/web/playwright-report
             apps/web/test-results
-          retention-days: 7
+            ${{ runner.temp }}/monitor.log
+            ${{ runner.temp }}/diagnostics.md
+          retention-days: 14
+          if-no-files-found: ignore
+
+  secrets:
+    name: Secret scanning (gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan the full history
+        run: |
+          docker run --rm -v "$PWD":/repo -w /repo ghcr.io/gitleaks/gitleaks:v8.24.3 \
+            git --log-opts="--all" --config /repo/.gitleaks.toml --redact --verbose --exit-code 1 /repo
+
+  dependencies:
+    name: Dependency scanning (OSV-Scanner)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan the lockfile against the OSV database
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          docker run --rm -v "$PWD":/repo -w /repo ghcr.io/google/osv-scanner:v2.0.2 \
+            scan source --config /repo/osv-scanner.toml --lockfile /repo/pnpm-lock.yaml --format markdown > "$RUNNER_TEMP/osv.md"
+          status=$?
+          set -e
+          { echo "### Dependency scan (exit $status)"; echo; cat "$RUNNER_TEMP/osv.md"; } > "$RUNNER_TEMP/osv-summary.md"
+          cat "$RUNNER_TEMP/osv-summary.md"
+          bash .github/scripts/post-check-summary.sh "Dependency scanning (OSV-Scanner)" "$RUNNER_TEMP/osv-summary.md" "OSV-Scanner"
+          exit $status

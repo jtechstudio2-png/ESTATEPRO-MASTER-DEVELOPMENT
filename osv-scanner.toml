@@ -1,0 +1,9 @@
+# Dependency scanning (OSV-Scanner), run in CI on pnpm-lock.yaml.
+# Any known vulnerability fails the build. An accepted exception needs an
+# entry here with the advisory id, an expiry date and the reason, reviewed
+# in the pull request, for example:
+#
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# ignoreUntil = 2026-12-31
+# reason = "Build-time only; no fix released yet"
