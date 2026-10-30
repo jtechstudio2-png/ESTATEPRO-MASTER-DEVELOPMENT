@@ -103,7 +103,7 @@ Each was deferred by an approved decision, with the reason recorded.
 
 | ID | Item | Impact | Classification |
 |---|---|---|---|
-| TD-1 | API tests fail on GitHub but pass locally. The test step is cut off about 90 seconds in (the step is left "in progress"); the logs cannot be downloaded through the API. Suspected cause: memory pressure on the 7 GB runner from ClamAV (about 1.2 GB), parallel image processing in the media performance test (12 MP photos) and Postgres. **Unconfirmed.** | No merge gate; regressions can land unseen | **Critical** |
+| TD-1 | API tests fail intermittently on GitHub but pass locally. Identical code passed in run 9 and failed in run 7. There are two patterns: most runs end with an ordinary test failure after 120–187 s (runs 7, 10, 26), and some are cut off with the step left "in progress" (runs 20, 27). Leading hypotheses: hard performance budgets on the 2 vCPU private-repository runner, and memory pressure (ClamAV, image processing, Postgres). **Unconfirmed**: see the [Stabilisation Plan](PHASE-4-STABILISATION-PLAN.md) §2. *(Corrected 30 October: an earlier version said every failure was a cut-off.)* | No merge gate; regressions can land unseen | **Critical** |
 | TD-2 | The web end-to-end job has never run on GitHub | Browser and accessibility regressions unguarded | **Critical** (fixed by TD-1) |
 | TD-3 | Rate limits (map, geocoder) are held in each API instance's memory | With several instances, the effective limit multiplies | **Medium** |
 | TD-4 | Upload type and size rules are copied by hand from the API into the web app | The two can drift; the API and worker still check | **Low** |
@@ -237,7 +237,7 @@ Nothing below is provisioned yet; only the local and CI environments exist.
 | Database migrations and SQL tests | ✅ Pass |
 | Web: lint, typecheck, messages, unit tests with coverage, production build | ✅ Pass |
 | API: lint, typecheck, build | ✅ Pass |
-| API: tests with coverage | ❌ **Fail.** The step is cut off after about 90 seconds (TD-1). The same suite passes locally: 288 of 288 tests; 97.1% statements, 92.6% branches |
+| API: tests with coverage | ❌ **Fail, intermittent.** Usually an ordinary test failure; twice the step was cut off (TD-1). The same suite passes locally: 288 of 288 tests; 97.1% statements, 92.6% branches |
 | Web end-to-end (Playwright, axe, performance) | ⏭ **Skipped** (needs the API job). Never run on GitHub. Passes locally, 55 of 55 |
 
 History: 1 green run in the last 20, all red since the M4 code landed (run 7). Earlier milestone reports described the checks as "enforced in CI"; the gate exists in the workflow but has not been passing.
