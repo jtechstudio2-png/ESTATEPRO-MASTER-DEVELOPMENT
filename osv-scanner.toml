@@ -7,3 +7,14 @@
 # id = "GHSA-xxxx-xxxx-xxxx"
 # ignoreUntil = 2026-12-31
 # reason = "Build-time only; no fix released yet"
+
+# minimatch ReDoS (CVSS 6.9). Development tooling only: ESLint 10 (minimatch
+# 10.2.6) and openapi-typescript's @redocly/openapi-core (minimatch 5.1.9);
+# nothing in the API, worker or web runtime loads it, and it only reads our
+# own lint and spec patterns. No newer 10.x or 5.x release exists; the only
+# newer line is 11.x (released 27 October 2026), which those tools do not
+# yet support. Re-check when ESLint or Redocly move to minimatch 11.
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2026-12-31T00:00:00Z
+reason = "Dev-only lint and type-generation tooling; no patched 10.x or 5.x release; revisit by 2026-12-31"

@@ -10,5 +10,10 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "db:verify": "bash database/scripts/verify.sh"
+  },
+  "pnpm": {
+    "overrides": {
+      "next>postcss": "8.5.32"
+    }
   }
 }
