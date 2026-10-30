@@ -48,6 +48,7 @@ peak_load="$(awk -F'load=' '/load=/{if ($2>m) m=$2} END{print m+0}' "$log" 2>/de
 oom="$(sudo dmesg 2>/dev/null | grep -iE 'out of memory|oom-kill|killed process' | tail -5 | tr '\n' ' ')"
 restarts="$(docker ps -a --format '{{.Names}}' 2>/dev/null | while read -r n; do printf '%s=%s ' "$n" "$(docker inspect -f '{{.RestartCount}}/{{.State.Status}}' "$n")"; done)"
 clam="$(docker logs --tail 8 clamav 2>&1 | tr '\n' ' ' | cut -c1-600)"
+seaweed="$(docker logs --tail 25 seaweedfs 2>&1 | grep -viE 'debug' | tail -12 | tr '\n' ' ' | cut -c1-1500)"
 cores="$(nproc)"
 mem_total="$(free -m | awk '/Mem:/{print $2}')"
 
@@ -64,6 +65,7 @@ mem_total="$(free -m | awk '/Mem:/{print $2}')"
   echo "| OOM kills | ${oom:-none} |"
   echo "| Containers (restarts/state) | ${restarts:-none} |"
   echo "| ClamAV last lines | ${clam:-n/a} |"
+  echo "| SeaweedFS last lines | ${seaweed:-n/a} |"
 } > "$out"
 
 cat "$out"
