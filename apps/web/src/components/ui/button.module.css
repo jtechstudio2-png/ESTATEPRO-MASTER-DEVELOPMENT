@@ -24,6 +24,31 @@
   background: var(--ep-color-surface-subtle);
 }
 
+/*
+ * Links styled as buttons (LinkButton) get no data-hovered from React Aria;
+ * these rules also outrank the global a:hover colour (0,1,1), which would
+ * otherwise turn the text brand-coloured on a brand background (WCAG 1.4.3,
+ * found by the CI accessibility sweep).
+ */
+a.button:hover {
+  background: var(--ep-color-surface-subtle);
+  color: var(--ep-color-text-primary);
+}
+
+a.primary:hover {
+  background: var(--ep-color-brand-hover);
+  color: var(--ep-color-on-brand);
+}
+
+a.danger:hover {
+  background: var(--ep-color-danger-hover);
+  color: var(--ep-color-on-danger);
+}
+
+a.quiet:hover {
+  background: var(--ep-color-surface-subtle);
+}
+
 .button[data-focus-visible] {
   outline: 2px solid var(--ep-color-focus);
   outline-offset: 2px;

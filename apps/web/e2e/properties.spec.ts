@@ -44,6 +44,17 @@ test.describe('Properties (P-1 to P-7)', () => {
     await expectAccessible(page);
   });
 
+  test('links styled as buttons keep readable text when hovered', async ({ page, state }) => {
+    await page.goto(`/properties/${state.records.osuCourt.id}`);
+    const visit = page.getByRole('navigation', { name: 'Field actions' }).getByRole('link', { name: 'Field visit' });
+    await visit.hover();
+    // White text on the hover brand colour, not brand-coloured text (global a:hover).
+    await expect(visit).toHaveCSS('color', 'rgb(255, 255, 255)');
+    await expectAccessible(page);
+    await page.getByRole('navigation', { name: 'Field actions' }).getByRole('link', { name: 'Keys' }).hover();
+    await expectAccessible(page);
+  });
+
   test('P-3 validates, then creates a property with a typed location', async ({ page }) => {
     await page.goto('/properties/new');
     await page.getByRole('button', { name: 'Save' }).first().click();
