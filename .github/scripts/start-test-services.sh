@@ -6,8 +6,12 @@ set -euo pipefail
 
 mkdir -p "$RUNNER_TEMP/seaweed"
 printf '%s' '{"identities":[{"name":"estatepro","credentials":[{"accessKey":"estatepro-test","secretKey":"estatepro-test-secret"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' > "$RUNNER_TEMP/seaweed/s3.json"
+# Small volumes: with the default (about 1 GB each) the volume server's
+# automatic limit (free disk / volume size) leaves no room for new volumes
+# on a CI runner's disk, and writes then retry until they time out
+# ("No more free space left"; CI root cause, run 32).
 docker run -d --name seaweedfs -p 8333:8333 -v "$RUNNER_TEMP/seaweed":/config chrislusf/seaweedfs:3.80 \
-  server -s3 -s3.port=8333 -s3.config=/config/s3.json -dir=/data
+  server -s3 -s3.port=8333 -s3.config=/config/s3.json -dir=/data -master.volumeSizeLimitMB=64
 docker run -d --name clamav -p 3310:3310 clamav/clamav:1.4
 sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
 
