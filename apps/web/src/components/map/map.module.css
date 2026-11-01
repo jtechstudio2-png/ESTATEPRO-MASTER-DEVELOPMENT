@@ -1,0 +1,87 @@
+.frame {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 240px;
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+  overflow: hidden;
+  background: var(--ep-color-media-placeholder);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.noTiles {
+  position: absolute;
+  inset-block-start: var(--ep-space-2);
+  inset-inline-start: var(--ep-space-2);
+  margin: 0;
+  max-inline-size: 70%;
+  padding: var(--ep-space-1) var(--ep-space-2);
+  background: var(--ep-color-surface);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-control);
+  font-size: var(--ep-font-size-100);
+  color: var(--ep-color-text-secondary);
+  z-index: var(--ep-z-map-controls);
+}
+
+/* Single records: round markers. */
+.marker {
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid var(--ep-color-surface);
+  background: var(--ep-color-brand);
+  box-shadow: 0 1px 4px rgb(23 33 47 / 40%);
+  cursor: pointer;
+}
+
+.marker[data-selected='true'] {
+  inline-size: 32px;
+  block-size: 32px;
+  background: var(--ep-color-map-selection);
+  outline: 3px solid var(--ep-color-focus);
+}
+
+/* Clusters: rounded squares with the count (shape differs from points). */
+.cluster {
+  min-inline-size: 36px;
+  block-size: 36px;
+  padding-inline: var(--ep-space-2);
+  border-radius: 8px;
+  border: 3px solid var(--ep-color-surface);
+  background: var(--ep-color-map-cluster);
+  color: var(--ep-color-on-brand);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--ep-font-size-200);
+  box-shadow: 0 1px 4px rgb(23 33 47 / 40%);
+  cursor: pointer;
+}
+
+.marker:focus-visible,
+.cluster:focus-visible,
+.pin:focus-visible {
+  outline: 3px solid var(--ep-color-focus);
+  outline-offset: 2px;
+}
+
+/* The location pin (M-1): a cross, distinct from result markers. */
+.pin {
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ep-color-surface);
+  background: var(--ep-color-danger);
+  color: var(--ep-color-on-danger);
+  font-size: 20px;
+  line-height: 1;
+  cursor: grab;
+  box-shadow: 0 1px 4px rgb(23 33 47 / 40%);
+}

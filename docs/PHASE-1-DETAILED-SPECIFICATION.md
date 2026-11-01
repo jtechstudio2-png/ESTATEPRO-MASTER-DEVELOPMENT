@@ -180,10 +180,10 @@ Requirements carry IDs so later phases, tests and tickets can reference them. Pr
 | PRP-04 | Listings per unit for sale or rent: asking price or rent, rent frequency, availability date, description, status | M |
 | PRP-05 | Listing statuses: Draft, Available, Reserved, Under Contract, Sold, Rented, Withdrawn. Unit operational flag: Under Maintenance (blocks new viewings and lettings) | M |
 | PRP-06 | Media: photos (ordered, with cover image), videos (upload or external link), floor plans, virtual-tour links | M |
-| PRP-07 | Internal notes, key and access information, and a status-history log | M |
-| PRP-08 | Location search: map view, radius and polygon search, filters by price, type, bedrooms and status | M |
+| PRP-07 | Internal notes, key and access information, and a status-history log. Notes have audiences (internal, landlord, tenant), revision history and their own permissions; tenant notes reference a unit; the key register tracks check-out and check-in (ADR-006) | M |
+| PRP-08 | Location search: map view, radius and polygon search, filters by price, type, bedrooms and status. Radius up to 50 km, polygons up to 100 points, map results clustered above 500; locations are confirmed by a user, geocoding only suggests (ADR-006) | M |
 | PRP-09 | Compliance documents per property or unit with expiry dates (e.g. safety certificates, insurance) | M |
-| PRP-10 | Listing feed export to the Company website and portals | S |
+| PRP-10 | Listing feed export to the Company website and portals, with a public location precision per listing: exact, approximate, area only or hidden (ADR-006) | S |
 | PRP-11 | Developments: a project with phases, unit inventory, price lists and reservation tracking | S |
 
 ### 5.3 CRM (CRM)
@@ -373,7 +373,7 @@ Each journey lists the steps, the system touchpoints, and the controls that make
 | 9 | Repairs during tenancy | Tenant, PM, Technician | Work orders (see 7.3) | SLA |
 | 10 | Renewal window (90/60/30 days) | System, PM | Renewal task; landlord and tenant consulted; decision recorded | Escalation if no decision by 30 days |
 | 11a | Renew | PM | New lease linked to old; rent review applied | — |
-| 11b | End | PM | Notice recorded; move-out inspection; deposit return with itemised deductions; listing → Available | Deposit return deadline |
+| 11b | End | PM | Notice recorded; move-out inspection; deposit return with itemised deductions; rental relisted as a new listing (ADR-004 D3) | Deposit return deadline |
 
 ### 7.3 Maintenance: from report to close
 
@@ -678,7 +678,7 @@ Platform Owner and Super Admin are excluded from the Company table. They have no
 | Subscription & billing | CRUD (all) | R (all) | — | — | — | R (all) | — | — | — |
 | Users & roles | CRUD (all) | CRUD (all)¹ | R (br) | R (br) | — | R (all) | — | — | — |
 | Properties & units | CRUDX (all) | CRUDX (all) | CRUX (br) | CRUX (br) | CRU (own), R (br) | R (all) | R (asg) | R (link) | R (link) |
-| Listings | CRUDAX (all) | CRUDAX (all) | CRUDA (br) | CRUDA (br) | CRU (own)² | R (all) | — | R (link) | — |
+| Listings | CRUDAX (all) | CRUDAX (all) | CRUDA (br) | CRUDA (br) | CRU + publish (own)², R (br) | R (all) | — | R (link) | — |
 | Contacts | CRUDX (all) | CRUDX (all) | CRUDX (br) | CRUDX (br) | CRU (own) | R (all) | R (asg)³ | R (self) | R (self) |
 | KYC checks | CRUDA (all) | CRUDA (all) | CRUA (br) | CRUA (br) | CRU (own) | R (all) | — | — | — |
 | Leads | CRUDX (all) | CRUDX (all) | CRUDX (br) | CRUD (br) | CRU (own) | — | — | — | — |
@@ -703,13 +703,14 @@ Platform Owner and Super Admin are excluded from the Company table. They have no
 Notes:
 
 1. An Office Administrator cannot grant the Company Owner role or modify the Company Owner's account.
-2. Price reductions and status changes to Withdrawn above a configured threshold need manager approval.
+2. Agents publish and change the status of listings assigned to them. Price reductions on live listings above a configurable threshold (off by default; suggested 10%) need manager approval; only managers and admins reassign listings (ADR-004).
 3. Only the contact details needed for the job: name, phone, access notes.
 4. A seller-landlord sees offers and viewing feedback on their own listing.
 5. Agents can draft leases for their own lettings; a Property Manager approves activation.
 6. Landlords approve quotes above their management agreement's limit.
 7. Supplier users can upload an invoice against their assigned work order.
 8. A Sales Manager approves commissions for their team; agents never approve their own.
+9. Property notes: Sales and Property Managers (branch) and admins manage notes and are the only roles that can make a note visible to landlords or tenants; agents view and add notes in their branch; accountants view. Keys: agents check keys out and in for their branch; managers and admins add and retire key sets (ADR-006).
 9. Landlord income and expenditure summary for their own portfolio.
 
 ### 11.3 Platform roles

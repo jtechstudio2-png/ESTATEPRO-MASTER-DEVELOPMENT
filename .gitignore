@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.next/
+*.tsbuildinfo
+test-results/
+playwright-report/
+.state.json
+apps/web/public/basemap/maplibre-gl-worker.mjs

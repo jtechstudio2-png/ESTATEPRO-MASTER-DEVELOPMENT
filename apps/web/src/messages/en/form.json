@@ -1,0 +1,9 @@
+{
+  "required": "required",
+  "errorSummary": "There is a problem",
+  "chars": "{count} of {max} characters",
+  "showOptions": "Show options",
+  "searching": "Searching…",
+  "noMatches": "No matches",
+  "timeZoneNote": "Time in {zone}"
+}

@@ -13,7 +13,7 @@ The platform is designed and built phase by phase. Each phase ends with a close-
 | 1 | Product Strategy & System Architecture | Complete | [Baseline](docs/PHASE-1-PRODUCT-STRATEGY-ARCHITECTURE.md) · [Detailed specification](docs/PHASE-1-DETAILED-SPECIFICATION.md) |
 | 2 | Database Engineering | Complete | [Design](docs/PHASE-2-DATABASE-ENGINEERING.md) · [Migrations](database/migrations) · [Tests](database/tests) |
 | 3 | UI/UX System Design | Complete (design specification) | [Overview](docs/phase-3-ui-ux/README.md) · [Dashboards](docs/phase-3-ui-ux/06-role-dashboards.md) · [Close-out](docs/phase-3-ui-ux/05-phase-3-validation-gate.md#8-phase-3-close-out) |
-| 4 | Property Management Module | Next ([roadmap](docs/phase-3-ui-ux/05-phase-3-validation-gate.md#88-next-phase-roadmap--phase-4-property-management-module)) | — |
+| 4 | Property Management Module | In progress — milestones 1 (foundation), 2 (properties, units, property types), 3 (listings), 4 (gallery, floor plans, worker) and 5 (location search, property notes, key register) complete; milestone 6 (web interface) implemented | [API](apps/api/README.md) · [Web app](apps/web/README.md) · [M6 wireframes](docs/phase-4/M6-WIREFRAMES.md) · [ADR-001](docs/decisions/ADR-001-authentication-managed-identity-provider.md) · [ADR-002](docs/decisions/ADR-002-accessibility-wcag-2-2-aa.md) · [ADR-003](docs/decisions/ADR-003-api-conventions.md) · [ADR-004](docs/decisions/ADR-004-listing-rules.md) · [ADR-005](docs/decisions/ADR-005-media-architecture.md) · [ADR-006](docs/decisions/ADR-006-location-notes-keys.md) · [Media policy](docs/policies/MEDIA-OWNERSHIP-AND-RETENTION-POLICY.md) |
 | 5 | Client CRM Module | Not started | — |
 | 6 | Sales Pipeline Management | Not started | — |
 | 7 | Rental & Lease Management | Not started | — |
@@ -29,7 +29,7 @@ The platform is designed and built phase by phase. Each phase ends with a close-
 
 ## Database
 
-PostgreSQL 16+. Fifteen forward-only migrations build 140 tables with company-scoped foreign keys and row-level security on every company table.
+PostgreSQL 16+. Sixteen forward-only migrations build 140 tables with company-scoped foreign keys and row-level security on every company table.
 
 ```bash
 # Requires PostgreSQL 16+ client tools and a superuser connection (PGHOST, PGUSER, …)
@@ -40,7 +40,10 @@ The script creates a fresh `estatepro_verify` database, applies every migration 
 
 | Path | Contents |
 |---|---|
-| `database/migrations/` | Numbered schema migrations (`0001`–`0015`) |
+| `apps/api/` | API service (NestJS, Kysely) — see its README |
+| `apps/web/` | Web app (Next.js, backend-for-frontend sign-in) — see its README |
+| `docs/decisions/` | Architecture decision records |
+| `database/migrations/` | Numbered schema migrations (`0001`–`0016`) |
 | `database/tests/` | Fixtures and SQL test suites |
 | `database/scripts/verify.sh` | Build-and-test runner |
 | `docs/` | Phase documents |

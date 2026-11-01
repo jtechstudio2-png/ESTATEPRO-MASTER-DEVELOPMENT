@@ -1,0 +1,9 @@
+{
+  "required": "مطلوب",
+  "errorSummary": "توجد مشكلة",
+  "chars": "{count} من {max} حرفًا",
+  "showOptions": "عرض الخيارات",
+  "searching": "جارٍ البحث…",
+  "noMatches": "لا توجد نتائج مطابقة",
+  "timeZoneNote": "الوقت بتوقيت {zone}"
+}

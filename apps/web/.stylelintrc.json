@@ -1,0 +1,9 @@
+{
+  "plugins": ["stylelint-use-logical"],
+  "rules": {
+    "csstools/use-logical": ["always", { "except": ["float"] }],
+    "declaration-property-value-disallowed-list": { "text-align": ["left", "right"] },
+    "color-no-invalid-hex": true,
+    "declaration-no-important": [true, { "severity": "warning" }]
+  }
+}

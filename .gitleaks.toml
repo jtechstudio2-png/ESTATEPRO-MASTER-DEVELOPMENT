@@ -1,0 +1,8 @@
+# Secret scanning (gitleaks), run in CI on the full history.
+# The default rules apply. The baseline scan of all 49 commits on every
+# branch (30 October 2026) found no secrets, so there is no allowlist yet;
+# add an entry only for a value that is visibly a test fixture, with a reason.
+title = "EstatePro gitleaks configuration"
+
+[extend]
+useDefault = true

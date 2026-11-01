@@ -1,0 +1,37 @@
+version: 2
+# Dependency updates. Security updates are raised as soon as an advisory is
+# published (Dependabot alerts and security updates are enabled in the
+# repository settings); version updates are grouped weekly so CI runs once
+# per group. Major versions arrive as their own pull requests for review.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:23'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    target-branch: main
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+      development-minor-and-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:23'
+      timezone: Etc/UTC
+    target-branch: main
+    groups:
+      actions:
+        patterns: ['*']
+    labels: [dependencies, ci]
+

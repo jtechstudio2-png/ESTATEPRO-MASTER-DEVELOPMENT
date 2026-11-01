@@ -1,0 +1,190 @@
+/*
+ * M-2 / M-3: phones show one pane at a time with a switch (X-5). Tablets
+ * show both (T-2): side by side in landscape, the map over the list in
+ * portrait. From 1024 px the list and map sit side by side.
+ */
+.layout {
+  display: grid;
+  gap: var(--ep-space-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.paneSwitch {
+  display: block;
+}
+
+.layout[data-pane='map'] .results,
+.layout[data-pane='list'] .mapPane {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .paneSwitch {
+    display: none;
+  }
+
+  .layout[data-pane] .results,
+  .layout[data-pane] .mapPane {
+    display: flex;
+  }
+
+  .mapPane {
+    order: -1;
+  }
+}
+
+@media (min-width: 768px) and (orientation: landscape), (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(280px, 2fr) 3fr;
+    align-items: start;
+  }
+
+  .mapPane {
+    order: 0;
+    position: sticky;
+    inset-block-start: var(--ep-space-4);
+  }
+}
+
+.results,
+.mapPane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-3);
+  min-inline-size: 0;
+}
+
+.resultsHeading {
+  margin: 0;
+  font-size: var(--ep-font-size-400);
+}
+
+.map {
+  block-size: 60vh;
+  min-block-size: 320px;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-2);
+}
+
+.card {
+  display: flex;
+  gap: var(--ep-space-3);
+  padding: var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+  background: var(--ep-color-surface);
+}
+
+.card[data-selected='true'] {
+  border-color: var(--ep-color-map-selection);
+  box-shadow: 0 0 0 2px var(--ep-color-map-selection);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ep-space-1);
+  min-inline-size: 0;
+}
+
+.cardTitle {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.thumb {
+  flex: none;
+  inline-size: 96px;
+  block-size: 72px;
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-media-placeholder);
+  overflow: hidden;
+}
+
+.thumb img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.quiet {
+  margin: 0;
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-200);
+}
+
+.areaTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+  align-items: flex-end;
+}
+
+.noLocation {
+  align-self: center;
+  font-weight: 600;
+}
+
+.searchArea {
+  position: absolute;
+  inset-block-start: var(--ep-space-3);
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  z-index: var(--ep-z-map-controls);
+  pointer-events: none;
+}
+
+.searchArea > * {
+  pointer-events: auto;
+}
+
+/* Keyboard crosshair for the radius and draw tools: the map moves under it. */
+.crosshair {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 44px;
+  block-size: 44px;
+  margin-block-start: -22px;
+  margin-inline-start: -22px;
+  padding: 0;
+  border: 0;
+  background:
+    linear-gradient(var(--ep-color-text-primary), var(--ep-color-text-primary)) center / 2px 100% no-repeat,
+    linear-gradient(var(--ep-color-text-primary), var(--ep-color-text-primary)) center / 100% 2px no-repeat;
+  z-index: var(--ep-z-map-controls);
+  cursor: crosshair;
+  pointer-events: none;
+}
+
+.crosshair:focus-visible {
+  outline: 3px solid var(--ep-color-focus);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.toolPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ep-space-2);
+  padding: var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+  background: var(--ep-color-surface-subtle);
+}
+
+/* Card buttons carry the record name: let them wrap on narrow screens. */
+.cardBody > button {
+  max-inline-size: 100%;
+  white-space: normal;
+  text-align: start;
+}

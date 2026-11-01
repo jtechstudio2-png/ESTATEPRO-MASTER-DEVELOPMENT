@@ -1,0 +1,39 @@
+{
+  "availability": {
+    "available": "Available",
+    "under_maintenance": "Under maintenance",
+    "owner_occupied": "Owner occupied",
+    "unavailable": "Unavailable"
+  },
+  "geocodeSource": {
+    "manual_pin": "Placed on map",
+    "geocoder": "From address search",
+    "postcode_centroid": "Postcode centre",
+    "import": "Imported"
+  },
+  "geocodeAccuracy": {
+    "rooftop": "Building",
+    "street": "Street",
+    "postcode": "Postcode",
+    "locality": "Area only"
+  },
+  "appliesTo": {
+    "property": "Property",
+    "unit": "Unit",
+    "both": "Property and unit"
+  },
+  "usageClass": {
+    "residential": "Residential",
+    "commercial": "Commercial",
+    "industrial": "Industrial",
+    "land": "Land",
+    "mixed_use": "Mixed use",
+    "hospitality": "Hospitality",
+    "agricultural": "Agricultural",
+    "other": "Other"
+  },
+  "yesNo": {
+    "true": "Yes",
+    "false": "No"
+  }
+}
