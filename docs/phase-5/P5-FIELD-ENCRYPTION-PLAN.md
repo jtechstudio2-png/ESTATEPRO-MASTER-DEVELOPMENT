@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **For product-owner approval**, with [ADR-007](../decisions/ADR-007-field-encryption-key-management.md) |
+| Status | **Approved** (product owner, 1 November 2026), with [ADR-007](../decisions/ADR-007-field-encryption-key-management.md) |
 | Issue | [#17](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/17) (audit IS-7), High, Phase 5 first item |
 | Gate | Stages E1–E4 complete and green in CI **before the first contact record is written** by any Phase 5 code (approved Phase 5 sequence) |
 | Contents | §1 Recommended approach · §2 Threat model · §3 Implementation roadmap · §4 Schema changes · §5 Tests and acceptance · §6 Open risks · §7 Approval |
@@ -114,8 +114,8 @@ New risks for review before Phase 5 implementation: **R-2, R-3, R-4** (from this
 
 | Item | Decision |
 |---|---|
-| ADR-007 (option C) | ☐ Approved ☐ Approved with changes ☐ Rejected |
-| Questions E-Q1 to E-Q5 | |
-| Roadmap E0–E8 and the E1–E4 gate | |
-| New risks R-2, R-3, R-4 reviewed | |
-| Approved by / date | |
+| ADR-007 (option C) | ✅ Approved |
+| Questions E-Q1 to E-Q5 | ✅ E-Q1 yes · E-Q2 yes · E-Q3 yes · E-Q4 later, as an enterprise feature · E-Q5 keep |
+| Roadmap E0–E8 and the E1–E4 gate | ✅ Approved: E1–E4 before any contact data is stored |
+| New risks R-2, R-3, R-4 reviewed | ✅ R-2 and R-4 accepted; R-3 accepted for Phase 5 and tracked for future sensitive-data detection work |
+| Approved by / date | Product owner (@jtechstudio2-png), 1 November 2026 |

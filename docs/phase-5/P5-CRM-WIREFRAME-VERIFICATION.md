@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | For product-owner review, together with the [wireframes](./P5-CRM-WIREFRAMES.md) |
+| Status | **Approved** (product owner, 1 November 2026), together with the [wireframes](./P5-CRM-WIREFRAMES.md) |
 | Scope | Checks the Phase 5 CRM wireframes against the approved requirements, the Phase 1–3 specifications, the Phase 2 schema and the permission model. Lists the API to build, the schema gaps found and the decisions needed before implementation |
 | Result | **Ready for approval**, subject to seven decisions (§5). No requirement is uncovered; five schema gaps need small migrations (§4); the whole CRM API is still to be built (§3) |
 
@@ -96,15 +96,15 @@ None of these changes an existing business rule. Each is a small additive migrat
 
 ## 5. Decisions needed before implementation
 
-| # | Decision | Options | Recommendation |
+| # | Decision | Options | Approved decision |
 |---|---|---|---|
-| D1 | What "own" means for an agent's contacts | (a) only `owner_membership_id`; (b) also contacts of leads and tasks assigned to them, read-only | **(b)**: an agent assigned a lead must see who it is from |
-| D2 | Buyers, Sellers, Landlords, Tenants: separate sections or views | (a) saved views of one register; (b) separate registers | **(a)**: one record per person (migration 0005 design) |
-| D3 | Lead response SLA | Company setting with no default (G1) | Owner sets it per company; dashboards show "not set" until then |
-| D4 | Requirement matching rule | Which fields must match (type, currency, price range, bedrooms, area, features) and how strict | Must match: type, currency, price within range, bedrooms ≥ min, inside area; features as "nice to have" ranking |
-| D5 | Editing logged activities | (a) never; (b) author within a window; (c) always with history | **(b)** author within 24 h with history kept, then archive-only (as for property notes) |
-| D6 | Who may assign follow-ups to others | (a) anyone in scope; (b) managers (`lead.assign`) | **(b)** |
-| D7 | Lead scoring rules (CRM-07, Should) | (a) Phase 5 editor; (b) show breakdown only when rules exist; editor later | **(b)** keep Phase 5 focused |
+| D1 | What "own" means for an agent's contacts | (a) only `owner_membership_id`; (b) also contacts of leads and tasks assigned to them, read-only | **(b) Yes**: an agent sees, read-only, the contacts of leads and tasks assigned to them |
+| D2 | Buyers, Sellers, Landlords, Tenants: separate sections or views | (a) saved views of one register; (b) separate registers | **(a)**: filtered views of the single Contacts entity |
+| D3 | Lead response SLA | Company setting with no default (G1) | **Company-defined response targets**; dashboards show "not set" until configured |
+| D4 | Requirement matching rule | Which fields must match (type, currency, price range, bedrooms, area, features) and how strict | **Proposed rules approved**: must match type, currency, price within range, bedrooms ≥ min, inside area; features rank matches |
+| D5 | Editing logged activities | (a) never; (b) author within a window; (c) always with history | **(b)** author-only edits within 24 h, history retained, then archive-only |
+| D6 | Who may assign follow-ups to others | (a) anyone in scope; (b) managers (`lead.assign`) | **(b)** manager-only follow-up assignment |
+| D7 | Lead scoring rules (CRM-07, Should) | (a) Phase 5 editor; (b) show breakdown only when rules exist; editor later | **(b)** no lead-scoring rule editor in Phase 5 |
 
 ## 6. Risks found
 
@@ -116,7 +116,7 @@ None of these changes an existing business rule. Each is a small additive migrat
 | WR-4 | Duplicate check as an enumeration oracle (does this phone exist?) | Medium | Rate-limited per user; neutral message out of scope; audited |
 | WR-5 | Without G1, "past SLA" cannot be shown | Low | D3 |
 
-New risks WR-1 and WR-4 are submitted for review as required before Phase 5 implementation.
+Risk review (product owner, 1 November 2026): **WR-1 accepted** for Phase 5 and tracked for future sensitive-data detection work; **WR-4 accepted**.
 
 ## 7. Verification method
 

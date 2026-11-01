@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Proposed**, for product-owner approval (issue [#17](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/17), audit IS-7) |
+| Status | **Accepted** (product owner, 1 November 2026: "The CRM wireframes and the field encryption plan are approved"; issue [#17](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/17), audit IS-7) |
 | Date | 1 November 2026 |
 | Context | Phase 5 (CRM) stores personal data about buyers, sellers, landlords and tenants. The schema already has envelope-encrypted columns (`*_encrypted`) and keyed hash columns (`number_hash`), but no key hierarchy, rotation or recovery design (audit IS-7; Phase 2 §14 deferred it) |
 | Requirements | Phase 1 §6 NFR "field-level encryption for sensitive personal and banking data"; Phase 1 §16 "envelope encryption … with per-Company data keys; masked in the UI by default"; Phase 2 §14 "never logged; revealed only with `contact.view_sensitive` and audited" |
@@ -241,15 +241,15 @@ Design choices that keep options open: region-scoped root keys, per-company keys
 | D. Encrypt all personal data (C2 too) with blind indexes | Rejected | Breaks name search, fuzzy matching, sorting and de-duplication (CRM-02, Phase 3 02 §7); high cost for limited gain given RLS and storage encryption |
 | E. One KMS key per company | Deferred | Strongest isolation and true crypto-shredding in backups, but cost and quota scale with companies; offer later as BYOK (E-Q4) |
 
-## 14. Questions for the product owner
+## 14. Product-owner decisions
 
-| # | Question | Recommendation |
+| # | Question | Decision (approved) |
 |---|---|---|
-| E-Q1 | Encrypt `tax_number` and `organisation_reg_number` for **persons** (individual taxpayer numbers)? | Yes, with a lookup hash |
-| E-Q2 | Accept that date of birth cannot be searched or used for age filters? | Yes |
-| E-Q3 | Revealed value hidden after 60 seconds? | Yes |
-| E-Q4 | Offer per-company KMS keys (BYOK) to enterprise customers later? | Later, priced; not Phase 5 |
-| E-Q5 | Office administrators do not have `contact.view_sensitive` in the seed. Keep? | Keep; grant per company if needed |
+| E-Q1 | Encrypt `tax_number` and `organisation_reg_number` for **persons** (individual taxpayer numbers)? | **Yes**, with a lookup hash |
+| E-Q2 | Accept that date of birth cannot be searched or used for age filters? | **Yes** |
+| E-Q3 | Revealed value hidden after 60 seconds? | **Yes** |
+| E-Q4 | Offer per-company KMS keys (BYOK) to enterprise customers later? | **Later, as an enterprise feature**; not Phase 5 |
+| E-Q5 | Office administrators do not have `contact.view_sensitive` in the seed. Keep? | **Keep**: office administrators cannot reveal sensitive data |
 
 ## 15. Consequences
 

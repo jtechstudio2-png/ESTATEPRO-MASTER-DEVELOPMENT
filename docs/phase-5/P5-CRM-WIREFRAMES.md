@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **For product-owner approval.** No CRM UI code has been written, and none will be until this document is approved. |
+| Status | **Approved** (product owner, 1 November 2026). Implementation follows the approved sequence: encryption stages E1–E4 first (ADR-007), then CRM. |
 | Issue | [#8](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/8): audit MD-2 (Admin dashboard layout) and MD-3 (Agent desktop home), extended to every Phase 5 CRM screen |
 | Builds on | Phase 3 design set (`docs/phase-3-ui-ux/`): shell, tokens, record page pattern (07 §1), tables, forms, filters, empty and error states, dashboard rules (06 §1). Phase 4 wireframe conventions (`docs/phase-4/M6-WIREFRAMES.md`). Those rules apply here and are not repeated |
 | Backed by | Phase 2 schema: `contacts`, `contact_relationships`, `contact_methods`, `contact_links`, `consents`, `requirements`, `identity_documents`, `kyc_checks`, `activities`, `activity_links`, `tasks`, `leads`, `lead_status_history`, `lead_assignments`, `property_ownerships` (migrations 0005–0007). No CRM API exists yet: every endpoint below is **planned** and listed in the [verification report](./P5-CRM-WIREFRAME-VERIFICATION.md) §3 |
@@ -734,6 +734,6 @@ XM-1 My day                 XM-2 Contact                 XM-3 After call        
 
 | Item | Decision |
 |---|---|
-| Wireframes D-A, D-C, D-M, C-1 to C-6, B-1, B-2, SE-1, LL-1, L-1 to L-4, A-1, A-2, F-1, F-2, XM-1 to XM-4, TM-1, TM-2 | ☐ Approved ☐ Approved with changes ☐ Rejected |
-| Decisions D1–D7 in the verification report §5 | Recorded per decision |
-| Approved by / date | |
+| Wireframes D-A, D-C, D-M, C-1 to C-6, B-1, B-2, SE-1, LL-1, L-1 to L-4, A-1, A-2, F-1, F-2, XM-1 to XM-4, TM-1, TM-2 | ✅ Approved |
+| Decisions D1–D7 in the verification report §5 | ✅ Recorded in the verification report §5 |
+| Approved by / date | Product owner (@jtechstudio2-png), 1 November 2026 |
