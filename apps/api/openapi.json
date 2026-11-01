@@ -5342,6 +5342,135 @@
           "Dashboards"
         ]
       }
+    },
+    "/api/v1/contacts/{contactId}/sensitive/{field}/reveal": {
+      "post": {
+        "operationId": "ContactSensitive_revealField",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "field",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "enum": [
+                "dateOfBirth",
+                "taxNumber",
+                "organisationRegNumber"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevealedValueDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reveal one protected detail of a contact (audited)",
+        "tags": [
+          "Contacts: protected details"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/identity-documents/{documentId}/reveal": {
+      "post": {
+        "operationId": "ContactSensitive_revealDocumentNumber",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevealedValueDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reveal the number of an identity document (audited)",
+        "tags": [
+          "Contacts: protected details"
+        ]
+      }
     }
   },
   "info": {
@@ -11095,6 +11224,54 @@
         "required": [
           "rejected",
           "recent"
+        ]
+      },
+      "RevealBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500,
+            "description": "Why the value is needed (recorded in the audit log). Do not include the value itself.",
+            "example": "Verifying identity for the sale of Osu Court, flat 2"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "RevealedValueDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "dateOfBirth",
+              "taxNumber",
+              "organisationRegNumber",
+              "documentNumber"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The protected value. Never cache, log or put it in a URL."
+          },
+          "revealedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hideAfterSeconds": {
+            "type": "number",
+            "description": "Hide the value after this many seconds",
+            "example": 60
+          }
+        },
+        "required": [
+          "field",
+          "value",
+          "revealedAt",
+          "hideAfterSeconds"
         ]
       }
     }

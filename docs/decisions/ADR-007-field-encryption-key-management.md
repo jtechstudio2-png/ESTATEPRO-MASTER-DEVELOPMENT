@@ -108,7 +108,7 @@ EstatePro does not collect health, religion, ethnicity, biometric or criminal da
 | `status` | `active` (one per company and purpose) → `decrypt_only` → `destroyed` |
 | `created_at`, `retired_at`, `destroyed_at` | Lifecycle |
 
-RLS by company like every tenant table. The runtime role may read only `active` and `decrypt_only` rows for the current company context; only the key-management job may insert or change status. Keys are created when a company is provisioned (provisioning CLI, M1) and back-filled for existing companies by migration.
+RLS by company like every tenant table. The runtime role may read its company's keys and may insert only a company's **first** key (version 1, active; enforced by a restrictive RLS policy); it can never update or delete keys. Rotation and destruction run as the platform role. **Implementation note (E2):** keys are created on first use inside the tenant transaction rather than at provisioning, because a SQL migration cannot call the key service to back-fill existing companies; one code path then serves new and existing companies. A database trigger allows only forward status changes and never replaces key material.
 
 ### 4.3 Ciphertext format
 

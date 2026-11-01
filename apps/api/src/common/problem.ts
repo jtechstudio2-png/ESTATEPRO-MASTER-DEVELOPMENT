@@ -131,6 +131,9 @@ export const Problems = {
   geocodingUnavailable: (detail = 'Address suggestions are not available. Place the pin on the map or enter the coordinates.') =>
     new ProblemError(503, 'geocoding-unavailable', 'Geocoding unavailable', detail),
 
+  encryptionUnavailable: (detail = 'Protected details cannot be read or saved right now. Try again in a few minutes.') =>
+    new ProblemError(503, 'encryption-unavailable', 'Encryption unavailable', detail),
+
   preconditionRequired: (detail = 'Send the If-Match header with the version you are updating.') =>
     new ProblemError(428, 'precondition-required', 'Precondition required', detail),
 

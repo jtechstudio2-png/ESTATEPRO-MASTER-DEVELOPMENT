@@ -78,7 +78,31 @@ const configSchema = z.object({
   MAP_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(10_000).default(240),
   /** Upper bound for one location search query (statement_timeout). */
   SEARCH_STATEMENT_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
+
+  /**
+   * Field encryption key provider (ADR-007 E-D6). "none": protected fields can
+   * be neither written nor revealed (fail closed). "local": root key from
+   * FIELD_ENCRYPTION_LOCAL_ROOT_KEY, for development and tests only; refused
+   * when NODE_ENV=production. A cloud KMS adapter is added with issue #28.
+   */
+  KEY_PROVIDER: z.enum(['none', 'local']).default('none'),
+  /** 32 random bytes, base64. Development and tests only. */
+  FIELD_ENCRYPTION_LOCAL_ROOT_KEY: z.string().optional(),
+  /** How long an unwrapped company key stays in memory (ADR-007 §4.5: at most 5 minutes). */
+  FIELD_KEY_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).max(300).default(300),
+  FIELD_KEY_CACHE_MAX_ENTRIES: z.coerce.number().int().min(1).max(100_000).default(1_000),
+  /** Step-up freshness for revealing a protected value (ADR-007 §9: 5 minutes). */
+  REVEAL_STEP_UP_MAX_AGE_SECONDS: z.coerce.number().int().min(30).max(900).default(300),
 }).superRefine((config, issues) => {
+  if (config.KEY_PROVIDER === 'local') {
+    if (config.NODE_ENV === 'production') {
+      issues.addIssue({ code: 'custom', path: ['KEY_PROVIDER'], message: 'The local key provider is for development and tests only. Configure a KMS provider.' });
+    }
+    const key = config.FIELD_ENCRYPTION_LOCAL_ROOT_KEY;
+    if (key === undefined || !/^[A-Za-z0-9+/]{43}=$/.test(key) || Buffer.from(key, 'base64').length !== 32) {
+      issues.addIssue({ code: 'custom', path: ['FIELD_ENCRYPTION_LOCAL_ROOT_KEY'], message: 'Required with KEY_PROVIDER=local: 32 random bytes, base64.' });
+    }
+  }
   if (config.GEOCODER_PROVIDER === 'mapbox' && config.MAPBOX_ACCESS_TOKEN === undefined) {
     issues.addIssue({ code: 'custom', path: ['MAPBOX_ACCESS_TOKEN'], message: 'Required when GEOCODER_PROVIDER is mapbox.' });
   }

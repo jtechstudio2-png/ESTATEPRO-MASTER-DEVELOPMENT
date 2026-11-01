@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
+import type { DestinationStream } from 'pino';
 
 import { AuditModule } from './audit/audit.module.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -9,6 +10,9 @@ import type { EstateProRequest } from './common/request-context.js';
 import { CompanyController } from './company/company.controller.js';
 import { APP_CONFIG, type AppConfig } from './config/config.js';
 import { ConfigModule } from './config/config.module.js';
+import { ContactsModule } from './contacts/contacts.module.js';
+import { CryptoModule } from './crypto/crypto.module.js';
+import { sensitiveLogPaths } from './crypto/sensitive-fields.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthController } from './health/health.controller.js';
 import { MeController } from './me/me.controller.js';
@@ -20,23 +24,33 @@ import { NotesModule } from './notes/notes.module.js';
 import { WorkspaceModule } from './workspace/workspace.module.js';
 import { PropertiesModule } from './properties/properties.module.js';
 
+/** Log destination override (tests capture the real log output); null means standard output. */
+export const LOG_STREAM = Symbol('LOG_STREAM');
+
+function withStream<T>(stream: DestinationStream | null, options: T): T | [T, DestinationStream] {
+  return stream === null ? options : [options, stream];
+}
+
 @Module({
   imports: [
     ConfigModule,
     LoggerModule.forRootAsync({
-      inject: [APP_CONFIG],
-      useFactory: (config: AppConfig) => ({
-        pinoHttp: {
+      providers: [{ provide: LOG_STREAM, useValue: null }],
+      inject: [APP_CONFIG, LOG_STREAM],
+      useFactory: (config: AppConfig, stream: DestinationStream | null) => ({
+        pinoHttp: withStream(stream, {
           level: config.LOG_LEVEL,
           genReqId: (req) => (req as unknown as EstateProRequest).requestId,
-          redact: { paths: ['req.headers.authorization', 'req.headers.cookie'], censor: '[redacted]' },
+          // Protected values (ADR-007 §9) are never logged, whatever object carries them.
+          redact: { paths: ['req.headers.authorization', 'req.headers.cookie', ...sensitiveLogPaths()], censor: '[redacted]' },
           // Address search text is never logged (ADR-006 L-D2).
           serializers: { req: (req: { url?: string }) => ({ ...req, url: withoutSearchText(req.url) }) },
           customProps: (req) => ({ companyId: (req as unknown as EstateProRequest).tenant?.companyId }),
-        },
+        }),
       }),
     }),
     DatabaseModule,
+    CryptoModule,
     AuditModule,
     AuthModule,
     PropertiesModule,
@@ -46,6 +60,7 @@ import { PropertiesModule } from './properties/properties.module.js';
     NotesModule,
     KeysModule,
     WorkspaceModule,
+    ContactsModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],

@@ -317,6 +317,18 @@ export interface Companies {
   version: Generated<number>;
 }
 
+export interface CompanyDataKeys {
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  destroyedAt: Timestamp | null;
+  kmsKeyRef: string;
+  purpose: string;
+  retiredAt: Timestamp | null;
+  status: Generated<string>;
+  version: number;
+  wrappedKey: Buffer | null;
+}
+
 export interface CompanyHolidays {
   companyId: string;
   createdAt: Generated<Timestamp>;
@@ -427,6 +439,9 @@ export interface Contacts {
   createdAt: Generated<Timestamp>;
   createdBy: string | null;
   customFields: Generated<Json>;
+  /**
+   * C3, ADR-007: AES-256-GCM with the company field key. Never hashed (low entropy).
+   */
   dateOfBirthEncrypted: Buffer | null;
   displayName: string;
   displayNameLocal: string | null;
@@ -440,6 +455,10 @@ export interface Contacts {
   officeId: string | null;
   organisationName: string | null;
   organisationRegNumber: string | null;
+  /**
+   * C3, ADR-007: registration number of a person (e.g. sole trader). Organisations use organisation_reg_number.
+   */
+  organisationRegNumberEncrypted: Buffer | null;
   otherNames: string | null;
   ownerMembershipId: string | null;
   preferredChannel: string | null;
@@ -451,6 +470,12 @@ export interface Contacts {
   searchVector: Generated<string | null>;
   sourceCode: string | null;
   taxNumber: string | null;
+  /**
+   * C3, ADR-007: tax number of a person. Organisations use tax_number.
+   */
+  taxNumberEncrypted: Buffer | null;
+  taxNumberHash: Buffer | null;
+  taxNumberLast4: string | null;
   title: string | null;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
@@ -825,8 +850,15 @@ export interface IdentityDocuments {
   id: Generated<string>;
   issuedOn: string | null;
   issuingCountryCode: string;
+  /**
+   * C3, ADR-007: AES-256-GCM with the company field key.
+   */
   numberEncrypted: Buffer;
+  /**
+   * ADR-007 §4.4: HMAC-SHA256 with the company lookup key, for duplicate detection.
+   */
   numberHash: Buffer;
+  numberLast4: string;
   verifiedAt: Timestamp | null;
   verifiedBy: string | null;
 }
@@ -2351,6 +2383,19 @@ export interface WebhookEndpoints {
   url: string;
 }
 
+export interface WebSessions {
+  accessExpiresAt: Timestamp;
+  createdAt: Generated<Timestamp>;
+  csrfToken: string;
+  expiresAt: Timestamp;
+  idHash: Buffer;
+  idleExpiresAt: Timestamp;
+  lastSeenAt: Generated<Timestamp>;
+  selectedCompanyId: string | null;
+  subject: string;
+  tokenCiphertext: Buffer;
+}
+
 export interface DB {
   activities: Activities;
   activityLinks: ActivityLinks;
@@ -2369,6 +2414,7 @@ export interface DB {
   commissionPlans: CommissionPlans;
   commissions: Commissions;
   companies: Companies;
+  companyDataKeys: CompanyDataKeys;
   companyHolidays: CompanyHolidays;
   companyMemberships: CompanyMemberships;
   companySettings: CompanySettings;
@@ -2498,4 +2544,5 @@ export interface DB {
   viewings: Viewings;
   webhookDeliveries: WebhookDeliveries;
   webhookEndpoints: WebhookEndpoints;
+  webSessions: WebSessions;
 }

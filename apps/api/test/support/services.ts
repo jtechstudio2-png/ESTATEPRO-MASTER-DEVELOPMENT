@@ -1,6 +1,12 @@
 import { inject } from 'vitest';
 
-/** Storage, scanner and platform-database settings for tests (see global-setup). */
+/**
+ * Root key for the local key provider in tests (ADR-007). Fixed so that every
+ * test app in a run unwraps the same company keys. Never used outside tests.
+ */
+export const TEST_FIELD_ENCRYPTION_ROOT_KEY = Buffer.alloc(32, 7).toString('base64');
+
+/** Storage, scanner, platform-database and key-provider settings for tests (see global-setup). */
 export function testServiceEnv(): Record<string, string> {
   const services = inject('testServices');
   return {
@@ -13,5 +19,7 @@ export function testServiceEnv(): Record<string, string> {
     CLAMAV_HOST: services.clamavHost,
     CLAMAV_PORT: String(services.clamavPort),
     PLATFORM_DATABASE_URL: inject('databaseUrls').platform,
+    KEY_PROVIDER: 'local',
+    FIELD_ENCRYPTION_LOCAL_ROOT_KEY: TEST_FIELD_ENCRYPTION_ROOT_KEY,
   };
 }
