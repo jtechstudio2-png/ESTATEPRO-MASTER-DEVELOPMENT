@@ -45,9 +45,9 @@ jobs:
     env:
       TEST_DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/postgres
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -67,7 +67,7 @@ jobs:
           bash .github/scripts/monitor.sh stop
           bash .github/scripts/ci-diagnostics.sh "API performance (100,000 listings, GIS, media processing)" apps/api/test-results/vitest-performance.json vitest
           { echo; echo "#### Measured"; grep -E "p95|s/photo" "$RUNNER_TEMP/api-performance.log" | sed 's/^/    /'; } >> "$GITHUB_STEP_SUMMARY" || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: api-performance
@@ -97,9 +97,9 @@ jobs:
       E2E_DATABASE_ADMIN_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
       PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/playwright-performance.json
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -123,7 +123,7 @@ jobs:
           bash .github/scripts/monitor.sh stop
           bash .github/scripts/ci-diagnostics.sh "Web performance (time to data, LCP, script size)" apps/web/test-results/playwright-performance.json playwright
           { echo; echo "#### Measured"; echo '```json'; cat apps/web/test-results/perf.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: web-performance
