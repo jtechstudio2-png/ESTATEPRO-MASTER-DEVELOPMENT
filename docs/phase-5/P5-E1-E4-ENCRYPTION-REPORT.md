@@ -35,7 +35,7 @@
 | SQL suite `database/tests/04_field_encryption_keys.sql` | 14 assertions | ✅ |
 | Full API suite (`test:ci`, local) | 326 in 25 files | ✅ (no regressions) |
 | Lint, typecheck, OpenAPI | — | ✅ |
-| GitHub CI on `7fc76b1` | run 63 | see §8 |
+| GitHub CI on `d2ba0de` (E1–E4 code plus this report) | run 64: all six jobs green (SQL, API, web, web end-to-end, gitleaks, OSV-Scanner) | ✅ |
 
 Coverage of the new code (lines): `src/crypto` 99.3 %, `src/contacts` 100 %. Whole API: 96.7 % statements, 92.1 % branches, 99.0 % lines.
 
@@ -114,7 +114,7 @@ Measured on the development container (4 vCPU), compiled code, 100,000 iteration
 | Issue #8 (wireframes, closed) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/8 |
 | Issue #35 (sensitive-data detection, R-3) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/35 |
 | Commit `7fc76b1` | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/commit/7fc76b1a3fd977d37574113c054f28c771ab147a |
-| CI run 63 | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41319992636 |
+| CI run 64 (green; run 63 on `7fc76b1` was superseded by this push) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41320179168 |
 
 ## 9. Next: CRM implementation
 
