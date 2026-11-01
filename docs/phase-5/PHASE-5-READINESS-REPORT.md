@@ -2,10 +2,21 @@
 
 | | |
 |---|---|
-| Date | 1 November 2026 |
+| Date | 1 November 2026 (revision 2; revision 1 approved the same day) |
 | Branch | `phase-4/property-management` (pull request #16) |
 | Sources | [Stabilisation Plan](../phase-4/PHASE-4-STABILISATION-PLAN.md) §9 and §11, [Consolidated Status Report](../phase-4/PHASE-4-CONSOLIDATED-STATUS-REPORT.md) §3–§12, Pre-Phase 4 Compliance Audit (`audit/pre-phase-4`, `docs/audits/PRE-PHASE-4-COMPLIANCE-AUDIT.md`), [CI Root Cause Investigation](../phase-4/CI-ROOT-CAUSE-INVESTIGATION.md), GitHub issues and branch settings as read on 1 November |
-| **Recommendation** | **NO-GO.** Branch protection on `main` is not active, and three conditions from the Stabilisation Plan exit criteria are still open (§7) |
+| **Recommendation** | **NO-GO.** Two gates remain: branch protection on `main` is not active, and pull request #16 has no formal review decision. The risk acceptances and the Phase 5 sequence are now recorded (§7) |
+
+## Changes since revision 1
+
+| Item | Revision 1 | Revision 2 | Record |
+|---|---|---|---|
+| #6 start without a vendor | Open | ✅ Accepted: CRM may use the test identity provider; no shared environment until #6 closes | [#6 comment](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/6#issuecomment-6556253555) |
+| #13 open until Phase 7 | Not recorded | ✅ Accepted | [#13 comment](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/13#issuecomment-6556252602) |
+| #21 open until pre-launch | Not recorded | ✅ Accepted | [#21 comment](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/21#issuecomment-6556253039) |
+| Phase 5 sequence | Proposed | ✅ Approved: #8 before CRM screens; #17 before contact data; landlord side of #12 within Phase 5 | Comments on [#8](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/8#issuecomment-6556253892), [#17](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/17#issuecomment-6556254242), [#12](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/12#issuecomment-6556254551) |
+| Branch protection | Not active | ❌ Still not active (re-checked 1 November, 09:40 UTC) | — |
+| Pull request #16 review | None | ❌ Still none; see §1, "Review constraint" | — |
 
 ## 1. Gate status checklist
 
@@ -18,9 +29,10 @@
 | G5 | Branch protection active on `main` | ❌ **Not met** | GitHub reports `main` as `protected: false`, and pull request #16 as mergeable ("clean") with **0 approvals**. With the requested rules in force it would read "blocked" |
 | G6 | Root cause recorded (Plan §11.2) | ✅ Met | CI Root Cause Investigation Report, approved |
 | G7 | Secret and dependency scanning (Plan §11.5–6) | ✅ Met | gitleaks and OSV-Scanner jobs green on every run; Dependabot configured. They become *required* only with G5 |
-| G8 | Identity provider decided, or start without it explicitly accepted (Plan §11.7) | ❌ **Open** | #6 open; evaluation started (§3); no acceptance recorded |
-| G9 | Risk register re-rated with owners and targets; remaining Critical items accepted (Plan §11.9) | 🟡 Partly met | Every Critical and High item now has an issue, priority, owner and target phase (§2). **Your acceptance of the three remaining Critical items (#6, #13, #21) is not yet recorded** |
-| G10 | Phase 4 pull request open, reviewed and merged, or review scheduled with a date (Plan §11.10) | 🟡 Partly met | #16 open, CI green, mergeable; no review and no review date |
+| G8 | Identity provider decided, or start without it explicitly accepted (Plan §11.7) | ✅ Met (accepted) | #6 stays open; CRM uses the test identity provider; no shared environment until it closes |
+| G9 | Risk register re-rated with owners and targets; remaining Critical items accepted (Plan §11.9) | ✅ Met | Every Critical and High item has an issue, priority, owner and target phase (§2). #6, #13 and #21 accepted on 1 November |
+| G10 | Formal review decision recorded for pull request #16 | ❌ **Not met** | #16 open, no review. See "Review constraint" below |
+| G13 | Phase 5 sequence approved | ✅ Met | #8 → CRM screens; #17 → contact data; landlord side of #12 within Phase 5 |
 | G11 | No business features added during stabilisation (Plan §11.11) | ✅ Met | Stabilisation commits change CI, tests, dependencies, scanning configuration, one CSS accessibility fix and documentation only |
 | G12 | Follow-ups filed: storage timeouts, history ordering | ✅ Met | #14 (High), #15 (Medium) |
 
@@ -38,6 +50,17 @@ The requested settings (pull request required, 1 approval, dismiss stale approva
 | OSV-Scanner | `Dependency scanning (OSV-Scanner)` |
 
 If a ruleset is used, its enforcement must be **Active** (not "Evaluate"), and it must target `main` (or the default branch).
+
+### Review constraint (affects G5 and G10)
+
+The repository has **one collaborator**, @jtechstudio2-png (admin), who is also the author of pull request #16. GitHub does not let an author approve their own pull request. So once "require 1 approval" is on, #16 (and every later pull request) cannot be merged unless one of these is done:
+
+| Option | How | Trade-off |
+|---|---|---|
+| **A. Add a second reviewer (recommended)** | Invite a developer as a collaborator with write access; they review and approve #16 | Real independent review, which is what the rule is for |
+| B. Admin bypass | In a ruleset, add the admin role to the bypass list ("for pull requests only"); in classic protection, leave "Do not allow bypassing" unchecked | The owner can merge without an approval; the review decision is recorded as a written comment on the pull request, not a GitHub approval |
+
+Claude cannot approve or merge pull requests. The formal review decision (approve, request changes, or approve with conditions) has to come from a person.
 
 ## 2. Open blockers (Critical and High)
 
@@ -145,22 +168,27 @@ The audit branch `audit/pre-phase-4` remains unmerged, as instructed; pull reque
 | 4 | No open high or critical production advisories | ✅ |
 | 5 | Secret scanning baseline and required gate | 🟡 Baseline clean, gate green; "required" needs G5 |
 | 6 | Dependabot and required dependency gate | 🟡 Configured, gate green; "required" needs G5 |
-| 7 | Identity provider decided or start explicitly accepted | ❌ |
+| 7 | Identity provider decided or start explicitly accepted | ✅ Accepted (#6) |
 | 8 | IS-3 filed and scheduled before Phase 7 | ✅ #13 |
-| 9 | Risk register with owners and dates; Critical items accepted | 🟡 Register complete; acceptance pending |
-| 10 | Phase 4 pull request reviewed and merged, or review dated | 🟡 #16 open, no review date |
+| 9 | Risk register with owners and dates; Critical items accepted | ✅ |
+| 10 | Phase 4 pull request reviewed and merged, or review dated | ❌ #16 open, no review decision |
 | 11 | No new business features during stabilisation | ✅ |
 
 ## 7. Recommendation
 
-**NO-GO for CRM today.**
+**NO-GO for CRM.**
 
-The recommendation changes to **GO** when all of these hold:
+| Condition (revision 1) | Status |
+|---|---|
+| 1. Branch protection active with the six exact check names | ❌ Not active |
+| 2. #6 decided, or test identity provider accepted | ✅ Accepted |
+| 3. #13, #21, #6 acceptance recorded | ✅ Recorded |
+| 4. Formal review decision for pull request #16 | ❌ None |
+| 5. Phase 5 sequence agreed | ✅ Approved |
 
-1. **Branch protection active on `main`** with the six exact check names in §1. Verified when pull request #16 reads "blocked" until it has an approval.
-2. **#6:** a vendor decision, **or** your written acceptance to build Phase 5 against the test identity provider, with no shared environment until #6 closes.
-3. **Critical-risk acceptance:** a recorded acceptance that #13 (before Phase 7), #21 (before launch) and #6 (as in point 2) remain open while Phase 5 runs.
-4. **Pull request #16:** a review date set (or the review done). Phase 5 should branch from `main` after #16 merges, so CRM is not stacked on unreviewed code.
-5. **Phase 5 ordering agreed:** #8 wireframes approved before CRM screens, and #17 key management delivered before any contact personal data is stored.
+The recommendation becomes **GO** when both of these are true:
 
-Points 2–5 need decisions, not engineering. Point 1 is a settings change by the repository owner. No CRM code has been written.
+1. **Branch protection is active on `main`** with the settings and exact check names in §1. Verified when GitHub reports `main` as protected, or pull request #16 reads "blocked" while it has no approval.
+2. **A formal review decision is recorded on pull request #16** by a person: a GitHub approval from a second reviewer (option A), or, under admin bypass (option B), a written review decision comment from the owner.
+
+Both are actions in GitHub by the repository owner. No CRM code has been written. When both are in place, CRM work starts in the approved order: #8 wireframes and #17 key management first, branched from `main` after #16 merges.
