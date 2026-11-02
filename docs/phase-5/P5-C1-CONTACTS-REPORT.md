@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 2 November 2026 |
-| Branch | `phase-5/preparation` (commit in §8) |
+| Branch | `phase-5/preparation`, commit `497c46e` |
 | Governance gate | Branch protection on `main` verified active before work started (GitHub reports `main` as `protected: true`) |
 | Scope | Contact list, contact record, create and edit, duplicate detection, merge, archive, consent management, protected-field masking, audit coverage (wireframes C-1 to C-6) |
-| Result | **C1 complete.** No automatic merges; protected data encrypted (ADR-007); visibility by permission and scope; 366 API tests and 6 SQL test suites green locally |
+| Result | **C1 complete.** No automatic merges; protected data encrypted (ADR-007); visibility by permission and scope; 366 API tests and 6 SQL test suites green locally and in CI run 66 |
 
 ## 1. Deliverables
 
@@ -62,6 +62,7 @@ Supporting code: `contact-access.ts` (record scope, SQL and in-memory, including
 | All SQL suites (22 migrations, 6 files) | — | ✅ |
 | Full API suite (`test:ci`, local) | 366 in 27 files | ✅ exit 0 |
 | Lint, typecheck, OpenAPI regenerated | — | ✅ |
+| CI run 66 on `497c46e` (all six required jobs) | — | ✅ [run 66](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41403748844) |
 
 Coverage (whole API): 97.09 % statements, 92.25 % branches, 99.02 % functions, 99.32 % lines.
 
@@ -148,3 +149,5 @@ The test runs in the nightly and release performance workflow, not in the blocki
 | Field encryption (#17) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/17 |
 | Sensitive-data detection (#35) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/35 |
 | Branch | `phase-5/preparation` |
+| C1 commit | `497c46e` |
+| CI run 66 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41403748844 |
