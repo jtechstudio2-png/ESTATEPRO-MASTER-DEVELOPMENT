@@ -61,6 +61,20 @@ describe('database catalogue', () => {
     expect(rows).toEqual([]);
   });
 
+  it('classifies every column that references contacts for merging (migration 0022, wireframe C-4)', async () => {
+    const { rows: foreignKeys } = await sql<{ ref: string }>`
+      select c.conrelid::regclass::text || '.' || a.attname as ref
+        from pg_constraint c
+        join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[array_length(c.conkey, 1)]
+       where c.contype = 'f' and c.confrelid = 'contacts'::regclass`.execute(admin);
+    const { rows: register } = await sql<{ ref: string; handling: string }>`
+      select table_name || '.' || column_name as ref, handling from contact_reference_columns`.execute(admin);
+    expect(foreignKeys.map((row) => row.ref).sort()).toEqual(register.map((row) => row.ref).sort());
+    const byHandling = (handling: string) => register.filter((row) => row.handling === handling).map((row) => row.ref.split('.')[0]);
+    // Financial and contractual records are never re-attributed by a merge.
+    expect(byHandling('block')).toEqual(expect.arrayContaining(['ledger_entries', 'payments', 'payouts', 'statements', 'lease_parties', 'contact_payment_accounts']));
+  });
+
   it('never lets the runtime role own a table (owners bypass RLS)', async () => {
     const { rows } = await sql<{ table: string }>`
       select c.relname as table from pg_class c join pg_namespace n on n.oid = c.relnamespace

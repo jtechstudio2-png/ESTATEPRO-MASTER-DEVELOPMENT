@@ -420,6 +420,13 @@ export interface ContactPaymentAccounts {
   verifiedBy: string | null;
 }
 
+export interface ContactReferenceColumns {
+  columnName: string;
+  handling: string;
+  reason: string;
+  tableName: string;
+}
+
 export interface ContactRelationships {
   companyId: string;
   contactId: string;
@@ -434,6 +441,8 @@ export interface ContactRelationships {
 export interface Contacts {
   addressId: string | null;
   archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   companyId: string;
   contactType: string;
   createdAt: Generated<Timestamp>;
@@ -2422,6 +2431,7 @@ export interface DB {
   contactLinks: ContactLinks;
   contactMethods: ContactMethods;
   contactPaymentAccounts: ContactPaymentAccounts;
+  contactReferenceColumns: ContactReferenceColumns;
   contactRelationships: ContactRelationships;
   contacts: Contacts;
   countries: Countries;

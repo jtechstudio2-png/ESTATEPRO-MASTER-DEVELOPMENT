@@ -5343,6 +5343,926 @@
         ]
       }
     },
+    "/api/v1/contacts": {
+      "get": {
+        "operationId": "Contacts_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[sourceCode]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[ownerMembershipId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[contactType]",
+            "required": false,
+            "in": "query",
+            "description": "person, organisation",
+            "schema": {}
+          },
+          {
+            "name": "filter[relationship]",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated: buyer, seller, landlord, tenant, applicant, guarantor, supplier, developer, investor, other",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Name (any script), reference, email or phone number in any format",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "displayName",
+                "-displayName",
+                "createdAt",
+                "-createdAt",
+                "updatedAt",
+                "-updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Contact register; Buyers, Sellers, Landlords and Tenants are filter[relationship] views",
+        "tags": [
+          "Contacts"
+        ]
+      },
+      "post": {
+        "operationId": "Contacts_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a contact. Answers 409 possible-duplicates unless confirmNotDuplicate is true",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/duplicate-check": {
+      "post": {
+        "operationId": "Contacts_duplicateCheck",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuplicateCheckResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find contacts with the same email, phone or tax number (rate-limited; audited without values)",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}": {
+      "get": {
+        "operationId": "Contacts_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      },
+      "patch": {
+        "operationId": "Contacts_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContactBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/archive": {
+      "post": {
+        "operationId": "Contacts_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveContactBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/restore": {
+      "post": {
+        "operationId": "Contacts_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/methods": {
+      "post": {
+        "operationId": "Contacts_addMethod",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMethodBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/methods/{methodId}": {
+      "patch": {
+        "operationId": "Contacts_updateMethod",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "methodId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMethodBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      },
+      "delete": {
+        "operationId": "Contacts_removeMethod",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "methodId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/relationships": {
+      "post": {
+        "operationId": "Contacts_addRelationship",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRelationshipBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/relationships/{relationshipId}/end": {
+      "post": {
+        "operationId": "Contacts_endRelationship",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "relationshipId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndRelationshipBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/consents": {
+      "get": {
+        "operationId": "Contacts_consents",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentHistoryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      },
+      "post": {
+        "operationId": "Contacts_recordConsent",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentHistoryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a consent or a withdrawal (append-only)",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/merge-preview": {
+      "get": {
+        "operationId": "Contacts_mergePreview",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mergeContactId",
+            "required": true,
+            "in": "query",
+            "description": "The contact that would be merged into this one",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePreviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/merge": {
+      "post": {
+        "operationId": "Contacts_merge",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the contact to keep",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Merge another contact into this one (explicit; cannot be undone)",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
     "/api/v1/contacts/{contactId}/sensitive/{field}/reveal": {
       "post": {
         "operationId": "ContactSensitive_revealField",
@@ -11224,6 +12144,1410 @@
         "required": [
           "rejected",
           "recent"
+        ]
+      },
+      "RefLabelDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ContactSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "person",
+              "organisation"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "displayNameLocal": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "roles": {
+            "type": "array",
+            "description": "Active roles",
+            "items": {
+              "type": "string",
+              "enum": [
+                "buyer",
+                "seller",
+                "landlord",
+                "tenant",
+                "applicant",
+                "guarantor",
+                "supplier",
+                "developer",
+                "investor",
+                "other"
+              ]
+            }
+          },
+          "primaryPhoneMasked": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Partly masked for lists"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "office": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "contactType",
+          "displayName",
+          "displayNameLocal",
+          "roles",
+          "primaryPhoneMasked",
+          "owner",
+          "office",
+          "archivedAt",
+          "updatedAt"
+        ]
+      },
+      "ContactPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "ConsentInput": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "marketing",
+              "property_alerts",
+              "data_processing",
+              "third_party_sharing",
+              "portal_terms"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "sms",
+              "whatsapp",
+              "phone",
+              "post",
+              "any"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "granted",
+              "withdrawn"
+            ]
+          },
+          "lawfulBasis": {
+            "type": "string",
+            "enum": [
+              "consent",
+              "contract",
+              "legal_obligation",
+              "legitimate_interest"
+            ],
+            "description": "Required when granted"
+          },
+          "capturedVia": {
+            "type": "string",
+            "enum": [
+              "web_form",
+              "portal",
+              "verbal",
+              "paper",
+              "import",
+              "email"
+            ]
+          },
+          "evidence": {
+            "type": "object",
+            "maxLength": 500,
+            "description": "Where the evidence is, e.g. \"signed form, file 2026/031\""
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it was given (defaults to now; never in the future)"
+          }
+        },
+        "required": [
+          "purpose",
+          "channel",
+          "status",
+          "capturedVia"
+        ]
+      },
+      "CreateContactBody": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "displayNameLocal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200,
+            "description": "Name in its own script, e.g. Arabic"
+          },
+          "givenName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "familyName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "otherNames": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "organisationName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "organisationRegNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50,
+            "description": "Persons: stored encrypted and never returned (reveal only). Organisations: public register number"
+          },
+          "taxNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50,
+            "description": "Persons: stored encrypted and never returned (reveal only). Organisations: public tax number"
+          },
+          "dateOfBirth": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Stored encrypted and never returned (reveal only)"
+          },
+          "primaryEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 254
+          },
+          "primaryPhone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 30,
+            "description": "Any format; national numbers use the office country"
+          },
+          "preferredLocaleCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "en"
+          },
+          "preferredChannel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "email",
+              "phone",
+              "sms",
+              "whatsapp",
+              "post",
+              null
+            ]
+          },
+          "nationalityCountryCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "GH"
+          },
+          "residenceCountryCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "GH"
+          },
+          "officeId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "ownerMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Responsible staff member"
+          },
+          "sourceCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Picklist lead_source"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 4000,
+            "description": "Do not record ID or bank numbers here (ADR-007)"
+          },
+          "confirmNotDuplicate": {
+            "type": "boolean",
+            "description": "Save even though possible duplicates were found (the choice is audited)"
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "person",
+              "organisation"
+            ]
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "buyer",
+                "seller",
+                "landlord",
+                "tenant",
+                "applicant",
+                "guarantor",
+                "supplier",
+                "developer",
+                "investor",
+                "other"
+              ]
+            }
+          },
+          "consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentInput"
+            }
+          }
+        },
+        "required": [
+          "contactType"
+        ]
+      },
+      "RelationshipDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "relationshipType": {
+            "type": "string",
+            "enum": [
+              "buyer",
+              "seller",
+              "landlord",
+              "tenant",
+              "applicant",
+              "guarantor",
+              "supplier",
+              "developer",
+              "investor",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          },
+          "startedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "endedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        },
+        "required": [
+          "id",
+          "relationshipType",
+          "status",
+          "startedOn",
+          "endedOn"
+        ]
+      },
+      "MethodDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "methodType": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone",
+              "mobile",
+              "whatsapp",
+              "fax",
+              "website",
+              "other"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "verifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "optedOutAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "methodType",
+          "value",
+          "label",
+          "isPrimary",
+          "verifiedAt",
+          "optedOutAt"
+        ]
+      },
+      "ConsentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "marketing",
+              "property_alerts",
+              "data_processing",
+              "third_party_sharing",
+              "portal_terms"
+            ]
+          },
+          "channel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "email",
+              "sms",
+              "whatsapp",
+              "phone",
+              "post",
+              "any",
+              null
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "granted",
+              "withdrawn"
+            ]
+          },
+          "lawfulBasis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "consent",
+              "contract",
+              "legal_obligation",
+              "legitimate_interest",
+              null
+            ]
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "capturedVia": {
+            "type": "string",
+            "enum": [
+              "web_form",
+              "portal",
+              "verbal",
+              "paper",
+              "import",
+              "email",
+              "merge"
+            ],
+            "description": "\"merge\": recorded when a merge kept a withdrawal in force"
+          },
+          "evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capturedByMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "purpose",
+          "channel",
+          "status",
+          "lawfulBasis",
+          "capturedAt",
+          "capturedVia",
+          "evidence",
+          "capturedByMembershipId"
+        ]
+      },
+      "ProtectedValueDto": {
+        "type": "object",
+        "properties": {
+          "recorded": {
+            "type": "boolean",
+            "description": "A value is recorded (reveal it with the reveal endpoint)"
+          },
+          "last4": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Last characters, where stored"
+          }
+        },
+        "required": [
+          "recorded",
+          "last4"
+        ]
+      },
+      "ContactProtectedDto": {
+        "type": "object",
+        "properties": {
+          "dateOfBirth": {
+            "$ref": "#/components/schemas/ProtectedValueDto"
+          },
+          "taxNumber": {
+            "$ref": "#/components/schemas/ProtectedValueDto"
+          },
+          "organisationRegNumber": {
+            "$ref": "#/components/schemas/ProtectedValueDto"
+          }
+        },
+        "required": [
+          "dateOfBirth",
+          "taxNumber",
+          "organisationRegNumber"
+        ]
+      },
+      "ContactAccessDto": {
+        "type": "object",
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canArchive": {
+            "type": "boolean"
+          },
+          "canMerge": {
+            "type": "boolean"
+          },
+          "canReveal": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "canEdit",
+          "canArchive",
+          "canMerge",
+          "canReveal"
+        ]
+      },
+      "ContactDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "person",
+              "organisation"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "displayNameLocal": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "givenName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "familyName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "otherNames": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "organisationName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "organisationRegNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Organisations only"
+          },
+          "taxNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Organisations only"
+          },
+          "primaryEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "primaryPhone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "E.164"
+          },
+          "preferredLocaleCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "preferredChannel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "email",
+              "phone",
+              "sms",
+              "whatsapp",
+              "post",
+              null
+            ]
+          },
+          "nationalityCountryCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "residenceCountryCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "office": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "owner": {
+            "description": "Responsible staff member (membership id)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sourceCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationshipDto"
+            }
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MethodDto"
+            }
+          },
+          "consents": {
+            "description": "Current state per purpose and channel",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentDto"
+            }
+          },
+          "protected": {
+            "description": "Present only with kyc.view",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactProtectedDto"
+              }
+            ]
+          },
+          "isAnonymised": {
+            "type": "boolean"
+          },
+          "mergedIntoContactId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Set when this contact was merged into another"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "access": {
+            "$ref": "#/components/schemas/ContactAccessDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "contactType",
+          "displayName",
+          "displayNameLocal",
+          "givenName",
+          "familyName",
+          "otherNames",
+          "title",
+          "organisationName",
+          "organisationRegNumber",
+          "taxNumber",
+          "primaryEmail",
+          "primaryPhone",
+          "preferredLocaleCode",
+          "preferredChannel",
+          "nationalityCountryCode",
+          "residenceCountryCode",
+          "office",
+          "owner",
+          "sourceCode",
+          "notes",
+          "relationships",
+          "methods",
+          "consents",
+          "isAnonymised",
+          "mergedIntoContactId",
+          "archivedAt",
+          "archivedReason",
+          "access",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "DuplicateCheckBody": {
+        "type": "object",
+        "properties": {
+          "primaryEmail": {
+            "type": "object",
+            "maxLength": 254
+          },
+          "primaryPhone": {
+            "type": "object",
+            "maxLength": 30
+          },
+          "taxNumber": {
+            "type": "object",
+            "maxLength": 50,
+            "description": "Tax number of a person (matched by keyed hash)"
+          },
+          "officeId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "Office whose country completes national phone numbers"
+          },
+          "excludeContactId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "Contact being edited (excluded from the results)"
+          }
+        }
+      },
+      "DuplicateCandidateDto": {
+        "type": "object",
+        "properties": {
+          "visible": {
+            "type": "boolean",
+            "description": "False when the match is outside your access: no details are shown"
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "displayName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "matchedOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone",
+                "tax_number"
+              ]
+            }
+          }
+        },
+        "required": [
+          "visible",
+          "id",
+          "reference",
+          "displayName",
+          "ownerName",
+          "archived",
+          "matchedOn"
+        ]
+      },
+      "DuplicateCheckResultDto": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DuplicateCandidateDto"
+            }
+          }
+        },
+        "required": [
+          "candidates"
+        ]
+      },
+      "UpdateContactBody": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "displayNameLocal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200,
+            "description": "Name in its own script, e.g. Arabic"
+          },
+          "givenName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "familyName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "otherNames": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "organisationName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "organisationRegNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50,
+            "description": "Persons: stored encrypted and never returned (reveal only). Organisations: public register number"
+          },
+          "taxNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50,
+            "description": "Persons: stored encrypted and never returned (reveal only). Organisations: public tax number"
+          },
+          "dateOfBirth": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Stored encrypted and never returned (reveal only)"
+          },
+          "primaryEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 254
+          },
+          "primaryPhone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 30,
+            "description": "Any format; national numbers use the office country"
+          },
+          "preferredLocaleCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "en"
+          },
+          "preferredChannel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "email",
+              "phone",
+              "sms",
+              "whatsapp",
+              "post",
+              null
+            ]
+          },
+          "nationalityCountryCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "GH"
+          },
+          "residenceCountryCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "GH"
+          },
+          "officeId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "ownerMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Responsible staff member"
+          },
+          "sourceCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Picklist lead_source"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 4000,
+            "description": "Do not record ID or bank numbers here (ADR-007)"
+          },
+          "confirmNotDuplicate": {
+            "type": "boolean",
+            "description": "Save even though possible duplicates were found (the choice is audited)"
+          }
+        }
+      },
+      "ArchiveContactBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "AddMethodBody": {
+        "type": "object",
+        "properties": {
+          "methodType": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone",
+              "mobile",
+              "whatsapp",
+              "fax",
+              "website",
+              "other"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "label": {
+            "type": "object",
+            "maxLength": 60
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "methodType",
+          "value"
+        ]
+      },
+      "UpdateMethodBody": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 60
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "optedOut": {
+            "type": "boolean",
+            "description": "The person asked not to be contacted this way"
+          },
+          "verified": {
+            "type": "boolean",
+            "description": "The value was confirmed with the person"
+          }
+        }
+      },
+      "AddRelationshipBody": {
+        "type": "object",
+        "properties": {
+          "relationshipType": {
+            "type": "string",
+            "enum": [
+              "buyer",
+              "seller",
+              "landlord",
+              "tenant",
+              "applicant",
+              "guarantor",
+              "supplier",
+              "developer",
+              "investor",
+              "other"
+            ]
+          }
+        },
+        "required": [
+          "relationshipType"
+        ]
+      },
+      "EndRelationshipBody": {
+        "type": "object",
+        "properties": {
+          "endedOn": {
+            "type": "string",
+            "format": "date",
+            "description": "Defaults to today"
+          }
+        }
+      },
+      "ConsentHistoryDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Every consent record, newest first",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MergeSideDto": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/ContactDto"
+          },
+          "references": {
+            "type": "object",
+            "description": "Rows that reference this contact, per table",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "contact",
+          "references"
+        ]
+      },
+      "MergePreviewDto": {
+        "type": "object",
+        "properties": {
+          "keep": {
+            "$ref": "#/components/schemas/MergeSideDto"
+          },
+          "merge": {
+            "$ref": "#/components/schemas/MergeSideDto"
+          },
+          "blockers": {
+            "description": "Reasons the merge cannot go ahead; empty when it can",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "choosableFields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "displayName",
+                "displayNameLocal",
+                "givenName",
+                "familyName",
+                "otherNames",
+                "title",
+                "organisationName",
+                "organisationRegNumber",
+                "taxNumber",
+                "dateOfBirth",
+                "primaryEmail",
+                "primaryPhone",
+                "preferredLocaleCode",
+                "preferredChannel",
+                "nationalityCountryCode",
+                "residenceCountryCode",
+                "officeId",
+                "ownerMembershipId",
+                "sourceCode",
+                "notes"
+              ]
+            }
+          }
+        },
+        "required": [
+          "keep",
+          "merge",
+          "blockers",
+          "choosableFields"
+        ]
+      },
+      "MergeBody": {
+        "type": "object",
+        "properties": {
+          "mergeContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The contact merged into this one (it is archived and points here)"
+          },
+          "mergeVersion": {
+            "type": "number",
+            "description": "Version of the merged contact, as shown in the preview"
+          },
+          "fields": {
+            "type": "object",
+            "description": "For each field, whose value to keep: \"keep\" (default) or \"merge\". Fields: displayName, displayNameLocal, givenName, familyName, otherNames, title, organisationName, organisationRegNumber, taxNumber, dateOfBirth, primaryEmail, primaryPhone, preferredLocaleCode, preferredChannel, nationalityCountryCode, residenceCountryCode, officeId, ownerMembershipId, sourceCode, notes",
+            "example": {
+              "primaryEmail": "merge"
+            }
+          }
+        },
+        "required": [
+          "mergeContactId",
+          "mergeVersion"
+        ]
+      },
+      "MergeResultDto": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/ContactDto"
+          },
+          "moved": {
+            "type": "object",
+            "description": "Rows moved to the kept contact, per table",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "contact",
+          "moved"
         ]
       },
       "RevealBody": {

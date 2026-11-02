@@ -23,6 +23,8 @@ export interface ProblemBody {
   requestId?: string;
   errors?: FieldError[];
   conflictingResource?: ConflictingResource;
+  /** possible-duplicates: matching contacts, limited to what the caller may see. */
+  candidates?: unknown[];
 }
 
 const TYPE_PREFIX = 'urn:estatepro:problem:';
@@ -33,7 +35,7 @@ export class ProblemError extends Error {
     readonly code: string,
     readonly title: string,
     readonly detail?: string,
-    readonly extras: Pick<ProblemBody, 'errors' | 'conflictingResource'> = {},
+    readonly extras: Pick<ProblemBody, 'errors' | 'conflictingResource' | 'candidates'> = {},
     /** Response headers that belong with this problem (e.g. Retry-After). */
     readonly headers: Readonly<Record<string, string>> = {},
   ) {
@@ -58,6 +60,7 @@ export class ProblemError extends Error {
     if (this.extras.conflictingResource !== undefined) {
       body.conflictingResource = this.extras.conflictingResource;
     }
+    if (this.extras.candidates !== undefined) body.candidates = this.extras.candidates;
     return body;
   }
 }
@@ -130,6 +133,15 @@ export const Problems = {
 
   geocodingUnavailable: (detail = 'Address suggestions are not available. Place the pin on the map or enter the coordinates.') =>
     new ProblemError(503, 'geocoding-unavailable', 'Geocoding unavailable', detail),
+
+  possibleDuplicates: (candidates: unknown[]) =>
+    new ProblemError(
+      409,
+      'possible-duplicates',
+      'Possible duplicate contacts',
+      'Contacts with the same details already exist. Open one of them, or confirm this is a different person and save again.',
+      { candidates },
+    ),
 
   encryptionUnavailable: (detail = 'Protected details cannot be read or saved right now. Try again in a few minutes.') =>
     new ProblemError(503, 'encryption-unavailable', 'Encryption unavailable', detail),

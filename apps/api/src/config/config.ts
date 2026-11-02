@@ -91,6 +91,8 @@ const configSchema = z.object({
   /** How long an unwrapped company key stays in memory (ADR-007 §4.5: at most 5 minutes). */
   FIELD_KEY_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).max(300).default(300),
   FIELD_KEY_CACHE_MAX_ENTRIES: z.coerce.number().int().min(1).max(100_000).default(1_000),
+  /** Contact duplicate checks per member per minute, per API instance (risk WR-4). */
+  DUPLICATE_CHECK_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(1_000).default(30),
   /** Step-up freshness for revealing a protected value (ADR-007 §9: 5 minutes). */
   REVEAL_STEP_UP_MAX_AGE_SECONDS: z.coerce.number().int().min(30).max(900).default(300),
 }).superRefine((config, issues) => {
