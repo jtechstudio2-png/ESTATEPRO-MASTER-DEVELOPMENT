@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 3 November 2026 |
-| Branch | `phase-5/preparation` (commit in §10) |
+| Branch | `phase-5/preparation`, commit `929df36` |
 | Approvals | C2 decisions C2-D1 to C2-D8 and risk C2-R1 approved before work started. Four-eyes KYC recorded as a future enhancement (#36) |
 | Scope | Leads (CRM-06, CRM-07; wireframes L-1 to L-4; decisions D3, D6, D7; gap G1), activity timeline (CRM-04; A-1, A-2; decision D5; gap G6 / #15), follow-ups (CRM-05; F-1, F-2; decision D6). API endpoints CA-11 to CA-13 |
-| Result | **C3 complete.** Encryption controls, reveal restrictions and tenant isolation unchanged and tested; every change audited; histories append-only. 424 API tests and 8 SQL test suites green locally |
+| Result | **C3 complete.** Encryption controls, reveal restrictions and tenant isolation unchanged and tested; every change audited; histories append-only. 424 API tests and 8 SQL test suites green locally and in CI run 70 |
 
 ## 1. Deliverables
 
@@ -70,6 +70,7 @@ Further changes:
 | All SQL suites (24 migrations, 8 files) | — | ✅ |
 | Full API suite (`test:ci`, local) | 424 in 31 files | ✅ |
 | Lint, typecheck, OpenAPI regenerated | — | ✅ |
+| CI run 70 on `929df36` (all six required jobs) | — | ✅ [run 70](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41609129882) |
 
 Coverage (whole API): 97.09 % statements, 91.8 % branches, 98.71 % functions, 99.21 % lines (thresholds 95/90 met). The remaining uncovered C3 branches are fail-closed fallbacks for scopes no role holds today.
 
@@ -173,3 +174,5 @@ No optimisation was needed after the first run. The C3 tables already had the ri
 | Sensitive-data detection (#35) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/35 |
 | Four-eyes KYC enhancement (#36) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/36 |
 | Branch | `phase-5/preparation` |
+| C3 commit | `929df36` |
+| CI run 70 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41609129882 |
