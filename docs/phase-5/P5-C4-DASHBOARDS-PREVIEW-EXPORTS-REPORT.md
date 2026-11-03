@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 3 November 2026 |
-| Branch | `phase-5/preparation`, C4 commit (see §10) |
+| Branch | `phase-5/preparation`, commit `4cce8dd` |
 | Approvals | C3 decisions C3-D1 to C3-D9 approved before work started |
 | Scope | Dashboards (CA-14; wireframes D-A admin, D-C CRM, D-M My day), landlord visibility preview (CA-15; wireframe LL-1; issue #12, landlord part), contact and lead exports (CA-16) |
-| Result | **C4 complete.** Encryption controls, reveal restrictions and tenant isolation unchanged and tested. Every export, download, expiry and preview is audited, and export records cannot be rewritten or deleted. 437 API tests and 9 SQL test suites pass locally; CI run in §10 |
+| Result | **C4 complete.** Encryption controls, reveal restrictions and tenant isolation unchanged and tested. Every export, download, expiry and preview is audited, and export records cannot be rewritten or deleted. 437 API tests and 9 SQL test suites green locally and in CI run 72 |
 
 ## 1. Deliverables
 
@@ -52,7 +52,7 @@ Worker jobs (every 15 minutes): `export.expire` deletes expired export files and
 | Tenant isolation | Row-level security on the new table; resolver is `SECURITY INVOKER`. Every dashboard number is computed inside the caller's scope. Other companies' contacts, exports and offices answer 404 | Isolation tests in both new suites; SQL suite 08 |
 | Audit integrity | Export requests (with purpose and filters), downloads, expiries and previews are audited in the same transaction. Export records cannot be rewritten or deleted | Audit assertions; SQL tests "a finished export cannot be rewritten", "the record of an export is never deleted" |
 | Performance validation | New test with 50,000 contacts, 100,000 leads, 100,000 follow-ups, 20,000 requirements, 20,000 listings; added to the nightly and release performance workflow | §7 |
-| CI verification | All six required jobs | §10 |
+| CI verification | All six required jobs green in run 72 | §3, §10 |
 | #12 landlord visibility | Ownerships and management agreements, property time zone, effective end date inclusive, units and listings under each | Preview tests and 9 SQL resolver assertions (including tenant isolation) |
 | Exports safe to open | UTF-8 with byte-order mark (Excel shows Arabic correctly); cells starting `=`, `+`, `-`, `@`, tab or return are prefixed with `'` | Export test with a formula-like name |
 
@@ -69,6 +69,7 @@ Worker jobs (every 15 minutes): `export.expire` deletes expired export files and
 | Full API suite (`test:ci`, local) | 437 in 33 files | ✅ |
 | Contacts, requirements, leads performance tests (re-run after the matching change) | 3 | ✅ p95 330 / 322 / 243 ms |
 | Lint, typecheck, OpenAPI regenerated | — | ✅ |
+| CI run 72 on `4cce8dd` (all six required jobs) | — | ✅ [run 72](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41648506737) |
 
 Coverage (whole API): 97.11 % statements, 91.63 % branches, 98.6 % functions, 99.21 % lines (thresholds 95/90 met).
 
@@ -168,4 +169,5 @@ Optimisation path for the CRM dashboard: 64 s → 19 s → 3–9 s → 1.16 s �
 | Portal visibility (#12) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/12 |
 | Sensitive-data detection (#35) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/35 |
 | Branch | `phase-5/preparation` |
-| C4 commit and CI run | Recorded after CI completes |
+| C4 commit | `4cce8dd` |
+| CI run 72 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41648506737 |
