@@ -108,6 +108,9 @@ export class ContactsService {
     if (query.cursor) qb = qb.where(keysetCondition(sortColumn, 'c.id', query.sort, query.cursor));
 
     const rows = await qb.orderBy(sortColumn, query.sort.direction).orderBy('c.id', query.sort.direction).limit(query.limit + 1).execute();
+    // Sellers view (SE-1): the latest identity check, only where the member has kyc.view on the contact.
+    const kycVisible = rows.slice(0, query.limit).filter((row) => canUse(ctx, 'kyc.view', row)).map((row) => row.id);
+    const identityChecks = await latestIdentityChecks(tx, kycVisible);
     return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({
       id: row.id,
       reference: row.reference,
@@ -120,6 +123,7 @@ export class ContactsService {
       office: row.officeId !== null ? { id: row.officeId, name: row.officeName ?? '' } : null,
       archivedAt: row.archivedAt?.toISOString() ?? null,
       updatedAt: row.updatedAt.toISOString(),
+      identityCheck: kycVisible.includes(row.id) ? (identityChecks.get(row.id) ?? { status: 'none', reviewedAt: null }) : null,
     }));
   }
 
@@ -767,12 +771,34 @@ export class ContactsService {
 
 // --------------------------------------------------------------------- helpers
 
+/**
+ * The latest identity check of each contact, with its effective status
+ * (a verified check past its expiry date reads as expired).
+ */
+export async function latestIdentityChecks(tx: Tx, contactIds: string[]): Promise<Map<string, { status: string; reviewedAt: string | null }>> {
+  const result = new Map<string, { status: string; reviewedAt: string | null }>();
+  if (contactIds.length === 0) return result;
+  const { rows } = await sql<{ contactId: string; status: string; reviewedAt: Date | null }>`
+    select distinct on (k.contact_id) k.contact_id, ${effectiveKycStatusSql('k')} as status, k.reviewed_at
+      from kyc_checks k
+     where k.contact_id = any(${contactIds}::uuid[]) and k.check_type = 'identity'
+     order by k.contact_id, k.created_at desc, k.id desc`.execute(tx);
+  for (const row of rows) result.set(row.contactId, { status: row.status, reviewedAt: row.reviewedAt?.toISOString() ?? null });
+  return result;
+}
+
+/** Stored status, except that a verified check past its expiry date is expired. */
+export function effectiveKycStatusSql(alias: string) {
+  const column = (name: string) => sql.ref(`${alias}.${name}`);
+  return sql<string>`case when ${column('status')} = 'verified' and ${column('expiresOn')} < current_date then 'expired' else ${column('status')} end`;
+}
+
 function canUse(ctx: TenantContext, permission: string, row: { officeId: string | null; ownerMembershipId: string | null }): boolean {
   const scope = scopeFor(ctx, permission);
   return scope !== null && contactWithinScope(scope, ctx, row);
 }
 
-function assertEditable(row: { archivedAt: Date | null; isAnonymised: boolean; mergedIntoContactId: string | null }): void {
+export function assertEditable(row: { archivedAt: Date | null; isAnonymised: boolean; mergedIntoContactId: string | null }): void {
   if (row.mergedIntoContactId !== null) throw Problems.businessRule('This contact was merged into another contact. Edit that contact instead.');
   if (row.isAnonymised) throw Problems.businessRule('This contact has been anonymised and cannot be edited.');
   if (row.archivedAt !== null) throw Problems.businessRule('Archived contacts cannot be edited. Restore the contact first.');
@@ -815,7 +841,7 @@ function sameValue(a: unknown, b: unknown): boolean {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
-async function newId(tx: Tx): Promise<string> {
+export async function newId(tx: Tx): Promise<string> {
   const { rows } = await sql<{ id: string }>`select app.uuid_v7() as id`.execute(tx);
   const id = rows[0]?.id;
   if (id === undefined) throw Problems.internal();

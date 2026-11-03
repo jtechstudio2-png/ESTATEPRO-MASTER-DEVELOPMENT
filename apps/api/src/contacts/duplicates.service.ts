@@ -17,6 +17,8 @@ export interface DuplicateKeys {
   phone: string | null;
   /** Plain tax number of a person; matched by keyed hash, never stored here. */
   taxNumber: string | null;
+  /** Keyed hash of an identity document number (identity documents, C2). */
+  identityNumberHash?: Buffer | null;
 }
 
 const MAX_CANDIDATES = 10;
@@ -38,7 +40,8 @@ export class DuplicatesService {
 
   async find(tx: Tx, ctx: TenantContext, keys: DuplicateKeys, excludeContactId?: string): Promise<DuplicateCandidateDto[]> {
     const taxHash = keys.taxNumber ? await this.sensitive.hash(tx, ctx, 'tax_number', keys.taxNumber) : null;
-    if (keys.email === null && keys.phone === null && taxHash === null) return [];
+    const identityHash = keys.identityNumberHash ?? null;
+    if (keys.email === null && keys.phone === null && taxHash === null && identityHash === null) return [];
     const scope = scopeFor(ctx, 'contact.view');
     const visibleSql = scope === null ? sql<boolean>`false` : contactScopeSql(scope, ctx, 'c', 'read');
     const phoneTypes = [...PHONE_METHOD_TYPES];
@@ -61,19 +64,26 @@ export class DuplicatesService {
             select 1 from contact_methods cm where cm.company_id = c.company_id and cm.contact_id = c.id
                and cm.method_type = any(${phoneTypes}::text[]) and cm.normalised = ${keys.phone}))`.as('matchPhone'),
         sql<boolean>`${taxHash !== null} and c.tax_number_hash = ${taxHash}`.as('matchTax'),
+        sql<boolean>`${identityHash !== null} and exists (select 1 from identity_documents d where d.company_id = c.company_id
+            and d.contact_id = c.id and d.number_hash = ${identityHash} and d.archived_at is null)`.as('matchIdentity'),
       ])
       .where('c.mergedIntoContactId', 'is', null)
       .where('c.isAnonymised', '=', false)
       .$if(excludeContactId !== undefined, (qb) => qb.where('c.id', '<>', excludeContactId!))
       // Candidate ids from indexed lookups only; match flags are then computed for at most ten rows.
-      .where(sql<boolean>`c.id in (${sql.join(this.candidateArms(ctx, keys.email, keys.phone, taxHash, phoneTypes), sql` union `)})`)
+      .where(sql<boolean>`c.id in (${sql.join(this.candidateArms(ctx, keys.email, keys.phone, taxHash, identityHash, phoneTypes), sql` union `)})`)
       .orderBy('c.archivedAt', 'desc')
       .orderBy('c.updatedAt', 'desc')
       .limit(MAX_CANDIDATES)
       .execute();
 
     return rows.map((row) => {
-      const matchedOn = [row.matchEmail ? 'email' : null, row.matchPhone ? 'phone' : null, row.matchTax ? 'tax_number' : null].filter(
+      const matchedOn = [
+        row.matchEmail ? 'email' : null,
+        row.matchPhone ? 'phone' : null,
+        row.matchTax ? 'tax_number' : null,
+        row.matchIdentity ? 'identity_document' : null,
+      ].filter(
         (value): value is string => value !== null,
       );
       return row.visible
@@ -82,7 +92,7 @@ export class DuplicatesService {
     });
   }
 
-  private candidateArms(ctx: TenantContext, email: string | null, phone: string | null, taxHash: Buffer | null, phoneTypes: string[]) {
+  private candidateArms(ctx: TenantContext, email: string | null, phone: string | null, taxHash: Buffer | null, identityHash: Buffer | null, phoneTypes: string[]) {
     const company = ctx.companyId;
     const arms = [];
     if (email !== null) {
@@ -94,6 +104,9 @@ export class DuplicatesService {
       arms.push(sql`select contact_id from contact_methods where company_id = ${company}::uuid and method_type = any(${phoneTypes}::text[]) and normalised = ${phone}`);
     }
     if (taxHash !== null) arms.push(sql`select id from contacts where company_id = ${company}::uuid and tax_number_hash = ${taxHash}`);
+    if (identityHash !== null) {
+      arms.push(sql`select contact_id from identity_documents where company_id = ${company}::uuid and number_hash = ${identityHash} and archived_at is null`);
+    }
     return arms;
   }
 

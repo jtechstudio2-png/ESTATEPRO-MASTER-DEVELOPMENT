@@ -6391,6 +6391,1156 @@
           "Contacts: protected details"
         ]
       }
+    },
+    "/api/v1/requirements": {
+      "get": {
+        "operationId": "RequirementsRegister_register",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[locality]",
+            "required": false,
+            "in": "query",
+            "description": "Requirements naming one of these areas",
+            "schema": {}
+          },
+          {
+            "name": "filter[moveBy][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[moveBy][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[budget][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[budget][gte]",
+            "required": false,
+            "in": "query",
+            "description": "Budget overlaps this range",
+            "schema": {}
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[financingStatus]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[currencyCode]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "Default active. active, paused, fulfilled, cancelled",
+            "schema": {}
+          },
+          {
+            "name": "filter[requirementType]",
+            "required": false,
+            "in": "query",
+            "description": "buy, rent",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "updatedAt",
+                "-updatedAt",
+                "createdAt",
+                "-createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Requirements of contacts you can see (active by default), with match counts",
+        "tags": [
+          "Contacts: requirements"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/requirements": {
+      "get": {
+        "operationId": "ContactRequirements_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts: requirements"
+        ]
+      },
+      "post": {
+        "operationId": "ContactRequirements_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequirementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record what a buyer or tenant is looking for",
+        "tags": [
+          "Contacts: requirements"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}": {
+      "get": {
+        "operationId": "ContactRequirements_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts: requirements"
+        ]
+      },
+      "patch": {
+        "operationId": "ContactRequirements_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequirementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts: requirements"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}/matches": {
+      "get": {
+        "operationId": "ContactRequirements_matches",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequirementMatchesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Published listings matching the requirement, best first (decision D4); needs listing.view",
+        "tags": [
+          "Contacts: requirements"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}/exclusions": {
+      "get": {
+        "operationId": "ContactRequirements_exclusions",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementExclusionDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listings marked not suitable for this requirement",
+        "tags": [
+          "Contacts: requirements"
+        ]
+      },
+      "post": {
+        "operationId": "ContactRequirements_exclude",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcludeListingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementExclusionDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a listing not suitable, with a reason; it stops appearing as a match",
+        "tags": [
+          "Contacts: requirements"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}/exclusions/{listingId}": {
+      "delete": {
+        "operationId": "ContactRequirements_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementExclusionDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Let a listing marked not suitable appear as a match again",
+        "tags": [
+          "Contacts: requirements"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/identity-documents": {
+      "get": {
+        "operationId": "Kyc_listDocuments",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdentityDocumentDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Identity documents (masked: last characters only)",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      },
+      "post": {
+        "operationId": "Kyc_addDocument",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIdentityDocumentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityDocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record an identity document. The number is encrypted; 409 possible-duplicates when another contact has it",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/identity-documents/{documentId}": {
+      "patch": {
+        "operationId": "Kyc_updateDocument",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIdentityDocumentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityDocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Correct a document that is not yet verified",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/identity-documents/{documentId}/archive": {
+      "post": {
+        "operationId": "Kyc_archiveDocument",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveIdentityDocumentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityDocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive a document (it is kept as evidence)",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/kyc-checks": {
+      "get": {
+        "operationId": "Kyc_listChecks",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KycCheckDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      },
+      "post": {
+        "operationId": "Kyc_recordCheck",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKycCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycCheckDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a KYC/AML check (identity, address, source of funds, sanctions/PEP, company ownership)",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/kyc-checks/{checkId}": {
+      "patch": {
+        "operationId": "Kyc_updateCheck",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "checkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKycCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycCheckDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an open check (pending or in review)",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/kyc-checks/{checkId}/approve": {
+      "post": {
+        "operationId": "Kyc_approve",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "checkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveKycCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycCheckDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign a check off as verified, with a risk rating; a verified identity check also verifies its document",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/kyc-checks/{checkId}/reject": {
+      "post": {
+        "operationId": "Kyc_reject",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "checkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectKycCheckBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycCheckDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign a check off as failed, with the reason",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
     }
   },
   "info": {
@@ -12162,6 +13312,33 @@
           "name"
         ]
       },
+      "IdentityCheckSummaryDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "none",
+              "pending",
+              "in_review",
+              "verified",
+              "failed",
+              "expired"
+            ]
+          },
+          "reviewedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "status",
+          "reviewedAt"
+        ]
+      },
       "ContactSummaryDto": {
         "type": "object",
         "properties": {
@@ -12247,6 +13424,17 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "identityCheck": {
+            "description": "Latest identity check (Sellers view); null without kyc.view on this contact",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IdentityCheckSummaryDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -12260,7 +13448,8 @@
           "owner",
           "office",
           "archivedAt",
-          "updatedAt"
+          "updatedAt",
+          "identityCheck"
         ]
       },
       "ContactPageDto": {
@@ -13130,7 +14319,8 @@
               "enum": [
                 "email",
                 "phone",
-                "tax_number"
+                "tax_number",
+                "identity_document"
               ]
             }
           }
@@ -13596,6 +14786,1325 @@
           "value",
           "revealedAt",
           "hideAfterSeconds"
+        ]
+      },
+      "RequirementAreaDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "locality",
+              "radius",
+              "polygon"
+            ]
+          },
+          "locality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "adminArea1": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "radiusMetres": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "points": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "RequirementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contact": {
+            "description": "The contact; name is its display name",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              }
+            ]
+          },
+          "requirementType": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "rent"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "GHS"
+          },
+          "minPrice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxPrice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ]
+          },
+          "minBedrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "maxBedrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "propertyTypeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "areas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequirementAreaDto"
+            }
+          },
+          "mustHaveFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "moveBy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "financingStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "cash",
+              "mortgage_approved",
+              "mortgage_in_progress",
+              "not_started",
+              "not_applicable",
+              null
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "matchCount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "maximum": 100,
+            "description": "Published listings matching now, at most 100 (null without listing.view)"
+          },
+          "matchCountCapped": {
+            "type": "boolean",
+            "description": "More than 100 listings match (show \"100+\"); the matches endpoint gives the exact total"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "contact",
+          "requirementType",
+          "status",
+          "currencyCode",
+          "minPrice",
+          "maxPrice",
+          "rentFrequency",
+          "minBedrooms",
+          "maxBedrooms",
+          "propertyTypeIds",
+          "areas",
+          "mustHaveFeatures",
+          "moveBy",
+          "financingStatus",
+          "notes",
+          "matchCount",
+          "matchCountCapped",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "RequirementPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequirementDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "RequirementAreaInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "locality",
+              "radius",
+              "polygon"
+            ]
+          },
+          "locality": {
+            "type": "object",
+            "maxLength": 120,
+            "example": "East Legon"
+          },
+          "adminArea1": {
+            "type": "object",
+            "maxLength": 120,
+            "example": "Greater Accra"
+          },
+          "latitude": {
+            "type": "object",
+            "example": 5.6355
+          },
+          "longitude": {
+            "type": "object",
+            "example": -0.1617
+          },
+          "radiusMetres": {
+            "type": "object",
+            "minimum": 1,
+            "maximum": 50000
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "[longitude, latitude] pairs"
+          },
+          "label": {
+            "type": "object",
+            "maxLength": 80,
+            "description": "Name shown for a map area, e.g. \"Near the school\""
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "CreateRequirementBody": {
+        "type": "object",
+        "properties": {
+          "minPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "900000",
+            "description": "Lowest price, in the requirement currency (rent: per rentFrequency)"
+          },
+          "maxPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "1200000"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ],
+            "description": "Rent requirements with a budget: the period the budget is for"
+          },
+          "minBedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 50
+          },
+          "maxBedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 50
+          },
+          "propertyTypeIds": {
+            "description": "Property or unit types wanted (ids from the property types list)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "areas": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequirementAreaInput"
+            }
+          },
+          "mustHaveFeatures": {
+            "description": "Codes from the \"feature\" picklist; listings with more of them rank higher",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "moveBy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "financingStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "cash",
+              "mortgage_approved",
+              "mortgage_in_progress",
+              "not_started",
+              "not_applicable",
+              null
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Do not record ID or bank numbers here"
+          },
+          "requirementType": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "rent"
+            ]
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "GHS",
+            "description": "ISO 4217; listings in other currencies never match"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused"
+            ],
+            "default": "active"
+          }
+        },
+        "required": [
+          "requirementType",
+          "currencyCode"
+        ]
+      },
+      "UpdateRequirementBody": {
+        "type": "object",
+        "properties": {
+          "minPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "900000",
+            "description": "Lowest price, in the requirement currency (rent: per rentFrequency)"
+          },
+          "maxPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "1200000"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ],
+            "description": "Rent requirements with a budget: the period the budget is for"
+          },
+          "minBedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 50
+          },
+          "maxBedrooms": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 50
+          },
+          "propertyTypeIds": {
+            "description": "Property or unit types wanted (ids from the property types list)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "areas": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequirementAreaInput"
+            }
+          },
+          "mustHaveFeatures": {
+            "description": "Codes from the \"feature\" picklist; listings with more of them rank higher",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "moveBy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "financingStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "cash",
+              "mortgage_approved",
+              "mortgage_in_progress",
+              "not_started",
+              "not_applicable",
+              null
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Do not record ID or bank numbers here"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "GHS"
+          }
+        }
+      },
+      "MatchBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "featuresMatched": {
+            "description": "Wanted features the listing has",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "featuresMissing": {
+            "description": "Wanted features the listing lacks",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "propertyTypeMatched": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Listing is one of the wanted types (null when no types were given)"
+          },
+          "withinMaxBedrooms": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Bedrooms within the maximum (null when no maximum was given)"
+          }
+        },
+        "required": [
+          "featuresMatched",
+          "featuresMissing",
+          "propertyTypeMatched",
+          "withinMaxBedrooms"
+        ]
+      },
+      "RequirementMatchDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          },
+          "price": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ]
+          },
+          "bedrooms": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "locality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "publishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "score": {
+            "type": "number",
+            "description": "Ranking points: one per wanted feature, one for a wanted type, one for bedrooms within the maximum"
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/MatchBreakdownDto"
+          }
+        },
+        "required": [
+          "listingId",
+          "reference",
+          "title",
+          "listingType",
+          "price",
+          "rentFrequency",
+          "bedrooms",
+          "locality",
+          "publishedAt",
+          "score",
+          "breakdown"
+        ]
+      },
+      "RequirementMatchesDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequirementMatchDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "All matching listings (data holds the best `limit`)"
+          },
+          "rules": {
+            "description": "The rules applied (decision D4)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "rules"
+        ]
+      },
+      "RequirementExclusionDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listingReference": {
+            "type": "string"
+          },
+          "listingTitle": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "excludedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "excludedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "listingId",
+          "listingReference",
+          "listingTitle",
+          "reason",
+          "excludedBy",
+          "excludedAt"
+        ]
+      },
+      "ExcludeListingBody": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "example": "Too far from the children’s school"
+          }
+        },
+        "required": [
+          "listingId",
+          "reason"
+        ]
+      },
+      "VerificationDto": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          }
+        },
+        "required": [
+          "at",
+          "by"
+        ]
+      },
+      "IdentityDocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "issuingCountryCode": {
+            "type": "string"
+          },
+          "numberLast4": {
+            "type": "string",
+            "example": "4821",
+            "description": "Last characters of the number, for recognising the document"
+          },
+          "issuedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expired": {
+            "type": "boolean",
+            "description": "The expiry date has passed"
+          },
+          "verified": {
+            "description": "Set when an identity check using this document is signed off as verified",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerificationDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You may correct this document (kyc.manage; not verified or archived)"
+          },
+          "canReveal": {
+            "type": "boolean",
+            "description": "You may reveal the number (contact.view_sensitive, with a recent second factor)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "documentTypeCode",
+          "issuingCountryCode",
+          "numberLast4",
+          "issuedOn",
+          "expiresOn",
+          "expired",
+          "verified",
+          "archivedAt",
+          "archivedReason",
+          "canEdit",
+          "canReveal",
+          "createdAt",
+          "version"
+        ]
+      },
+      "CreateIdentityDocumentBody": {
+        "type": "object",
+        "properties": {
+          "documentTypeCode": {
+            "type": "string",
+            "example": "ghana_card",
+            "description": "Code from the id_document_type picklist for the issuing country"
+          },
+          "issuingCountryCode": {
+            "type": "string",
+            "example": "GH"
+          },
+          "documentNumber": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 40,
+            "description": "Document number. Encrypted at rest; never returned (reveal needs contact.view_sensitive and a recent second factor)."
+          },
+          "issuedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "confirmNotDuplicate": {
+            "type": "boolean",
+            "description": "Record the document even though another contact has the same number"
+          }
+        },
+        "required": [
+          "documentTypeCode",
+          "issuingCountryCode",
+          "documentNumber"
+        ]
+      },
+      "UpdateIdentityDocumentBody": {
+        "type": "object",
+        "properties": {
+          "documentTypeCode": {
+            "type": "string",
+            "example": "passport"
+          },
+          "issuingCountryCode": {
+            "type": "string",
+            "example": "GH"
+          },
+          "documentNumber": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 40,
+            "description": "A corrected number (re-encrypted)"
+          },
+          "issuedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "confirmNotDuplicate": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArchiveIdentityDocumentBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "example": "Replaced by a renewed passport"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "KycDocumentRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "numberLast4": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "documentTypeCode",
+          "numberLast4"
+        ]
+      },
+      "KycCheckDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "checkType": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "address",
+              "source_of_funds",
+              "sanctions_pep",
+              "company_ownership"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_review",
+              "verified",
+              "failed",
+              "expired"
+            ],
+            "description": "A verified check past its expiry date reads as expired"
+          },
+          "riskRating": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              null
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "providerReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "identityDocument": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KycDocumentRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recordedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviewedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviewedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "decisionReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The reviewer’s reason"
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You may edit this open check (kyc.manage)"
+          },
+          "canDecide": {
+            "type": "boolean",
+            "description": "You may sign this open check off (kyc.approve)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "checkType",
+          "status",
+          "riskRating",
+          "provider",
+          "providerReference",
+          "identityDocument",
+          "recordedBy",
+          "reviewedBy",
+          "reviewedAt",
+          "expiresOn",
+          "notes",
+          "decisionReason",
+          "canEdit",
+          "canDecide",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "CreateKycCheckBody": {
+        "type": "object",
+        "properties": {
+          "checkType": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "address",
+              "source_of_funds",
+              "sanctions_pep",
+              "company_ownership"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_review"
+            ],
+            "default": "pending"
+          },
+          "identityDocumentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The identity document examined"
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100,
+            "description": "Who ran the check, if not your company"
+          },
+          "providerReference": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "riskRating": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              null
+            ]
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "When the result should be renewed"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Do not record ID or bank numbers here"
+          }
+        },
+        "required": [
+          "checkType"
+        ]
+      },
+      "UpdateKycCheckBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_review"
+            ]
+          },
+          "identityDocumentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "providerReference": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "riskRating": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              null
+            ]
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          }
+        }
+      },
+      "ApproveKycCheckBody": {
+        "type": "object",
+        "properties": {
+          "riskRating": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "Required when signing off a check as verified"
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "When the check should be renewed"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 3,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "riskRating"
+        ]
+      },
+      "RejectKycCheckBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 1000,
+            "example": "Name on the passport does not match the sale contract"
+          },
+          "riskRating": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              null
+            ]
+          }
+        },
+        "required": [
+          "reason"
         ]
       }
     }

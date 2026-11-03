@@ -259,6 +259,11 @@ export class ContactDto {
   @ApiProperty() version!: number;
 }
 
+export class IdentityCheckSummaryDto {
+  @ApiProperty({ enum: ['none', 'pending', 'in_review', 'verified', 'failed', 'expired'] }) status!: string;
+  @ApiProperty({ type: String, nullable: true, format: 'date-time' }) reviewedAt!: string | null;
+}
+
 export class ContactSummaryDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ type: String, nullable: true }) reference!: string | null;
@@ -271,6 +276,12 @@ export class ContactSummaryDto {
   @ApiProperty({ type: RefLabelDto, nullable: true }) office!: RefLabelDto | null;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) archivedAt!: string | null;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
+  @ApiProperty({
+    type: IdentityCheckSummaryDto,
+    nullable: true,
+    description: 'Latest identity check (Sellers view); null without kyc.view on this contact',
+  })
+  identityCheck!: IdentityCheckSummaryDto | null;
 }
 
 export class ContactPageDto {
@@ -285,7 +296,7 @@ export class DuplicateCandidateDto {
   @ApiProperty({ type: String, nullable: true }) displayName!: string | null;
   @ApiProperty({ type: String, nullable: true }) ownerName!: string | null;
   @ApiProperty() archived!: boolean;
-  @ApiProperty({ enum: ['email', 'phone', 'tax_number'], isArray: true }) matchedOn!: string[];
+  @ApiProperty({ enum: ['email', 'phone', 'tax_number', 'identity_document'], isArray: true }) matchedOn!: string[];
 }
 
 export class DuplicateCheckResultDto {

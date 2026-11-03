@@ -850,9 +850,13 @@ export interface IdempotencyKeys {
 }
 
 export interface IdentityDocuments {
+  archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   companyId: string;
   contactId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   documentId: string | null;
   documentTypeCode: string;
   expiresOn: string | null;
@@ -868,8 +872,10 @@ export interface IdentityDocuments {
    */
   numberHash: Buffer;
   numberLast4: string;
+  updatedAt: Generated<Timestamp>;
   verifiedAt: Timestamp | null;
   verifiedBy: string | null;
+  version: Generated<number>;
 }
 
 export interface ImportJobs {
@@ -1002,11 +1008,14 @@ export interface KycChecks {
   contactId: string;
   createdAt: Generated<Timestamp>;
   dealId: string | null;
+  decisionReason: string | null;
   expiresOn: string | null;
   id: Generated<string>;
+  identityDocumentId: string | null;
   notes: string | null;
   provider: string | null;
   providerReference: string | null;
+  recordedBy: string | null;
   reviewedAt: Timestamp | null;
   reviewedBy: string | null;
   riskRating: string | null;
@@ -1188,6 +1197,11 @@ export interface Listings {
   availableFrom: string | null;
   closedAt: Timestamp | null;
   companyId: string;
+  /**
+   * Sale price, or rent per year; for requirement matching (decision D4). Never written by the application.
+   */
+  comparablePrice: Generated<Numeric | null>;
+  comparablePriceFloor: Generated<Int8 | null>;
   createdAt: Generated<Timestamp>;
   createdBy: string | null;
   currencyCode: string;
@@ -1947,10 +1961,28 @@ export interface RequiredDocumentRules {
   validityDays: number | null;
 }
 
+export interface RequirementExclusions {
+  companyId: string;
+  excludedAt: Generated<Timestamp>;
+  excludedBy: string | null;
+  id: Generated<string>;
+  listingId: string;
+  reason: string;
+  requirementId: string;
+}
+
 export interface Requirements {
   companyId: string;
+  comparableMaxFloor: Generated<Int8 | null>;
+  comparableMaxPrice: Generated<Numeric | null>;
+  comparableMinFloor: Generated<Int8 | null>;
+  /**
+   * Budget bounds in the terms of listings.comparable_price (rent per year). Never written by the application.
+   */
+  comparableMinPrice: Generated<Numeric | null>;
   contactId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   currencyCode: string;
   financingStatus: string | null;
   id: Generated<string>;
@@ -2525,6 +2557,7 @@ export interface DB {
   rentCharges: RentCharges;
   rentReviews: RentReviews;
   requiredDocumentRules: RequiredDocumentRules;
+  requirementExclusions: RequirementExclusions;
   requirements: Requirements;
   rolePermissions: RolePermissions;
   roles: Roles;

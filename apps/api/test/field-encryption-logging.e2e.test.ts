@@ -13,6 +13,7 @@ import { Fixtures } from './support/fixtures.js';
 const DATE_OF_BIRTH = '1979-11-04';
 const TAX_NUMBER = 'P0012345678';
 const PASSPORT = 'G-4821-7733';
+const GHANA_CARD = 'GHA-715550123-4';
 
 /**
  * ADR-007 §9 and threat T-8: protected values never reach the logs. Runs in its
@@ -96,12 +97,17 @@ describe('protected values and the logs (ADR-007 §9, T-8)', () => {
     const damaged = await seed({ taxNumber: TAX_NUMBER });
     await sql`update contacts set tax_number_encrypted = (select tax_number_encrypted from contacts where id = ${id}) where id = ${damaged.id}`.execute(fx.db);
     expect((await post(fieldPath(damaged.id, 'taxNumber'), { reason: 'Log leak test reveal' })).status).toBe(422);
+    // Identity documents (C2): recorded, refused as a duplicate, and rejected by validation.
+    const card = { documentTypeCode: 'ghana_card', issuingCountryCode: 'GH', documentNumber: GHANA_CARD };
+    expect((await post(`/api/v1/contacts/${id}/identity-documents`, card)).status).toBe(201);
+    expect((await post(`/api/v1/contacts/${damaged.id}/identity-documents`, card)).status).toBe(409);
+    expect((await post(`/api/v1/contacts/${id}/identity-documents`, { ...card, issuingCountryCode: 'QA' })).status).toBe(422);
 
     const text = output.join('');
     // The capture works: request lines for the reveals are present.
     expect(text).toContain(`/contacts/${id}/sensitive/dateOfBirth/reveal`);
     expect(text).toContain('"statusCode":422');
-    for (const value of [DATE_OF_BIRTH, TAX_NUMBER, PASSPORT, 'G48217733']) {
+    for (const value of [DATE_OF_BIRTH, TAX_NUMBER, PASSPORT, 'G48217733', GHANA_CARD, '715550123']) {
       expect(text, value).not.toContain(value);
     }
   });
