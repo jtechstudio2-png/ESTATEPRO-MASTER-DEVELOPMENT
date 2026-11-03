@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 3 November 2026 |
-| Branch | `phase-5/preparation` (commit in §9) |
+| Branch | `phase-5/preparation`, commit `8439a5f` |
 | Approvals | C1 decisions C1-D1 to C1-D7 approved by the product owner before work started |
 | Scope | Requirements and matching (CRM-03; wireframes B-1, B-2; decision D4; gap G2), identity documents (C-5) and identity verification / KYC (CRM-09; SE-1) |
-| Result | **C2 complete.** Encryption controls unchanged and enforced; identity numbers encrypted; reveal permissions not relaxed; tenant isolation, audit and performance tested. 400 API tests and 7 SQL test suites green locally |
+| Result | **C2 complete.** Encryption controls unchanged and enforced; identity numbers encrypted; reveal permissions not relaxed; tenant isolation, audit and performance tested. 400 API tests and 7 SQL test suites green locally and in CI run 68 |
 
 ## 1. Deliverables
 
@@ -61,6 +61,7 @@ Matching follows decision D4 exactly. **Must match:** type, currency, price with
 | All SQL suites (23 migrations, 7 files) | — | ✅ |
 | Full API suite (`test:ci`, local) | 400 in 29 files | ✅ |
 | Lint, typecheck, OpenAPI regenerated | — | ✅ |
+| CI run 68 on `8439a5f` (all six required jobs) | — | ✅ [run 68](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41601465480) |
 
 Coverage (whole API): 97.26 % statements, 92.33 % branches, 98.96 % functions, 99.36 % lines. New files: 98–100 % of lines.
 
@@ -160,3 +161,5 @@ The slowest single request (a 100-row register page) is above 1 s; the p95 targe
 | Seller identity for publishing (#18) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/18 |
 | Sensitive-data detection (#35) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/35 |
 | Branch | `phase-5/preparation` |
+| C2 commit | `8439a5f` |
+| CI run 68 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41601465480 |
