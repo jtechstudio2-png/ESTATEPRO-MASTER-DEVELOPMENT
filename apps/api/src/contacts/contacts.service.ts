@@ -7,6 +7,7 @@ import type { PermissionScope, TenantContext } from '../common/request-context.j
 import { keysetCondition, type Page, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
 import { SensitiveDataService } from '../crypto/sensitive-data.service.js';
 import type { Tx } from '../database/database.module.js';
+import { recordSystemActivity } from '../crm/system-activity.js';
 import { nextReference } from '../properties/properties.service.js';
 import { checkPicklistCode } from '../reference/picklists.js';
 import { contactScopeSql, contactWithinScope, scopeFor } from './contact-access.js';
@@ -586,6 +587,12 @@ export class ContactsService {
       entityType: 'contact',
       entityId: contactId,
       metadata: { consentId: inserted.id, purpose: consent.purpose, channel: consent.channel, status: consent.status, capturedVia: capturedVia ?? consent.capturedVia },
+    });
+    // The timeline shows consent changes as system entries (wireframe A-1).
+    await recordSystemActivity(tx, ctx, {
+      activityType: 'system',
+      subject: `Consent ${consent.status}: ${consent.purpose.replace(/_/g, ' ')} (${consent.channel ?? 'any'}) via ${(capturedVia ?? consent.capturedVia).replace(/_/g, ' ')}`,
+      links: [{ entityType: 'contact', entityId: contactId }],
     });
   }
 

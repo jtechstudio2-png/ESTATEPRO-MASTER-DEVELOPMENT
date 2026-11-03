@@ -29,17 +29,29 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Activities {
   activityType: string;
+  archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   body: string | null;
   companyId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   direction: string | null;
   durationSeconds: number | null;
+  editedAt: Timestamp | null;
+  /**
+   * Insertion order; breaks ties between entries at the same time so timelines never reorder (gap G6, #15).
+   */
+  entryNo: Generated<Int8>;
   externalMessageId: string | null;
   id: Generated<string>;
+  isSystem: Generated<boolean | null>;
   occurredAt: Generated<Timestamp>;
   outcomeCode: string | null;
   performedBy: string | null;
   subject: string | null;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
 }
 
 export interface ActivityLinks {
@@ -47,6 +59,21 @@ export interface ActivityLinks {
   companyId: string;
   entityId: string;
   entityType: string;
+}
+
+export interface ActivityRevisions {
+  activityId: string;
+  body: string | null;
+  companyId: string;
+  direction: string | null;
+  durationSeconds: number | null;
+  editedAt: Generated<Timestamp>;
+  editedBy: string | null;
+  id: Generated<string>;
+  occurredAt: Timestamp;
+  outcomeCode: string | null;
+  revisionNo: number;
+  subject: string | null;
 }
 
 export interface Addresses {
@@ -1032,16 +1059,20 @@ export interface LeadAssignments {
   companyId: string;
   id: Generated<string>;
   leadId: string;
+  note: string | null;
 }
 
 export interface Leads {
   archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   assignedTo: string | null;
   campaign: string | null;
   companyId: string;
   contactId: string;
   convertedDealId: string | null;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   customFields: Generated<Json>;
   firstResponseAt: Timestamp | null;
   id: Generated<string>;
@@ -2198,6 +2229,9 @@ export interface SupportAccessGrants {
 export interface Tasks {
   assignedTo: string;
   automationRuleId: string | null;
+  cancelledAt: Timestamp | null;
+  cancelledBy: string | null;
+  cancelReason: string | null;
   companyId: string;
   completedAt: Timestamp | null;
   completedBy: string | null;
@@ -2440,6 +2474,7 @@ export interface WebSessions {
 export interface DB {
   activities: Activities;
   activityLinks: ActivityLinks;
+  activityRevisions: ActivityRevisions;
   addresses: Addresses;
   agentProfiles: AgentProfiles;
   aiRequests: AiRequests;

@@ -536,7 +536,7 @@ describe('contacts API (Phase 5 milestone C1)', () => {
         'requirements.contact_id': 1,
         'identity_documents.contact_id': 1,
         'tasks.entity_id': 1,
-        'activity_links.entity_id': 1,
+        'activity_links.entity_id': 2, // the note, and the consent entry on its timeline (C3)
         'contact_relationships.contact_id': 2,
       });
       expect(JSON.stringify(preview.body)).not.toContain('P555666777');

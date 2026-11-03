@@ -7541,6 +7541,1458 @@
           "Contacts: identity and KYC"
         ]
       }
+    },
+    "/api/v1/leads": {
+      "get": {
+        "operationId": "Leads_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "true",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[attention]",
+            "required": false,
+            "in": "query",
+            "description": "response_overdue (needs a response target), no_next_action",
+            "schema": {}
+          },
+          {
+            "name": "filter[receivedAt][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[receivedAt][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[assignedTo]",
+            "required": false,
+            "in": "query",
+            "description": "Member ids, \"me\" or \"unassigned\" (needs lead.assign)",
+            "schema": {}
+          },
+          {
+            "name": "filter[listingId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[sourceCode]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leadType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Lead reference or contact name",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "receivedAt",
+                "-receivedAt",
+                "updatedAt",
+                "-updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lead inbox and register (Inbox, Mine, Unassigned, All open, Closed are filters)",
+        "tags": [
+          "Leads"
+        ]
+      },
+      "post": {
+        "operationId": "Leads_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Capture a lead for an existing or a new contact (L-3)",
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}": {
+      "get": {
+        "operationId": "Leads_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leads"
+        ]
+      },
+      "patch": {
+        "operationId": "Leads_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/status": {
+      "post": {
+        "operationId": "Leads_changeStatus",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeLeadStatusBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change status: contacted, qualified, unqualified (with a note), lost (with a reason); reopening is a manager action",
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/assign": {
+      "post": {
+        "operationId": "Leads_assign",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignLeadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign the lead to a team member in your scope who works in its office",
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/archive": {
+      "post": {
+        "operationId": "Leads_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveLeadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/restore": {
+      "post": {
+        "operationId": "Leads_restore",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/settings/crm": {
+      "get": {
+        "operationId": "Leads_getSettings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "CRM settings: the lead response target (decision D3)",
+        "tags": [
+          "Leads"
+        ]
+      },
+      "put": {
+        "operationId": "Leads_saveSettings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/activities": {
+      "get": {
+        "operationId": "Activities_contactTimeline",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[activityType]",
+            "required": false,
+            "in": "query",
+            "description": "call, email, sms, whatsapp, meeting, note, viewing, offer, status_change, document, portal, system",
+            "schema": {}
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Contact timeline: activities on the contact and its leads, newest first",
+        "tags": [
+          "Activities"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/activities": {
+      "get": {
+        "operationId": "Activities_leadTimeline",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[activityType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lead timeline, newest first",
+        "tags": [
+          "Activities"
+        ]
+      }
+    },
+    "/api/v1/activities": {
+      "post": {
+        "operationId": "Activities_log",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogActivityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Log a call, message, meeting or note (recorded, not sent)",
+        "tags": [
+          "Activities"
+        ]
+      }
+    },
+    "/api/v1/activities/{activityId}": {
+      "get": {
+        "operationId": "Activities_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Activities"
+        ]
+      },
+      "patch": {
+        "operationId": "Activities_edit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditActivityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit your own activity within 24 hours; the earlier version is kept (D5)",
+        "tags": [
+          "Activities"
+        ]
+      }
+    },
+    "/api/v1/activities/{activityId}/archive": {
+      "post": {
+        "operationId": "Activities_archive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveActivityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive with a reason (author, or a manager over a linked record)",
+        "tags": [
+          "Activities"
+        ]
+      }
+    },
+    "/api/v1/tasks": {
+      "get": {
+        "operationId": "Tasks_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[entityId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[entityType]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "contact",
+                "lead"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[assignedTo]",
+            "required": false,
+            "in": "query",
+            "description": "Team view only",
+            "schema": {}
+          },
+          {
+            "name": "filter[priority]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[dueAt][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[dueAt][gte]",
+            "required": false,
+            "in": "query",
+            "description": "Today / this week boundaries, computed by the client in the office timezone",
+            "schema": {}
+          },
+          {
+            "name": "filter[reminderDue]",
+            "required": false,
+            "in": "query",
+            "description": "In-app reminders that are due",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[overdue]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "Default open",
+            "schema": {}
+          },
+          {
+            "name": "filter[view]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "mine",
+                "team"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "dueAt",
+                "-dueAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Follow-ups: Mine (default) or Team (managers); open by default, soonest first",
+        "tags": [
+          "Follow-ups"
+        ]
+      },
+      "post": {
+        "operationId": "Tasks_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Schedule a follow-up for yourself, or (managers) for someone in your team",
+        "tags": [
+          "Follow-ups"
+        ]
+      }
+    },
+    "/api/v1/tasks/{taskId}": {
+      "get": {
+        "operationId": "Tasks_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Follow-ups"
+        ]
+      },
+      "patch": {
+        "operationId": "Tasks_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit or reschedule an open follow-up",
+        "tags": [
+          "Follow-ups"
+        ]
+      }
+    },
+    "/api/v1/tasks/{taskId}/assign": {
+      "post": {
+        "operationId": "Tasks_reassign",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReassignTaskBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Give the follow-up to someone in your team (D6)",
+        "tags": [
+          "Follow-ups"
+        ]
+      }
+    },
+    "/api/v1/tasks/{taskId}/complete": {
+      "post": {
+        "operationId": "Tasks_complete",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Follow-ups"
+        ]
+      }
+    },
+    "/api/v1/tasks/{taskId}/cancel": {
+      "post": {
+        "operationId": "Tasks_cancel",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelTaskBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Follow-ups"
+        ]
+      }
     }
   },
   "info": {
@@ -16101,6 +17553,1795 @@
               "high",
               null
             ]
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "LeadContactDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "primaryPhoneMasked": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Partly masked"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "primaryPhoneMasked"
+        ]
+      },
+      "LeadListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title"
+        ]
+      },
+      "LeadResponseDto": {
+        "type": "object",
+        "properties": {
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Not yet answered and past the target"
+          },
+          "late": {
+            "type": "boolean",
+            "description": "Answered after the target"
+          }
+        },
+        "required": [
+          "dueAt",
+          "overdue",
+          "late"
+        ]
+      },
+      "LeadSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/LeadContactDto"
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "rent",
+              "sell",
+              "let",
+              "valuation",
+              "management",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "contacted",
+              "qualified",
+              "unqualified",
+              "converted",
+              "lost"
+            ]
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceDetail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeadListingDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "office": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assignedTo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "messagePreview": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "First line of the enquiry, at most 120 characters"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstResponseAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "nextActionAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "response": {
+            "description": "null when the company has no response target",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeadResponseDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "score": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Shown only with its breakdown; no scoring rules exist in Phase 5 (D7)"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "contact",
+          "leadType",
+          "status",
+          "sourceCode",
+          "sourceDetail",
+          "listing",
+          "office",
+          "assignedTo",
+          "messagePreview",
+          "receivedAt",
+          "firstResponseAt",
+          "nextActionAt",
+          "response",
+          "score",
+          "archivedAt",
+          "updatedAt"
+        ]
+      },
+      "LeadPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeadSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CreateLeadBody": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "An existing contact; or give `contact` to create one (duplicate check applies)"
+          },
+          "contact": {
+            "description": "A new contact (needs contact.create)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreateContactBody"
+              }
+            ]
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "rent",
+              "sell",
+              "let",
+              "valuation",
+              "management",
+              "other"
+            ]
+          },
+          "sourceCode": {
+            "type": "string",
+            "example": "walk_in",
+            "description": "Code from the lead_source picklist"
+          },
+          "sourceDetail": {
+            "type": "object",
+            "maxLength": 200,
+            "description": "Portal name, referrer or campaign detail"
+          },
+          "campaign": {
+            "type": "object",
+            "maxLength": 200
+          },
+          "listingId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "The listing the enquiry is about"
+          },
+          "requirementId": {
+            "type": "object",
+            "format": "uuid",
+            "description": "A requirement of the same contact"
+          },
+          "message": {
+            "type": "object",
+            "maxLength": 4000,
+            "description": "The enquiry as received"
+          },
+          "assignedTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Defaults to you; someone else needs lead.assign (decision D6); null leaves it unassigned for the office inbox (managers)"
+          },
+          "officeId": {
+            "type": "object",
+            "format": "uuid"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the enquiry arrived (default now)"
+          }
+        },
+        "required": [
+          "leadType",
+          "sourceCode"
+        ]
+      },
+      "ScoreRuleDto": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string"
+          },
+          "points": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rule",
+          "points"
+        ]
+      },
+      "LeadStatusChangeDto": {
+        "type": "object",
+        "properties": {
+          "fromStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "new",
+              "contacted",
+              "qualified",
+              "unqualified",
+              "converted",
+              "lost",
+              null
+            ]
+          },
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "new",
+              "contacted",
+              "qualified",
+              "unqualified",
+              "converted",
+              "lost"
+            ]
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "fromStatus",
+          "toStatus",
+          "changedAt",
+          "changedBy",
+          "note"
+        ]
+      },
+      "LeadAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "assignedTo": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "assignedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "assignedTo",
+          "assignedBy",
+          "assignedAt",
+          "note"
+        ]
+      },
+      "LeadAccessDto": {
+        "type": "object",
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canAssign": {
+            "type": "boolean"
+          },
+          "canReopen": {
+            "type": "boolean",
+            "description": "Reopen an unqualified or lost lead (managers, lead.assign)"
+          },
+          "nextStatuses": {
+            "type": "array",
+            "description": "Statuses you may move this lead to now",
+            "items": {
+              "type": "string",
+              "enum": [
+                "contacted",
+                "qualified",
+                "unqualified",
+                "lost"
+              ]
+            }
+          }
+        },
+        "required": [
+          "canEdit",
+          "canAssign",
+          "canReopen",
+          "nextStatuses"
+        ]
+      },
+      "LeadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/LeadContactDto"
+          },
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "rent",
+              "sell",
+              "let",
+              "valuation",
+              "management",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "contacted",
+              "qualified",
+              "unqualified",
+              "converted",
+              "lost"
+            ]
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceDetail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeadListingDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "office": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assignedTo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "messagePreview": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "First line of the enquiry, at most 120 characters"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstResponseAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "nextActionAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "response": {
+            "description": "null when the company has no response target",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeadResponseDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "score": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Shown only with its breakdown; no scoring rules exist in Phase 5 (D7)"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "campaign": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requirementId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The enquiry as received"
+          },
+          "lostReasonCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scoreBreakdown": {
+            "description": "Rule → points; empty when there is no score (CRM-07)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScoreRuleDto"
+            }
+          },
+          "statusHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeadStatusChangeDto"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeadAssignmentDto"
+            }
+          },
+          "access": {
+            "$ref": "#/components/schemas/LeadAccessDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "contact",
+          "leadType",
+          "status",
+          "sourceCode",
+          "sourceDetail",
+          "listing",
+          "office",
+          "assignedTo",
+          "messagePreview",
+          "receivedAt",
+          "firstResponseAt",
+          "nextActionAt",
+          "response",
+          "score",
+          "archivedAt",
+          "updatedAt",
+          "campaign",
+          "requirementId",
+          "message",
+          "lostReasonCode",
+          "archivedReason",
+          "scoreBreakdown",
+          "statusHistory",
+          "assignments",
+          "access",
+          "createdAt",
+          "version"
+        ]
+      },
+      "UpdateLeadBody": {
+        "type": "object",
+        "properties": {
+          "leadType": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "rent",
+              "sell",
+              "let",
+              "valuation",
+              "management",
+              "other"
+            ]
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceDetail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "campaign": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "listingId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "requirementId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Move the lead to another office within your scope"
+          }
+        }
+      },
+      "ChangeLeadStatusBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "contacted",
+              "qualified",
+              "unqualified",
+              "lost"
+            ]
+          },
+          "lostReasonCode": {
+            "type": "object",
+            "description": "Code from the lost_reason picklist; required for lost"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 1000,
+            "description": "Required when marking unqualified or reopening"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "AssignLeadBody": {
+        "type": "object",
+        "properties": {
+          "assignedTo": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "assignedTo"
+        ]
+      },
+      "ArchiveLeadBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "CrmSettingsDto": {
+        "type": "object",
+        "properties": {
+          "leadResponseMinutes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "null: no response target set (\"SLA not set\")"
+          }
+        },
+        "required": [
+          "leadResponseMinutes"
+        ]
+      },
+      "CrmSettingsBody": {
+        "type": "object",
+        "properties": {
+          "leadResponseMinutes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 10080,
+            "description": "Minutes to the first response to a new lead (decision D3); null = not set"
+          }
+        },
+        "required": [
+          "leadResponseMinutes"
+        ]
+      },
+      "ActivityLinkDto": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "contact",
+              "lead",
+              "listing",
+              "property"
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "description": "Contact name, lead or listing reference"
+          }
+        },
+        "required": [
+          "entityType",
+          "entityId",
+          "label"
+        ]
+      },
+      "ActivityDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "activityType": {
+            "type": "string",
+            "enum": [
+              "call",
+              "email",
+              "sms",
+              "whatsapp",
+              "meeting",
+              "note",
+              "viewing",
+              "offer",
+              "status_change",
+              "document",
+              "portal",
+              "system"
+            ]
+          },
+          "direction": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "inbound",
+              "outbound",
+              "internal",
+              null
+            ]
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "outcomeCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "performedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdBy": {
+            "description": "Who logged it",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityLinkDto"
+            }
+          },
+          "isSystem": {
+            "type": "boolean",
+            "description": "Written by the system; never edited or archived"
+          },
+          "editedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "editableUntil": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You wrote it and the edit window is open (D5)"
+          },
+          "canArchive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "activityType",
+          "direction",
+          "subject",
+          "body",
+          "occurredAt",
+          "durationSeconds",
+          "outcomeCode",
+          "performedBy",
+          "createdBy",
+          "links",
+          "isSystem",
+          "editedAt",
+          "editableUntil",
+          "archivedAt",
+          "archivedReason",
+          "canEdit",
+          "canArchive",
+          "createdAt",
+          "version"
+        ]
+      },
+      "ActivityPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityDto"
+            }
+          },
+          "page": {
+            "type": "object",
+            "description": "{ limit, nextCursor }"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "ActivityLinkInput": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "contact",
+              "lead",
+              "listing",
+              "property"
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "entityType",
+          "entityId"
+        ]
+      },
+      "LogActivityBody": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 10000,
+            "description": "Do not record ID or bank numbers here"
+          },
+          "durationSeconds": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 86400
+          },
+          "outcomeCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Code from the activity_outcome picklist"
+          },
+          "activityType": {
+            "type": "string",
+            "enum": [
+              "call",
+              "email",
+              "sms",
+              "whatsapp",
+              "meeting",
+              "note"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "internal"
+            ],
+            "description": "Required for calls and messages; notes are internal"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it happened (default now)"
+          },
+          "performedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Who made the call or held the meeting (default you)"
+          },
+          "links": {
+            "description": "At least one contact or lead; a lead also links its contact",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityLinkInput"
+            }
+          }
+        },
+        "required": [
+          "activityType",
+          "links"
+        ]
+      },
+      "ActivityRevisionDto": {
+        "type": "object",
+        "properties": {
+          "revisionNo": {
+            "type": "number"
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "outcomeCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "direction": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "editedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "editedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revisionNo",
+          "subject",
+          "body",
+          "outcomeCode",
+          "direction",
+          "occurredAt",
+          "durationSeconds",
+          "editedBy",
+          "editedAt"
+        ]
+      },
+      "ActivityDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "activityType": {
+            "type": "string",
+            "enum": [
+              "call",
+              "email",
+              "sms",
+              "whatsapp",
+              "meeting",
+              "note",
+              "viewing",
+              "offer",
+              "status_change",
+              "document",
+              "portal",
+              "system"
+            ]
+          },
+          "direction": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "inbound",
+              "outbound",
+              "internal",
+              null
+            ]
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "outcomeCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "performedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdBy": {
+            "description": "Who logged it",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityLinkDto"
+            }
+          },
+          "isSystem": {
+            "type": "boolean",
+            "description": "Written by the system; never edited or archived"
+          },
+          "editedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "editableUntil": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "archivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You wrote it and the edit window is open (D5)"
+          },
+          "canArchive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          },
+          "revisions": {
+            "description": "Earlier versions, oldest first",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityRevisionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "activityType",
+          "direction",
+          "subject",
+          "body",
+          "occurredAt",
+          "durationSeconds",
+          "outcomeCode",
+          "performedBy",
+          "createdBy",
+          "links",
+          "isSystem",
+          "editedAt",
+          "editableUntil",
+          "archivedAt",
+          "archivedReason",
+          "canEdit",
+          "canArchive",
+          "createdAt",
+          "version",
+          "revisions"
+        ]
+      },
+      "EditActivityBody": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 10000,
+            "description": "Do not record ID or bank numbers here"
+          },
+          "durationSeconds": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 86400
+          },
+          "outcomeCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Code from the activity_outcome picklist"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "internal"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ArchiveActivityBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "TaskAboutDto": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "contact",
+              "lead"
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "description": "Contact name, or lead reference and contact name"
+          }
+        },
+        "required": [
+          "entityType",
+          "entityId",
+          "label"
+        ]
+      },
+      "TaskDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "taskType": {
+            "type": "string",
+            "enum": [
+              "follow_up",
+              "call",
+              "email",
+              "viewing_feedback",
+              "document_chase",
+              "renewal",
+              "arrears",
+              "inspection",
+              "other"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "urgent"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "done",
+              "cancelled"
+            ]
+          },
+          "dueAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "remindAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Open and past its due time"
+          },
+          "reminderDue": {
+            "type": "boolean",
+            "description": "Open and its reminder time has come (in-app reminder)"
+          },
+          "assignedTo": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "about": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskAboutDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancelledAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You may edit, reschedule, complete or cancel it"
+          },
+          "canReassign": {
+            "type": "boolean",
+            "description": "You may give it to someone else (managers, D6)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "taskType",
+          "priority",
+          "status",
+          "dueAt",
+          "remindAt",
+          "overdue",
+          "reminderDue",
+          "assignedTo",
+          "about",
+          "createdBy",
+          "completedAt",
+          "completedBy",
+          "cancelledAt",
+          "cancelReason",
+          "canEdit",
+          "canReassign",
+          "createdAt",
+          "version"
+        ]
+      },
+      "TaskPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "TaskAboutInput": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "contact",
+              "lead"
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "entityType",
+          "entityId"
+        ]
+      },
+      "CreateTaskBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "Call back about East Legon options"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "taskType": {
+            "type": "string",
+            "enum": [
+              "follow_up",
+              "call",
+              "email",
+              "viewing_feedback",
+              "document_chase",
+              "other"
+            ],
+            "default": "follow_up"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "urgent"
+            ],
+            "default": "normal"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Quick picks (later today, tomorrow) are computed by the client in the office timezone"
+          },
+          "remindAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "In-app reminder time; not after dueAt"
+          },
+          "assignedTo": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Defaults to you; someone else is a manager action (lead.assign, decision D6)"
+          },
+          "about": {
+            "description": "The contact or lead it is about (one record, gap G4)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskAboutInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "dueAt"
+        ]
+      },
+      "UpdateTaskBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "taskType": {
+            "type": "string",
+            "enum": [
+              "follow_up",
+              "call",
+              "email",
+              "viewing_feedback",
+              "document_chase",
+              "other"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "urgent"
+            ]
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Reschedule"
+          },
+          "remindAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ReassignTaskBody": {
+        "type": "object",
+        "properties": {
+          "assignedTo": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "assignedTo"
+        ]
+      },
+      "CancelTaskBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
           }
         },
         "required": [

@@ -163,3 +163,11 @@ The slowest single request (a 100-row register page) is above 1 s; the p95 targe
 | Branch | `phase-5/preparation` |
 | C2 commit | `8439a5f` |
 | CI run 68 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41601465480 |
+
+## Approval
+
+Product owner, 3 November 2026:
+
+- **C2-D1 to C2-D8 approved.** C2-D4 is approved for Phase 5. Optional dual approval (four-eyes) for KYC sign-off is recorded as a future enhancement in [#36](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/36).
+- **C2-R1 accepted and tracked.** The default 50-row page meets the approved target.
+- Proceed to C3.
