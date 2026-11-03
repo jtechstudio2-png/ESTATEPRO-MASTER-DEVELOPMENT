@@ -8,13 +8,15 @@ import { ActivitiesService } from './activities.service.js';
 import { CrmSettingsService } from './crm-settings.service.js';
 import { LeadsController } from './leads.controller.js';
 import { LeadsService } from './leads.service.js';
+import { PortalPreviewController } from './portal-preview.controller.js';
+import { PortalPreviewService } from './portal-preview.service.js';
 import { TasksController } from './tasks.controller.js';
 import { TasksService } from './tasks.service.js';
 
 /** CRM work: leads, the activity timeline and follow-ups (Phase 5 milestone C3). */
 @Module({
   imports: [AuthModule, ContactsModule],
-  controllers: [LeadsController, ActivitiesController, TasksController],
-  providers: [LeadsService, ActivitiesService, TasksService, CrmSettingsService, IdempotencyService],
+  controllers: [LeadsController, ActivitiesController, TasksController, PortalPreviewController],
+  providers: [LeadsService, ActivitiesService, TasksService, CrmSettingsService, IdempotencyService, PortalPreviewService],
 })
 export class CrmModule {}

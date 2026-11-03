@@ -92,8 +92,10 @@ export interface Addresses {
   geocodeSource: string | null;
   id: Generated<string>;
   latitude: Numeric | null;
+  latitudeF: Generated<number | null>;
   localComponents: Generated<Json>;
   locality: string | null;
+  localityKey: Generated<string | null>;
   /**
    * Calculated from latitude/longitude (ADR-006 L-D1). Never written by the application.
    */
@@ -103,6 +105,7 @@ export interface Addresses {
    */
   locationStale: Generated<boolean>;
   longitude: Numeric | null;
+  longitudeF: Generated<number | null>;
   postalCode: string | null;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
@@ -791,8 +794,11 @@ export interface DocumentVersions {
 export interface ExportJobs {
   companyId: string;
   createdAt: Generated<Timestamp>;
+  downloadCount: Generated<number>;
   expiresAt: Timestamp | null;
   exportType: string;
+  failureReason: string | null;
+  fileName: string | null;
   finishedAt: Timestamp | null;
   format: string;
   id: Generated<string>;
@@ -2002,7 +2008,24 @@ export interface RequirementExclusions {
   requirementId: string;
 }
 
+export interface RequirementMatchStatus {
+  checkedAt: Generated<Timestamp>;
+  companyId: string;
+  hasMatch: boolean;
+  requirementId: string;
+}
+
 export interface Requirements {
+  areaAnywhere: Generated<boolean | null>;
+  /**
+   * Prefilter for matching; the exact test is app.requirement_area_covers. Never written by the application.
+   */
+  areaBbox: Generated<string | null>;
+  areaEast: Generated<number | null>;
+  areaLocalities: Generated<string[] | null>;
+  areaNorth: Generated<number | null>;
+  areaSouth: Generated<number | null>;
+  areaWest: Generated<number | null>;
   companyId: string;
   comparableMaxFloor: Generated<Int8 | null>;
   comparableMaxPrice: Generated<Numeric | null>;
@@ -2593,6 +2616,7 @@ export interface DB {
   rentReviews: RentReviews;
   requiredDocumentRules: RequiredDocumentRules;
   requirementExclusions: RequirementExclusions;
+  requirementMatchStatus: RequirementMatchStatus;
   requirements: Requirements;
   rolePermissions: RolePermissions;
   roles: Roles;

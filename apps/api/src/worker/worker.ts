@@ -3,6 +3,8 @@ import { sql } from 'kysely';
 import type { AuditService } from '../audit/audit.service.js';
 import { systemContext } from '../common/request-context.js';
 import type { Db, TenantDb } from '../database/database.module.js';
+import { refreshRequirementMatches } from '../dashboards/dashboards.service.js';
+import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { ARCHIVE_RETENTION_DAYS, MEDIA_PROCESS_JOB, purgeMedia } from '../media/media.service.js';
@@ -16,6 +18,8 @@ export const JOBS = {
   mediaTimeout: 'media.timeout',
   mediaPurge: 'media.purge',
   storageReconcile: 'storage.reconcile',
+  exportExpire: 'export.expire',
+  requirementMatchRefresh: 'requirement.match_refresh',
 } as const;
 
 /** Pending media older than this with no live job is marked failed. */
@@ -142,6 +146,18 @@ export class Worker {
         where archived_at < ${now}::timestamptz - make_interval(days => ${ARCHIVE_RETENTION_DAYS}) and not legal_hold`,
     );
     enqueued += await discover(JOBS.storageReconcile, day, sql<{ companyId: string }>`select company_id as "companyId" from storage_usage`);
+    // The CRM dashboard's "no match" figure (decision D4 rules), every 15 minutes.
+    enqueued += await discover(
+      JOBS.requirementMatchRefresh,
+      quarter,
+      sql<{ companyId: string }>`select distinct company_id as "companyId" from requirements where status = 'active'`,
+    );
+    // Export files are deleted as soon as they expire (24 hours, CA-16).
+    enqueued += await discover(
+      JOBS.exportExpire,
+      quarter,
+      sql<{ companyId: string }>`select distinct company_id as "companyId" from export_jobs where status = 'completed' and expires_at <= ${now}::timestamptz`,
+    );
 
     // Global housekeeping: expired idempotency records (not company business data).
     await sql`delete from idempotency_keys where expires_at < ${now}::timestamptz`.execute(db);
@@ -277,6 +293,19 @@ export class Worker {
             changes: { bytesUsed: { old: Number(current.bytesUsed), new: used }, bytesReserved: { old: Number(current.bytesReserved), new: held } },
           });
           this.deps.logger.warn('storage usage drift corrected', { companyId: job.companyId, used, reserved: held });
+        });
+        return;
+
+      case JOBS.requirementMatchRefresh:
+        await tenantDb.run(scope, async (tx) => {
+          await refreshRequirementMatches(tx, ctx);
+        });
+        return;
+
+      case JOBS.exportExpire:
+        await tenantDb.run(scope, async (tx) => {
+          const count = await expireExports(tx, ctx, storage, audit);
+          if (count > 0) this.deps.logger.info('exports expired', { companyId: job.companyId, count });
         });
         return;
 

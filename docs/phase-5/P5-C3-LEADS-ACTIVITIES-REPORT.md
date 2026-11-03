@@ -176,3 +176,7 @@ No optimisation was needed after the first run. The C3 tables already had the ri
 | Branch | `phase-5/preparation` |
 | C3 commit | `929df36` |
 | CI run 70 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41609129882 |
+
+## Approval
+
+Product owner, 3 November 2026: **C3-D1 to C3-D9 approved.** Proceed to C4 (dashboards, landlord visibility preview, exports).

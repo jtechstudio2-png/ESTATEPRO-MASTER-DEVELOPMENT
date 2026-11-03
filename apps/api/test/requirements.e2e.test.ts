@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { createWorker } from '../src/worker/create-worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
 
@@ -468,6 +469,35 @@ describe('requirements and matching (Phase 5 milestone C2, decision D4)', () => 
       const moved = await as('owner').get(`/api/v1/contacts/${keep.id}/requirements/${created.id}/exclusions`).expect(200);
       expect(moved.body).toHaveLength(1);
       await as('owner').get(`/api/v1/contacts/${merge.id}/requirements/${created.id}`).expect(404);
+    });
+  });
+
+  describe('dashboard "no match" count (C4)', () => {
+    it('agrees with the matches endpoint for every kind of area', async () => {
+      const active = await fx.db
+        .selectFrom('requirements')
+        .select(['id', 'contactId'])
+        .where('companyId', '=', company.companyId)
+        .where('status', '=', 'active')
+        .execute();
+      let expected = 0;
+      for (const row of active) {
+        const archived = await fx.db.selectFrom('contacts').select(['archivedAt', 'mergedIntoContactId']).where('id', '=', row.contactId).executeTakeFirstOrThrow();
+        if (archived.archivedAt !== null || archived.mergedIntoContactId !== null) continue;
+        const res = await as('owner').get(`/api/v1/contacts/${row.contactId}/requirements/${row.id}/matches?limit=1`).expect(200);
+        if (res.body.total === 0) expected += 1;
+      }
+      const silent = { info: () => undefined, warn: () => undefined, error: () => undefined };
+      const { worker, close } = createWorker(t.config, silent, { scheduleEveryMs: 0 });
+      try {
+        await worker.runOnce();
+      } finally {
+        await close();
+      }
+      const dashboard = await as('owner').get('/api/v1/dashboards/crm').expect(200);
+      expect(dashboard.body.requirements.noMatchPending).toBe(0);
+      expect(dashboard.body.requirements.noMatch).toBe(expected);
+      expect(expected).toBeGreaterThan(0);
     });
   });
 });

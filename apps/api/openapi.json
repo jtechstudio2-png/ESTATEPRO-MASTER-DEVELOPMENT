@@ -8993,6 +8993,412 @@
           "Follow-ups"
         ]
       }
+    },
+    "/api/v1/contacts/{contactId}/portal-visibility-preview": {
+      "get": {
+        "operationId": "PortalPreview_landlord",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPreviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What this landlord would see in the landlord portal (read-only, audited; needs property.view)",
+        "tags": [
+          "Contacts: portal preview"
+        ]
+      }
+    },
+    "/api/v1/dashboards/crm": {
+      "get": {
+        "operationId": "Dashboards_crm",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timezone",
+            "required": false,
+            "in": "query",
+            "description": "IANA time zone for today and this week (default: your office)",
+            "schema": {}
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365,
+              "default": 30
+            }
+          },
+          {
+            "name": "officeId",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmDashboardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "CRM dashboard: waiting leads, follow-ups, statuses, response times, sources, requirements",
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/dashboards/admin": {
+      "get": {
+        "operationId": "Dashboards_admin",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "officeId",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDashboardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin dashboard: attention items, access, lead flow by office, data quality, privacy, exports, account",
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/dashboards/my-day": {
+      "get": {
+        "operationId": "Dashboards_myDay",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timezone",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyDayDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My day: my follow-ups due today or overdue and my new leads, in my office time zone",
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/contacts/exports": {
+      "post": {
+        "operationId": "Exports_contacts",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactExportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export contacts in your scope as CSV (no protected details, notes or messages)",
+        "tags": [
+          "Exports"
+        ]
+      }
+    },
+    "/api/v1/leads/exports": {
+      "post": {
+        "operationId": "Exports_leads",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeadExportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export leads in your scope as CSV (no enquiry messages)",
+        "tags": [
+          "Exports"
+        ]
+      }
+    },
+    "/api/v1/exports": {
+      "get": {
+        "operationId": "Exports_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExportJobDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Your exports (members who manage users see all)",
+        "tags": [
+          "Exports"
+        ]
+      }
+    },
+    "/api/v1/exports/{exportId}": {
+      "get": {
+        "operationId": "Exports_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Exports"
+        ]
+      }
+    },
+    "/api/v1/exports/{exportId}/download": {
+      "post": {
+        "operationId": "Exports_download",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportDownloadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A five-minute download link for your export (audited)",
+        "tags": [
+          "Exports"
+        ]
+      }
     }
   },
   "info": {
@@ -19346,6 +19752,1220 @@
         },
         "required": [
           "reason"
+        ]
+      },
+      "PreviewBasisDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ownership",
+              "management_agreement"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "null: the whole property"
+          },
+          "sharePercent": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Ownership share, e.g. \"100.0000\""
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Ownership type or management service level"
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "unitId",
+          "sharePercent",
+          "kind",
+          "from",
+          "until"
+        ]
+      },
+      "PreviewUnitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "label"
+        ]
+      },
+      "PreviewListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "isPublished": {
+            "type": "boolean"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title",
+          "status",
+          "isPublished",
+          "unitId"
+        ]
+      },
+      "PreviewPropertyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Access is judged in this time zone"
+          },
+          "basis": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewBasisDto"
+            }
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewUnitDto"
+            }
+          },
+          "listings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewListingDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "name",
+          "timezone",
+          "basis",
+          "units",
+          "listings"
+        ]
+      },
+      "PortalPreviewDto": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "portal": {
+            "type": "string",
+            "enum": [
+              "landlord"
+            ]
+          },
+          "hasLandlordRole": {
+            "type": "boolean",
+            "description": "The contact has an active landlord role"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewPropertyDto"
+            }
+          },
+          "notVisible": {
+            "description": "What the landlord would not see",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limitedToYourAccess": {
+            "type": "boolean",
+            "description": "Only properties you may view are listed here"
+          }
+        },
+        "required": [
+          "contact",
+          "portal",
+          "hasLandlordRole",
+          "generatedAt",
+          "properties",
+          "notVisible",
+          "limitedToYourAccess"
+        ]
+      },
+      "DashboardScopeDto": {
+        "type": "object",
+        "properties": {
+          "officeId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Office filter, or null for everything in your scope"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone used for \"today\" and \"this week\""
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "officeId",
+          "timezone",
+          "from",
+          "to",
+          "generatedAt"
+        ]
+      },
+      "WaitingLeadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Past the response target (null when none is set)"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "contactName",
+          "sourceCode",
+          "assignedTo",
+          "receivedAt",
+          "overdue"
+        ]
+      },
+      "WaitingLeadsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "items": {
+            "description": "Oldest first, at most 10",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaitingLeadDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "items"
+        ]
+      },
+      "FollowUpCountsDto": {
+        "type": "object",
+        "properties": {
+          "overdue": {
+            "type": "number"
+          },
+          "today": {
+            "type": "number",
+            "description": "Due later today"
+          },
+          "thisWeek": {
+            "type": "number",
+            "description": "Due from now to the end of this week (Monday to Sunday)"
+          },
+          "view": {
+            "type": "string",
+            "enum": [
+              "mine",
+              "team"
+            ]
+          }
+        },
+        "required": [
+          "overdue",
+          "today",
+          "thisWeek",
+          "view"
+        ]
+      },
+      "LeadStatusCountsDto": {
+        "type": "object",
+        "properties": {
+          "new": {
+            "type": "number"
+          },
+          "contacted": {
+            "type": "number"
+          },
+          "qualified": {
+            "type": "number"
+          },
+          "unqualified": {
+            "type": "number"
+          },
+          "lost": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "new",
+          "contacted",
+          "qualified",
+          "unqualified",
+          "lost"
+        ]
+      },
+      "AgentResponseRowDto": {
+        "type": "object",
+        "properties": {
+          "leads": {
+            "type": "number"
+          },
+          "medianFirstResponseMinutes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Median minutes to first response, of answered leads"
+          },
+          "withinTarget": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Leads answered within the target (null when none is set); base is `leads`"
+          },
+          "withinTargetPercent": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Percentage of `leads`, one decimal"
+          },
+          "qualified": {
+            "type": "number"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          }
+        },
+        "required": [
+          "leads",
+          "medianFirstResponseMinutes",
+          "withinTarget",
+          "withinTargetPercent",
+          "qualified",
+          "assignee"
+        ]
+      },
+      "SourceRowDto": {
+        "type": "object",
+        "properties": {
+          "leads": {
+            "type": "number"
+          },
+          "medianFirstResponseMinutes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Median minutes to first response, of answered leads"
+          },
+          "withinTarget": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Leads answered within the target (null when none is set); base is `leads`"
+          },
+          "withinTargetPercent": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Percentage of `leads`, one decimal"
+          },
+          "qualified": {
+            "type": "number"
+          },
+          "sourceCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "leads",
+          "medianFirstResponseMinutes",
+          "withinTarget",
+          "withinTargetPercent",
+          "qualified",
+          "sourceCode"
+        ]
+      },
+      "RequirementCountsDto": {
+        "type": "object",
+        "properties": {
+          "buy": {
+            "type": "number"
+          },
+          "rent": {
+            "type": "number"
+          },
+          "noMatch": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Active requirements no published listing of the company matches, as of the last check (null without listing.view)"
+          },
+          "noMatchPending": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Requirements added or changed since the last check (checked every 15 minutes)"
+          },
+          "noMatchCheckedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Oldest check in this count"
+          }
+        },
+        "required": [
+          "buy",
+          "rent",
+          "noMatch",
+          "noMatchPending",
+          "noMatchCheckedAt"
+        ]
+      },
+      "CrmDashboardDto": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/DashboardScopeDto"
+          },
+          "responseTargetMinutes": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Company response target in minutes; null shows \"SLA not set\""
+          },
+          "newNotContacted": {
+            "$ref": "#/components/schemas/WaitingLeadsDto"
+          },
+          "followUps": {
+            "$ref": "#/components/schemas/FollowUpCountsDto"
+          },
+          "leadsByStatus": {
+            "description": "Leads received in the period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LeadStatusCountsDto"
+              }
+            ]
+          },
+          "responseTimes": {
+            "description": "Per assignee; null for members who only see their own leads",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/AgentResponseRowDto"
+            }
+          },
+          "leadsBySource": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceRowDto"
+            }
+          },
+          "requirements": {
+            "description": "null without contact.view",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequirementCountsDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "scope",
+          "responseTargetMinutes",
+          "newNotContacted",
+          "followUps",
+          "leadsByStatus",
+          "responseTimes",
+          "leadsBySource",
+          "requirements"
+        ]
+      },
+      "AttentionItemDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "unassigned_leads"
+          },
+          "count": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "link": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "API path of the list behind the number; null where that list is not built yet (invitations, imports, agent profiles)"
+          }
+        },
+        "required": [
+          "code",
+          "count",
+          "message",
+          "link"
+        ]
+      },
+      "UsersAccessDto": {
+        "type": "object",
+        "properties": {
+          "pendingInvitations": {
+            "type": "number"
+          },
+          "expiredInvitations": {
+            "type": "number"
+          },
+          "usersWithoutRequiredMfa": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Not available: second factors are held by the identity provider (ADR-001)"
+          },
+          "agentLicencesExpiring": {
+            "type": "number",
+            "description": "Agent licences expiring within 60 days"
+          }
+        },
+        "required": [
+          "pendingInvitations",
+          "expiredInvitations",
+          "usersWithoutRequiredMfa",
+          "agentLicencesExpiring"
+        ]
+      },
+      "OfficeFlowRowDto": {
+        "type": "object",
+        "properties": {
+          "office": {
+            "description": "null: leads without an office",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "newLeads": {
+            "type": "number"
+          },
+          "unassigned": {
+            "type": "number"
+          },
+          "noResponsePastTarget": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Not answered and past the target (null when none is set)"
+          }
+        },
+        "required": [
+          "office",
+          "newLeads",
+          "unassigned",
+          "noResponsePastTarget"
+        ]
+      },
+      "LeadFlowDto": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number"
+          },
+          "responseTargetMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "offices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfficeFlowRowDto"
+            }
+          }
+        },
+        "required": [
+          "days",
+          "responseTargetMinutes",
+          "offices"
+        ]
+      },
+      "DataQualityDto": {
+        "type": "object",
+        "properties": {
+          "possibleDuplicateGroups": {
+            "type": "number",
+            "description": "Phone, email or identity numbers shared by more than one active contact"
+          },
+          "contactsWithoutOwner": {
+            "type": "number"
+          },
+          "identityDocumentsExpiring": {
+            "type": "number",
+            "description": "Identity documents expiring within 30 days"
+          },
+          "identityChecksExpiring": {
+            "type": "number",
+            "description": "Verified checks due for renewal within 30 days"
+          }
+        },
+        "required": [
+          "possibleDuplicateGroups",
+          "contactsWithoutOwner",
+          "identityDocumentsExpiring",
+          "identityChecksExpiring"
+        ]
+      },
+      "PrivacyDto": {
+        "type": "object",
+        "properties": {
+          "dataSubjectRequestsOpen": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Not available until data-subject requests are built (encryption stage E6, gap G3)"
+          },
+          "marketingWithdrawals": {
+            "type": "number",
+            "description": "Marketing consents withdrawn in the last 7 days"
+          },
+          "sensitiveReveals": {
+            "type": "number",
+            "description": "Protected details revealed in the last 7 days"
+          },
+          "exports": {
+            "type": "number",
+            "description": "Contact and lead exports in the last 7 days"
+          }
+        },
+        "required": [
+          "dataSubjectRequestsOpen",
+          "marketingWithdrawals",
+          "sensitiveReveals",
+          "exports"
+        ]
+      },
+      "ExportJobSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exportType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "requestedBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "exportType",
+          "status",
+          "rowCount",
+          "requestedBy",
+          "createdAt"
+        ]
+      },
+      "ImportsExportsDto": {
+        "type": "object",
+        "properties": {
+          "recentExports": {
+            "description": "Latest 5",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportJobSummaryDto"
+            }
+          },
+          "failedImports": {
+            "type": "number",
+            "description": "Imports that failed in the last 30 days"
+          }
+        },
+        "required": [
+          "recentExports",
+          "failedImports"
+        ]
+      },
+      "UsageDto": {
+        "type": "object",
+        "properties": {
+          "used": {
+            "type": "number"
+          },
+          "limit": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "used",
+          "limit"
+        ]
+      },
+      "AccountDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "description": "Active staff members of the subscription seats",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UsageDto"
+              }
+            ]
+          },
+          "storage": {
+            "description": "Bytes",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UsageDto"
+              }
+            ]
+          },
+          "supportAccessGrantsOpen": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "users",
+          "storage",
+          "supportAccessGrantsOpen"
+        ]
+      },
+      "AdminDashboardDto": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/DashboardScopeDto"
+          },
+          "needsAttention": {
+            "description": "Most urgent first, at most 5",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttentionItemDto"
+            }
+          },
+          "usersAndAccess": {
+            "$ref": "#/components/schemas/UsersAccessDto"
+          },
+          "leadFlow": {
+            "$ref": "#/components/schemas/LeadFlowDto"
+          },
+          "dataQuality": {
+            "$ref": "#/components/schemas/DataQualityDto"
+          },
+          "privacy": {
+            "$ref": "#/components/schemas/PrivacyDto"
+          },
+          "importsExports": {
+            "$ref": "#/components/schemas/ImportsExportsDto"
+          },
+          "account": {
+            "$ref": "#/components/schemas/AccountDto"
+          }
+        },
+        "required": [
+          "scope",
+          "needsAttention",
+          "usersAndAccess",
+          "leadFlow",
+          "dataQuality",
+          "privacy",
+          "importsExports",
+          "account"
+        ]
+      },
+      "DayItemDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "follow_up",
+              "new_lead"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Due time, or when the lead arrived"
+          },
+          "title": {
+            "type": "string"
+          },
+          "about": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Contact name, or lead reference and contact name"
+          },
+          "aboutType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "contact",
+              "lead",
+              null
+            ]
+          },
+          "aboutId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Follow-ups: the version for If-Match (Done, Reschedule)"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "at",
+          "title",
+          "about",
+          "aboutType",
+          "aboutId",
+          "overdue",
+          "version"
+        ]
+      },
+      "WaitingOnMeDto": {
+        "type": "object",
+        "properties": {
+          "newLeadsAssigned": {
+            "type": "number"
+          },
+          "overdueFollowUps": {
+            "type": "number"
+          },
+          "leadsPastTarget": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Past the response target without a reply (null when none is set)"
+          }
+        },
+        "required": [
+          "newLeadsAssigned",
+          "overdueFollowUps",
+          "leadsPastTarget"
+        ]
+      },
+      "MyDayDto": {
+        "type": "object",
+        "properties": {
+          "timezone": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "today": {
+            "description": "Overdue first, then by time",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayItemDto"
+            }
+          },
+          "laterThisWeek": {
+            "type": "number",
+            "description": "Follow-ups due later this week"
+          },
+          "waitingOnMe": {
+            "$ref": "#/components/schemas/WaitingOnMeDto"
+          },
+          "myLeadsByStatus": {
+            "description": "My open and closed leads (not archived)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LeadStatusCountsDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "timezone",
+          "date",
+          "today",
+          "laterThisWeek",
+          "waitingOnMe",
+          "myLeadsByStatus"
+        ]
+      },
+      "ContactExportBody": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 300,
+            "example": "Quarterly landlord newsletter list for the Osu office"
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "buyer",
+                "seller",
+                "landlord",
+                "tenant",
+                "applicant",
+                "guarantor",
+                "supplier",
+                "developer",
+                "investor",
+                "other"
+              ]
+            }
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "person",
+              "organisation"
+            ]
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "excludeMarketingWithdrawn": {
+            "type": "boolean",
+            "description": "Leave out contacts who withdrew marketing consent on every channel"
+          }
+        },
+        "required": [
+          "purpose"
+        ]
+      },
+      "ExportJobDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exportType": {
+            "type": "string",
+            "enum": [
+              "contacts",
+              "leads"
+            ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "failed",
+              "expired"
+            ]
+          },
+          "rowCount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "fileName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Filters and purpose, as requested"
+          },
+          "requestedBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "downloadCount": {
+            "type": "number"
+          },
+          "canDownload": {
+            "type": "boolean",
+            "description": "Only the person who requested an export can download it, until it expires"
+          }
+        },
+        "required": [
+          "id",
+          "exportType",
+          "format",
+          "status",
+          "rowCount",
+          "fileName",
+          "parameters",
+          "requestedBy",
+          "createdAt",
+          "expiresAt",
+          "downloadCount",
+          "canDownload"
+        ]
+      },
+      "LeadExportBody": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 300,
+            "example": "Quarterly landlord newsletter list for the Osu office"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "new",
+                "contacted",
+                "qualified",
+                "unqualified",
+                "converted",
+                "lost"
+              ]
+            }
+          },
+          "leadTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "rent",
+                "sell",
+                "let",
+                "valuation",
+                "management",
+                "other"
+              ]
+            }
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receivedFrom": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Received on or after"
+          },
+          "receivedTo": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Received before"
+          }
+        },
+        "required": [
+          "purpose"
+        ]
+      },
+      "ExportDownloadDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Short-lived link to the file. Do not share it."
+          },
+          "linkExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "url",
+          "linkExpiresAt"
         ]
       }
     }
