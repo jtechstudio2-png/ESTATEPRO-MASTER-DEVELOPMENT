@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 5 November 2026 |
-| Branch | `phase-5/preparation`, C6 commit (see §10) |
+| Branch | `phase-5/preparation`, commit `c76daf4`; CI run 78 green |
 | Approvals | C5 decisions C5-D1 to C5-D8 approved before work started; #25 (Arabic native-speaker review) kept open as a pre-launch requirement |
 | Scope | The gaps C5 left against the approved wireframes (#8): the Sellers, Landlords and Buyers columns that need per-contact summaries (SE-1, LL-1, B-1), the company-wide "Identity checks" queue (SH-1), API text that was English-only on translated screens, and loosely typed request bodies in the OpenAPI document. No new features beyond the approved wireframes |
-| Result | **C6 complete.** Every summary and the queue are limited to what the viewer may see; no protected value is added anywhere; the web app no longer needs type casts for API bodies. Results in §3; CI run in §10 |
+| Result | **C6 complete.** Every summary and the queue are limited to what the viewer may see; no protected value is added anywhere; the web app no longer needs type casts for API bodies. Results in §3; CI run 78 green (§10) |
 
 ## 1. Deliverables
 
@@ -134,4 +134,5 @@ Timing inside the API showed the summaries take about 10 ms of a page; the rest 
 | Screen-reader pass (#24) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/24 |
 | Arabic review (#25) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/25 |
 | Branch | `phase-5/preparation` |
-| C6 commit and CI run | Recorded after CI completes |
+| C6 commit | `c76daf4` |
+| CI run 78 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42032527528 |
