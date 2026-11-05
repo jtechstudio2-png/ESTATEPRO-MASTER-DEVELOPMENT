@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 5 November 2026 |
-| Branch | `phase-5/preparation`, E5–E6 commits (see §10) |
+| Branch | `phase-5/preparation`, commits `a767927`, `7818752`, `03b46e8`; CI run 83 green |
 | Approvals | C6 decisions C6-D1 to C6-D6 approved before work started; #24 and #25 kept open as pre-launch requirements |
 | Scope | The two encryption stages the approved roadmap requires before Phase 5 exit (ADR-007; `P5-FIELD-ENCRYPTION-PLAN.md` §3): **E5** data-key rotation; **E6** erasure, crypto-shredding, the erasure ledger, the restore runbook and a recovery drill. E7 (cloud KMS) and E8 (monitoring) stay with hosting (#28). No new screens beyond showing an erased person correctly |
-| Result | **E5–E6 complete.** Keys can be rotated without downtime or false edit conflicts. A person can be erased everywhere without breaking the records the law requires us to keep. A restore cannot bring erased data back. Results in §3; CI in §10 |
+| Result | **E5–E6 complete.** Keys can be rotated without downtime or false edit conflicts. A person can be erased everywhere without breaking the records the law requires us to keep. A restore cannot bring erased data back. Results in §3; CI run 83 green (§10) |
 
 ## 1. Deliverables
 
@@ -59,7 +59,7 @@
 | Accessibility | Erased contact record and Identity tab in the axe sweep, English and Arabic, desktop and 320 px | Browser tests |
 | Localisation validation | Three new strings in English and Arabic (erased name, number erased, linked document erased); message check passes | Message check |
 | Performance budgets | See §7 | Performance test |
-| CI verification | See §10 | CI run |
+| CI verification | All required jobs green on the final commit | CI run 83 |
 
 ## 3. Tests
 
@@ -162,4 +162,5 @@ A rotation runs in batches of 200 rows, each its own short transaction, so scree
 | ADR-007 | `docs/decisions/ADR-007-field-encryption-key-management.md` (§16 implementation notes) |
 | Runbook | `docs/runbooks/DATA-PROTECTION-RUNBOOK.md` |
 | Branch | `phase-5/preparation` |
-| Commits and CI run | Recorded after CI completes |
+| Commits | `a767927` (implementation), `7818752` (erased documents not revealable; style restored), `03b46e8` (report figures) |
+| CI run 83 (green, on `03b46e8`; runs 81 and 82 were cancelled by the later pushes) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42087303793 |
