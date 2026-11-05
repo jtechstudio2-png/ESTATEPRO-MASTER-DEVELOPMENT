@@ -526,7 +526,7 @@ export class KycService {
       archivedAt: row.archivedAt?.toISOString() ?? null,
       archivedReason: row.archivedReason,
       canEdit: allows(ctx, 'kyc.manage', contact) && row.verifiedAt === null && row.archivedAt === null,
-      canReveal: allows(ctx, 'contact.view_sensitive', contact),
+      canReveal: allows(ctx, 'contact.view_sensitive', contact) && row.numberLast4 !== null,
       createdAt: row.createdAt.toISOString(),
       version: row.version,
     };
