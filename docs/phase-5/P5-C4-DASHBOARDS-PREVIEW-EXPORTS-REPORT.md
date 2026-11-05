@@ -171,3 +171,7 @@ Optimisation path for the CRM dashboard: 64 s → 19 s → 3–9 s → 1.16 s �
 | Branch | `phase-5/preparation` |
 | C4 commit | `4cce8dd` |
 | CI run 72 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41648506737 |
+
+## Approval
+
+Product owner, 5 November 2026: **C4-D1 to C4-D8 approved** (after a detailed walk-through of each decision). Proceed to C5 (CRM web screens), maintaining tenant isolation, encryption controls, reveal restrictions, audit integrity, export governance, performance validation and CI verification.
