@@ -8,6 +8,7 @@
     "organisationRegNumber": "رقم السجل"
   },
   "maskedValue": "مسجَّل ومخفي",
+  "numberErased": "تم محو الرقم",
   "maskedLast4": "مسجَّل ومخفي، ينتهي بـ {last4}",
   "notRecorded": "غير مسجَّل",
   "reveal": "كشف",
@@ -83,6 +84,7 @@
   },
   "recordedBy": "سجّله {name}",
   "reviewedBy": "اعتمده {name}، {date}",
+  "linkedDocumentErased": "وثيقة (تم محو الرقم)",
   "linkedDocument": "وثيقة تنتهي بـ {last4}",
   "provider": "المزوّد: {name}",
   "decisionReason": "القرار: {reason}",

@@ -335,7 +335,7 @@ describe('contacts API (Phase 5 milestone C1)', () => {
     it('ignores merged and anonymised contacts, audits checks without values, and rate-limits', async () => {
       const phone = nextPhone();
       const anonymised = await create('owner', person({ primaryPhone: phone }));
-      await fx.db.updateTable('contacts').set({ isAnonymised: true }).where('id', '=', anonymised.id).execute();
+      await fx.eraseContact(company.companyId, anonymised.id);
       const keeper = await create('owner', person());
       const mergedAway = await create('owner', person({ primaryPhone: phone, confirmNotDuplicate: true }));
       await fx.db.updateTable('contacts').set({ mergedIntoContactId: keeper.id, archivedAt: new Date() }).where('id', '=', mergedAway.id).execute();
@@ -689,7 +689,7 @@ describe('contacts API (Phase 5 milestone C1)', () => {
       await as('owner').patch(`/api/v1/contacts/${created.id}/methods/${whatsapp[0]!.id}`, { optedOut: false, verified: false, label: 'Personal' }).expect(200);
       expect((await as('owner').delete(`/api/v1/contacts/${created.id}/methods/${whatsapp[0]!.id}`)).status).toBe(200);
 
-      await fx.db.updateTable('contacts').set({ isAnonymised: true }).where('id', '=', created.id).execute();
+      await fx.eraseContact(company.companyId, created.id);
       const now = (await as('owner').get(`/api/v1/contacts/${created.id}`)).body;
       expect((await as('owner').patch(`/api/v1/contacts/${created.id}`, { title: 'Mr' }, now.version)).status).toBe(422);
       expect((await as('owner').post(`/api/v1/contacts/${created.id}/consents`, { purpose: 'marketing', channel: 'sms', status: 'withdrawn', capturedVia: 'verbal' })).status).toBe(422);
@@ -725,7 +725,7 @@ describe('contacts API (Phase 5 milestone C1)', () => {
       const archivedKeep = await create('owner', person());
       const done = await as('owner').action(`/api/v1/contacts/${archivedKeep.id}/archive`, archivedKeep.version, { reason: 'Archived for test' }).expect(200);
       const anonymous = await create('owner', person());
-      await fx.db.updateTable('contacts').set({ isAnonymised: true }).where('id', '=', anonymous.id).execute();
+      await fx.eraseContact(company.companyId, anonymous.id);
       const preview = await as('owner').get(`/api/v1/contacts/${archivedKeep.id}/merge-preview?mergeContactId=${anonymous.id}`).expect(200);
       expect(preview.body.blockers.join(' ')).toMatch(/Anonymised/);
       expect(preview.body.blockers.join(' ')).toMatch(/archived/);

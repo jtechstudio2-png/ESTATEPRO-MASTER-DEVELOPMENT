@@ -8,6 +8,7 @@
     "organisationRegNumber": "Registration number"
   },
   "maskedValue": "Recorded, hidden",
+  "numberErased": "Number erased",
   "maskedLast4": "Recorded, hidden, ending {last4}",
   "notRecorded": "Not recorded",
   "reveal": "Reveal",
@@ -83,6 +84,7 @@
   },
   "recordedBy": "Recorded by {name}",
   "reviewedBy": "Signed off by {name}, {date}",
+  "linkedDocumentErased": "Document (number erased)",
   "linkedDocument": "Document ending {last4}",
   "provider": "Provider: {name}",
   "decisionReason": "Decision: {reason}",

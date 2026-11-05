@@ -60,7 +60,7 @@ export class ContactSensitiveService {
       .executeTakeFirst();
     if (!document) throw Problems.notFound();
     if (!contactWithinScope(request.scope, ctx, document)) throw Problems.forbidden();
-    if (document.isAnonymised) throw Problems.notFound('This contact has been anonymised. No protected details are kept.');
+    if (document.isAnonymised || document.numberEncrypted === null) throw Problems.notFound('This contact has been anonymised. No protected details are kept.');
 
     const value = await this.sensitive.open(tx, ctx, { table: 'identity_documents', column: 'number_encrypted', rowId: document.id }, document.numberEncrypted);
     await this.recordReveal(tx, ctx, document.contactId, 'documentNumber', request, { identityDocumentId: document.id });

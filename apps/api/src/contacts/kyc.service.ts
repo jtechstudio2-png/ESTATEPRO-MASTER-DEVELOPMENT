@@ -160,7 +160,7 @@ export class KycService {
         'identity_number',
         body.documentNumber,
       );
-      if (!protectedNumber.hash.equals(current.numberHash)) {
+      if (current.numberHash === null || !protectedNumber.hash.equals(current.numberHash)) {
         confirmed = await this.checkDuplicates(tx, ctx, contactId, protectedNumber.hash, documentId, body.confirmNotDuplicate === true);
         numberColumns = { numberEncrypted: protectedNumber.encrypted, numberHash: protectedNumber.hash, numberLast4: protectedNumber.last4 };
         changes['documentNumber'] = { old: '[protected]', new: '[protected]' };

@@ -17741,9 +17741,12 @@
             "type": "string"
           },
           "numberLast4": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "4821",
-            "description": "Last characters of the number, for recognising the document"
+            "description": "Last characters of the number, for recognising the document; null once the person has been erased"
           },
           "issuedOn": {
             "type": [
@@ -17924,7 +17927,11 @@
             "type": "string"
           },
           "numberLast4": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null once the person has been erased"
           }
         },
         "required": [

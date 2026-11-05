@@ -95,6 +95,20 @@ const configSchema = z.object({
   DUPLICATE_CHECK_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).max(1_000).default(30),
   /** Step-up freshness for revealing a protected value (ADR-007 §9: 5 minutes). */
   REVEAL_STEP_UP_MAX_AGE_SECONDS: z.coerce.number().int().min(30).max(900).default(300),
+  /** Yearly field-key rotation (ADR-007 E-D7): a company's field key older than this is rotated by the worker. */
+  KEY_ROTATION_MAX_AGE_DAYS: z.coerce.number().int().min(30).max(3_650).default(365),
+  /**
+   * How long a rotation waits after moving every value before it destroys the
+   * old key, so requests that read the old key before the switch have finished.
+   * At least the key cache lifetime.
+   */
+  KEY_ROTATION_SETTLE_SECONDS: z.coerce.number().int().min(0).max(86_400).default(600),
+  /**
+   * Erasure ledger (ADR-007 §8, E6): a bucket outside the database backup set,
+   * with object lock in production, on the same S3-compatible service as
+   * STORAGE_*. Required by erasure, company shredding and restore replay.
+   */
+  ERASURE_LEDGER_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/).optional(),
 }).superRefine((config, issues) => {
   if (config.KEY_PROVIDER === 'local') {
     if (config.NODE_ENV === 'production') {

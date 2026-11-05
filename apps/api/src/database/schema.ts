@@ -892,6 +892,10 @@ export interface IdentityDocuments {
   createdBy: string | null;
   documentId: string | null;
   documentTypeCode: string;
+  /**
+   * Set when the person was erased (ADR-007 §8): the number, its hash and last characters are gone; type, country and dates stay for the KYC record.
+   */
+  erasedAt: Timestamp | null;
   expiresOn: string | null;
   id: Generated<string>;
   issuedOn: string | null;
@@ -899,12 +903,12 @@ export interface IdentityDocuments {
   /**
    * C3, ADR-007: AES-256-GCM with the company field key.
    */
-  numberEncrypted: Buffer;
+  numberEncrypted: Buffer | null;
   /**
    * ADR-007 §4.4: HMAC-SHA256 with the company lookup key, for duplicate detection.
    */
-  numberHash: Buffer;
-  numberLast4: string;
+  numberHash: Buffer | null;
+  numberLast4: string | null;
   updatedAt: Generated<Timestamp>;
   verifiedAt: Timestamp | null;
   verifiedBy: string | null;
@@ -1014,6 +1018,26 @@ export interface KeyMovements {
   note: string | null;
   occurredAt: Generated<Timestamp>;
   recordedBy: string;
+}
+
+export interface KeyRotations {
+  companyId: string;
+  completedAt: Timestamp | null;
+  cursorField: Generated<number>;
+  cursorRowId: string | null;
+  fromVersion: number;
+  id: Generated<string>;
+  lastError: string | null;
+  pass: Generated<number>;
+  purpose: string;
+  reason: string;
+  requestedBy: string;
+  rowsRewritten: Generated<Int8>;
+  settleUntil: Timestamp | null;
+  startedAt: Generated<Timestamp>;
+  status: Generated<string>;
+  toVersion: number;
+  triggerType: string;
 }
 
 export interface KeySets {
@@ -2556,6 +2580,7 @@ export interface DB {
   jurisdictionSettingDefinitions: JurisdictionSettingDefinitions;
   jurisdictionSettings: JurisdictionSettings;
   keyMovements: KeyMovements;
+  keyRotations: KeyRotations;
   keySets: KeySets;
   kycChecks: KycChecks;
   leadAssignments: LeadAssignments;

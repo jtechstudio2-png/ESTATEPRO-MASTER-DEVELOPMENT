@@ -11,10 +11,11 @@
     "lint": "eslint .",
     "test": "vitest run --coverage",
     "test:ci": "vitest run --coverage --exclude 'test/**/*.performance.test.ts' --reporter=default --reporter=json --outputFile.json=test-results/vitest.json",
-    "test:performance": "vitest run test/listings.performance.test.ts test/location.performance.test.ts test/media.performance.test.ts test/contacts.performance.test.ts test/requirements.performance.test.ts test/leads.performance.test.ts test/dashboards.performance.test.ts --reporter=default --reporter=json --outputFile.json=test-results/vitest-performance.json",
+    "test:performance": "vitest run test/listings.performance.test.ts test/location.performance.test.ts test/media.performance.test.ts test/contacts.performance.test.ts test/requirements.performance.test.ts test/leads.performance.test.ts test/dashboards.performance.test.ts test/data-protection.performance.test.ts --reporter=default --reporter=json --outputFile.json=test-results/vitest-performance.json",
     "openapi": "tsc -p tsconfig.build.json && node dist/openapi/generate.js",
     "db:types": "kysely-codegen --dialect postgres --camel-case --date-parser string --numeric-parser string --exclude-pattern \"public.{*_20[0-9][0-9][0-9][0-9],*_default,spatial_ref_sys,geography_columns,geometry_columns}\" --out-file src/database/schema.ts",
-    "provision-company": "node dist/cli/provision-company.js"
+    "provision-company": "node dist/cli/provision-company.js",
+    "data-protection": "node dist/cli/data-protection.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1158.0",

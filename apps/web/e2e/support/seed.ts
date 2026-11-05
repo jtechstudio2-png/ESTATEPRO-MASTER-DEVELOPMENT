@@ -254,6 +254,19 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       areas: [{ kind: 'locality', locality: 'East Legon' }],
       financingStatus: 'mortgage_approved',
     });
+    // A person erased at their request (ADR-007 E6): anonymised by app.erase_contact, as the erasure service does.
+    const erased = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Akua Erased',
+      primaryPhone: '+233 20 444 9911',
+      officeId: accra.officeId,
+      relationships: ['buyer'],
+    });
+    await accraApi.call('POST', `contacts/${erased.id}/identity-documents`, { documentTypeCode: 'passport', issuingCountryCode: 'GH', documentNumber: 'G7654321', expiresOn: '2030-01-31' });
+    await db.query('BEGIN');
+    await db.query(`SELECT set_config('app.company_id', $1, true)`, [accra.companyId]);
+    await db.query('SELECT app.erase_contact($1)', [erased.id]);
+    await db.query('COMMIT');
     // Ama owns Labone Villa (ownership records arrive with Phase 7 screens; the resolver reads them now).
     await db.query(
       `INSERT INTO property_ownerships (company_id, property_id, owner_contact_id, effective_from) VALUES ($1, $2, $3, current_date - 400)`,
@@ -292,6 +305,17 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       primaryPhone: '+974 5512 0193',
       relationships: ['seller'],
     });
+    const dohaErased = await dohaApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Fatima Erased',
+      primaryPhone: '+974 5512 0777',
+      relationships: ['buyer'],
+    });
+    await dohaApi.call('POST', `contacts/${dohaErased.id}/identity-documents`, { documentTypeCode: 'passport', issuingCountryCode: 'QA', documentNumber: 'Q9876543', expiresOn: '2030-01-31' });
+    await db.query('BEGIN');
+    await db.query(`SELECT set_config('app.company_id', $1, true)`, [doha.companyId]);
+    await db.query('SELECT app.erase_contact($1)', [dohaErased.id]);
+    await db.query('COMMIT');
 
     return {
       users,
@@ -307,7 +331,7 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
         dohaTower,
         listing,
         keySet,
-        crm: { ama, amaDuplicate, seller, portalLead, agentLead, agentTask, dohaContact },
+        crm: { ama, amaDuplicate, seller, erased, portalLead, agentLead, agentTask, dohaContact, dohaErased },
       },
     };
   } finally {

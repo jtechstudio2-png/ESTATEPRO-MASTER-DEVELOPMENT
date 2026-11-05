@@ -119,6 +119,9 @@ test.describe('Screen sweep (issue #7)', () => {
       '/settings/listings',
       '/settings/storage',
       ...crmScreens(state.records.crm.dohaContact.id, null),
+      // An erased person (ADR-007 E6): translated name, banner, document number gone.
+      `/contacts/${state.records.crm.dohaErased.id}`,
+      `/contacts/${state.records.crm.dohaErased.id}/identity`,
     ];
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });

@@ -13,6 +13,7 @@ export function testServiceEnv(): Record<string, string> {
     STORAGE_ENDPOINT: services.storageEndpoint,
     STORAGE_REGION: 'us-east-1',
     STORAGE_BUCKET: services.storageBucket,
+    ERASURE_LEDGER_BUCKET: services.ledgerBucket,
     STORAGE_ACCESS_KEY_ID: services.storageAccessKeyId,
     STORAGE_SECRET_ACCESS_KEY: services.storageSecretAccessKey,
     STORAGE_FORCE_PATH_STYLE: 'true',

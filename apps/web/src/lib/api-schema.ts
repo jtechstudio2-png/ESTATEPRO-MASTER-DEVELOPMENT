@@ -4318,10 +4318,10 @@ export interface components {
             documentTypeCode: string;
             issuingCountryCode: string;
             /**
-             * @description Last characters of the number, for recognising the document
+             * @description Last characters of the number, for recognising the document; null once the person has been erased
              * @example 4821
              */
-            numberLast4: string;
+            numberLast4: string | null;
             /** Format: date */
             issuedOn: string | null;
             /** Format: date */
@@ -4379,7 +4379,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             documentTypeCode: string;
-            numberLast4: string;
+            /** @description Null once the person has been erased */
+            numberLast4: string | null;
         };
         KycCheckDto: {
             /** Format: uuid */

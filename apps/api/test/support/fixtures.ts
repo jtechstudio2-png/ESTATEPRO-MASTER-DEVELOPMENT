@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { sql } from 'kysely';
 import { inject } from 'vitest';
 
 import { createKysely, type Db } from '../../src/database/database.module.js';
@@ -21,6 +22,14 @@ export class Fixtures {
 
   async close(): Promise<void> {
     await this.db.destroy();
+  }
+
+  /** Erases a contact the way the erasure service does (app.erase_contact, migration 0026). */
+  async eraseContact(companyId: string, contactId: string): Promise<void> {
+    await this.db.transaction().execute(async (tx) => {
+      await sql`select set_config('app.company_id', ${companyId}, true)`.execute(tx);
+      await sql`select app.erase_contact(${contactId}::uuid)`.execute(tx);
+    });
   }
 
   uniqueSuffix(): string {

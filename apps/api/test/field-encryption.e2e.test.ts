@@ -56,13 +56,13 @@ describe('field encryption keys and protected-detail reveal (ADR-007, stages E1â
           displayName: `Contact ${id.slice(0, 8)}`,
           officeId: values.officeId ?? null,
           ownerMembershipId: values.ownerMembershipId ?? null,
-          isAnonymised: values.anonymised ?? false,
           dateOfBirthEncrypted: dob,
           taxNumberEncrypted: tax?.encrypted ?? null,
           taxNumberHash: tax?.hash ?? null,
           taxNumberLast4: tax?.last4 ?? null,
         })
         .execute();
+      if (values.anonymised) await sql`select app.erase_contact(${id}::uuid)`.execute(tx);
     });
     return id;
   }

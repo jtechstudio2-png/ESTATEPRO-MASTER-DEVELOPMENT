@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import { join } from 'node:path';
 
-import { CreateBucketCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, DeleteObjectsCommand, HeadBucketCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 
 import pg from 'pg';
 import type { TestProject } from 'vitest/node';
@@ -28,6 +28,8 @@ export interface TestDatabaseUrls {
 export interface TestServices {
   storageEndpoint: string;
   storageBucket: string;
+  /** Erasure ledger (ADR-007 §8): its own bucket, emptied at the start of every run. */
+  ledgerBucket: string;
   storageAccessKeyId: string;
   storageSecretAccessKey: string;
   clamavHost: string;
@@ -93,6 +95,7 @@ async function prepareServices(): Promise<TestServices> {
   const services: TestServices = {
     storageEndpoint: process.env['TEST_STORAGE_ENDPOINT'] ?? 'http://127.0.0.1:8333',
     storageBucket: process.env['TEST_STORAGE_BUCKET'] ?? 'estatepro-test-media',
+    ledgerBucket: process.env['TEST_LEDGER_BUCKET'] ?? 'estatepro-test-ledger',
     storageAccessKeyId: process.env['TEST_STORAGE_ACCESS_KEY_ID'] ?? 'estatepro-test',
     storageSecretAccessKey: process.env['TEST_STORAGE_SECRET_ACCESS_KEY'] ?? 'estatepro-test-secret',
     clamavHost: process.env['TEST_CLAMAV_HOST'] ?? '127.0.0.1',
@@ -106,9 +109,18 @@ async function prepareServices(): Promise<TestServices> {
     credentials: { accessKeyId: services.storageAccessKeyId, secretAccessKey: services.storageSecretAccessKey },
   });
   try {
-    await s3.send(new HeadBucketCommand({ Bucket: services.storageBucket })).catch(async () => {
-      await s3.send(new CreateBucketCommand({ Bucket: services.storageBucket }));
-    });
+    for (const bucket of [services.storageBucket, services.ledgerBucket]) {
+      await s3.send(new HeadBucketCommand({ Bucket: bucket })).catch(async () => {
+        await s3.send(new CreateBucketCommand({ Bucket: bucket }));
+      });
+    }
+    // Ledger entries of earlier runs name companies this fresh database does not have.
+    for (;;) {
+      const page = await s3.send(new ListObjectsV2Command({ Bucket: services.ledgerBucket, MaxKeys: 1000 }));
+      const keys = (page.Contents ?? []).flatMap((object) => (object.Key ? [{ Key: object.Key }] : []));
+      if (keys.length === 0) break;
+      await s3.send(new DeleteObjectsCommand({ Bucket: services.ledgerBucket, Delete: { Objects: keys } }));
+    }
   } catch (error) {
     throw new Error(`Test object storage is not reachable at ${services.storageEndpoint}: ${(error as Error).message}`);
   } finally {

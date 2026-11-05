@@ -63,7 +63,8 @@ export class IdentityDocumentDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() documentTypeCode!: string;
   @ApiProperty() issuingCountryCode!: string;
-  @ApiProperty({ example: '4821', description: 'Last characters of the number, for recognising the document' }) numberLast4!: string;
+  @ApiProperty({ type: String, nullable: true, example: '4821', description: 'Last characters of the number, for recognising the document; null once the person has been erased' })
+  numberLast4!: string | null;
   @ApiProperty({ type: String, nullable: true, format: 'date' }) issuedOn!: string | null;
   @ApiProperty({ type: String, nullable: true, format: 'date' }) expiresOn!: string | null;
   @ApiProperty({ description: 'The expiry date has passed' }) expired!: boolean;
@@ -136,7 +137,7 @@ export class RejectKycCheckBody {
 export class KycDocumentRefDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() documentTypeCode!: string;
-  @ApiProperty() numberLast4!: string;
+  @ApiProperty({ type: String, nullable: true, description: 'Null once the person has been erased' }) numberLast4!: string | null;
 }
 
 export class KycCheckDto {

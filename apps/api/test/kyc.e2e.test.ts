@@ -110,7 +110,8 @@ describe('identity documents and KYC checks (Phase 5 milestone C2, CRM-09)', () 
       });
       expect(JSON.stringify(created)).not.toContain('712345678');
       const row = await fx.db.selectFrom('identityDocuments').selectAll().where('id', '=', created.id).executeTakeFirstOrThrow();
-      expect(row.numberEncrypted.toString('latin1')).not.toContain('712345678');
+      expect(row.numberEncrypted).not.toBeNull();
+      expect(row.numberEncrypted?.toString('latin1')).not.toContain('712345678');
       expect(row.numberHash).toHaveLength(32);
       expect(row.createdBy).toBe(members['owner']);
       const [audit] = await audits(seller.id, 'contact.identity_document_added');

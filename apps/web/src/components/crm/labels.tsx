@@ -19,7 +19,12 @@ export const LEAD_STATUSES: readonly LeadStatus[] = ['new', 'contacted', 'qualif
  * A contact's name with its local-script form (wireframes §11): each in its
  * own element with automatic direction, so Arabic and Latin never reorder.
  */
+/** The name the database gives every erased contact (migration 0026, contacts_anonymised_empty). */
+export const ERASED_CONTACT_NAME = 'Erased contact';
+
 export function ContactName({ name, local }: { name: string; local?: string | null }) {
+  const t = useTranslations('crm');
+  if (name === ERASED_CONTACT_NAME && !local) return <>{t('erasedContact')}</>;
   if (!local || local === name) return <bdi dir="auto">{name}</bdi>;
   return (
     <>

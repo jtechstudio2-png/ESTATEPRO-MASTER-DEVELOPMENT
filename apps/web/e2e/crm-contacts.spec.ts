@@ -107,6 +107,21 @@ test.describe('CRM contacts (C-1 to C-6)', () => {
     await expect(page.getByText('GHA-7788-4821')).toBeVisible();
   });
 
+  test('C-2 shows an erased person as anonymised: no name, no contact details, the document number gone (ADR-007 E6)', async ({ page, state }) => {
+    await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
+    await page.goto(`/contacts/${state.records.crm.erased.id}`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Erased contact' })).toBeVisible();
+    await expect(page.getByText('This contact was anonymised at their request.')).toBeVisible();
+    await expect(page.locator('main')).not.toContainText('Akua');
+    await expect(page.getByRole('link', { name: /^Call / })).toHaveCount(0);
+    await expectAccessible(page);
+    await page.getByRole('navigation', { name: 'Contact sections' }).getByRole('link', { name: 'Identity' }).click();
+    await expect(page.getByText('Number erased')).toBeVisible();
+    await expect(page.locator('main')).not.toContainText('4321');
+    await expect(page.getByRole('button', { name: /Reveal/ })).toHaveCount(0);
+    await expectAccessible(page);
+  });
+
   test('C-6 shows the current consent, keeps history and records a new consent', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
     await page.goto(`/contacts/${state.records.crm.ama.id}/consent`);

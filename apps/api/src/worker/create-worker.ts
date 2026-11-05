@@ -1,5 +1,7 @@
 import { AuditService } from '../audit/audit.service.js';
 import type { AppConfig } from '../config/config.js';
+import { createKeyProvider } from '../crypto/crypto.module.js';
+import { KeyRotationService } from '../crypto/key-rotation.service.js';
 import { createKysely, TenantDb } from '../database/database.module.js';
 import { ListingSettingsService } from '../listings/listing-settings.service.js';
 import { ListingsService } from '../listings/listings.service.js';
@@ -26,6 +28,7 @@ export function createWorker(
   const scanner = overrides.scanner ?? new ClamAvScanner(config.CLAMAV_HOST!, config.CLAMAV_PORT, config.CLAMAV_TIMEOUT_MS);
   const audit = new AuditService();
   const tenantDb = new TenantDb(appDb);
+  const rotation = new KeyRotationService(platformDb, createKeyProvider(config), config, audit);
   const worker = new Worker(
     {
       platformDb,
@@ -35,6 +38,7 @@ export function createWorker(
       processor: new MediaProcessor(tenantDb, storage, scanner, audit),
       listings: new ListingsService(audit, new ListingSettingsService(audit), config),
       audit,
+      rotation,
       logger,
     },
     { ...(overrides.now ? { now: overrides.now } : {}), ...(overrides.scheduleEveryMs !== undefined ? { scheduleEveryMs: overrides.scheduleEveryMs } : {}) },
@@ -43,6 +47,7 @@ export function createWorker(
     worker,
     close: async () => {
       storage.destroy();
+      rotation.close();
       await Promise.all([appDb.destroy(), platformDb.destroy()]);
     },
   };

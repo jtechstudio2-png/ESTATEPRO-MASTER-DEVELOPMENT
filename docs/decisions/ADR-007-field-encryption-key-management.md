@@ -257,3 +257,17 @@ Design choices that keep options open: region-scoped root keys, per-company keys
 - Lists and dashboards never call KMS, so performance is unaffected; reveal and KYC writes add one cached key lookup.
 - A cloud KMS vendor must be selected with the hosting decision (#28) before any shared environment, which already waits for #6 and #20.
 - Engineers cannot read C3 data in production databases, which is intended; support uses the reveal flow under #19.
+
+## 16. Implementation notes: rotation and erasure (E5–E6)
+
+Built in Phase 5 (migration 0026; report `docs/phase-5/P5-E5-E6-ROTATION-ERASURE-REPORT.md`; runbook `docs/runbooks/DATA-PROTECTION-RUNBOOK.md`). Where the implementation makes a rule of §8 and §10 more precise:
+
+- **Rotation states.** `key_rotations` records each rotation: rewriting → settling → completed.
+  - A field-key rotation ends only when no ciphertext header names the old version after the settle period (`KEY_ROTATION_SETTLE_SECONDS`, default 10 minutes). A value written with the old key during the switch is caught and re-encrypted.
+  - A lookup-key rotation re-hashes in two passes, separated by the settle period. Hashes carry no version, so the second pass replaces any written with the old key.
+- **Not an edit.** Re-encryption leaves a row's version and update time unchanged. Verified identity documents accept a new ciphertext (newer key only) or a new hash from a maintenance role, and nothing else.
+- **Erasure scope.** `app.erase_contact` covers the person and every record merged into it. It removes names, contact details, protected values, notes, custom fields and an unshared address. It replaces with "[Erased]" the free text of leads, activities and their revisions, follow-ups, KYC notes and reasons, consent evidence, requirement notes and exclusions, lead history notes, and the string values of audit changes and outbox payloads; audit rows keep actor, action, entity, time and field names.
+- **Who can be erased.** Only people (`contact_type = 'person'`). Erasure is refused while financial or contractual records reference the person (the `block` rows of `contact_reference_columns`), because the law requires us to keep them.
+- **Append-only history.** History tables stay append-only. Their guards accept exactly one change: replacing text with "[Erased]" inside the erasure function, which runs with the owner's rights. The runtime role cannot use this path even if it sets the erasure flag itself.
+- **Ledger.** The erasure ledger is written before the erasure transaction commits; if the ledger is unreachable, nothing is erased. Replay is idempotent.
+- **Who erases.** Until the data-subject request register (gap G3) exists, erasure and company shredding are operator commands, audited in the company's audit log.

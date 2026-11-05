@@ -26,10 +26,12 @@ export interface E2eState {
       ama: { id: string; reference: string };
       amaDuplicate: { id: string; reference: string };
       seller: { id: string; reference: string };
+      erased: { id: string; reference: string };
       portalLead: { id: string; reference: string };
       agentLead: { id: string; reference: string };
       agentTask: { id: string };
       dohaContact: { id: string; reference: string };
+      dohaErased: { id: string; reference: string };
     };
   };
 }
