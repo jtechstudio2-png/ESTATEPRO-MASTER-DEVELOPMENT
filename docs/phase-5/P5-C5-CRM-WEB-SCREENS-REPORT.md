@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 5 November 2026 |
-| Branch | `phase-5/preparation`, C5 commit (see §10) |
+| Branch | `phase-5/preparation`, commit `273c6ba` |
 | Approvals | C4 decisions C4-D1 to C4-D8 approved before work started (recorded in the C4 report) |
 | Scope | The web screens for C1–C4, built to the approved wireframes (#8): navigation and role start pages (SH-1), admin dashboard (D-A), CRM dashboard (D-C), My day (D-M), contacts (C-1 to C-6), relationship views (B-1, B-2, SE-1, LL-1), leads (L-1 to L-4), activity (A-1, A-2), follow-ups (F-1, F-2), exports and CRM settings. Mobile and tablet layouts (XM-1 to XM-4, TM-1, TM-2) use the same components |
-| Result | **C5 complete.** Every screen works against the real API. Encryption, reveal restrictions, tenant isolation, audit and export governance are enforced by the API and shown correctly by the screens; the end-to-end tests check each one. 81 end-to-end tests (26 new CRM tests) and 75 unit tests pass locally; CI run in §10 |
+| Result | **C5 complete.** Every screen works against the real API. Encryption, reveal restrictions, tenant isolation, audit and export governance are enforced by the API and shown correctly by the screens; the end-to-end tests check each one. 81 end-to-end tests (26 new CRM tests) and 75 unit tests pass locally and in CI run 75 |
 
 ## 1. Deliverables
 
@@ -51,7 +51,7 @@
 | Audit integrity | Every write goes through the audited API. The screens add nothing unaudited. The landlord preview is generated once per visit (no background refetch), because each generation is audited | API audit suites (C1–C4) unchanged and passing |
 | Export governance | Purpose required; the dialog lists what is and is not included; at most 50,000 rows; deleted after 24 hours; download only for the requester; admins see the list but cannot download others' files | CA-16 test; exports list test |
 | Performance validation | Every screen loads its data within budget on the production build | §7 |
-| CI verification | All six required jobs | §10 |
+| CI verification | All six required jobs green in run 75 | §3, §10 |
 | Accessibility (WCAG 2.2 AA) | axe on every CRM screen and state in the specs; one `h1`; tables with captions; timeline as an ordered list; status in icon and text; accessible names contain the visible text; focus kept in dialogs | Sweep and CRM specs, 81 tests |
 | Right to left and Arabic | Every CRM screen in Arabic at desktop and 320 px, right to left, axe-clean, with no sideways scrolling; names in `dir="auto"`, phones and references isolated | Sweep "every Arabic screen" |
 | Mobile and tablet | Tables become cards below 768 px; bottom bar for CRM staff (My day or CRM dashboard, Leads, Contacts, Follow-ups) | Sweep at 320 px |
@@ -69,6 +69,7 @@
 | `e2e/perf.spec.ts` (7 CRM screens added) | 1 | ✅ |
 | Unit tests (new: navigation by role, time-zone quick picks and week bounds, consent state, message channels, run-time message keys) | 75 in 17 files | ✅ |
 | Lint, typecheck, stylelint, message check, production build | — | ✅ |
+| CI run 75 on `273c6ba` (all six required jobs, including the end-to-end suite) | — | ✅ [run 75](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41973234561) |
 
 Unit coverage (logic layer): 98.14 % statements, 91.41 % branches, 97.87 % functions, 99.4 % lines (thresholds 95/88 met). Screens are covered by the end-to-end suite, as in Phase 4.
 
@@ -164,4 +165,5 @@ The Phase 4 screens stayed within their earlier figures. API performance for the
 | Arabic review (#25) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/25 |
 | Sensitive-data detection (#35) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/35 |
 | Branch | `phase-5/preparation` |
-| C5 commit and CI run | Recorded after CI completes |
+| C5 commit | `273c6ba` |
+| CI run 75 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/41973234561 |
