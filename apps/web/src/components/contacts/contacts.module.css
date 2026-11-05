@@ -1,0 +1,149 @@
+/* CRM screens (C-1 to C-6, B-1, B-2, LL-1). Logical properties only (wireframes §11). */
+
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+}
+
+.viewLink {
+  padding: var(--ep-space-1) var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: 999px;
+  color: var(--ep-color-text-primary);
+  text-decoration: none;
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.viewLink[aria-current='page'] {
+  border-color: var(--ep-color-brand);
+  background: var(--ep-color-brand);
+  color: var(--ep-color-on-brand);
+  font-weight: 600;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list > li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2) var(--ep-space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--ep-space-3);
+}
+
+.list > li + li {
+  border-block-start: var(--ep-border-width) solid var(--ep-color-border);
+}
+
+.itemMain {
+  display: grid;
+  gap: var(--ep-space-1);
+  min-inline-size: 0;
+  flex: 1 1 16rem;
+}
+
+.meta {
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-200);
+}
+
+.warningLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+  align-items: center;
+}
+
+.duplicate {
+  display: grid;
+  gap: var(--ep-space-2);
+}
+
+.masked {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  letter-spacing: 0.05em;
+}
+
+.revealed {
+  font-weight: 600;
+}
+
+.choices {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+
+.choices th,
+.choices td {
+  padding: var(--ep-space-2);
+  border-block-end: var(--ep-border-width) solid var(--ep-color-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.choices thead th {
+  font-size: var(--ep-font-size-200);
+  color: var(--ep-color-text-secondary);
+}
+
+.tableRegion {
+  overflow-x: auto;
+  max-inline-size: 100%;
+}
+
+.body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.matches {
+  display: grid;
+  gap: var(--ep-space-3);
+}
+
+.areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ep-space-1);
+  padding: var(--ep-space-1) var(--ep-space-2);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: 999px;
+  background: var(--ep-color-surface-subtle);
+}
+
+/* Reveal is a desktop action: phones show "Open on a computer to reveal" (wireframes §8). */
+.mobileOnly {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .desktopOnly {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: inline;
+  }
+}

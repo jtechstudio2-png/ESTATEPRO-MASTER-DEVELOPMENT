@@ -1,0 +1,47 @@
+{
+  "title": "Consent",
+  "record": "Record consent",
+  "recordTitle": "Record consent or withdrawal",
+  "empty": "No consent recorded",
+  "emptyDetail": "Record what the person agreed to, when and how.",
+  "currentCaption": "Current consent by purpose and channel",
+  "historyCaption": "Full consent history, newest first",
+  "purpose": "Purpose",
+  "channel": "Channel",
+  "status": "Status",
+  "basis": "Lawful basis",
+  "captured": "Captured",
+  "via": "How",
+  "granted": "Granted",
+  "withdrawn": "Withdrawn",
+  "showHistory": "Show full history",
+  "showCurrent": "Show current only",
+  "appendOnly": "Consent rows are never edited. A change or correction is a new row.",
+  "evidence": "Evidence",
+  "evidenceHelp": "For example \"Signed form, file 2026-114\" or \"Phone call with Ama\". Do not type ID numbers.",
+  "withdrawEffect": "A withdrawal takes effect at once: the channel is blocked in Message actions.",
+  "recordedGranted": "Consent recorded: {purpose}",
+  "recordedWithdrawn": "Withdrawal recorded: {purpose}",
+  "purposeValue": {
+    "marketing": "Marketing",
+    "property_alerts": "Property alerts",
+    "data_processing": "Data processing",
+    "third_party_sharing": "Sharing with third parties",
+    "portal_terms": "Portal terms"
+  },
+  "basisValue": {
+    "consent": "Consent",
+    "contract": "Contract",
+    "legal_obligation": "Legal obligation",
+    "legitimate_interest": "Legitimate interest"
+  },
+  "viaValue": {
+    "web_form": "Web form",
+    "portal": "Portal",
+    "verbal": "Verbal",
+    "paper": "Paper",
+    "import": "Import",
+    "email": "Email",
+    "merge": "Merge"
+  }
+}

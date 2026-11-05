@@ -43,7 +43,7 @@ export default async function SelectCompanyPage({ searchParams }: { searchParams
     } catch (error) {
       if (!isApiError(error)) throw error;
     }
-    if (id !== null) redirect(returnTo === '/' ? '/dashboard' : returnTo);
+    if (id !== null) redirect(returnTo);
   }
   const t = await getTranslations('auth');
   return (
@@ -56,7 +56,7 @@ export default async function SelectCompanyPage({ searchParams }: { searchParams
         ) : (
           <>
             <p>{t('chooseIntro')}</p>
-            <CompanyPicker companies={companies} currentCompanyId={context.session?.company.id ?? null} returnTo={returnTo === '/' ? '/dashboard' : returnTo} email={me.email} />
+            <CompanyPicker companies={companies} currentCompanyId={context.session?.company.id ?? null} returnTo={returnTo} email={me.email} />
           </>
         )}
       </div>

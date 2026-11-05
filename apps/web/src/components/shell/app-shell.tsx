@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Button as AriaButton, Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components';
@@ -14,14 +14,42 @@ import fieldStyles from '@/components/ui/field.module.css';
 import { bff, bffRequest } from '@/lib/bff';
 
 import styles from './app-shell.module.css';
-import { buildNavigation, buildQuickCreate, isCurrent } from './navigation';
+import { buildNavigation, buildQuickCreate, hasCrm, isCurrent, type NavItem } from './navigation';
 import { GlobalSearch } from './search';
 
-const ICONS: Record<string, string> = { dashboard: '▦', properties: '⌂', listings: '☰', map: '⌖', keys: '⚿', 'property-types': '◇', 'listing-rules': '⚙', storage: '◔' };
+const ICONS: Record<string, string> = {
+  'my-day': '☀',
+  'admin-dashboard': '▤',
+  'crm-dashboard': '▥',
+  dashboard: '▦',
+  contacts: '☺',
+  'contacts-buyer': '›',
+  'contacts-seller': '›',
+  'contacts-landlord': '›',
+  'contacts-tenant': '›',
+  requirements: '⌕',
+  exports: '⇩',
+  leads: '✉',
+  'follow-ups': '✓',
+  properties: '⌂',
+  listings: '☰',
+  map: '⌖',
+  keys: '⚿',
+  'property-types': '◇',
+  'listing-rules': '⚙',
+  'crm-settings': '⚙',
+  storage: '◔',
+};
+
+/** Badge text for a queue count: hidden at zero, capped so a long queue does not widen the menu. */
+function badgeText(count: number, capped: boolean): string {
+  return capped ? '99+' : String(count);
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const search = useSearchParams();
   const { session, grant, readOnly } = useSession();
   const sections = buildNavigation(grant);
   const quickCreate = buildQuickCreate(grant);
@@ -50,6 +78,32 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
   const overdueCount = overdue.data?.data.length ?? 0;
 
+  // Queue counts (SH-1): only queues that need action, never totals; a failed fetch hides the badge.
+  const canAssignLeads = grant('lead.assign') !== undefined;
+  const newLeads = useQuery({
+    queryKey: ['shell', 'lead-queue', session.membershipId, canAssignLeads],
+    queryFn: () => bff<{ data: unknown[] }>(`leads?filter[status]=new&filter[assignedTo]=${canAssignLeads ? 'unassigned' : 'me'}&limit=100`),
+    enabled: grant('lead.view') !== undefined,
+    staleTime: 60_000,
+  });
+  const overdueFollowUps = useQuery({
+    queryKey: ['shell', 'follow-ups-overdue', session.membershipId],
+    queryFn: () => bff<{ data: unknown[]; page: { nextCursor: string | null } }>('tasks?filter[view]=mine&filter[status]=open&filter[overdue]=true&limit=100'),
+    enabled: hasCrm(grant),
+    staleTime: 60_000,
+  });
+  const badges: Record<string, { text: string; label: string } | null> = {
+    leads:
+      newLeads.data && newLeads.data.data.length > 0
+        ? { text: badgeText(newLeads.data.data.length, newLeads.data.data.length >= 100), label: t(canAssignLeads ? 'leadsUnassigned' : 'leadsNewMine', { count: newLeads.data.data.length }) }
+        : null,
+    'follow-ups':
+      overdueFollowUps.data && overdueFollowUps.data.data.length > 0
+        ? { text: badgeText(overdueFollowUps.data.data.length, overdueFollowUps.data.page.nextCursor !== null), label: t('followUpsOverdue', { count: overdueFollowUps.data.data.length }) }
+        : null,
+    keys: overdueCount > 0 ? { text: String(overdueCount), label: t('keysOverdue', { count: overdueCount }) } : null,
+  };
+
   const signOut = async () => {
     const result = await bffRequest<{ redirectTo: string }>('../auth/logout', { method: 'POST' }).catch(() => null);
     window.location.assign(result?.data.redirectTo ?? '/sign-in?signedOut=1');
@@ -63,16 +117,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ul className={styles.navList}>
             {section.items.map((item) => (
               <li key={item.id}>
-                <NextLink href={item.href} className={styles.navLink} aria-current={isCurrent(item, pathname) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>
+                <NextLink href={item.href} className={styles.navLink} aria-current={isCurrent(item, pathname, search) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>
                   <span>
                     <span className={styles.navIcon} aria-hidden="true">
                       {ICONS[item.id]}
                     </span>
                     <span className={styles.navText}>{t(item.label)}</span>
                   </span>
-                  {item.id === 'keys' && overdueCount > 0 ? (
-                    <span className={styles.badge} aria-label={t('keysOverdue', { count: overdueCount })}>
-                      {overdueCount}
+                  {badges[item.id] ? (
+                    <span className={styles.badge} aria-label={badges[item.id]!.label}>
+                      {badges[item.id]!.text}
                     </span>
                   ) : null}
                 </NextLink>
@@ -90,7 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {t('skipToContent')}
       </a>
       <header className={styles.topbar}>
-        <NextLink href="/dashboard" className={styles.brand}>
+        <NextLink href="/" className={styles.brand}>
           EstatePro
         </NextLink>
         <div className={styles.company}>
@@ -150,11 +204,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
       <nav className={styles.bottomBar} aria-label={t('mobile')}>
-        {sections
-          .flatMap((section) => section.items)
-          .filter((item) => ['properties', 'listings', 'map', 'keys'].includes(item.id))
-          .map((item) => (
-            <NextLink key={item.id} href={item.href} aria-current={isCurrent(item, pathname) ? 'page' : undefined}>
+        {bottomItems(sections.flatMap((section) => section.items)).map((item) => (
+            <NextLink key={item.id} href={item.href} aria-current={isCurrent(item, pathname, search) ? 'page' : undefined}>
               <span aria-hidden="true">{ICONS[item.id]}</span>
               {t(item.label)}
             </NextLink>
@@ -170,4 +221,17 @@ export function AppShell({ children }: { children: ReactNode }) {
       <GlobalSearch isOpen={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
+}
+
+/**
+ * Mobile bottom bar (wireframes §8): CRM staff get My day or the CRM
+ * dashboard, Leads and Contacts; everyone else keeps the property items.
+ */
+function bottomItems(items: NavItem[]): NavItem[] {
+  const crm = ['my-day', 'crm-dashboard', 'leads', 'contacts', 'follow-ups'];
+  const chosen = items.filter((item) => crm.includes(item.id));
+  // My day replaces the CRM dashboard for agents; managers keep the dashboard.
+  const withoutDuplicateHome = chosen.some((item) => item.id === 'my-day') ? chosen.filter((item) => item.id !== 'crm-dashboard') : chosen;
+  if (withoutDuplicateHome.length >= 3) return withoutDuplicateHome.slice(0, 4);
+  return items.filter((item) => ['properties', 'listings', 'map', 'keys'].includes(item.id));
 }

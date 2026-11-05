@@ -8,9 +8,10 @@ test.describe('S-1 and S-2: sign-in, company picker and shell', () => {
     await expect(page.getByText('Read only')).toBeVisible();
     await expectAccessible(page);
     await page.getByRole('button', { name: 'Open Accra Homes Ltd' }).click();
-    await expect(page).toHaveURL(/\/dashboard/);
+    // Owners land on the admin dashboard (SH-1).
+    await expect(page).toHaveURL(/\/dashboards\/admin/);
     const nav = page.getByRole('navigation', { name: 'Main' }).first();
-    for (const item of ['Properties', 'Listings', 'Map', 'Keys', 'Property types', 'Listing rules', 'Storage']) {
+    for (const item of ['Admin dashboard', 'CRM dashboard', 'Property dashboard', 'Contacts', 'Buyers', 'Landlords', 'Requirements', 'Exports', 'Leads', 'Follow-ups', 'Properties', 'Listings', 'Map', 'Keys', 'Property types', 'Listing rules', 'CRM settings', 'Storage']) {
       await expect(nav.getByRole('link', { name: new RegExp(`^.?\\s*${item}`) })).toBeVisible();
     }
     await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
@@ -22,9 +23,9 @@ test.describe('S-1 and S-2: sign-in, company picker and shell', () => {
     await expect(page.getByRole('button', { name: 'Create' })).toHaveCount(0);
   });
 
-  test('a member of one company skips the picker', async ({ page, state }) => {
+  test('a member of one company skips the picker and an agent lands on My day', async ({ page, state }) => {
     await signIn(page, state.users.agent.email);
-    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page).toHaveURL(/\/my-day/);
     await expect(page.getByRole('button', { name: /Account: Ama Boateng/ })).toBeVisible();
   });
 

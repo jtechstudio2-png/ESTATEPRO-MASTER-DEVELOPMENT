@@ -1,0 +1,20 @@
+{
+  "propertiesTitle": "Properties",
+  "notLandlord": "This contact has no landlord role. The list shows any properties they own or that we manage for them.",
+  "noProperties": "No current properties",
+  "noPropertiesDetail": "No current ownership or active management agreement links this contact to a property you can see.",
+  "ownershipBasis": "Owner, {share} % · from {from} until {until}",
+  "managementBasis": "Management agreement · from {from} until {until}",
+  "noEnd": "no end date",
+  "unitsLine": "{count, plural, one {# unit} other {# units}}",
+  "published": "Published",
+  "timezone": "Dates judged in {zone}",
+  "phase7": "Management agreements and portal access are managed from Phase 7.",
+  "previewTitle": "What this landlord could see in the portal",
+  "previewIntro": "Preview made {when}. It uses the same rules as the landlord portal, so staff and portal cannot disagree.",
+  "visible": "Visible:",
+  "nothingVisible": "Nothing",
+  "notVisible": "Not visible:",
+  "limited": "Limited to the properties you can see. The landlord may have other properties outside your access.",
+  "auditNote": "Opening this preview is recorded in the audit log."
+}

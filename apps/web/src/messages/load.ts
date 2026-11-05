@@ -18,6 +18,21 @@ export const NAMESPACES = [
   'units',
   'listings',
   'media',
+  'crm',
+  'contacts',
+  'consent',
+  'identity',
+  'merge',
+  'requirements',
+  'landlord',
+  'leads',
+  'activity',
+  'followUps',
+  'exports',
+  'crmDashboard',
+  'adminDashboard',
+  'myDay',
+  'crmSettings',
 ] as const;
 
 export async function loadMessages(language: UiLanguage): Promise<Record<string, unknown>> {

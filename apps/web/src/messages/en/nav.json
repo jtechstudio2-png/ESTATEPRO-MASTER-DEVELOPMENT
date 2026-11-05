@@ -23,5 +23,28 @@
   "mobile": "Quick navigation",
   "menu": "Menu",
   "main": "Main",
-  "keysOverdue": "{count, plural, one {# key set overdue with you} other {# key sets overdue with you}}"
+  "keysOverdue": "{count, plural, one {# key set overdue with you} other {# key sets overdue with you}}",
+  "myDay": "My day",
+  "adminDashboard": "Admin dashboard",
+  "crmDashboard": "CRM dashboard",
+  "contactsSection": "Contacts",
+  "contacts": "Contacts",
+  "view": {
+    "buyer": "Buyers",
+    "seller": "Sellers",
+    "landlord": "Landlords",
+    "tenant": "Tenants"
+  },
+  "requirements": "Requirements",
+  "exports": "Exports",
+  "salesSection": "Sales",
+  "leads": "Leads",
+  "followUps": "Follow-ups",
+  "crmSettings": "CRM settings",
+  "createLead": "Lead",
+  "createContact": "Contact",
+  "createFollowUp": "Follow-up",
+  "leadsUnassigned": "{count, plural, one {# new lead unassigned} other {# new leads unassigned}}",
+  "leadsNewMine": "{count, plural, one {# new lead assigned to you} other {# new leads assigned to you}}",
+  "followUpsOverdue": "{count, plural, one {# follow-up overdue} other {# follow-ups overdue}}"
 }

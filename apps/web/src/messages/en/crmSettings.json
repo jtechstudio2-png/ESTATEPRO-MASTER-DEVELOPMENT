@@ -1,0 +1,14 @@
+{
+  "title": "CRM settings",
+  "responseTitle": "Lead response target",
+  "responseHelp": "How quickly a new lead should get its first reply. Dashboards and the lead inbox flag leads past this target. There is no default: until you set one, screens say the target is not set.",
+  "enable": "Set a response target",
+  "minutes": "Target in minutes",
+  "minutesHelp": "For example 60 for one hour. Between 1 minute and 7 days (10080 minutes).",
+  "minutesInvalid": "Enter a whole number of minutes from 1 to 10080.",
+  "notSet": "No response target is set. Leads are not flagged as late.",
+  "save": "Save target",
+  "saved": "Response target saved: {minutes} minutes",
+  "cleared": "Response target removed",
+  "readOnly": "Only members who manage settings can change the target."
+}

@@ -13,7 +13,7 @@ export async function signIn(page: Page, email: string, options: { company?: str
   if (options.mfa === false) await page.getByLabel('Second factor').uncheck();
   await page.getByRole('button', { name: 'Continue' }).click();
   if (options.company) {
-    await page.waitForURL(/\/select-company|\/dashboard|\/properties|\/listings|\/keys|\/map|\/settings/);
+    await page.waitForURL(/\/select-company|\/dashboard|\/my-day|\/properties|\/listings|\/keys|\/map|\/settings|\/contacts|\/leads/);
     if (page.url().includes('/select-company')) {
       await page.getByRole('button', { name: new RegExp(`(Open|فتح) ${escape(options.company)}`) }).click();
       await page.waitForURL((url) => !url.pathname.startsWith('/select-company'));

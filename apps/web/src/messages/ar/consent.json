@@ -1,0 +1,47 @@
+{
+  "title": "الموافقات",
+  "record": "تسجيل موافقة",
+  "recordTitle": "تسجيل موافقة أو سحبها",
+  "empty": "لا موافقات مسجلة",
+  "emptyDetail": "سجّل ما وافق عليه الشخص ومتى وكيف.",
+  "currentCaption": "الموافقة الحالية حسب الغرض والقناة",
+  "historyCaption": "السجل الكامل للموافقات، الأحدث أولًا",
+  "purpose": "الغرض",
+  "channel": "القناة",
+  "status": "الحالة",
+  "basis": "الأساس القانوني",
+  "captured": "تاريخ التسجيل",
+  "via": "الطريقة",
+  "granted": "ممنوحة",
+  "withdrawn": "مسحوبة",
+  "showHistory": "عرض السجل الكامل",
+  "showCurrent": "عرض الحالية فقط",
+  "appendOnly": "لا تُعدَّل سجلات الموافقة أبدًا. أي تغيير أو تصحيح يُسجَّل كسجل جديد.",
+  "evidence": "الدليل",
+  "evidenceHelp": "مثلًا \"نموذج موقّع، ملف 2026-114\" أو \"مكالمة هاتفية مع آمنة\". لا تكتب أرقام الهوية.",
+  "withdrawEffect": "يسري السحب فورًا: تُحظر القناة في إجراءات المراسلة.",
+  "recordedGranted": "تم تسجيل الموافقة: {purpose}",
+  "recordedWithdrawn": "تم تسجيل السحب: {purpose}",
+  "purposeValue": {
+    "marketing": "التسويق",
+    "property_alerts": "تنبيهات العقارات",
+    "data_processing": "معالجة البيانات",
+    "third_party_sharing": "المشاركة مع أطراف ثالثة",
+    "portal_terms": "شروط البوابة"
+  },
+  "basisValue": {
+    "consent": "الموافقة",
+    "contract": "العقد",
+    "legal_obligation": "التزام قانوني",
+    "legitimate_interest": "مصلحة مشروعة"
+  },
+  "viaValue": {
+    "web_form": "نموذج إلكتروني",
+    "portal": "البوابة",
+    "verbal": "شفهيًا",
+    "paper": "ورقيًا",
+    "import": "استيراد",
+    "email": "البريد الإلكتروني",
+    "merge": "دمج"
+  }
+}
