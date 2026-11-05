@@ -76,6 +76,7 @@ export function buildNavigation(can: Can): NavSection[] {
       })),
       { id: 'requirements', href: '/requirements', label: 'requirements', match: ['/requirements'] },
     ];
+    if (can('kyc.view')) contacts.push({ id: 'identity-checks', href: '/identity-checks', label: 'identityChecks', match: ['/identity-checks'] });
     if (can('contact.export') || can('lead.export') || can('user.manage')) contacts.push({ id: 'exports', href: '/exports', label: 'exports', match: ['/exports'] });
     sections.push({ id: 'contacts', label: 'contactsSection', items: contacts });
 

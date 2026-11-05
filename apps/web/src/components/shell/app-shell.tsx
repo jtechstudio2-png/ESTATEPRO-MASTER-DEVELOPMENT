@@ -28,6 +28,7 @@ const ICONS: Record<string, string> = {
   'contacts-landlord': '›',
   'contacts-tenant': '›',
   requirements: '⌕',
+  'identity-checks': '✓',
   exports: '⇩',
   leads: '✉',
   'follow-ups': '✓',

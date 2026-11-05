@@ -11,11 +11,12 @@ import { propertyScopeSql } from '../properties/property-access.js';
 import type { PortalPreviewDto } from './portal-preview.dto.js';
 
 /** What a landlord portal never shows, whatever they own (wireframe LL-1). */
-const NOT_VISIBLE = [
-  'Properties, units and listings of other owners',
-  'Tenants’ and buyers’ contact details',
-  'Staff notes, activities and follow-ups',
-  'Protected details (identity, tax and bank numbers)',
+/** What the landlord portal never shows, as codes (translated by the web app) and in English. */
+const NOT_VISIBLE: ReadonlyArray<readonly [code: string, text: string]> = [
+  ['other_owners', 'Properties, units and listings of other owners'],
+  ['tenant_buyer_contacts', 'Tenants’ and buyers’ contact details'],
+  ['staff_records', 'Staff notes, activities and follow-ups'],
+  ['protected_details', 'Protected details (identity, tax and bank numbers)'],
 ];
 
 /**
@@ -114,7 +115,8 @@ export class PortalPreviewService {
       hasLandlordRole: role !== undefined,
       generatedAt: new Date().toISOString(),
       properties,
-      notVisible: NOT_VISIBLE,
+      notVisible: NOT_VISIBLE.map(([, text]) => text),
+      notVisibleCodes: NOT_VISIBLE.map(([code]) => code),
       limitedToYourAccess: propertyScope !== 'all',
     };
   }

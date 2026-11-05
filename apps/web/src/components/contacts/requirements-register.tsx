@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { NextFollowUpCell } from '@/components/crm/labels';
 import { useSession } from '@/components/session';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
@@ -131,6 +132,7 @@ export function RequirementsRegister() {
               cell: (row) => (row.matchCount === null ? '—' : <span className="ep-num">{t('matchCount', { count: row.matchCount, capped: row.matchCountCapped ? 'yes' : 'no' })}</span>),
               align: 'end',
             },
+            { key: 'next', header: t('next'), cell: (row) => <NextFollowUpCell next={row.nextFollowUp} warnWhenNone={row.status === 'active'} />, onCard: true },
             { key: 'updated', header: t('updated'), cell: (row) => <When iso={row.updatedAt} />, align: 'end' },
           ]}
           footer={<LoadMore hasMore={result.hasNextPage} loading={result.isFetchingNextPage} onLoad={result.loadMore} shown={result.rows.length} />}

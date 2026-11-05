@@ -71,6 +71,8 @@ test('main screens load within budget', { tag: '@performance' }, async ({ page, 
     ['Contact record (C-2)', `/contacts/${state.records.crm.ama.id}`, (p) => p.getByRole('heading', { name: 'Contact methods' })],
     ['Lead inbox (L-1)', '/leads?tab=open', (p) => p.getByRole('table', { name: 'All open' }).getByRole('rowheader').first()],
     ['Lead record (L-2)', `/leads/${state.records.crm.agentLead.id}`, (p) => p.getByRole('heading', { name: 'Status history' })],
+    ['Sellers view (SE-1)', '/contacts?view=seller', (p) => p.getByRole('table', { name: 'Sellers contacts' }).getByRole('rowheader').first()],
+    ['Identity checks (SH-1)', '/identity-checks?queue=verified', (p) => p.getByRole('heading', { level: 1, name: 'Identity checks' })],
     ['Follow-ups (F-2)', '/follow-ups?range=done', (p) => p.getByRole('heading', { level: 1, name: 'Follow-ups' })],
   ];
   const results: Array<Measure & { map: boolean }> = [];

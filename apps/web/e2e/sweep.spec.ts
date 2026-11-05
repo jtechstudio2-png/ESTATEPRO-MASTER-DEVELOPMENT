@@ -34,6 +34,8 @@ function crmScreens(contactId: string, leadId: string | null): string[] {
     `${contact}/identity`,
     `${contact}/consent`,
     '/requirements',
+    '/identity-checks',
+    '/contacts?view=seller',
     '/leads',
     '/leads/new',
     ...(leadId ? [`/leads/${leadId}`] : []),

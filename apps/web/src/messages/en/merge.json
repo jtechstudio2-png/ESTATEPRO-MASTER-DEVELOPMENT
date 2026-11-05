@@ -64,5 +64,14 @@
     "document_links": "Documents",
     "key_movements": "Key movements",
     "key_sets": "Key sets"
+  },
+  "blocker": {
+    "same_contact": "A contact cannot be merged into itself.",
+    "already_merged": "One of the contacts was already merged into another contact.",
+    "anonymised": "Anonymised contacts cannot be merged.",
+    "keep_archived": "The contact to keep is archived. Restore it first.",
+    "different_types": "A person and an organisation cannot be merged.",
+    "financial_records": "The contact to merge has {records}; financial and contractual records are never moved to another contact.",
+    "both_portal": "Both contacts have portal access. End one portal membership first."
   }
 }

@@ -47,6 +47,10 @@ const families: Array<[string, string, readonly string[]]> = [
   ['requirements', 'financing', ['cash', 'mortgage_approved', 'mortgage_in_progress', 'not_started', 'not_applicable']],
   ['requirements', 'per', ['weekly', 'monthly', 'quarterly', 'semi_annual', 'annual']],
   ['exports', 'statusValue', ['completed', 'failed', 'expired']],
+  ['identity', 'queue', ['open', 'expiring', 'verified', 'failed', 'expired']],
+  ['identity', 'queueEmpty', ['open', 'expiring', 'verified', 'failed', 'expired']],
+  ['landlord', 'notVisibleCode', ['other_owners', 'tenant_buyer_contacts', 'staff_records', 'protected_details']],
+  ['merge', 'blocker', ['same_contact', 'already_merged', 'anonymised', 'keep_archived', 'different_types', 'financial_records', 'both_portal']],
   ['adminDashboard', 'attention', ['unassigned_leads', 'response_overdue', 'expired_invitations', 'identity_checks_expiring', 'failed_imports', 'agent_licences']],
 ];
 

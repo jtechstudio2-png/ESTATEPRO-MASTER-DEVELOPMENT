@@ -115,5 +115,6 @@
   "contact": "جهة الاتصال",
   "bedsHeader": "الغرف",
   "updated": "آخر تحديث",
-  "forRequirement": "لمتطلب {type}"
+  "forRequirement": "لمتطلب {type}",
+  "next": "المتابعة التالية"
 }

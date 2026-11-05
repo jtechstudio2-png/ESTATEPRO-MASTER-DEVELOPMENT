@@ -44,7 +44,7 @@ export class ConsentInput {
   @ValidateIf(notNull) @IsIn(LAWFUL_BASES)
   lawfulBasis?: (typeof LAWFUL_BASES)[number] | null;
   @ApiProperty({ enum: CAPTURED_VIA }) @IsIn(CAPTURED_VIA) capturedVia!: (typeof CAPTURED_VIA)[number];
-  @ApiPropertyOptional({ maxLength: 500, description: 'Where the evidence is, e.g. "signed form, file 2026/031"' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 500, description: 'Where the evidence is, e.g. "signed form, file 2026/031"' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(500)
   evidence?: string | null;
   @ApiPropertyOptional({ format: 'date-time', description: 'When it was given (defaults to now; never in the future)' })
@@ -117,19 +117,19 @@ export class ArchiveContactBody {
 }
 
 export class DuplicateCheckBody {
-  @ApiPropertyOptional({ maxLength: 254 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(254) primaryEmail?: string | null;
-  @ApiPropertyOptional({ maxLength: 30 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(30) primaryPhone?: string | null;
-  @ApiPropertyOptional({ maxLength: 50, description: 'Tax number of a person (matched by keyed hash)' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 254 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(254) primaryEmail?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 30 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(30) primaryPhone?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 50, description: 'Tax number of a person (matched by keyed hash)' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(50)
   taxNumber?: string | null;
-  @ApiPropertyOptional({ format: 'uuid', description: 'Office whose country completes national phone numbers' }) @ValidateIf(notNull) @IsUUID() officeId?: string | null;
-  @ApiPropertyOptional({ format: 'uuid', description: 'Contact being edited (excluded from the results)' }) @ValidateIf(notNull) @IsUUID() excludeContactId?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'Office whose country completes national phone numbers' }) @ValidateIf(notNull) @IsUUID() officeId?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'Contact being edited (excluded from the results)' }) @ValidateIf(notNull) @IsUUID() excludeContactId?: string | null;
 }
 
 export class AddMethodBody {
   @ApiProperty({ enum: METHOD_TYPES }) @IsIn(METHOD_TYPES) methodType!: (typeof METHOD_TYPES)[number];
   @ApiProperty({ maxLength: 500 }) @Transform(trim) @IsString() @MinLength(1) @MaxLength(500) value!: string;
-  @ApiPropertyOptional({ maxLength: 60 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(60) label?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 60 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(60) label?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isPrimary?: boolean;
 }
 
@@ -159,6 +159,8 @@ export class MergeBody {
   @ApiProperty({ format: 'uuid', description: 'The contact merged into this one (it is archived and points here)' }) @IsUUID() mergeContactId!: string;
   @ApiProperty({ description: 'Version of the merged contact, as shown in the preview' }) @IsInt() @Min(1) mergeVersion!: number;
   @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string', enum: ['keep', 'merge'] },
     description: `For each field, whose value to keep: "keep" (default) or "merge". Fields: ${MERGE_FIELDS.join(', ')}`,
     example: { primaryEmail: 'merge' },
   })
@@ -264,6 +266,30 @@ export class IdentityCheckSummaryDto {
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) reviewedAt!: string | null;
 }
 
+export class NextFollowUpDto {
+  @ApiProperty({ format: 'date-time' }) dueAt!: string;
+  @ApiProperty() overdue!: boolean;
+}
+
+export class ListingRefDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() reference!: string;
+  @ApiProperty() status!: string;
+  @ApiProperty() isPublished!: boolean;
+}
+
+export class ListingSummaryDto {
+  @ApiProperty({ description: 'Listings not closed (draft, available, reserved, under contract) that you may see' }) active!: number;
+  @ApiProperty() published!: number;
+  @ApiProperty({ type: ListingRefDto, nullable: true, description: 'Most recently updated' }) latest!: ListingRefDto | null;
+}
+
+export class LeadRefDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() reference!: string;
+  @ApiProperty() status!: string;
+}
+
 export class ContactSummaryDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ type: String, nullable: true }) reference!: string | null;
@@ -282,6 +308,22 @@ export class ContactSummaryDto {
     description: 'Latest identity check (Sellers view); null without kyc.view on this contact',
   })
   identityCheck!: IdentityCheckSummaryDto | null;
+  @ApiProperty({
+    type: NextFollowUpDto,
+    nullable: true,
+    description: 'Next open follow-up about the contact or one of its leads, among follow-ups you may see (B-1, SE-1, LL-1)',
+  })
+  nextFollowUp!: NextFollowUpDto | null;
+  @ApiPropertyOptional({
+    type: ListingSummaryDto,
+    nullable: true,
+    description: 'Sellers and Landlords views only: listings on units the contact owns or we manage for them, among those you may see; null without listing.view',
+  })
+  listings?: ListingSummaryDto | null;
+  @ApiPropertyOptional({ type: LeadRefDto, nullable: true, description: 'Sellers view only: latest open sell or valuation lead you may see' })
+  valuationLead?: LeadRefDto | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, description: 'Landlords view only: properties owned or managed for them that you may see; null without property.view' })
+  properties?: number | null;
 }
 
 export class ContactPageDto {
@@ -313,10 +355,19 @@ export class MergeSideDto {
   references!: Record<string, number>;
 }
 
+export const MERGE_BLOCKER_CODES = ['same_contact', 'already_merged', 'anonymised', 'keep_archived', 'different_types', 'financial_records', 'both_portal'] as const;
+
+export class MergeBlockerDto {
+  @ApiProperty({ enum: MERGE_BLOCKER_CODES }) code!: (typeof MERGE_BLOCKER_CODES)[number];
+  @ApiProperty({ description: 'The reason in English' }) message!: string;
+  @ApiProperty({ type: [String], description: 'financial_records: the tables holding the records that cannot move' }) records!: string[];
+}
+
 export class MergePreviewDto {
   @ApiProperty({ type: MergeSideDto }) keep!: MergeSideDto;
   @ApiProperty({ type: MergeSideDto }) merge!: MergeSideDto;
-  @ApiProperty({ type: [String], description: 'Reasons the merge cannot go ahead; empty when it can' }) blockers!: string[];
+  @ApiProperty({ type: [String], description: 'Reasons the merge cannot go ahead (English); empty when it can' }) blockers!: string[];
+  @ApiProperty({ type: [MergeBlockerDto], description: 'The same reasons with codes, for translated screens' }) blockerDetails!: MergeBlockerDto[];
   @ApiProperty({ enum: MERGE_FIELDS, isArray: true }) choosableFields!: string[];
 }
 

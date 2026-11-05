@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import NextLink from 'next/link';
 import { useState } from 'react';
 
-import { ContactName, IdentityStatusLabel, Ltr, RoleList } from '@/components/crm/labels';
+import { ContactName, IdentityStatusLabel, Ltr, NextFollowUpCell, RoleList } from '@/components/crm/labels';
 import { ExportDialog } from '@/components/exports/export-dialog';
 import { useSession } from '@/components/session';
 import { Button, LinkButton } from '@/components/ui/button';
@@ -177,6 +177,34 @@ export function ContactList() {
         ...(showIdentity
           ? [{ key: 'identity', header: t('identityCheck'), cell: (row: ContactSummaryDto) => (row.identityCheck ? <IdentityStatusLabel status={row.identityCheck.status} /> : '—') }]
           : []),
+        ...(view === 'seller' || view === 'landlord'
+          ? [{ key: 'listings', header: t('listings'), cell: (row: ContactSummaryDto) => <ListingsCell summary={row.listings} />, onCard: true }]
+          : []),
+        ...(view === 'seller'
+          ? [
+              {
+                key: 'valuation',
+                header: t('valuationLead'),
+                cell: (row: ContactSummaryDto) =>
+                  row.valuationLead ? (
+                    <NextLink href={`/leads/${row.valuationLead.id}`}>
+                      <Ltr>{row.valuationLead.reference}</Ltr> {crm(`leadStatus.${row.valuationLead.status as 'new'}`)}
+                    </NextLink>
+                  ) : (
+                    '—'
+                  ),
+              },
+            ]
+          : []),
+        ...(view === 'landlord'
+          ? [{ key: 'properties', header: t('propertiesCount'), cell: (row: ContactSummaryDto) => (row.properties === null || row.properties === undefined ? '—' : <span className="ep-num">{row.properties}</span>), align: 'end' as const }]
+          : []),
+        {
+          key: 'next',
+          header: t('next'),
+          cell: (row) => <NextFollowUpCell next={row.nextFollowUp} warnWhenNone={view === 'buyer' || view === 'seller'} />,
+          onCard: view !== 'all',
+        },
         { key: 'owner', header: t('owner'), cell: (row) => (row.owner ? <bdi>{row.owner.name}</bdi> : <span>{t('ownerNone')}</span>) },
         { key: 'office', header: t('office'), cell: (row) => (row.office ? <bdi>{row.office.name}</bdi> : '—') },
         {
@@ -228,5 +256,21 @@ export function ContactList() {
         />
       ) : null}
     </Page>
+  );
+}
+
+/** SE-1 and LL-1 "Listings": the latest listing on their units, and how many more (only listings the viewer may see). */
+function ListingsCell({ summary }: { summary: ContactSummaryDto['listings'] }) {
+  const t = useTranslations('contacts');
+  if (summary === null || summary === undefined) return <span>—</span>;
+  if (summary.active === 0 || summary.latest === null) return <span>{t('noListings')}</span>;
+  return (
+    <span>
+      <NextLink href={`/listings/${summary.latest.id}`}>
+        <Ltr>{summary.latest.reference}</Ltr>
+      </NextLink>{' '}
+      {summary.latest.isPublished ? t('published') : t('notPublished')}
+      {summary.active > 1 ? ` ${t('moreListings', { count: summary.active - 1 })}` : ''}
+    </span>
   );
 }

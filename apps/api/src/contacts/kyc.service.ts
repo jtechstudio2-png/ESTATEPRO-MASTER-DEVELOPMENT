@@ -2,23 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
 
 import { AuditService } from '../audit/audit.service.js';
+import { keysetCondition, type Page, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
 import { type FieldError, Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import { SensitiveDataService } from '../crypto/sensitive-data.service.js';
 import type { Tx } from '../database/database.module.js';
 import { checkPicklistCode } from '../reference/picklists.js';
-import { contactWithinScope, scopeFor } from './contact-access.js';
+import { contactScopeSql, contactWithinScope, scopeFor } from './contact-access.js';
 import { assertEditable, ContactsService, effectiveKycStatusSql, newId } from './contacts.service.js';
 import { DuplicatesService } from './duplicates.service.js';
-import type {
-  ApproveKycCheckBody,
-  CreateIdentityDocumentBody,
-  CreateKycCheckBody,
-  IdentityDocumentDto,
-  KycCheckDto,
-  RejectKycCheckBody,
-  UpdateIdentityDocumentBody,
-  UpdateKycCheckBody,
+import {
+  type ApproveKycCheckBody,
+  type CreateIdentityDocumentBody,
+  type CreateKycCheckBody,
+  type IdentityDocumentDto,
+  type KycCheckDto,
+  type KycQueueItemDto,
+  OPEN_CHECK_STATUSES,
+  type RejectKycCheckBody,
+  type UpdateIdentityDocumentBody,
+  type UpdateKycCheckBody,
 } from './kyc.dto.js';
 
 interface ContactAccessRow {
@@ -213,6 +216,36 @@ export class KycService {
     const contact = await this.contactFor(tx, ctx, contactId, 'kyc.view');
     const rows = await this.checkQuery(tx).where('k.contactId', '=', contactId).orderBy('k.createdAt', 'desc').orderBy('k.id', 'desc').execute();
     return rows.map((row) => this.toCheckDto(ctx, contact, row));
+  }
+
+  /**
+   * The company-wide identity-check queue (SH-1 "Identity checks", C6): open
+   * checks by default, oldest first, for contacts within the member's
+   * `kyc.view` scope (ownership and offices, never through a lead). Only the
+   * last four characters of a document number appear, as on the record.
+   */
+  async queue(tx: Tx, ctx: TenantContext, query: ParsedListQuery<'createdAt'>): Promise<Page<KycQueueItemDto>> {
+    const scope = scopeFor(ctx, 'kyc.view');
+    if (scope === null) throw Problems.forbidden();
+    const f = query.filters;
+    let qb = this.checkQuery(tx)
+      .innerJoin('contacts as c', (join) => join.onRef('c.companyId', '=', 'k.companyId').onRef('c.id', '=', 'k.contactId'))
+      .select(['c.id as contactId', 'c.displayName as contactName', 'c.reference as contactReference', 'c.officeId as contactOfficeId', 'c.ownerMembershipId as contactOwnerId'])
+      .select(sortValueSql('k.createdAt', 'timestamp').as('cursorValue'))
+      .where('c.mergedIntoContactId', 'is', null)
+      .where('c.archivedAt', 'is', null)
+      .where(contactScopeSql(scope, ctx, 'c', 'write'));
+    const statuses = Array.isArray(f['status']) ? f['status'] : f['expiring'] === true ? ['verified'] : [...OPEN_CHECK_STATUSES];
+    qb = qb.where(sql<boolean>`${effectiveKycStatusSql('k')} = any(${statuses}::text[])`);
+    if (Array.isArray(f['checkType'])) qb = qb.where('k.checkType', 'in', f['checkType']);
+    // Verified checks due for renewal within 30 days (the admin dashboard's figure).
+    if (f['expiring'] === true) qb = qb.where(sql<boolean>`k.expires_on between current_date and current_date + 30`);
+    if (query.cursor) qb = qb.where(keysetCondition('k.createdAt', 'k.id', query.sort, query.cursor));
+    const rows = await qb.orderBy('k.createdAt', query.sort.direction).orderBy('k.id', query.sort.direction).limit(query.limit + 1).execute();
+    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({
+      ...this.toCheckDto(ctx, { id: row.contactId, officeId: row.contactOfficeId, ownerMembershipId: row.contactOwnerId }, row),
+      contact: { id: row.contactId, name: row.contactName, reference: row.contactReference },
+    }));
   }
 
   async recordCheck(tx: Tx, ctx: TenantContext, contactId: string, body: CreateKycCheckBody): Promise<KycCheckDto> {

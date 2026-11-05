@@ -46,5 +46,6 @@
   "createFollowUp": "Follow-up",
   "leadsUnassigned": "{count, plural, one {# new lead unassigned} other {# new leads unassigned}}",
   "leadsNewMine": "{count, plural, one {# new lead assigned to you} other {# new leads assigned to you}}",
-  "followUpsOverdue": "{count, plural, one {# follow-up overdue} other {# follow-ups overdue}}"
+  "followUpsOverdue": "{count, plural, one {# follow-up overdue} other {# follow-ups overdue}}",
+  "identityChecks": "Identity checks"
 }

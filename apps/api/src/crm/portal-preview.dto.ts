@@ -43,6 +43,12 @@ export class PortalPreviewDto {
   @ApiProperty({ description: 'The contact has an active landlord role' }) hasLandlordRole!: boolean;
   @ApiProperty({ format: 'date-time' }) generatedAt!: string;
   @ApiProperty({ type: [PreviewPropertyDto] }) properties!: PreviewPropertyDto[];
-  @ApiProperty({ type: [String], description: 'What the landlord would not see' }) notVisible!: string[];
+  @ApiProperty({ type: [String], description: 'What the landlord would not see (English)' }) notVisible!: string[];
+  @ApiProperty({
+    enum: ['other_owners', 'tenant_buyer_contacts', 'staff_records', 'protected_details'],
+    isArray: true,
+    description: 'The same list as codes, in the same order, for translated screens',
+  })
+  notVisibleCodes!: string[];
   @ApiProperty({ description: 'Only properties you may view are listed here' }) limitedToYourAccess!: boolean;
 }

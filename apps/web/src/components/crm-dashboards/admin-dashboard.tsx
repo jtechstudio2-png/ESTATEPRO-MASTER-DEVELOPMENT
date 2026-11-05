@@ -21,7 +21,7 @@ import { useOffices } from '@/lib/hooks/reference';
 const ATTENTION_ROUTES: Record<string, string> = {
   unassigned_leads: '/leads?tab=unassigned',
   response_overdue: '/leads?tab=open&filter[attention]=response_overdue',
-  identity_checks_expiring: '/contacts?view=seller',
+  identity_checks_expiring: '/identity-checks?queue=expiring',
 };
 const KNOWN_ATTENTION = ['unassigned_leads', 'response_overdue', 'expired_invitations', 'identity_checks_expiring', 'failed_imports', 'agent_licences'];
 
@@ -171,7 +171,7 @@ export function AdminDashboard() {
                 {row(t('duplicates'), data!.dataQuality.possibleDuplicateGroups)}
                 {row(t('noOwner'), data!.dataQuality.contactsWithoutOwner)}
                 {row(t('documentsExpiring'), data!.dataQuality.identityDocumentsExpiring, null, true)}
-                {row(t('checksExpiring'), data!.dataQuality.identityChecksExpiring, '/contacts?view=seller', true)}
+                {row(t('checksExpiring'), data!.dataQuality.identityChecksExpiring, '/identity-checks?queue=expiring', true)}
               </ul>
             </Panel>
             <Panel title={t('privacyTitle')}>

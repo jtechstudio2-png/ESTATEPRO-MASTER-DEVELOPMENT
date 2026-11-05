@@ -8,7 +8,7 @@ import { ComboBox, FieldError, Input, Label, ListBox, ListBoxItem, Popover, Text
 
 import { useAnnounce } from '@/components/announcer';
 import { DuplicatePanel, useDuplicateCheck } from '@/components/contacts/duplicates';
-import { LEAD_TYPES, Ltr } from '@/components/crm/labels';
+import { type ContactRole, LEAD_TYPES, Ltr } from '@/components/crm/labels';
 import { useContact } from '@/components/crm/use-crm';
 import { useSession } from '@/components/session';
 import { Button, LinkButton } from '@/components/ui/button';
@@ -24,6 +24,24 @@ import { useOffices, usePicklist } from '@/lib/hooks/reference';
 import { useRefreshAll } from '@/lib/mutations';
 
 const NONE = '__none__';
+
+/** The role a new contact takes from the lead that brings them in (L-3). */
+function roleForLead(leadType: CreateLeadBody['leadType']): ContactRole[] {
+  switch (leadType) {
+    case 'rent':
+      return ['applicant'];
+    case 'buy':
+      return ['buyer'];
+    case 'sell':
+    case 'valuation':
+      return ['seller'];
+    case 'let':
+    case 'management':
+      return ['landlord'];
+    default:
+      return [];
+  }
+}
 
 /** Contact search for lead capture: name, phone in any format, or reference, in the member's own scope. */
 function ContactSearch({ value, onChange, error, labelId }: { value: ContactSummaryDto | null; onChange: (contact: ContactSummaryDto | null) => void; error?: string; labelId: string }) {
@@ -98,7 +116,7 @@ export function NewLead() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [leadType, setLeadType] = useState<string>('buy');
+  const [leadType, setLeadType] = useState<CreateLeadBody['leadType']>('buy');
   const [sourceCode, setSourceCode] = useState<string>(NONE);
   const [detail, setDetail] = useState('');
   const [listingTerm, setListingTerm] = useState('');
@@ -143,11 +161,11 @@ export function NewLead() {
               ...(phone.trim() ? { primaryPhone: phone.trim() } : {}),
               ...(email.trim() ? { primaryEmail: email.trim() } : {}),
               sourceCode,
-              relationships: leadType === 'rent' ? (['applicant'] as const) : leadType === 'buy' ? (['buyer'] as const) : leadType === 'sell' || leadType === 'valuation' ? (['seller'] as const) : leadType === 'let' || leadType === 'management' ? (['landlord'] as const) : [],
+              relationships: roleForLead(leadType),
               ...(duplicates.confirmed ? { confirmNotDuplicate: true } : {}),
             },
           };
-    const body = {
+    const body: CreateLeadBody = {
       ...contactPart,
       leadType,
       sourceCode,
@@ -156,7 +174,7 @@ export function NewLead() {
       ...(message.trim() ? { message: message.trim() } : {}),
       ...(assignee ? { assignedTo: assignee.membershipId } : {}),
       ...(officeId !== NONE ? { officeId } : {}),
-    } as unknown as CreateLeadBody;
+    };
     try {
       const created = await bff<LeadDto>('leads', { method: 'POST', body, idempotencyKey: key });
       announce(t('createdLead', { reference: created.reference }));
@@ -230,7 +248,7 @@ export function NewLead() {
         </Panel>
         <Panel title={t('enquirySection')}>
           <FieldRow>
-            <SelectField label={t('type')} value={leadType} onChange={setLeadType} isRequired options={LEAD_TYPES.map((id) => ({ id, label: crm(`leadType.${id}`) }))} />
+            <SelectField label={t('type')} value={leadType} onChange={(value) => setLeadType(value as CreateLeadBody['leadType'])} isRequired options={LEAD_TYPES.map((id) => ({ id, label: crm(`leadType.${id}`) }))} />
             <SelectField
               id={ids.source}
               label={t('source')}

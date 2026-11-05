@@ -21,7 +21,7 @@ import {
 
 import { AMOUNT, MoneyDto } from '../common/money.js';
 import { PageDto } from '../properties/dto.js';
-import { RefLabelDto } from './dto.js';
+import { NextFollowUpDto, RefLabelDto } from './dto.js';
 
 export const REQUIREMENT_TYPES = ['buy', 'rent'] as const;
 export const REQUIREMENT_STATUSES = ['active', 'paused', 'fulfilled', 'cancelled'] as const;
@@ -44,19 +44,19 @@ const CODE = /^[a-z][a-z0-9_]*$/;
  */
 export class RequirementAreaInput {
   @ApiProperty({ enum: AREA_KINDS }) @IsIn(AREA_KINDS) kind!: (typeof AREA_KINDS)[number];
-  @ApiPropertyOptional({ maxLength: 120, example: 'East Legon' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 120, example: 'East Legon' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(120)
   locality?: string | null;
-  @ApiPropertyOptional({ maxLength: 120, example: 'Greater Accra' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 120, example: 'Greater Accra' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(120)
   adminArea1?: string | null;
-  @ApiPropertyOptional({ example: 5.6355 }) @ValidateIf(notNull) @IsNumber({ allowNaN: false, allowInfinity: false }) latitude?: number | null;
-  @ApiPropertyOptional({ example: -0.1617 }) @ValidateIf(notNull) @IsNumber({ allowNaN: false, allowInfinity: false }) longitude?: number | null;
-  @ApiPropertyOptional({ minimum: 1, maximum: 50_000 }) @ValidateIf(notNull) @IsInt() radiusMetres?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, example: 5.6355 }) @ValidateIf(notNull) @IsNumber({ allowNaN: false, allowInfinity: false }) latitude?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, example: -0.1617 }) @ValidateIf(notNull) @IsNumber({ allowNaN: false, allowInfinity: false }) longitude?: number | null;
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 1, maximum: 50_000 }) @ValidateIf(notNull) @IsInt() radiusMetres?: number | null;
   @ApiPropertyOptional({ type: 'array', items: { type: 'array', items: { type: 'number' } }, description: '[longitude, latitude] pairs' })
   @ValidateIf(notNull) @IsArray() @ArrayMaxSize(101)
   points?: number[][] | null;
-  @ApiPropertyOptional({ maxLength: 80, description: 'Name shown for a map area, e.g. "Near the school"' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 80, description: 'Name shown for a map area, e.g. "Near the school"' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(80)
   label?: string | null;
 }
@@ -138,6 +138,8 @@ export class RequirementDto {
   @ApiProperty({ type: Number, nullable: true, maximum: 100, description: 'Published listings matching now, at most 100 (null without listing.view)' })
   matchCount!: number | null;
   @ApiProperty({ description: 'More than 100 listings match (show "100+"); the matches endpoint gives the exact total' }) matchCountCapped!: boolean;
+  @ApiPropertyOptional({ type: NextFollowUpDto, nullable: true, description: 'Register (B-1) only: the contact\'s next open follow-up among those you may see' })
+  nextFollowUp?: NextFollowUpDto | null;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
   @ApiProperty() version!: number;

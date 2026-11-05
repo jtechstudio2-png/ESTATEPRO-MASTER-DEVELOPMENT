@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsIn, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
 
+import { PageDto } from '../properties/dto.js';
 import { RefLabelDto } from './dto.js';
 
 export const CHECK_TYPES = ['identity', 'address', 'source_of_funds', 'sanctions_pep', 'company_ownership'] as const;
@@ -157,4 +158,20 @@ export class KycCheckDto {
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
   @ApiProperty() version!: number;
+}
+
+export class KycQueueContactDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() name!: string;
+  @ApiProperty({ type: String, nullable: true }) reference!: string | null;
+}
+
+/** One row of the company-wide identity-check queue (SH-1 "Identity checks"). */
+export class KycQueueItemDto extends KycCheckDto {
+  @ApiProperty({ type: KycQueueContactDto }) contact!: KycQueueContactDto;
+}
+
+export class KycQueuePageDto {
+  @ApiProperty({ type: [KycQueueItemDto] }) data!: KycQueueItemDto[];
+  @ApiProperty({ type: PageDto }) page!: PageDto;
 }

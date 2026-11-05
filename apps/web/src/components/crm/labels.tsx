@@ -3,7 +3,8 @@
 import { useTranslations } from 'next-intl';
 
 import { StatusLabel, type Tone } from '@/components/ui/feedback';
-import type { ContactSummaryDto, IdentityCheckSummaryDto, KycCheckDto, LeadSummaryDto, TaskDto } from '@/lib/api-schema';
+import { When } from '@/components/ui/when';
+import type { ContactSummaryDto, IdentityCheckSummaryDto, KycCheckDto, LeadSummaryDto, NextFollowUpDto, TaskDto } from '@/lib/api-schema';
 
 export type ContactRole = ContactSummaryDto['roles'][number];
 export type LeadStatus = LeadSummaryDto['status'];
@@ -105,5 +106,27 @@ export function OverdueMark({ overdue }: { overdue: boolean }) {
     <StatusLabel tone="danger" icon="⚠">
       {t('overdue')}
     </StatusLabel>
+  );
+}
+
+/**
+ * "Next" column (B-1, SE-1, LL-1): the next follow-up the viewer may see.
+ * With `warnWhenNone`, an active client without one is flagged in text.
+ */
+export function NextFollowUpCell({ next, warnWhenNone = false }: { next: NextFollowUpDto | null | undefined; warnWhenNone?: boolean }) {
+  const t = useTranslations('crm');
+  if (!next) {
+    return warnWhenNone ? (
+      <StatusLabel tone="warning" icon="⚠">
+        {t('noFollowUp')}
+      </StatusLabel>
+    ) : (
+      <span>—</span>
+    );
+  }
+  return (
+    <span>
+      <When iso={next.dueAt} /> <OverdueMark overdue={next.overdue} />
+    </span>
   );
 }

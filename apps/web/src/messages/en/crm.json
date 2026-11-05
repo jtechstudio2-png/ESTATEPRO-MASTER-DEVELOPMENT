@@ -60,5 +60,6 @@
   "response": {
     "overdue": "Past response target",
     "late": "Answered late"
-  }
+  },
+  "noFollowUp": "None scheduled"
 }

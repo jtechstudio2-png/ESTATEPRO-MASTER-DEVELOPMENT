@@ -1673,6 +1673,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/kyc-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Identity checks of contacts in your scope: open ones (pending, in review) by default, oldest first */
+        get: operations["KycQueue_queue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/leads": {
         parameters: {
             query?: never;
@@ -3682,6 +3699,31 @@ export interface components {
             /** Format: date-time */
             reviewedAt: string | null;
         };
+        NextFollowUpDto: {
+            /** Format: date-time */
+            dueAt: string;
+            overdue: boolean;
+        };
+        ListingRefDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            status: string;
+            isPublished: boolean;
+        };
+        ListingSummaryDto: {
+            /** @description Listings not closed (draft, available, reserved, under contract) that you may see */
+            active: number;
+            published: number;
+            /** @description Most recently updated */
+            latest: components["schemas"]["ListingRefDto"] | null;
+        };
+        LeadRefDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            status: string;
+        };
         ContactSummaryDto: {
             /** Format: uuid */
             id: string;
@@ -3702,6 +3744,14 @@ export interface components {
             updatedAt: string;
             /** @description Latest identity check (Sellers view); null without kyc.view on this contact */
             identityCheck: components["schemas"]["IdentityCheckSummaryDto"] | null;
+            /** @description Next open follow-up about the contact or one of its leads, among follow-ups you may see (B-1, SE-1, LL-1) */
+            nextFollowUp: components["schemas"]["NextFollowUpDto"] | null;
+            /** @description Sellers and Landlords views only: listings on units the contact owns or we manage for them, among those you may see; null without listing.view */
+            listings?: components["schemas"]["ListingSummaryDto"] | null;
+            /** @description Sellers view only: latest open sell or valuation lead you may see */
+            valuationLead?: components["schemas"]["LeadRefDto"] | null;
+            /** @description Landlords view only: properties owned or managed for them that you may see; null without property.view */
+            properties?: number | null;
         };
         ContactPageDto: {
             data: components["schemas"]["ContactSummaryDto"][];
@@ -3722,7 +3772,7 @@ export interface components {
             /** @enum {string} */
             capturedVia: "web_form" | "portal" | "verbal" | "paper" | "import" | "email";
             /** @description Where the evidence is, e.g. "signed form, file 2026/031" */
-            evidence?: Record<string, never>;
+            evidence?: string | null;
             /**
              * Format: date-time
              * @description When it was given (defaults to now; never in the future)
@@ -3893,20 +3943,20 @@ export interface components {
             version: number;
         };
         DuplicateCheckBody: {
-            primaryEmail?: Record<string, never>;
-            primaryPhone?: Record<string, never>;
+            primaryEmail?: string | null;
+            primaryPhone?: string | null;
             /** @description Tax number of a person (matched by keyed hash) */
-            taxNumber?: Record<string, never>;
+            taxNumber?: string | null;
             /**
              * Format: uuid
              * @description Office whose country completes national phone numbers
              */
-            officeId?: Record<string, never>;
+            officeId?: string | null;
             /**
              * Format: uuid
              * @description Contact being edited (excluded from the results)
              */
-            excludeContactId?: Record<string, never>;
+            excludeContactId?: string | null;
         };
         DuplicateCandidateDto: {
             /** @description False when the match is outside your access: no details are shown */
@@ -3972,7 +4022,7 @@ export interface components {
             /** @enum {string} */
             methodType: "email" | "phone" | "mobile" | "whatsapp" | "fax" | "website" | "other";
             value: string;
-            label?: Record<string, never>;
+            label?: string | null;
             isPrimary?: boolean;
         };
         UpdateMethodBody: {
@@ -4005,11 +4055,21 @@ export interface components {
                 [key: string]: number;
             };
         };
+        MergeBlockerDto: {
+            /** @enum {string} */
+            code: "same_contact" | "already_merged" | "anonymised" | "keep_archived" | "different_types" | "financial_records" | "both_portal";
+            /** @description The reason in English */
+            message: string;
+            /** @description financial_records: the tables holding the records that cannot move */
+            records: string[];
+        };
         MergePreviewDto: {
             keep: components["schemas"]["MergeSideDto"];
             merge: components["schemas"]["MergeSideDto"];
-            /** @description Reasons the merge cannot go ahead; empty when it can */
+            /** @description Reasons the merge cannot go ahead (English); empty when it can */
             blockers: string[];
+            /** @description The same reasons with codes, for translated screens */
+            blockerDetails: components["schemas"]["MergeBlockerDto"][];
             choosableFields: ("displayName" | "displayNameLocal" | "givenName" | "familyName" | "otherNames" | "title" | "organisationName" | "organisationRegNumber" | "taxNumber" | "dateOfBirth" | "primaryEmail" | "primaryPhone" | "preferredLocaleCode" | "preferredChannel" | "nationalityCountryCode" | "residenceCountryCode" | "officeId" | "ownerMembershipId" | "sourceCode" | "notes")[];
         };
         MergeBody: {
@@ -4026,7 +4086,9 @@ export interface components {
              *       "primaryEmail": "merge"
              *     }
              */
-            fields?: Record<string, never>;
+            fields?: {
+                [key: string]: "keep" | "merge";
+            };
         };
         MergeResultDto: {
             contact: components["schemas"]["ContactDto"];
@@ -4095,6 +4157,8 @@ export interface components {
             matchCount: number | null;
             /** @description More than 100 listings match (show "100+"); the matches endpoint gives the exact total */
             matchCountCapped: boolean;
+            /** @description Register (B-1) only: the contact's next open follow-up among those you may see */
+            nextFollowUp?: components["schemas"]["NextFollowUpDto"] | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -4109,18 +4173,18 @@ export interface components {
             /** @enum {string} */
             kind: "locality" | "radius" | "polygon";
             /** @example East Legon */
-            locality?: Record<string, never>;
+            locality?: string | null;
             /** @example Greater Accra */
-            adminArea1?: Record<string, never>;
+            adminArea1?: string | null;
             /** @example 5.6355 */
-            latitude?: Record<string, never>;
+            latitude?: number | null;
             /** @example -0.1617 */
-            longitude?: Record<string, never>;
-            radiusMetres?: Record<string, never>;
+            longitude?: number | null;
+            radiusMetres?: number | null;
             /** @description [longitude, latitude] pairs */
             points?: number[][];
             /** @description Name shown for a map area, e.g. "Near the school" */
-            label?: Record<string, never>;
+            label?: string | null;
         };
         CreateRequirementBody: {
             /**
@@ -4409,6 +4473,51 @@ export interface components {
             /** @enum {string|null} */
             riskRating?: "low" | "medium" | "high" | null;
         };
+        KycQueueContactDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            reference: string | null;
+        };
+        KycQueueItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            checkType: "identity" | "address" | "source_of_funds" | "sanctions_pep" | "company_ownership";
+            /**
+             * @description A verified check past its expiry date reads as expired
+             * @enum {string}
+             */
+            status: "pending" | "in_review" | "verified" | "failed" | "expired";
+            /** @enum {string|null} */
+            riskRating: "low" | "medium" | "high" | null;
+            provider: string | null;
+            providerReference: string | null;
+            identityDocument: components["schemas"]["KycDocumentRefDto"] | null;
+            recordedBy: components["schemas"]["RefLabelDto"] | null;
+            reviewedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            reviewedAt: string | null;
+            /** Format: date */
+            expiresOn: string | null;
+            notes: string | null;
+            /** @description The reviewer’s reason */
+            decisionReason: string | null;
+            /** @description You may edit this open check (kyc.manage) */
+            canEdit: boolean;
+            /** @description You may sign this open check off (kyc.approve) */
+            canDecide: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+            contact: components["schemas"]["KycQueueContactDto"];
+        };
+        KycQueuePageDto: {
+            data: components["schemas"]["KycQueueItemDto"][];
+            page: components["schemas"]["PageDto"];
+        };
         LeadContactDto: {
             /** Format: uuid */
             id: string;
@@ -4470,7 +4579,7 @@ export interface components {
              * Format: uuid
              * @description An existing contact; or give `contact` to create one (duplicate check applies)
              */
-            contactId?: Record<string, never>;
+            contactId?: string | null;
             /** @description A new contact (needs contact.create) */
             contact?: components["schemas"]["CreateContactBody"];
             /** @enum {string} */
@@ -4481,27 +4590,27 @@ export interface components {
              */
             sourceCode: string;
             /** @description Portal name, referrer or campaign detail */
-            sourceDetail?: Record<string, never>;
-            campaign?: Record<string, never>;
+            sourceDetail?: string | null;
+            campaign?: string | null;
             /**
              * Format: uuid
              * @description The listing the enquiry is about
              */
-            listingId?: Record<string, never>;
+            listingId?: string | null;
             /**
              * Format: uuid
              * @description A requirement of the same contact
              */
-            requirementId?: Record<string, never>;
+            requirementId?: string | null;
             /** @description The enquiry as received */
-            message?: Record<string, never>;
+            message?: string | null;
             /**
              * Format: uuid
              * @description Defaults to you; someone else needs lead.assign (decision D6); null leaves it unassigned for the office inbox (managers)
              */
             assignedTo?: string | null;
             /** Format: uuid */
-            officeId?: Record<string, never>;
+            officeId?: string | null;
             /**
              * Format: date-time
              * @description When the enquiry arrived (default now)
@@ -4603,14 +4712,14 @@ export interface components {
             /** @enum {string} */
             status: "contacted" | "qualified" | "unqualified" | "lost";
             /** @description Code from the lost_reason picklist; required for lost */
-            lostReasonCode?: Record<string, never>;
+            lostReasonCode?: string | null;
             /** @description Required when marking unqualified or reopening */
-            note?: Record<string, never>;
+            note?: string | null;
         };
         AssignLeadBody: {
             /** Format: uuid */
             assignedTo: string;
-            note?: Record<string, never>;
+            note?: string | null;
         };
         ArchiveLeadBody: {
             reason: string;
@@ -4666,8 +4775,7 @@ export interface components {
         };
         ActivityPageDto: {
             data: components["schemas"]["ActivityDto"][];
-            /** @description { limit, nextCursor } */
-            page: Record<string, never>;
+            page: components["schemas"]["PageDto"];
         };
         ActivityLinkInput: {
             /** @enum {string} */
@@ -4928,8 +5036,10 @@ export interface components {
             /** Format: date-time */
             generatedAt: string;
             properties: components["schemas"]["PreviewPropertyDto"][];
-            /** @description What the landlord would not see */
+            /** @description What the landlord would not see (English) */
             notVisible: string[];
+            /** @description The same list as codes, in the same order, for translated screens */
+            notVisibleCodes: ("other_owners" | "tenant_buyer_contacts" | "staff_records" | "protected_details")[];
             /** @description Only properties you may view are listed here */
             limitedToYourAccess: boolean;
         };
@@ -5178,7 +5288,9 @@ export interface components {
             rowCount: number | null;
             fileName: string | null;
             /** @description Filters and purpose, as requested */
-            parameters: Record<string, never>;
+            parameters: {
+                [key: string]: unknown;
+            };
             requestedBy: components["schemas"]["RefLabelDto"];
             /** Format: date-time */
             createdAt: string;
@@ -5353,6 +5465,10 @@ export type RejectedMediaDto = components['schemas']['RejectedMediaDto'];
 export type MediaPanelDto = components['schemas']['MediaPanelDto'];
 export type RefLabelDto = components['schemas']['RefLabelDto'];
 export type IdentityCheckSummaryDto = components['schemas']['IdentityCheckSummaryDto'];
+export type NextFollowUpDto = components['schemas']['NextFollowUpDto'];
+export type ListingRefDto = components['schemas']['ListingRefDto'];
+export type ListingSummaryDto = components['schemas']['ListingSummaryDto'];
+export type LeadRefDto = components['schemas']['LeadRefDto'];
 export type ContactSummaryDto = components['schemas']['ContactSummaryDto'];
 export type ContactPageDto = components['schemas']['ContactPageDto'];
 export type ConsentInput = components['schemas']['ConsentInput'];
@@ -5375,6 +5491,7 @@ export type AddRelationshipBody = components['schemas']['AddRelationshipBody'];
 export type EndRelationshipBody = components['schemas']['EndRelationshipBody'];
 export type ConsentHistoryDto = components['schemas']['ConsentHistoryDto'];
 export type MergeSideDto = components['schemas']['MergeSideDto'];
+export type MergeBlockerDto = components['schemas']['MergeBlockerDto'];
 export type MergePreviewDto = components['schemas']['MergePreviewDto'];
 export type MergeBody = components['schemas']['MergeBody'];
 export type MergeResultDto = components['schemas']['MergeResultDto'];
@@ -5402,6 +5519,9 @@ export type CreateKycCheckBody = components['schemas']['CreateKycCheckBody'];
 export type UpdateKycCheckBody = components['schemas']['UpdateKycCheckBody'];
 export type ApproveKycCheckBody = components['schemas']['ApproveKycCheckBody'];
 export type RejectKycCheckBody = components['schemas']['RejectKycCheckBody'];
+export type KycQueueContactDto = components['schemas']['KycQueueContactDto'];
+export type KycQueueItemDto = components['schemas']['KycQueueItemDto'];
+export type KycQueuePageDto = components['schemas']['KycQueuePageDto'];
 export type LeadContactDto = components['schemas']['LeadContactDto'];
 export type LeadListingDto = components['schemas']['LeadListingDto'];
 export type LeadResponseDto = components['schemas']['LeadResponseDto'];
@@ -8872,6 +8992,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KycCheckDto"];
+                };
+            };
+        };
+    };
+    KycQueue_queue: {
+        parameters: {
+            query?: {
+                /** @description true: verified checks due for renewal within 30 days */
+                "filter[expiring]"?: unknown;
+                /** @description identity, address, source_of_funds, sanctions_pep, company_ownership */
+                "filter[checkType]"?: unknown;
+                /** @description Default pending,in_review. pending, in_review, verified, failed, expired */
+                "filter[status]"?: unknown;
+                sort?: "createdAt" | "-createdAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycQueuePageDto"];
                 };
             };
         };

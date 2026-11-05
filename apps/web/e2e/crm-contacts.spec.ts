@@ -155,6 +155,34 @@ test.describe('CRM contacts (C-1 to C-6)', () => {
     await expect(page.getByText('This contact was merged into another record.')).toBeVisible();
   });
 
+  test('SE-1 and LL-1 show identity checks, listings, properties and the next follow-up in the views', async ({ page, state }) => {
+    await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
+    await page.goto('/contacts?view=seller');
+    const sellers = page.getByRole('table', { name: 'Sellers contacts' });
+    for (const header of ['Identity check', 'Listings', 'Valuation lead', 'Next follow-up']) await expect(sellers.getByRole('columnheader', { name: header })).toBeVisible();
+    const esi = sellers.getByRole('row').filter({ hasText: 'Esi Sarpong' });
+    await expect(esi).toContainText('In review');
+    await expect(esi).toContainText('None scheduled');
+    await page.goto('/contacts?view=landlord');
+    const landlords = page.getByRole('table', { name: 'Landlords contacts' });
+    await expect(landlords.getByRole('columnheader', { name: 'Properties' })).toBeVisible();
+    await expect(landlords.getByRole('row').filter({ hasText: 'Ama Owusu' }).getByRole('cell').filter({ hasText: /^1$/ })).toHaveCount(1);
+    await expectAccessible(page);
+  });
+
+  test('SH-1 identity checks list open checks across contacts, linked to the contact’s Identity tab', async ({ page, state }) => {
+    await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
+    await page.getByRole('navigation', { name: 'Main' }).first().getByRole('link', { name: /Identity checks/ }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Identity checks' })).toBeVisible();
+    const open = page.getByRole('table', { name: 'Open' });
+    const row = open.getByRole('row').filter({ hasText: 'Esi Sarpong' });
+    await expect(row).toContainText('In review');
+    await expect(row).toContainText('•••• 4567');
+    await expectAccessible(page);
+    await row.getByRole('link', { name: 'Esi Sarpong' }).click();
+    await expect(page).toHaveURL(new RegExp(`/contacts/${state.records.crm.seller.id}/identity`));
+  });
+
   test('SE-1 and KYC: a manager signs off an identity check once, with a risk rating', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
     await page.goto(`/contacts/${state.records.crm.seller.id}/identity`);
@@ -170,6 +198,11 @@ test.describe('CRM contacts (C-1 to C-6)', () => {
     await expect(checks).toContainText('Risk: Low');
     // Signed off: no further decision is offered.
     await expect(checks.getByRole('button', { name: 'More actions for the Identity check' })).toHaveCount(0);
+    // It leaves the open queue and appears under Verified.
+    await page.goto('/identity-checks');
+    await expect(page.getByText('Esi Sarpong')).toHaveCount(0);
+    await page.goto('/identity-checks?queue=verified');
+    await expect(page.getByRole('table', { name: 'Verified' })).toContainText('Esi Sarpong');
   });
 
   test('B-1 and B-2 list requirements by budget and show matches from published listings only', async ({ page, state }) => {
@@ -207,6 +240,7 @@ test.describe('CRM contacts (C-1 to C-6)', () => {
     const preview = page.locator('section').filter({ has: page.getByRole('heading', { name: 'What this landlord could see in the portal' }) });
     await expect(preview).toContainText('Visible: Labone Villa');
     await expect(preview).toContainText('Not visible:');
+    await expect(preview).toContainText('Protected details (identity, tax and bank numbers)');
     await expectAccessible(page);
   });
 

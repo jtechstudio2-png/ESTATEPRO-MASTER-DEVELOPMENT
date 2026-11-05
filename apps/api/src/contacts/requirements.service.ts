@@ -10,6 +10,7 @@ import type { Tx } from '../database/database.module.js';
 import { listingScopeSql } from '../listings/listing-access.js';
 import { checkPicklistCode } from '../reference/picklists.js';
 import { contactScopeSql, scopeFor } from './contact-access.js';
+import { nextFollowUps } from './contact-summaries.js';
 import { assertEditable, ContactsService } from './contacts.service.js';
 import {
   featuresMatchedSql,
@@ -103,7 +104,9 @@ export class RequirementsService {
       .limit(query.limit + 1)
       .execute();
     const counts = await this.matchCounts(tx, ctx, rows.slice(0, query.limit).map((row) => row.id));
-    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => toRequirementDto(row, counts));
+    // B-1 "Next": the contact's next follow-up among those the viewer may see (C6).
+    const followUps = await nextFollowUps(tx, ctx, [...new Set(rows.slice(0, query.limit).map((row) => row.contactId))]);
+    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({ ...toRequirementDto(row, counts), nextFollowUp: followUps.get(row.contactId) ?? null }));
   }
 
   async listForContact(tx: Tx, ctx: TenantContext, contactId: string): Promise<RequirementDto[]> {

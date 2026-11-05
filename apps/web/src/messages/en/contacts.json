@@ -214,5 +214,13 @@
     "phone": "phone number",
     "tax_number": "tax number",
     "identity_document": "identity document"
-  }
+  },
+  "listings": "Listings",
+  "valuationLead": "Valuation lead",
+  "propertiesCount": "Properties",
+  "next": "Next follow-up",
+  "noListings": "None",
+  "published": "published",
+  "notPublished": "not published",
+  "moreListings": "(+{count} more)"
 }

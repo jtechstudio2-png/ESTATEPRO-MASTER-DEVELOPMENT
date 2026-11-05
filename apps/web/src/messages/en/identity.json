@@ -112,5 +112,27 @@
   "validUntil": "Valid until",
   "approveNote": "Note",
   "approved": "Check approved",
-  "rejected": "Check rejected"
+  "rejected": "Check rejected",
+  "queueTitle": "Identity checks",
+  "queueSubtitle": "Checks of the contacts you look after. Decide each one on the contact's Identity tab.",
+  "queueViews": "Identity check views",
+  "queue": {
+    "open": "Open",
+    "expiring": "Due for renewal",
+    "verified": "Verified",
+    "failed": "Failed",
+    "expired": "Expired"
+  },
+  "queueEmpty": {
+    "open": "No open identity checks",
+    "expiring": "No checks due for renewal in the next 30 days",
+    "verified": "No verified checks",
+    "failed": "No failed checks",
+    "expired": "No expired checks"
+  },
+  "queueEmptyDetail": "Identity checks are recorded on a contact's Identity tab.",
+  "oldestFirst": "Recorded, oldest first",
+  "newestFirst": "Recorded, newest first",
+  "contactHeader": "Contact",
+  "recordedHeader": "Recorded"
 }

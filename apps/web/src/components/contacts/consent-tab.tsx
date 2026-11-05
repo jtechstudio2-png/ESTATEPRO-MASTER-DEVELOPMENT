@@ -156,8 +156,7 @@ function RecordConsentDialog({ contactId, onClose }: { contactId: string; onClos
         status,
         capturedVia: via,
         ...(status === 'granted' ? { lawfulBasis: basis } : {}),
-        // The API takes the evidence as text (up to 500 characters); the generated schema types it loosely.
-        ...(evidence.trim() ? { evidence: evidence.trim() as unknown as ConsentInput['evidence'] } : {}),
+        ...(evidence.trim() ? { evidence: evidence.trim() } : {}),
       };
       await bff(`contacts/${contactId}/consents`, { method: 'POST', body });
       announce(status === 'granted' ? t('recordedGranted', { purpose: t(`purposeValue.${purpose}`) }) : t('recordedWithdrawn', { purpose: t(`purposeValue.${purpose}`) }));

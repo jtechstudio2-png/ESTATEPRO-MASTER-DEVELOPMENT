@@ -31,20 +31,7 @@ const FREQUENCIES = ['monthly', 'weekly', 'quarterly', 'semi_annual', 'annual'] 
 const STATUSES = ['active', 'paused', 'fulfilled', 'cancelled'] as const;
 const NONE = '__none__';
 
-/**
- * An area as the API takes it (RequirementAreaInput). The generated schema
- * types its optional members loosely, so the form keeps its own exact type.
- */
-interface AreaInput {
-  kind: 'locality' | 'radius' | 'polygon';
-  locality?: string | null;
-  adminArea1?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  radiusMetres?: number | null;
-  points?: number[][] | null;
-  label?: string | null;
-}
+type AreaInput = RequirementAreaInput;
 
 /** "GH₵900,000 – GH₵1,200,000" or "up to …"; never mixes currencies (B-1). */
 export function useBudgetText() {
@@ -184,7 +171,8 @@ function RequirementDialog({ contact, requirement, onClose }: { contact: Contact
   const [maxBeds, setMaxBeds] = useState(requirement?.maxBedrooms?.toString() ?? '');
   const [typeIds, setTypeIds] = useState<string[]>(requirement?.propertyTypeIds ?? []);
   const [mustHave, setMustHave] = useState<string[]>(requirement?.mustHaveFeatures ?? []);
-  const [areas, setAreas] = useState<AreaInput[]>(() => (requirement?.areas ?? []).map((area) => ({ ...area })));
+  // Stored areas come back with null for absent members; the API takes them omitted.
+  const [areas, setAreas] = useState<AreaInput[]>(() => (requirement?.areas ?? []).map(({ points, ...area }) => ({ ...area, ...(points ? { points } : {}) })));
   const [locality, setLocality] = useState('');
   const [pickingPoint, setPickingPoint] = useState(false);
   const [point, setPoint] = useState<LocationValue | null>(null);
@@ -238,7 +226,7 @@ function RequirementDialog({ contact, requirement, onClose }: { contact: Contact
       minBedrooms: minBeds === '' ? null : Number(minBeds),
       maxBedrooms: maxBeds === '' ? null : Number(maxBeds),
       propertyTypeIds: typeIds,
-      areas: areas as unknown as RequirementAreaInput[],
+      areas,
       mustHaveFeatures: mustHave,
       moveBy: moveBy || null,
       financingStatus: financing === NONE ? null : (financing as CreateRequirementBody['financingStatus']),

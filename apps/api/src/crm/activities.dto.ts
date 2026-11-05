@@ -20,6 +20,7 @@ import {
 } from 'class-validator';
 
 import { RefLabelDto } from '../contacts/dto.js';
+import { PageDto } from '../properties/dto.js';
 
 /** Types a person logs (A-2); system entries are written by the server. */
 export const LOGGABLE_TYPES = ['call', 'email', 'sms', 'whatsapp', 'meeting', 'note'] as const;
@@ -114,5 +115,5 @@ export class ActivityDetailDto extends ActivityDto {
 
 export class ActivityPageDto {
   @ApiProperty({ type: [ActivityDto] }) data!: ActivityDto[];
-  @ApiProperty({ type: Object, description: '{ limit, nextCursor }' }) page!: { limit: number; nextCursor: string | null };
+  @ApiProperty({ type: PageDto }) page!: PageDto;
 }

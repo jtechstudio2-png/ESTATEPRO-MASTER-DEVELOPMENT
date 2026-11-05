@@ -98,7 +98,7 @@ export function PropertiesTab({ id }: { id: string }) {
           <strong>{t('visible')}</strong> {data.properties.length === 0 ? t('nothingVisible') : data.properties.map((property) => property.name ?? property.reference).join(', ')}
         </p>
         <p>
-          <strong>{t('notVisible')}</strong> {data.notVisible.join(' · ')}
+          <strong>{t('notVisible')}</strong> {data.notVisibleCodes.map((code) => t(`notVisibleCode.${code as 'other_owners'}`)).join(' · ')}
         </p>
         {data.limitedToYourAccess ? <Notice tone="info">{t('limited')}</Notice> : null}
         <p className={styles.meta}>{t('auditNote')}</p>

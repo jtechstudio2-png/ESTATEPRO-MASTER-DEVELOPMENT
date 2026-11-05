@@ -41,7 +41,7 @@ export class ExportJobDto {
   @ApiProperty({ enum: ['completed', 'failed', 'expired'] }) status!: string;
   @ApiProperty({ type: Number, nullable: true }) rowCount!: number | null;
   @ApiProperty({ type: String, nullable: true }) fileName!: string | null;
-  @ApiProperty({ description: 'Filters and purpose, as requested' }) parameters!: Record<string, unknown>;
+  @ApiProperty({ type: 'object', additionalProperties: true, description: 'Filters and purpose, as requested' }) parameters!: Record<string, unknown>;
   @ApiProperty({ type: RefLabelDto }) requestedBy!: RefLabelDto;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) expiresAt!: string | null;

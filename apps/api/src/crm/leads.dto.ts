@@ -16,7 +16,7 @@ const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'stri
 const CODE = /^[a-z][a-z0-9_]*$/;
 
 export class CreateLeadBody {
-  @ApiPropertyOptional({ format: 'uuid', description: 'An existing contact; or give `contact` to create one (duplicate check applies)' })
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'An existing contact; or give `contact` to create one (duplicate check applies)' })
   @ValidateIf(notNull) @IsUUID()
   contactId?: string | null;
   @ApiPropertyOptional({ type: CreateContactBody, description: 'A new contact (needs contact.create)' })
@@ -24,19 +24,19 @@ export class CreateLeadBody {
   contact?: CreateContactBody | null;
   @ApiProperty({ enum: LEAD_TYPES }) @IsIn(LEAD_TYPES) leadType!: (typeof LEAD_TYPES)[number];
   @ApiProperty({ example: 'walk_in', description: 'Code from the lead_source picklist' }) @Matches(CODE) sourceCode!: string;
-  @ApiPropertyOptional({ maxLength: 200, description: 'Portal name, referrer or campaign detail' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 200, description: 'Portal name, referrer or campaign detail' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(200)
   sourceDetail?: string | null;
-  @ApiPropertyOptional({ maxLength: 200 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(200) campaign?: string | null;
-  @ApiPropertyOptional({ format: 'uuid', description: 'The listing the enquiry is about' }) @ValidateIf(notNull) @IsUUID() listingId?: string | null;
-  @ApiPropertyOptional({ format: 'uuid', description: 'A requirement of the same contact' }) @ValidateIf(notNull) @IsUUID() requirementId?: string | null;
-  @ApiPropertyOptional({ maxLength: 4000, description: 'The enquiry as received' })
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 200 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(200) campaign?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'The listing the enquiry is about' }) @ValidateIf(notNull) @IsUUID() listingId?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'A requirement of the same contact' }) @ValidateIf(notNull) @IsUUID() requirementId?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 4000, description: 'The enquiry as received' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MaxLength(4000)
   message?: string | null;
   @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid', description: 'Defaults to you; someone else needs lead.assign (decision D6); null leaves it unassigned for the office inbox (managers)' })
   @ValidateIf(notNull) @IsUUID()
   assignedTo?: string | null;
-  @ApiPropertyOptional({ format: 'uuid' }) @ValidateIf(notNull) @IsUUID() officeId?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, format: 'uuid' }) @ValidateIf(notNull) @IsUUID() officeId?: string | null;
   @ApiPropertyOptional({ format: 'date-time', description: 'When the enquiry arrived (default now)' }) @IsOptional() @IsISO8601({ strict: true }) receivedAt?: string;
 }
 
@@ -52,15 +52,15 @@ export class UpdateLeadBody {
 
 export class ChangeLeadStatusBody {
   @ApiProperty({ enum: SETTABLE_STATUSES }) @IsIn(SETTABLE_STATUSES) status!: (typeof SETTABLE_STATUSES)[number];
-  @ApiPropertyOptional({ description: 'Code from the lost_reason picklist; required for lost' }) @ValidateIf(notNull) @Matches(CODE) lostReasonCode?: string | null;
-  @ApiPropertyOptional({ maxLength: 1000, description: 'Required when marking unqualified or reopening' })
+  @ApiPropertyOptional({ type: String, nullable: true, description: 'Code from the lost_reason picklist; required for lost' }) @ValidateIf(notNull) @Matches(CODE) lostReasonCode?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 1000, description: 'Required when marking unqualified or reopening' })
   @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(3) @MaxLength(1000)
   note?: string | null;
 }
 
 export class AssignLeadBody {
   @ApiProperty({ format: 'uuid' }) @IsUUID() assignedTo!: string;
-  @ApiPropertyOptional({ maxLength: 1000 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(1000) note?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true, maxLength: 1000 }) @ValidateIf(notNull) @Transform(trim) @IsString() @MinLength(1) @MaxLength(1000) note?: string | null;
 }
 
 export class ArchiveLeadBody {

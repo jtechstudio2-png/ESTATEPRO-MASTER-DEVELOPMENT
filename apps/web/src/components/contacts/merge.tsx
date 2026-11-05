@@ -141,8 +141,10 @@ export function MergePage({ id, otherId }: { id: string; otherId: string | null 
       {blockers.length > 0 ? (
         <Notice tone="danger" title={t('blocked')}>
           <ul>
-            {blockers.map((blocker) => (
-              <li key={blocker}>{blocker}</li>
+            {preview.data.blockerDetails.map((blocker) => (
+              <li key={blocker.code}>
+                {t(`blocker.${blocker.code}`, { records: blocker.records.map((table) => (t.has(`reference.${table}`) ? t(`reference.${table}` as 'reference.leads') : table.replace(/_/g, ' '))).join(', ') })}
+              </li>
             ))}
           </ul>
         </Notice>

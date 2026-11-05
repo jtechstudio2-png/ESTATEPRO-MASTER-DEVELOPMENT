@@ -4,16 +4,20 @@ import type { Response } from 'express';
 
 import { RequirePermission, Tenant } from '../auth/decorators.js';
 import { requireIfMatch, setVersionEtag } from '../common/http.js';
+import { type FilterSpec, type ListQueryInput, parseListQuery, type SortSpec } from '../common/list-query.js';
 import { Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import { TenantDb } from '../database/database.module.js';
 import {
   ApproveKycCheckBody,
   ArchiveIdentityDocumentBody,
+  CHECK_STATUSES,
+  CHECK_TYPES,
   CreateIdentityDocumentBody,
   CreateKycCheckBody,
   IdentityDocumentDto,
   KycCheckDto,
+  KycQueuePageDto,
   RejectKycCheckBody,
   UpdateIdentityDocumentBody,
   UpdateKycCheckBody,
@@ -190,5 +194,43 @@ export class KycController {
     const check = await this.tenantDb.run(ctx, (tx) => this.kyc.rejectCheck(tx, ctx, contactId, checkId, version, body));
     setVersionEtag(res, check.version);
     return check;
+  }
+}
+
+const QUEUE_SORT = {
+  allowed: { createdAt: 'timestamp' },
+  default: { field: 'createdAt', direction: 'asc' },
+} as const satisfies SortSpec<'createdAt'>;
+
+const QUEUE_FILTERS: FilterSpec = {
+  status: { type: 'enum', values: CHECK_STATUSES, multi: true },
+  checkType: { type: 'enum', values: CHECK_TYPES, multi: true },
+  expiring: { type: 'boolean' },
+};
+
+/** The company-wide identity-check queue (wireframe SH-1 "Identity checks"; C6). */
+@ApiTags('Contacts: identity and KYC')
+@ApiBearerAuth()
+@ApiHeader({ name: 'X-Company-Id', required: true })
+@Controller('api/v1/kyc-checks')
+export class KycQueueController {
+  constructor(
+    private readonly tenantDb: TenantDb,
+    private readonly kyc: KycService,
+  ) {}
+
+  @Get()
+  @RequirePermission('kyc.view')
+  @ApiOperation({ summary: 'Identity checks of contacts in your scope: open ones (pending, in review) by default, oldest first' })
+  @ApiQuery({ name: 'limit', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 } })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'sort', required: false, enum: ['createdAt', '-createdAt'] })
+  @ApiQuery({ name: 'filter[status]', required: false, description: `Default pending,in_review. ${CHECK_STATUSES.join(', ')}` })
+  @ApiQuery({ name: 'filter[checkType]', required: false, description: CHECK_TYPES.join(', ') })
+  @ApiQuery({ name: 'filter[expiring]', required: false, description: 'true: verified checks due for renewal within 30 days' })
+  @ApiOkResponse({ type: KycQueuePageDto })
+  async queue(@Tenant() ctx: TenantContext, @Query() query: ListQueryInput): Promise<KycQueuePageDto> {
+    const parsed = parseListQuery<'createdAt'>(query, QUEUE_SORT, QUEUE_FILTERS);
+    return this.tenantDb.run(ctx, (tx) => this.kyc.queue(tx, ctx, parsed));
   }
 }

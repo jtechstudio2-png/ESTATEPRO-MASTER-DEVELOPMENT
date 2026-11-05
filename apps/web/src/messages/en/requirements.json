@@ -115,5 +115,6 @@
   "contact": "Contact",
   "bedsHeader": "Beds",
   "updated": "Updated",
-  "forRequirement": "for the {type} requirement"
+  "forRequirement": "for the {type} requirement",
+  "next": "Next follow-up"
 }

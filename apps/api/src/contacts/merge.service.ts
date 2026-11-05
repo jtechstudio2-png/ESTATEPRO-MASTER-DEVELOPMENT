@@ -7,7 +7,7 @@ import type { TenantContext } from '../common/request-context.js';
 import { SensitiveDataService } from '../crypto/sensitive-data.service.js';
 import type { Tx } from '../database/database.module.js';
 import { ContactsService } from './contacts.service.js';
-import { MERGE_FIELDS, type MergeBody, type MergeField, type MergePreviewDto, type MergeResultDto } from './dto.js';
+import { MERGE_FIELDS, type MergeBlockerDto, type MergeBody, type MergeField, type MergePreviewDto, type MergeResultDto } from './dto.js';
 
 type ContactRecord = NonNullable<Awaited<ReturnType<MergeService['lock']>>>;
 
@@ -76,7 +76,8 @@ export class MergeService {
     return {
       keep: { contact: keepDto, references: keepRefs },
       merge: { contact: mergeDto, references: mergeRefs },
-      blockers,
+      blockers: blockers.map((blocker) => blocker.message),
+      blockerDetails: blockers,
       choosableFields: [...MERGE_FIELDS],
     };
   }
@@ -98,7 +99,7 @@ export class MergeService {
     if (keep.version !== expectedKeepVersion || merge.version !== Number(body.mergeVersion)) throw Problems.preconditionFailed();
 
     const blockers = await this.blockers(tx, keep, merge);
-    if (blockers.length > 0) throw Problems.businessRule(`These contacts cannot be merged: ${blockers.join(' ')}`);
+    if (blockers.length > 0) throw Problems.businessRule(`These contacts cannot be merged: ${blockers.map((blocker) => blocker.message).join(' ')}`);
 
     const choices = this.validateChoices(body.fields ?? {});
     const patch = await this.chosenValues(tx, ctx, keep, merge, choices);
@@ -174,17 +175,22 @@ export class MergeService {
     tx: Tx,
     keep: { id: string; contactType: string; mergedIntoContactId: string | null; isAnonymised: boolean; archivedAt: Date | null },
     merge: { id: string; contactType: string; mergedIntoContactId: string | null; isAnonymised: boolean },
-  ): Promise<string[]> {
-    const reasons: string[] = [];
-    if (keep.id === merge.id) reasons.push('A contact cannot be merged into itself.');
-    if (keep.mergedIntoContactId !== null || merge.mergedIntoContactId !== null) reasons.push('One of the contacts was already merged into another contact.');
-    if (keep.isAnonymised || merge.isAnonymised) reasons.push('Anonymised contacts cannot be merged.');
-    if (keep.archivedAt !== null && keep.mergedIntoContactId === null) reasons.push('The contact to keep is archived. Restore it first.');
-    if (keep.contactType !== merge.contactType) reasons.push('A person and an organisation cannot be merged.');
+  ): Promise<MergeBlockerDto[]> {
+    const reasons: MergeBlockerDto[] = [];
+    const add = (code: MergeBlockerDto['code'], message: string, records: string[] = []) => reasons.push({ code, message, records });
+    if (keep.id === merge.id) add('same_contact', 'A contact cannot be merged into itself.');
+    if (keep.mergedIntoContactId !== null || merge.mergedIntoContactId !== null) add('already_merged', 'One of the contacts was already merged into another contact.');
+    if (keep.isAnonymised || merge.isAnonymised) add('anonymised', 'Anonymised contacts cannot be merged.');
+    if (keep.archivedAt !== null && keep.mergedIntoContactId === null) add('keep_archived', 'The contact to keep is archived. Restore it first.');
+    if (keep.contactType !== merge.contactType) add('different_types', 'A person and an organisation cannot be merged.');
     const { rows } = await sql<{ blockers: string[] }>`select app.contact_merge_blockers(${merge.id}::uuid) as blockers`.execute(tx);
     const financial = rows[0]?.blockers ?? [];
     if (financial.length > 0) {
-      reasons.push(`The contact to merge has ${financial.map((table) => BLOCKING_TABLE_LABELS[table] ?? table).join(', ')}; financial and contractual records are never moved to another contact.`);
+      add(
+        'financial_records',
+        `The contact to merge has ${financial.map((table) => BLOCKING_TABLE_LABELS[table] ?? table).join(', ')}; financial and contractual records are never moved to another contact.`,
+        financial,
+      );
     }
     const portal = await tx
       .selectFrom('companyMemberships')
@@ -192,7 +198,7 @@ export class MergeService {
       .where('contactId', 'in', [keep.id, merge.id])
       .where('status', 'in', ['invited', 'active'])
       .executeTakeFirstOrThrow();
-    if (Number(portal.n) > 1) reasons.push('Both contacts have portal access. End one portal membership first.');
+    if (Number(portal.n) > 1) add('both_portal', 'Both contacts have portal access. End one portal membership first.');
     return reasons;
   }
 

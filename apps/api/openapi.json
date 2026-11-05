@@ -7542,6 +7542,92 @@
         ]
       }
     },
+    "/api/v1/kyc-checks": {
+      "get": {
+        "operationId": "KycQueue_queue",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[expiring]",
+            "required": false,
+            "in": "query",
+            "description": "true: verified checks due for renewal within 30 days",
+            "schema": {}
+          },
+          {
+            "name": "filter[checkType]",
+            "required": false,
+            "in": "query",
+            "description": "identity, address, source_of_funds, sanctions_pep, company_ownership",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "Default pending,in_review. pending, in_review, verified, failed, expired",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "createdAt",
+                "-createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KycQueuePageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Identity checks of contacts in your scope: open ones (pending, in review) by default, oldest first",
+        "tags": [
+          "Contacts: identity and KYC"
+        ]
+      }
+    },
     "/api/v1/leads": {
       "get": {
         "operationId": "Leads_list",
@@ -15197,6 +15283,94 @@
           "reviewedAt"
         ]
       },
+      "NextFollowUpDto": {
+        "type": "object",
+        "properties": {
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dueAt",
+          "overdue"
+        ]
+      },
+      "ListingRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "isPublished"
+        ]
+      },
+      "ListingSummaryDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "number",
+            "description": "Listings not closed (draft, available, reserved, under contract) that you may see"
+          },
+          "published": {
+            "type": "number"
+          },
+          "latest": {
+            "description": "Most recently updated",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ListingRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "published",
+          "latest"
+        ]
+      },
+      "LeadRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status"
+        ]
+      },
       "ContactSummaryDto": {
         "type": "object",
         "properties": {
@@ -15293,6 +15467,46 @@
                 "type": "null"
               }
             ]
+          },
+          "nextFollowUp": {
+            "description": "Next open follow-up about the contact or one of its leads, among follow-ups you may see (B-1, SE-1, LL-1)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextFollowUpDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listings": {
+            "description": "Sellers and Landlords views only: listings on units the contact owns or we manage for them, among those you may see; null without listing.view",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ListingSummaryDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valuationLead": {
+            "description": "Sellers view only: latest open sell or valuation lead you may see",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeadRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "properties": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Landlords view only: properties owned or managed for them that you may see; null without property.view"
           }
         },
         "required": [
@@ -15307,7 +15521,8 @@
           "office",
           "archivedAt",
           "updatedAt",
-          "identityCheck"
+          "identityCheck",
+          "nextFollowUp"
         ]
       },
       "ContactPageDto": {
@@ -15381,7 +15596,10 @@
             ]
           },
           "evidence": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 500,
             "description": "Where the evidence is, e.g. \"signed form, file 2026/031\""
           },
@@ -16111,25 +16329,40 @@
         "type": "object",
         "properties": {
           "primaryEmail": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 254
           },
           "primaryPhone": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 30
           },
           "taxNumber": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 50,
             "description": "Tax number of a person (matched by keyed hash)"
           },
           "officeId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid",
             "description": "Office whose country completes national phone numbers"
           },
           "excludeContactId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid",
             "description": "Contact being edited (excluded from the results)"
           }
@@ -16400,7 +16633,10 @@
             "maxLength": 500
           },
           "label": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 60
           },
           "isPrimary": {
@@ -16502,6 +16738,39 @@
           "references"
         ]
       },
+      "MergeBlockerDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "same_contact",
+              "already_merged",
+              "anonymised",
+              "keep_archived",
+              "different_types",
+              "financial_records",
+              "both_portal"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "The reason in English"
+          },
+          "records": {
+            "description": "financial_records: the tables holding the records that cannot move",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "records"
+        ]
+      },
       "MergePreviewDto": {
         "type": "object",
         "properties": {
@@ -16512,10 +16781,17 @@
             "$ref": "#/components/schemas/MergeSideDto"
           },
           "blockers": {
-            "description": "Reasons the merge cannot go ahead; empty when it can",
+            "description": "Reasons the merge cannot go ahead (English); empty when it can",
             "type": "array",
             "items": {
               "type": "string"
+            }
+          },
+          "blockerDetails": {
+            "description": "The same reasons with codes, for translated screens",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeBlockerDto"
             }
           },
           "choosableFields": {
@@ -16551,6 +16827,7 @@
           "keep",
           "merge",
           "blockers",
+          "blockerDetails",
           "choosableFields"
         ]
       },
@@ -16568,6 +16845,13 @@
           },
           "fields": {
             "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "keep",
+                "merge"
+              ]
+            },
             "description": "For each field, whose value to keep: \"keep\" (default) or \"merge\". Fields: displayName, displayNameLocal, givenName, familyName, otherNames, title, organisationName, organisationRegNumber, taxNumber, dateOfBirth, primaryEmail, primaryPhone, preferredLocaleCode, preferredChannel, nationalityCountryCode, residenceCountryCode, officeId, ownerMembershipId, sourceCode, notes",
             "example": {
               "primaryEmail": "merge"
@@ -16848,6 +17132,17 @@
             "type": "boolean",
             "description": "More than 100 listings match (show \"100+\"); the matches endpoint gives the exact total"
           },
+          "nextFollowUp": {
+            "description": "Register (B-1) only: the contact's next open follow-up among those you may see",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextFollowUpDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -16914,25 +17209,40 @@
             ]
           },
           "locality": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 120,
             "example": "East Legon"
           },
           "adminArea1": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 120,
             "example": "Greater Accra"
           },
           "latitude": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "example": 5.6355
           },
           "longitude": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "example": -0.1617
           },
           "radiusMetres": {
-            "type": "object",
+            "type": [
+              "number",
+              "null"
+            ],
             "minimum": 1,
             "maximum": 50000
           },
@@ -16947,7 +17257,10 @@
             "description": "[longitude, latitude] pairs"
           },
           "label": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 80,
             "description": "Name shown for a map area, e.g. \"Near the school\""
           }
@@ -17965,6 +18278,201 @@
           "reason"
         ]
       },
+      "KycQueueContactDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "reference"
+        ]
+      },
+      "KycQueueItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "checkType": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "address",
+              "source_of_funds",
+              "sanctions_pep",
+              "company_ownership"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_review",
+              "verified",
+              "failed",
+              "expired"
+            ],
+            "description": "A verified check past its expiry date reads as expired"
+          },
+          "riskRating": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              null
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "providerReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "identityDocument": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KycDocumentRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recordedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviewedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviewedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "expiresOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "decisionReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The reviewer’s reason"
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You may edit this open check (kyc.manage)"
+          },
+          "canDecide": {
+            "type": "boolean",
+            "description": "You may sign this open check off (kyc.approve)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/KycQueueContactDto"
+          }
+        },
+        "required": [
+          "id",
+          "checkType",
+          "status",
+          "riskRating",
+          "provider",
+          "providerReference",
+          "identityDocument",
+          "recordedBy",
+          "reviewedBy",
+          "reviewedAt",
+          "expiresOn",
+          "notes",
+          "decisionReason",
+          "canEdit",
+          "canDecide",
+          "createdAt",
+          "updatedAt",
+          "version",
+          "contact"
+        ]
+      },
+      "KycQueuePageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KycQueueItemDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
       "LeadContactDto": {
         "type": "object",
         "properties": {
@@ -18204,7 +18712,10 @@
         "type": "object",
         "properties": {
           "contactId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid",
             "description": "An existing contact; or give `contact` to create one (duplicate check applies)"
           },
@@ -18234,26 +18745,41 @@
             "description": "Code from the lead_source picklist"
           },
           "sourceDetail": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 200,
             "description": "Portal name, referrer or campaign detail"
           },
           "campaign": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 200
           },
           "listingId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid",
             "description": "The listing the enquiry is about"
           },
           "requirementId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid",
             "description": "A requirement of the same contact"
           },
           "message": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 4000,
             "description": "The enquiry as received"
           },
@@ -18266,7 +18792,10 @@
             "description": "Defaults to you; someone else needs lead.assign (decision D6); null leaves it unassigned for the office inbox (managers)"
           },
           "officeId": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "receivedAt": {
@@ -18710,11 +19239,17 @@
             ]
           },
           "lostReasonCode": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Code from the lost_reason picklist; required for lost"
           },
           "note": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 1000,
             "description": "Required when marking unqualified or reopening"
           }
@@ -18731,7 +19266,10 @@
             "format": "uuid"
           },
           "note": {
-            "type": "object",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 1000
           }
         },
@@ -18981,8 +19519,7 @@
             }
           },
           "page": {
-            "type": "object",
-            "description": "{ limit, nextCursor }"
+            "$ref": "#/components/schemas/PageDto"
           }
         },
         "required": [
@@ -19941,10 +20478,23 @@
             }
           },
           "notVisible": {
-            "description": "What the landlord would not see",
+            "description": "What the landlord would not see (English)",
             "type": "array",
             "items": {
               "type": "string"
+            }
+          },
+          "notVisibleCodes": {
+            "type": "array",
+            "description": "The same list as codes, in the same order, for translated screens",
+            "items": {
+              "type": "string",
+              "enum": [
+                "other_owners",
+                "tenant_buyer_contacts",
+                "staff_records",
+                "protected_details"
+              ]
             }
           },
           "limitedToYourAccess": {
@@ -19959,6 +20509,7 @@
           "generatedAt",
           "properties",
           "notVisible",
+          "notVisibleCodes",
           "limitedToYourAccess"
         ]
       },
@@ -20855,6 +21406,7 @@
           },
           "parameters": {
             "type": "object",
+            "additionalProperties": true,
             "description": "Filters and purpose, as requested"
           },
           "requestedBy": {

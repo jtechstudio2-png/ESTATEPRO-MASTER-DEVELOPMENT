@@ -207,7 +207,7 @@ export class DashboardsService {
       { code: 'unassigned_leads', count: n(unassignedOld.rows[0]?.n), message: 'New leads unassigned for more than an hour', link: '/api/v1/leads?filter[assignedTo]=unassigned' },
       ...(target !== null ? [{ code: 'response_overdue', count: pastTarget, message: 'New leads past the response target', link: '/api/v1/leads?filter[attention]=response_overdue' }] : []),
       { code: 'expired_invitations', count: n(counts!.expiredInvitations), message: 'Invitations expired before they were accepted', link: null },
-      { code: 'identity_checks_expiring', count: n(counts!.checksExpiring) + n(counts!.documentsExpiring), message: 'Identity checks or documents expiring within 30 days', link: '/api/v1/contacts?filter[relationship]=seller' },
+      { code: 'identity_checks_expiring', count: n(counts!.checksExpiring) + n(counts!.documentsExpiring), message: 'Identity checks or documents expiring within 30 days', link: '/api/v1/kyc-checks?filter[expiring]=true' },
       { code: 'failed_imports', count: n(counts!.failedImports), message: 'Imports failed in the last 30 days', link: null },
       { code: 'agent_licences', count: n(counts!.licencesExpiring), message: 'Agent licences expiring within 60 days', link: null },
     ]

@@ -24,6 +24,7 @@ import type {
   UpdateContactBody,
   UpdateMethodBody,
 } from './dto.js';
+import { landlordProperties, nextFollowUps, sellerListings, valuationLeads } from './contact-summaries.js';
 import { DuplicatesService } from './duplicates.service.js';
 import { isEmail, maskPhone, normaliseEmail, normaliseMethod, normalisePhone, searchNormalise } from './identifiers.js';
 
@@ -112,6 +113,17 @@ export class ContactsService {
     // Sellers view (SE-1): the latest identity check, only where the member has kyc.view on the contact.
     const kycVisible = rows.slice(0, query.limit).filter((row) => canUse(ctx, 'kyc.view', row)).map((row) => row.id);
     const identityChecks = await latestIdentityChecks(tx, kycVisible);
+    // Register summaries (C6): computed for this page only, each within the viewer's own scope.
+    const pageIds = rows.slice(0, query.limit).map((row) => row.id);
+    const views = Array.isArray(relationship) ? relationship : [];
+    const sellerView = views.includes('seller');
+    const landlordView = views.includes('landlord');
+    const [followUps, listings, valuation, properties] = await Promise.all([
+      nextFollowUps(tx, ctx, pageIds),
+      sellerView || landlordView ? sellerListings(tx, ctx, pageIds) : Promise.resolve(undefined),
+      sellerView ? valuationLeads(tx, ctx, pageIds) : Promise.resolve(undefined),
+      landlordView ? landlordProperties(tx, ctx, pageIds) : Promise.resolve(undefined),
+    ]);
     return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({
       id: row.id,
       reference: row.reference,
@@ -125,6 +137,10 @@ export class ContactsService {
       archivedAt: row.archivedAt?.toISOString() ?? null,
       updatedAt: row.updatedAt.toISOString(),
       identityCheck: kycVisible.includes(row.id) ? (identityChecks.get(row.id) ?? { status: 'none', reviewedAt: null }) : null,
+      nextFollowUp: followUps.get(row.id) ?? null,
+      ...(listings !== undefined ? { listings: listings === null ? null : (listings.get(row.id) ?? { active: 0, published: 0, latest: null }) } : {}),
+      ...(valuation !== undefined ? { valuationLead: valuation === null ? null : (valuation.get(row.id) ?? null) } : {}),
+      ...(properties !== undefined ? { properties: properties === null ? null : (properties.get(row.id) ?? 0) } : {}),
     }));
   }
 

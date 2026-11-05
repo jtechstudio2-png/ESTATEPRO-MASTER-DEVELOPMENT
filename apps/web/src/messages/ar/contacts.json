@@ -214,5 +214,13 @@
     "phone": "رقم الهاتف",
     "tax_number": "الرقم الضريبي",
     "identity_document": "وثيقة الهوية"
-  }
+  },
+  "listings": "الإعلانات",
+  "valuationLead": "عميل تقييم محتمل",
+  "propertiesCount": "العقارات",
+  "next": "المتابعة التالية",
+  "noListings": "لا شيء",
+  "published": "منشور",
+  "notPublished": "غير منشور",
+  "moreListings": "(+{count} أخرى)"
 }
