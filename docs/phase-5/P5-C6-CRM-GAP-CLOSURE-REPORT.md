@@ -136,3 +136,7 @@ Timing inside the API showed the summaries take about 10 ms of a page; the rest 
 | Branch | `phase-5/preparation` |
 | C6 commit | `c76daf4` |
 | CI run 78 (green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42032527528 |
+
+## Approval
+
+Product owner, 5 November 2026: **C6-D1 to C6-D6 approved.** Issues #24 (manual screen-reader pass) and #25 (native-speaker review of the Arabic text) remain pre-launch requirements; #25 continues to cover every new CRM string. Proceed to the next approved milestone, maintaining tenant isolation, encryption controls, reveal restrictions, audit integrity, accessibility validation, localisation validation, performance budgets and CI verification.
