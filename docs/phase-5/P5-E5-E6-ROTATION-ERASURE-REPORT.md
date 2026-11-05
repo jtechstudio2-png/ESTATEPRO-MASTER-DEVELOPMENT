@@ -69,10 +69,12 @@
 | `api/test/data-protection.e2e.test.ts` (rotation incl. a write with the old key mid-rotation, lookup rotation, yearly worker rotation, erasure, merged records, blockers, ledger failure, shredding, restore drill, replay errors) | 10 | ✅ |
 | `api/test/data-protection-args.test.ts` (command arguments, rotated columns) | 3 | ✅ |
 | Full API suite (`test:ci`) | 456 in 36 files | ✅ |
-| `web/e2e` (new: erased contact; erased Arabic contact in the sweep) | PENDING | |
-| Web unit tests, lint, typecheck, message check, OpenAPI regenerated | PENDING | |
+| `api/test/data-protection.performance.test.ts` (rotation and erasure at volume, §7) | 3 | ✅ |
+| Full end-to-end suite (Playwright; new: erased contact record and Identity tab; erased Arabic contact in the axe sweep) | 85 | ✅ |
+| Web unit tests | 75 | ✅ |
+| Lint, typecheck, message check (2,355 keys in both languages), OpenAPI and web types regenerated | — | ✅ |
 
-API coverage: 96.35 % statements, 91.02 % branches, 98.34 % functions, 98.49 % lines (thresholds 95/90 met). The operator command's entry point is exercised through the services it calls, not run as a process.
+API coverage: 96.35 % statements, 91.02 % branches, 98.34 % functions, 98.49 % lines. Web coverage: 98.14 % statements, 91.41 % branches. Thresholds 95/90 met. The operator command's entry point is exercised through the services it calls, not run as a process.
 
 ### 3.1 Defects found and fixed before the milestone closed
 
@@ -115,7 +117,15 @@ Existing audit rows about an erased person keep their shape, with values redacte
 
 ## 7. Performance results
 
-PENDING
+`api/test/data-protection.performance.test.ts`: one company, 20,000 contacts with an encrypted date of birth, 5,000 of them also with an encrypted tax number and its lookup hash.
+
+| Measure | Budget | Result |
+|---|---|---|
+| Field-key rotation, 25,000 values (re-encrypt, check, destroy old key) | ≥ 500 values a second | 11.9 s, about 2,100 a second ✅ |
+| Lookup-key rotation, 5,000 hashes, two passes | ≥ 250 a second | 3.0 s, about 3,300 a second ✅ |
+| Erasing a person with 300 timeline entries, 50 follow-ups and 100 audit rows | < 2 s | 121 ms ✅ |
+
+A rotation runs in batches of 200 rows, each its own short transaction, so screens are not held up while it runs. The screen budgets measured in C6 are unchanged: E5–E6 adds no work to list or record requests.
 
 ## 8. Decisions taken in E5–E6 (for confirmation)
 

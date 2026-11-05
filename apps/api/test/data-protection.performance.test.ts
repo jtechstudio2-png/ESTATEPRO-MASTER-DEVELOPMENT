@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { mkdirSync, writeFileSync } from 'node:fs';
 
 import { sql } from 'kysely';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
@@ -73,7 +74,8 @@ describe('key rotation and erasure performance', () => {
   }, 300_000);
 
   afterAll(async () => {
-    console.log('data-protection performance', results);
+    mkdirSync('test-results', { recursive: true });
+    writeFileSync('test-results/data-protection-performance.json', `${JSON.stringify(results, null, 2)}\n`);
     rotation.close();
     ledger.destroy();
     await platform.destroy();
