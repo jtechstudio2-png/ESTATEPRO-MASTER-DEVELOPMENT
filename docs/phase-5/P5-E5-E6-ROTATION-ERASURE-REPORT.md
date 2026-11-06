@@ -164,3 +164,7 @@ A rotation runs in batches of 200 rows, each its own short transaction, so scree
 | Branch | `phase-5/preparation` |
 | Commits | `a767927` (implementation), `7818752` (erased documents not revealable; style restored), `03b46e8` (report figures) |
 | CI run 83 (green, on `03b46e8`; runs 81 and 82 were cancelled by the later pushes) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42087303793 |
+
+## Approval
+
+Product owner, 6 November 2026: **E56-D1 to E56-D7 approved.** Proceed with the data-subject request register (gap G3): access and erasure requests, lifecycle and status tracking, assignment, due dates, audit trail, request evidence, merge blocking while an erasure request is open, admin dashboard and contact record integration. Continue maintaining tenant isolation, encryption controls, audit integrity, reveal controls, accessibility validation, localisation validation and CI verification.
