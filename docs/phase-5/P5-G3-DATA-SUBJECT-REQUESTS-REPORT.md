@@ -72,7 +72,24 @@
 
 ## 3. Tests
 
-PENDING
+| Suite | Tests | Result |
+|---|---|---|
+| `database/tests/10_data_subject_requests_g3.sql` (lifecycle, identity before work, one extension, closed requests final, append-only history and evidence, merge register, isolation, permissions) | 31 assertions | ✅ |
+| `api/test/privacy-requests.e2e.test.ts` (logging, validation, lifecycle, views and paging, access report with download and audit, erasure with merge blocking, blocked erasure and refusal, dashboard, permissions and isolation) | 9 | ✅ |
+| Full API suite (`test:ci`) | 465 in 37 files | ✅ |
+| `web/e2e/privacy.spec.ts` (register and dashboard link, access request to report, erasure request from the contact record with merge blocked, agent without access) | 4 | ✅ |
+| Full end-to-end suite (incl. sweep with the register, request page and log form in English and Arabic, desktop and 320 px) | 89 | ✅ |
+| Web unit tests (navigation, run-time message keys) | 75 | ✅ |
+| Lint, typecheck, message check (2,507 keys in both languages), OpenAPI and web types regenerated | — | ✅ |
+
+API coverage: 95.91 % statements, 90.43 % branches, 98.36 % functions, 98.19 % lines (thresholds 95/90 met). Web coverage: 98.14 % statements, 91.41 % branches.
+
+### 3.1 Defects found and fixed before the milestone closed
+
+| Defect | Found by | Fix |
+|---|---|---|
+| The browser-test API had no erasure ledger, so erasure would have been refused there | Browser test review | Ledger bucket configured for the browser-test API |
+| Two earlier tests (C4 API and C5 browser) expected the request count to be "not available" | Full suites | Updated: the count is real now and links to the register |
 
 ## 4. Security validation
 
@@ -96,7 +113,16 @@ New audit actions: `privacy.request_created`, `privacy.request_assigned`, `priva
 
 ## 7. Performance results
 
-PENDING
+Playwright performance spec (budget: ready and LCP 4,000 ms, script 300 KB):
+
+| Screen | Ready | LCP | Script |
+|---|---|---|---|
+| Privacy requests register (all views) | 254 ms | 80 ms | 229 KB ✅ |
+| Privacy request page | 361 ms | 276 ms | 239 KB ✅ |
+| Contact record (C-2), with the new panel | 365 ms | 336 ms | 260 KB ✅ |
+| Admin dashboard (D-A), with the new counts | 368 ms | 312 ms | 225 KB ✅ |
+
+The register's open view uses a partial index on open requests by due date; the dashboard adds one count query over open requests.
 
 ## 8. Decisions taken in G3 (for confirmation)
 

@@ -38,13 +38,15 @@ test.describe('CRM dashboards (D-A, D-C, D-M)', () => {
     await expect(page.getByRole('heading', { name: 'Leads received in the last 7 days' })).toBeVisible();
   });
 
-  test('D-A shows the account health with unknowable figures marked "Not available"', async ({ page, state }) => {
+  test('D-A shows the account health with unknowable figures marked "Not available", and privacy requests linked to the register', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
     await expect(page).toHaveURL(/\/dashboards\/admin/);
     const users = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Users and access' }) });
     await expect(users.getByText('Users without required second factor').locator('..')).toContainText('Not available');
     const privacy = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Privacy and consent' }) });
-    await expect(privacy.getByText('Open access and erasure requests').locator('..')).toContainText('Not available');
+    // Data-subject requests (gap G3): a real count, linked to the register.
+    await expect(privacy.getByRole('link', { name: /Open access and erasure requests/ })).toHaveAttribute('href', '/privacy-requests');
+    await expect(privacy).not.toContainText('Access and erasure requests arrive with a later release');
     await expect(privacy.getByRole('link', { name: /Contact and lead exports/ })).toBeVisible();
     await expectAccessible(page);
   });
