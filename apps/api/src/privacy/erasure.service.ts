@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { sql } from 'kysely';
 
 import { AuditService } from '../audit/audit.service.js';
-import { systemContext } from '../common/request-context.js';
+import { systemContext, type TenantContext } from '../common/request-context.js';
 import type { Db, TenantDb, Tx } from '../database/database.module.js';
 import { type ErasureLedger, type LedgerEntry, REQUEST_REFERENCE } from './erasure-ledger.js';
 
@@ -56,36 +56,50 @@ export interface ReplaySummary {
  */
 export class ErasureService {
   constructor(
-    private readonly tenantDb: TenantDb,
-    private readonly platformDb: Db,
+    private readonly tenantDb: TenantDb | null,
+    private readonly platformDb: Db | null,
     private readonly ledger: ErasureLedger,
     private readonly audit: AuditService = new AuditService(),
   ) {}
 
   async eraseContact(companyId: string, contactId: string, request: ErasureRequest): Promise<ContactErasureResult> {
     validateRequest(request);
-    return this.tenantDb.run({ companyId, userId: '' }, async (tx) => {
-      const outcome = await this.eraseInTransaction(tx, companyId, contactId);
-      if (outcome.alreadyErased) return { ...outcome, ledgerKey: null };
-      const entry: LedgerEntry = {
-        type: 'contact_erasure',
-        id: randomUUID(),
-        at: new Date().toISOString(),
-        companyId,
-        contactIds: outcome.erasedContactIds,
-        requestReference: request.requestReference,
-        requestedBy: request.requestedBy,
-      };
-      await this.audit.record(tx, systemContext(companyId, `erasure:${entry.id}`), {
-        action: 'contact.erased',
-        entityType: 'contact',
-        entityId: contactId,
-        metadata: { ledgerEntryId: entry.id, requestReference: request.requestReference, requestedBy: request.requestedBy, counts: outcome.counts, erasedContactIds: outcome.erasedContactIds },
-      });
-      // Written before the commit: if the ledger is unreachable, nothing is erased and the operator retries.
-      const ledgerKey = await this.ledger.append(entry);
-      return { ...outcome, ledgerKey };
+    if (!this.tenantDb) throw new ErasureError('invalid_request', 'Erasure needs the tenant database.');
+    return this.tenantDb.run({ companyId, userId: '' }, (tx) => this.eraseContactIn(tx, systemContext(companyId, `erasure:${contactId}`), contactId, request));
+  }
+
+  /**
+   * Erases inside the caller's tenant transaction (the data-subject request
+   * register uses this so the request and the erasure commit together). The
+   * ledger entry is written before the caller commits.
+   */
+  async eraseContactIn(tx: Tx, ctx: TenantContext, contactId: string, request: ErasureRequest): Promise<ContactErasureResult & { ledgerEntryId: string | null }> {
+    validateRequest(request);
+    const outcome = await this.eraseInTransaction(tx, ctx.companyId, contactId);
+    if (outcome.alreadyErased) return { ...outcome, ledgerKey: null, ledgerEntryId: null };
+    const entry: LedgerEntry = {
+      type: 'contact_erasure',
+      id: randomUUID(),
+      at: new Date().toISOString(),
+      companyId: ctx.companyId,
+      contactIds: outcome.erasedContactIds,
+      requestReference: request.requestReference,
+      requestedBy: request.requestedBy,
+    };
+    await this.audit.record(tx, ctx, {
+      action: 'contact.erased',
+      entityType: 'contact',
+      entityId: contactId,
+      metadata: { ledgerEntryId: entry.id, requestReference: request.requestReference, requestedBy: request.requestedBy, counts: outcome.counts, erasedContactIds: outcome.erasedContactIds },
     });
+    // Written before the commit: if the ledger is unreachable, nothing is erased and the operator retries.
+    const ledgerKey = await this.ledger.append(entry);
+    return { ...outcome, ledgerKey, ledgerEntryId: entry.id };
+  }
+
+  /** Why the contact cannot be erased now (codes; empty when it can). */
+  async blockers(tx: Tx, contactId: string): Promise<string[]> {
+    return erasureBlockers(tx, contactId);
   }
 
   private async eraseInTransaction(tx: Tx, companyId: string, contactId: string): Promise<Omit<ContactErasureResult, 'ledgerKey'>> {
@@ -95,8 +109,7 @@ export class ErasureService {
     if (contact.mergedIntoContactId !== null) {
       throw new ErasureError('merged', `Contact ${contactId} was merged into ${contact.mergedIntoContactId}; erase that contact (its merged records are erased with it).`);
     }
-    const { rows } = await sql<{ blockers: string[] }>`select app.contact_erasure_blockers(${contactId}::uuid) as blockers`.execute(tx);
-    const blockers = rows[0]?.blockers ?? [];
+    const blockers = await this.blockers(tx, contactId);
     if (blockers.length > 0) {
       throw new ErasureError('blocked', `Contact ${contactId} cannot be erased: ${blockers.join(', ')}. Records the law requires us to keep, or not a person.`, blockers);
     }
@@ -115,6 +128,7 @@ export class ErasureService {
    */
   async shredCompany(companyId: string, confirmSlug: string, request: ErasureRequest): Promise<{ keysDestroyed: number; ledgerKey: string }> {
     validateRequest(request);
+    if (!this.platformDb) throw new ErasureError('invalid_request', 'Shredding needs the platform database.');
     return this.platformDb.transaction().execute(async (tx) => {
       const company = await tx.selectFrom('companies').select(['slug', 'status']).where('id', '=', companyId).forUpdate().executeTakeFirst();
       if (!company) throw new ErasureError('not_found', `Company ${companyId} does not exist.`);
@@ -149,12 +163,15 @@ export class ErasureService {
    * an error. `dryRun` reports without changing anything.
    */
   async replay(options: { dryRun?: boolean } = {}): Promise<ReplaySummary> {
+    const platformDb = this.platformDb;
+    const tenantDb = this.tenantDb;
+    if (!platformDb || !tenantDb) throw new ErasureError('invalid_request', 'Replay needs both databases.');
     const summary: ReplaySummary = { entries: 0, contactsErased: 0, contactsAlreadyErased: 0, contactsMissing: 0, keysDestroyed: 0, failures: [] };
     for (const entry of await this.ledger.entries()) {
       summary.entries += 1;
       try {
         if (entry.type === 'company_shred') {
-          summary.keysDestroyed += await this.platformDb.transaction().execute(async (tx) => {
+          summary.keysDestroyed += await platformDb.transaction().execute(async (tx) => {
             const remaining = await tx.selectFrom('companyDataKeys').select('version').where('companyId', '=', entry.companyId).where('status', '<>', 'destroyed').execute();
             if (options.dryRun || remaining.length === 0) return remaining.length;
             return (await destroyKeys(tx, entry.companyId)).length;
@@ -162,7 +179,7 @@ export class ErasureService {
           continue;
         }
         for (const contactId of entry.contactIds) {
-          const outcome = await this.tenantDb.run({ companyId: entry.companyId, userId: '' }, async (tx) => {
+          const outcome = await tenantDb.run({ companyId: entry.companyId, userId: '' }, async (tx) => {
             const contact = await tx.selectFrom('contacts').select(['isAnonymised', 'mergedIntoContactId']).where('id', '=', contactId).executeTakeFirst();
             if (!contact) return 'missing' as const;
             if (contact.isAnonymised) return 'already' as const;
@@ -188,6 +205,12 @@ export class ErasureService {
     }
     return summary;
   }
+}
+
+/** Why a contact cannot be erased now (codes; empty when it can). */
+export async function erasureBlockers(tx: Tx, contactId: string): Promise<string[]> {
+  const { rows } = await sql<{ blockers: string[] }>`select app.contact_erasure_blockers(${contactId}::uuid) as blockers`.execute(tx);
+  return rows[0]?.blockers ?? [];
 }
 
 async function destroyKeys(tx: Tx, companyId: string): Promise<{ purpose: 'field' | 'lookup'; version: number }[]> {

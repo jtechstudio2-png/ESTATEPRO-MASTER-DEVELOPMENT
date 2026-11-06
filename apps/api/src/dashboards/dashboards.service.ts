@@ -203,7 +203,17 @@ export class DashboardsService {
       select count(*) as n from leads l where l.archived_at is null and l.assigned_to is null and l.status = 'new'
          and l.received_at < now() - interval '1 hour' ${office('l')}`.execute(tx);
     const pastTarget = flow.rows.reduce((sum, row) => sum + n(row.pastTarget), 0);
+    // Data-subject requests (gap G3): company-wide, for members who may see the register.
+    const privacy =
+      scopeFor(ctx, 'privacy.view') === null
+        ? null
+        : (
+            await sql<{ open: string; overdue: string }>`
+              select count(*) as open, count(*) filter (where coalesce(extended_due_on, due_on) < current_date) as overdue
+                from data_subject_requests where closed_at is null`.execute(tx)
+          ).rows[0];
     const attention = [
+      ...(privacy ? [{ code: 'privacy_requests_overdue', count: n(privacy.overdue), message: 'Data-subject requests past their due date', link: '/api/v1/privacy-requests?filter[view]=overdue' }] : []),
       { code: 'unassigned_leads', count: n(unassignedOld.rows[0]?.n), message: 'New leads unassigned for more than an hour', link: '/api/v1/leads?filter[assignedTo]=unassigned' },
       ...(target !== null ? [{ code: 'response_overdue', count: pastTarget, message: 'New leads past the response target', link: '/api/v1/leads?filter[attention]=response_overdue' }] : []),
       { code: 'expired_invitations', count: n(counts!.expiredInvitations), message: 'Invitations expired before they were accepted', link: null },
@@ -240,7 +250,8 @@ export class DashboardsService {
         identityChecksExpiring: n(counts!.checksExpiring),
       },
       privacy: {
-        dataSubjectRequestsOpen: null,
+        dataSubjectRequestsOpen: privacy ? n(privacy.open) : null,
+        dataSubjectRequestsOverdue: privacy ? n(privacy.overdue) : null,
         marketingWithdrawals: n(counts!.withdrawals),
         sensitiveReveals: n(counts!.reveals),
         exports: n(counts!.exports),

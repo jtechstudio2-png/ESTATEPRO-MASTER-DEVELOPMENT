@@ -18,7 +18,8 @@
   "requesterOnly": "Only the requester can download",
   "type": {
     "contacts": "Contacts",
-    "leads": "Leads"
+    "leads": "Leads",
+    "subject_access": "Access report"
   },
   "statusValue": {
     "completed": "Ready",

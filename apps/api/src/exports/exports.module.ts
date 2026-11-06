@@ -10,5 +10,6 @@ import { ExportsService } from './exports.service.js';
   imports: [AuthModule, MediaModule],
   controllers: [ExportsController],
   providers: [ExportsService],
+  exports: [ExportsService],
 })
 export class ExportsModule {}

@@ -199,6 +199,11 @@ export class MergeService {
       .where('status', 'in', ['invited', 'active'])
       .executeTakeFirstOrThrow();
     if (Number(portal.n) > 1) add('both_portal', 'Both contacts have portal access. End one portal membership first.');
+    // An open erasure request (gap G3, wireframe C-4): the person is about to be erased, so nothing is merged into or out of them.
+    const erasure = await sql<{ references: string[] }>`
+      select app.contact_open_erasure_requests(${keep.id}::uuid) || app.contact_open_erasure_requests(${merge.id}::uuid) as references`.execute(tx);
+    const open = erasure.rows[0]?.references ?? [];
+    if (open.length > 0) add('erasure_request', `An erasure request is open for one of the contacts (${open.join(', ')}). Close it before merging.`, open);
     return reasons;
   }
 

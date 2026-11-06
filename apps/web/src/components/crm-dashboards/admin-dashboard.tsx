@@ -22,14 +22,16 @@ const ATTENTION_ROUTES: Record<string, string> = {
   unassigned_leads: '/leads?tab=unassigned',
   response_overdue: '/leads?tab=open&filter[attention]=response_overdue',
   identity_checks_expiring: '/identity-checks?queue=expiring',
+  privacy_requests_overdue: '/privacy-requests?view=overdue',
 };
-const KNOWN_ATTENTION = ['unassigned_leads', 'response_overdue', 'expired_invitations', 'identity_checks_expiring', 'failed_imports', 'agent_licences'];
+const KNOWN_ATTENTION = ['unassigned_leads', 'response_overdue', 'expired_invitations', 'identity_checks_expiring', 'failed_imports', 'agent_licences', 'privacy_requests_overdue'];
 
 /**
  * D-A admin dashboard (MD-2): is the account set up correctly and secure, is
  * CRM work flowing, and is anything blocked? Figures the product cannot know
- * yet (MFA held by the identity provider; data-subject requests before E6)
- * read "not available", never zero (C4-D7).
+ * (MFA held by the identity provider) or that the member may not see (the
+ * data-subject request register needs privacy.view) read "not available",
+ * never zero (C4-D7).
  */
 export function AdminDashboard() {
   const t = useTranslations('adminDashboard');
@@ -176,12 +178,12 @@ export function AdminDashboard() {
             </Panel>
             <Panel title={t('privacyTitle')}>
               <ul className={styles.counts}>
-                {row(t('subjectRequests'), data!.privacy.dataSubjectRequestsOpen)}
+                {row(t('subjectRequests'), data!.privacy.dataSubjectRequestsOpen, '/privacy-requests')}
+                {row(t('subjectRequestsOverdue'), data!.privacy.dataSubjectRequestsOverdue, '/privacy-requests?view=overdue', true)}
                 {row(t('withdrawals'), data!.privacy.marketingWithdrawals)}
                 {row(t('reveals'), data!.privacy.sensitiveReveals)}
                 {row(t('exports'), data!.privacy.exports, '/exports')}
               </ul>
-              <p className={styles.quiet}>{t('privacyNote')}</p>
             </Panel>
             <Panel title={t('exportsTitle')}>
               {data!.importsExports.recentExports.length === 0 ? (

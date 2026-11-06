@@ -112,7 +112,8 @@ export class DataQualityDto {
 }
 
 export class PrivacyDto {
-  @ApiProperty({ type: Number, nullable: true, description: 'Not available until data-subject requests are built (encryption stage E6, gap G3)' }) dataSubjectRequestsOpen!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Open access and erasure requests (gap G3); null without privacy.view' }) dataSubjectRequestsOpen!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Open requests past their due date; null without privacy.view' }) dataSubjectRequestsOverdue!: number | null;
   @ApiProperty({ description: 'Marketing consents withdrawn in the last 7 days' }) marketingWithdrawals!: number;
   @ApiProperty({ description: 'Protected details revealed in the last 7 days' }) sensitiveReveals!: number;
   @ApiProperty({ description: 'Contact and lead exports in the last 7 days' }) exports!: number;

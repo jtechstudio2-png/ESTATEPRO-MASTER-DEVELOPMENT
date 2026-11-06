@@ -11,6 +11,7 @@ import { ActivityTimeline } from '@/components/activity/timeline';
 import { useAnnounce } from '@/components/announcer';
 import { CONTACT_ROLES, type ContactRole, Ltr, OverdueMark } from '@/components/crm/labels';
 import { useContact } from '@/components/crm/use-crm';
+import { ContactPrivacyRequests } from '@/components/privacy/contact-requests';
 import { useSession } from '@/components/session';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, Dialog } from '@/components/ui/dialog';
@@ -83,6 +84,7 @@ export function ContactOverview({ id }: { id: string }) {
       }
       aside={
         <>
+          <ContactPrivacyRequests contactId={id} canLog={record.mergedIntoContactId === null} />
           <Panel title={t('nextFollowUp')}>
             {nextTask.isPending ? (
               <Skeleton />

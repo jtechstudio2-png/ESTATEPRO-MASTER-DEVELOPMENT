@@ -355,12 +355,12 @@ export class MergeSideDto {
   references!: Record<string, number>;
 }
 
-export const MERGE_BLOCKER_CODES = ['same_contact', 'already_merged', 'anonymised', 'keep_archived', 'different_types', 'financial_records', 'both_portal'] as const;
+export const MERGE_BLOCKER_CODES = ['same_contact', 'already_merged', 'anonymised', 'keep_archived', 'different_types', 'financial_records', 'both_portal', 'erasure_request'] as const;
 
 export class MergeBlockerDto {
   @ApiProperty({ enum: MERGE_BLOCKER_CODES }) code!: (typeof MERGE_BLOCKER_CODES)[number];
   @ApiProperty({ description: 'The reason in English' }) message!: string;
-  @ApiProperty({ type: [String], description: 'financial_records: the tables holding the records that cannot move' }) records!: string[];
+  @ApiProperty({ type: [String], description: 'financial_records: the tables holding the records that cannot move; erasure_request: the open request references' }) records!: string[];
 }
 
 export class MergePreviewDto {

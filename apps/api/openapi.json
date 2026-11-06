@@ -9485,6 +9485,665 @@
           "Exports"
         ]
       }
+    },
+    "/api/v1/privacy-requests": {
+      "get": {
+        "operationId": "PrivacyRequests_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[assignedTo]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "me",
+                "none"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "received, verifying, in_progress, completed, refused, withdrawn",
+            "schema": {}
+          },
+          {
+            "name": "filter[requestType]",
+            "required": false,
+            "in": "query",
+            "description": "access, erasure",
+            "schema": {}
+          },
+          {
+            "name": "filter[view]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "open",
+                "overdue",
+                "closed",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "dueOn",
+                "-dueOn",
+                "createdAt",
+                "-createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Requests: open ones by default, soonest due first",
+        "tags": [
+          "Privacy requests"
+        ]
+      },
+      "post": {
+        "operationId": "PrivacyRequests_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePrivacyRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Log a request; it is due 30 days after it reached the company",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/assignable": {
+      "get": {
+        "operationId": "PrivacyRequests_assignable",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssignableMemberDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Members who can be given requests",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}": {
+      "get": {
+        "operationId": "PrivacyRequests_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A request with its evidence and history",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/assign": {
+      "post": {
+        "operationId": "PrivacyRequests_assign",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignPrivacyRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Give the request to a member, or clear the assignee",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/verify-identity": {
+      "post": {
+        "operationId": "PrivacyRequests_verifyIdentity",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record how the requester's identity was verified (once)",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/status": {
+      "post": {
+        "operationId": "PrivacyRequests_changeStatus",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePrivacyRequestStatusBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move the request on: verifying, in progress, completed (access), refused or withdrawn",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/extend": {
+      "post": {
+        "operationId": "PrivacyRequests_extend",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtendPrivacyRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Extend the due date once, with the reason",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/evidence": {
+      "post": {
+        "operationId": "PrivacyRequests_addEvidence",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddEvidenceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record evidence: the request, identity proof seen, correspondence or the response (append-only)",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/access-report": {
+      "post": {
+        "operationId": "PrivacyRequests_accessReport",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Produce the access report (JSON, protected details included) as a 24-hour export for you; audited",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/privacy-requests/{id}/erase": {
+      "post": {
+        "operationId": "PrivacyRequests_erase",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CarryOutErasureBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyRequestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Carry out the erasure (ADR-007 §8) and complete the request; cannot be undone",
+        "tags": [
+          "Privacy requests"
+        ]
+      }
     }
   },
   "info": {
@@ -16750,7 +17409,8 @@
               "keep_archived",
               "different_types",
               "financial_records",
-              "both_portal"
+              "both_portal",
+              "erasure_request"
             ]
           },
           "message": {
@@ -16758,7 +17418,7 @@
             "description": "The reason in English"
           },
           "records": {
-            "description": "financial_records: the tables holding the records that cannot move",
+            "description": "financial_records: the tables holding the records that cannot move; erasure_request: the open request references",
             "type": "array",
             "items": {
               "type": "string"
@@ -21021,7 +21681,14 @@
               "number",
               "null"
             ],
-            "description": "Not available until data-subject requests are built (encryption stage E6, gap G3)"
+            "description": "Open access and erasure requests (gap G3); null without privacy.view"
+          },
+          "dataSubjectRequestsOverdue": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Open requests past their due date; null without privacy.view"
           },
           "marketingWithdrawals": {
             "type": "number",
@@ -21038,6 +21705,7 @@
         },
         "required": [
           "dataSubjectRequestsOpen",
+          "dataSubjectRequestsOverdue",
           "marketingWithdrawals",
           "sensitiveReveals",
           "exports"
@@ -21382,8 +22050,10 @@
             "type": "string",
             "enum": [
               "contacts",
-              "leads"
-            ]
+              "leads",
+              "subject_access"
+            ],
+            "description": "subject_access: an access report for a data-subject request (JSON)"
           },
           "format": {
             "type": "string",
@@ -21525,6 +22195,726 @@
         "required": [
           "url",
           "linkExpiresAt"
+        ]
+      },
+      "PrivacyRequestSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "requestType": {
+            "type": "string",
+            "enum": [
+              "access",
+              "erasure"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "verifying",
+              "in_progress",
+              "completed",
+              "refused",
+              "withdrawn"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone",
+              "in_person",
+              "post",
+              "web_form",
+              "other"
+            ]
+          },
+          "contact": {
+            "$ref": "#/components/schemas/KycQueueContactDto"
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "dueOn": {
+            "type": "string",
+            "format": "date",
+            "description": "The due date in force (extended if it was extended)"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Open and past its due date"
+          },
+          "daysLeft": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Days until the due date (negative when overdue); null once closed"
+          },
+          "assignedTo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identityVerified": {
+            "type": "boolean",
+            "description": "The requester's identity has been verified"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "requestType",
+          "status",
+          "channel",
+          "contact",
+          "receivedOn",
+          "dueOn",
+          "overdue",
+          "daysLeft",
+          "assignedTo",
+          "identityVerified",
+          "closedAt",
+          "version"
+        ]
+      },
+      "PrivacyRequestPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrivacyRequestSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "AssignableMemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "AccessReportDto": {
+        "type": "object",
+        "properties": {
+          "exportId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Export id: download with POST /api/v1/exports/{id}/download (the member who generated it, within 24 hours)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "expired"
+            ]
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "canDownload": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "exportId",
+          "status",
+          "expiresAt",
+          "canDownload"
+        ]
+      },
+      "PrivacyRequestEvidenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "request",
+              "identity",
+              "correspondence",
+              "response",
+              "other"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "recordedBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "summary",
+          "receivedOn",
+          "recordedBy",
+          "recordedAt"
+        ]
+      },
+      "PrivacyRequestEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "created",
+              "status_changed",
+              "assigned",
+              "identity_verified",
+              "due_extended",
+              "evidence_added",
+              "access_report_generated",
+              "erasure_carried_out",
+              "erasure_blocked"
+            ]
+          },
+          "fromStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "received",
+              "verifying",
+              "in_progress",
+              "completed",
+              "refused",
+              "withdrawn",
+              null
+            ]
+          },
+          "toStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "received",
+              "verifying",
+              "in_progress",
+              "completed",
+              "refused",
+              "withdrawn",
+              null
+            ]
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Codes and ids only (assignee, method, new due date, counts, blocker codes)"
+          },
+          "actor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "eventType",
+          "fromStatus",
+          "toStatus",
+          "detail",
+          "actor",
+          "occurredAt"
+        ]
+      },
+      "PrivacyRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "requestType": {
+            "type": "string",
+            "enum": [
+              "access",
+              "erasure"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "verifying",
+              "in_progress",
+              "completed",
+              "refused",
+              "withdrawn"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone",
+              "in_person",
+              "post",
+              "web_form",
+              "other"
+            ]
+          },
+          "contact": {
+            "$ref": "#/components/schemas/KycQueueContactDto"
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "dueOn": {
+            "type": "string",
+            "format": "date",
+            "description": "The due date in force (extended if it was extended)"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Open and past its due date"
+          },
+          "daysLeft": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Days until the due date (negative when overdue); null once closed"
+          },
+          "assignedTo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identityVerified": {
+            "type": "boolean",
+            "description": "The requester's identity has been verified"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          },
+          "originalDueOn": {
+            "type": "string",
+            "format": "date",
+            "description": "The original due date"
+          },
+          "extensionReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "identityVerifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "identityVerifiedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identityMethod": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "documents_seen",
+              "known_contact_details",
+              "email_confirmation",
+              "other",
+              null
+            ]
+          },
+          "outcomeNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "closedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "erasureLedgerEntryId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Erasure ledger entry, once carried out"
+          },
+          "accessReport": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccessReportDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "erasureBlockers": {
+            "description": "For an open erasure request: why the person cannot be erased now (codes)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrivacyRequestEvidenceDto"
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrivacyRequestEventDto"
+            }
+          },
+          "nextStatuses": {
+            "type": "array",
+            "description": "Statuses this member can move the request to now",
+            "items": {
+              "type": "string",
+              "enum": [
+                "verifying",
+                "in_progress",
+                "completed",
+                "refused",
+                "withdrawn"
+              ]
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "canFulfil": {
+            "type": "boolean",
+            "description": "Can carry out the erasure or generate the access report now"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "requestType",
+          "status",
+          "channel",
+          "contact",
+          "receivedOn",
+          "dueOn",
+          "overdue",
+          "daysLeft",
+          "assignedTo",
+          "identityVerified",
+          "closedAt",
+          "version",
+          "originalDueOn",
+          "extensionReason",
+          "identityVerifiedAt",
+          "identityVerifiedBy",
+          "identityMethod",
+          "outcomeNote",
+          "closedBy",
+          "createdBy",
+          "createdAt",
+          "erasureLedgerEntryId",
+          "accessReport",
+          "erasureBlockers",
+          "evidence",
+          "history",
+          "nextStatuses",
+          "canManage",
+          "canFulfil"
+        ]
+      },
+      "CreatePrivacyRequestBody": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The person the request is about"
+          },
+          "requestType": {
+            "type": "string",
+            "enum": [
+              "access",
+              "erasure"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "phone",
+              "in_person",
+              "post",
+              "web_form",
+              "other"
+            ]
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date",
+            "description": "When the request reached the company (not in the future); the due date counts from it"
+          },
+          "assignedTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Member who handles it (must be allowed to manage requests)"
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000,
+            "description": "Summary of the request as received, recorded as the first evidence entry. Do not copy ID or bank numbers."
+          }
+        },
+        "required": [
+          "contactId",
+          "requestType",
+          "channel",
+          "receivedOn"
+        ]
+      },
+      "AssignPrivacyRequestBody": {
+        "type": "object",
+        "properties": {
+          "assignedTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "assignedTo"
+        ]
+      },
+      "VerifyIdentityBody": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "documents_seen",
+              "known_contact_details",
+              "email_confirmation",
+              "other"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000,
+            "description": "What was seen or confirmed (recorded as identity evidence). No document numbers."
+          }
+        },
+        "required": [
+          "method"
+        ]
+      },
+      "ChangePrivacyRequestStatusBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "verifying",
+              "in_progress",
+              "completed",
+              "refused",
+              "withdrawn"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000,
+            "description": "Required when refusing or recording a withdrawal"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ExtendPrivacyRequestBody": {
+        "type": "object",
+        "properties": {
+          "extendedDueOn": {
+            "type": "string",
+            "format": "date",
+            "description": "New due date: after the current one, at most 60 days after it"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500,
+            "description": "Why more time is needed (told to the requester)"
+          }
+        },
+        "required": [
+          "extendedDueOn",
+          "reason"
+        ]
+      },
+      "AddEvidenceBody": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "request",
+              "identity",
+              "correspondence",
+              "response",
+              "other"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 1000,
+            "description": "What was received or sent. Do not copy ID or bank numbers."
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "kind",
+          "summary",
+          "receivedOn"
+        ]
+      },
+      "CarryOutErasureBody": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "string",
+            "example": "ERASE",
+            "description": "Type ERASE to confirm; erasure cannot be undone"
+          }
+        },
+        "required": [
+          "confirm"
         ]
       }
     }

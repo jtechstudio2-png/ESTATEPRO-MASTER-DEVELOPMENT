@@ -36,7 +36,7 @@ export class LeadExportBody extends ExportPurpose {
 
 export class ExportJobDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ enum: ['contacts', 'leads'] }) exportType!: string;
+  @ApiProperty({ enum: ['contacts', 'leads', 'subject_access'], description: 'subject_access: an access report for a data-subject request (JSON)' }) exportType!: string;
   @ApiProperty({ enum: ['csv'] }) format!: string;
   @ApiProperty({ enum: ['completed', 'failed', 'expired'] }) status!: string;
   @ApiProperty({ type: Number, nullable: true }) rowCount!: number | null;

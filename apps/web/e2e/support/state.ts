@@ -33,6 +33,12 @@ export interface E2eState {
       dohaContact: { id: string; reference: string };
       dohaErased: { id: string; reference: string };
     };
+    privacy: {
+      requester: { id: string; reference: string };
+      overdueRequest: { id: string; reference: string };
+      toErase: { id: string; reference: string };
+      dohaRequest: { id: string; reference: string };
+    };
   };
 }
 

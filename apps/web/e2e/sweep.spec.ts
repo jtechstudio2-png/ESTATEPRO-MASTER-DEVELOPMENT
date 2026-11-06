@@ -42,6 +42,8 @@ function crmScreens(contactId: string, leadId: string | null): string[] {
     '/follow-ups',
     '/exports',
     '/settings/crm',
+    '/privacy-requests',
+    '/privacy-requests/new',
   ];
 }
 
@@ -84,6 +86,9 @@ test.describe('Screen sweep (issue #7)', () => {
       ...crmScreens(state.records.crm.ama.id, state.records.crm.portalLead.id),
       `/contacts/${state.records.crm.ama.id}/edit`,
       `/contacts/${state.records.crm.seller.id}/identity`,
+      // Data-subject requests (gap G3).
+      `/privacy-requests/${state.records.privacy.overdueRequest.id}`,
+      '/privacy-requests?view=overdue',
     ];
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });
@@ -122,6 +127,7 @@ test.describe('Screen sweep (issue #7)', () => {
       // An erased person (ADR-007 E6): translated name, banner, document number gone.
       `/contacts/${state.records.crm.dohaErased.id}`,
       `/contacts/${state.records.crm.dohaErased.id}/identity`,
+      `/privacy-requests/${state.records.privacy.dohaRequest.id}`,
     ];
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });

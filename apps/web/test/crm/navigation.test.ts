@@ -5,7 +5,7 @@ import type { Grant } from '@/lib/session-types';
 
 /** Grants of the system roles (migration 0014 and 0022), CRM part plus what the shell reads. */
 const ROLES: Record<string, Record<string, Grant['scope']>> = {
-  company_owner: { 'kyc.view': 'all', 'contact.view': 'all', 'contact.create': 'all', 'contact.export': 'all', 'lead.view': 'all', 'lead.create': 'all', 'lead.assign': 'all', 'lead.export': 'all', 'user.manage': 'all', 'settings.manage': 'all', 'property.view': 'all', 'listing.view': 'all', 'listing.approve_price': 'all' },
+  company_owner: { 'kyc.view': 'all', 'contact.view': 'all', 'contact.create': 'all', 'contact.export': 'all', 'lead.view': 'all', 'lead.create': 'all', 'lead.assign': 'all', 'lead.export': 'all', 'user.manage': 'all', 'settings.manage': 'all', 'property.view': 'all', 'listing.view': 'all', 'listing.approve_price': 'all', 'privacy.view': 'all', 'privacy.manage': 'all', 'privacy.fulfil': 'all' },
   sales_manager: { 'contact.view': 'office', 'contact.create': 'office', 'contact.export': 'office', 'lead.view': 'office', 'lead.create': 'office', 'lead.assign': 'office', 'lead.export': 'office', 'property.view': 'office', 'listing.view': 'office', 'listing.approve_price': 'office' },
   agent: { 'contact.view': 'own', 'contact.create': 'own', 'lead.view': 'own', 'lead.create': 'own', 'property.view': 'office', 'listing.view': 'office' },
   accountant: { 'contact.view': 'all', 'contact.view_sensitive': 'all', 'property.view': 'all', 'listing.view': 'all' },
@@ -31,6 +31,9 @@ describe('CRM navigation (SH-1, wireframes §2.2)', () => {
   it('shows the contact views, leads and follow-ups only to CRM staff', () => {
     expect(ids('company_owner')).toEqual(expect.arrayContaining(['admin-dashboard', 'crm-dashboard', 'contacts', 'contacts-buyer', 'contacts-landlord', 'requirements', 'identity-checks', 'exports', 'leads', 'follow-ups', 'crm-settings']));
     expect(ids('agent')).not.toContain('identity-checks');
+    // Data-subject requests (gap G3): owners and office administrators only.
+    expect(ids('company_owner')).toContain('privacy-requests');
+    expect(ids('agent')).not.toContain('privacy-requests');
     expect(ids('agent')).toEqual(expect.arrayContaining(['my-day', 'crm-dashboard', 'contacts', 'leads', 'follow-ups']));
     expect(ids('agent')).not.toContain('admin-dashboard');
     expect(ids('agent')).not.toContain('exports');

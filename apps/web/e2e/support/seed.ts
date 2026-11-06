@@ -267,6 +267,30 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
     await db.query(`SELECT set_config('app.company_id', $1, true)`, [accra.companyId]);
     await db.query('SELECT app.erase_contact($1)', [erased.id]);
     await db.query('COMMIT');
+    // Data-subject requests (gap G3): an access request received 35 days ago (overdue), and a person
+    // whose erasure request is logged during the browser test.
+    const requester = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Kojo Requester',
+      primaryPhone: '+233 20 555 1203',
+      officeId: accra.officeId,
+      relationships: ['buyer'],
+      dateOfBirth: '1986-03-14',
+    });
+    const overdueRequest = await accraApi.call<{ id: string; reference: string }>('POST', 'privacy-requests', {
+      contactId: requester.id,
+      requestType: 'access',
+      channel: 'email',
+      receivedOn: new Date(Date.now() - 35 * 86_400_000).toISOString().slice(0, 10),
+      summary: 'Email asking for a copy of the data we hold',
+    });
+    const toErase = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Afua Eraseme',
+      primaryPhone: '+233 20 555 1204',
+      officeId: accra.officeId,
+      relationships: ['tenant'],
+    });
     // Ama owns Labone Villa (ownership records arrive with Phase 7 screens; the resolver reads them now).
     await db.query(
       `INSERT INTO property_ownerships (company_id, property_id, owner_contact_id, effective_from) VALUES ($1, $2, $3, current_date - 400)`,
@@ -312,6 +336,13 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       relationships: ['buyer'],
     });
     await dohaApi.call('POST', `contacts/${dohaErased.id}/identity-documents`, { documentTypeCode: 'passport', issuingCountryCode: 'QA', documentNumber: 'Q9876543', expiresOn: '2030-01-31' });
+    const dohaRequest = await dohaApi.call<{ id: string; reference: string }>('POST', 'privacy-requests', {
+      contactId: dohaContact.id,
+      requestType: 'access',
+      channel: 'in_person',
+      receivedOn: new Date().toISOString().slice(0, 10),
+      summary: 'طلب نسخة من البيانات',
+    });
     await db.query('BEGIN');
     await db.query(`SELECT set_config('app.company_id', $1, true)`, [doha.companyId]);
     await db.query('SELECT app.erase_contact($1)', [dohaErased.id]);
@@ -332,6 +363,7 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
         listing,
         keySet,
         crm: { ama, amaDuplicate, seller, erased, portalLead, agentLead, agentTask, dohaContact, dohaErased },
+        privacy: { requester, overdueRequest, toErase, dohaRequest },
       },
     };
   } finally {

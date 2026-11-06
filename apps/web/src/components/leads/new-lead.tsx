@@ -43,8 +43,22 @@ function roleForLead(leadType: CreateLeadBody['leadType']): ContactRole[] {
   }
 }
 
-/** Contact search for lead capture: name, phone in any format, or reference, in the member's own scope. */
-function ContactSearch({ value, onChange, error, labelId }: { value: ContactSummaryDto | null; onChange: (contact: ContactSummaryDto | null) => void; error?: string; labelId: string }) {
+/** Contact search: name, phone in any format, or reference, in the member's own scope (lead capture, privacy requests). */
+export function ContactSearch({
+  value,
+  onChange,
+  error,
+  labelId,
+  label,
+  help,
+}: {
+  value: ContactSummaryDto | null;
+  onChange: (contact: ContactSummaryDto | null) => void;
+  error?: string;
+  labelId: string;
+  label?: string;
+  help?: string;
+}) {
   const t = useTranslations('leads');
   const form = useTranslations('form');
   const [text, setText] = useState(value?.displayName ?? '');
@@ -70,11 +84,11 @@ function ContactSearch({ value, onChange, error, labelId }: { value: ContactSumm
       validationBehavior="aria"
     >
       <Label className={fieldStyles.label} id={labelId}>
-        {t('existingContact')}
+        {label ?? t('existingContact')}
       </Label>
       <Input className={fieldStyles.input} dir="auto" />
       <Text slot="description" className={fieldStyles.description}>
-        {t('existingContactHelp')}
+        {help ?? t('existingContactHelp')}
       </Text>
       <FieldError className={fieldStyles.error}>{error}</FieldError>
       <Popover className={fieldStyles.popover}>

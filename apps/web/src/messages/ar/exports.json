@@ -18,7 +18,8 @@
   "requesterOnly": "لا ينزّله إلا من طلبه",
   "type": {
     "contacts": "جهات الاتصال",
-    "leads": "العملاء المحتملون"
+    "leads": "العملاء المحتملون",
+    "subject_access": "تقرير الوصول"
   },
   "statusValue": {
     "completed": "جاهز",

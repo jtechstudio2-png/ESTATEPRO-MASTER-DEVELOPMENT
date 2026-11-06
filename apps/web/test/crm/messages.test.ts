@@ -50,8 +50,18 @@ const families: Array<[string, string, readonly string[]]> = [
   ['identity', 'queue', ['open', 'expiring', 'verified', 'failed', 'expired']],
   ['identity', 'queueEmpty', ['open', 'expiring', 'verified', 'failed', 'expired']],
   ['landlord', 'notVisibleCode', ['other_owners', 'tenant_buyer_contacts', 'staff_records', 'protected_details']],
-  ['merge', 'blocker', ['same_contact', 'already_merged', 'anonymised', 'keep_archived', 'different_types', 'financial_records', 'both_portal']],
-  ['adminDashboard', 'attention', ['unassigned_leads', 'response_overdue', 'expired_invitations', 'identity_checks_expiring', 'failed_imports', 'agent_licences']],
+  ['merge', 'blocker', ['same_contact', 'already_merged', 'anonymised', 'keep_archived', 'different_types', 'financial_records', 'both_portal', 'erasure_request']],
+  ['adminDashboard', 'attention', ['unassigned_leads', 'response_overdue', 'expired_invitations', 'identity_checks_expiring', 'failed_imports', 'agent_licences', 'privacy_requests_overdue']],
+  ['privacy', 'status', ['received', 'verifying', 'in_progress', 'completed', 'refused', 'withdrawn']],
+  ['privacy', 'type', ['access', 'erasure']],
+  ['privacy', 'typeLong', ['access', 'erasure']],
+  ['privacy', 'view', ['open', 'overdue', 'closed', 'all']],
+  ['privacy', 'empty', ['open', 'overdue', 'closed', 'all']],
+  ['privacy', 'channel', ['email', 'phone', 'in_person', 'post', 'web_form', 'other']],
+  ['privacy', 'identityMethod', ['documents_seen', 'known_contact_details', 'email_confirmation', 'other']],
+  ['privacy', 'evidenceKind', ['request', 'identity', 'correspondence', 'response', 'other']],
+  ['privacy', 'event', ['created', 'status_changed', 'assigned', 'identity_verified', 'due_extended', 'evidence_added', 'access_report_generated', 'erasure_carried_out', 'erasure_blocked']],
+  ['exports', 'type', ['contacts', 'leads', 'subject_access']],
 ];
 
 describe('dynamic message keys', () => {

@@ -198,7 +198,7 @@ describe('dashboards (Phase 5 milestone C4; D-A, D-C, D-M)', () => {
       expect(body.usersAndAccess).toEqual({ pendingInvitations: 1, expiredInvitations: 1, usersWithoutRequiredMfa: null, agentLicencesExpiring: 0 });
       expect(body.dataQuality.possibleDuplicateGroups).toBeGreaterThanOrEqual(1);
       expect(body.dataQuality.contactsWithoutOwner).toBeGreaterThanOrEqual(1);
-      expect(body.privacy).toMatchObject({ dataSubjectRequestsOpen: null, marketingWithdrawals: 1, sensitiveReveals: 1 });
+      expect(body.privacy).toMatchObject({ dataSubjectRequestsOpen: 0, dataSubjectRequestsOverdue: 0, marketingWithdrawals: 1, sensitiveReveals: 1 });
       expect(body.leadFlow.responseTargetMinutes).toBe(60);
       const hq = body.leadFlow.offices.find((row: { office: { id: string } | null }) => row.office?.id === company.officeId);
       expect(hq).toMatchObject({ unassigned: 1, noResponsePastTarget: 2 });

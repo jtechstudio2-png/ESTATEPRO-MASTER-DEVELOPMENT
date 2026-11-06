@@ -12,7 +12,8 @@
     "expired_invitations": "{count, plural, one {# invitation expired before it was accepted} other {# invitations expired before they were accepted}}",
     "identity_checks_expiring": "{count, plural, one {# identity check or document expiring within 30 days} other {# identity checks or documents expiring within 30 days}}",
     "failed_imports": "{count, plural, one {# import failed in the last 30 days} other {# imports failed in the last 30 days}}",
-    "agent_licences": "{count, plural, one {# agent licence expiring within 60 days} other {# agent licences expiring within 60 days}}"
+    "agent_licences": "{count, plural, one {# agent licence expiring within 60 days} other {# agent licences expiring within 60 days}}",
+    "privacy_requests_overdue": "{count, plural, one {# access or erasure request past its due date} other {# access or erasure requests past their due date}}"
   },
   "open": "Open",
   "noListYet": "List not available yet",
@@ -43,7 +44,6 @@
   "withdrawals": "Marketing consent withdrawn (7 days)",
   "reveals": "Protected details revealed (7 days)",
   "exports": "Contact and lead exports (7 days)",
-  "privacyNote": "Access and erasure requests arrive with a later release; until then the count is not available.",
   "exportsTitle": "Imports and exports",
   "noExports": "No exports yet.",
   "exportLine": "{type} · {status} · {rows} rows · {name}",
@@ -54,5 +54,6 @@
   "storage": "Storage",
   "usedOf": "{used} of {limit}",
   "supportGrants": "Open support access grants",
-  "scopeNote": "Counts include only the offices you can see."
+  "scopeNote": "Counts include only the offices you can see.",
+  "subjectRequestsOverdue": "Past their due date"
 }

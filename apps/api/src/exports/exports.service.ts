@@ -190,38 +190,52 @@ export class ExportsService {
     rowCount: number,
     action: string,
   ): Promise<ExportJobDto> {
-    const job = await tx
-      .insertInto('exportJobs')
-      .values({ companyId: ctx.companyId, exportType, format: 'csv', parameters: JSON.stringify(parameters), status: 'running', requestedBy: ctx.membershipId })
-      .returning(['id', 'createdAt'])
-      .executeTakeFirstOrThrow();
-    const stamp = job.createdAt.toISOString().slice(0, 16).replace(/[-:T]/g, '');
-    const fileName = `${exportType}-${stamp}.csv`;
-    const storageKey = `exports/${ctx.companyId}/${job.id}.csv`;
-    // The file is written before the job is marked complete. If the transaction
-    // fails afterwards, no job points at the object, so it can never be
-    // downloaded; a storage lifecycle rule on exports/ (deployment checklist)
-    // removes such objects.
-    await this.storage.write(storageKey, csv, 'text/csv; charset=utf-8');
-    await tx
-      .updateTable('exportJobs')
-      .set({
-        status: 'completed',
-        storageKey,
-        fileName,
-        rowCount,
-        finishedAt: sql<Date>`now()`,
-        expiresAt: sql<Date>`now() + make_interval(hours => ${EXPORT_LIFETIME_HOURS})`,
-      })
-      .where('id', '=', job.id)
-      .execute();
+    const job = await this.storeFile(tx, ctx, { exportType, format: 'csv', contentType: 'text/csv; charset=utf-8', body: csv, rowCount, parameters });
     await this.audit.record(tx, ctx, {
       action,
       entityType: 'export',
       entityId: job.id,
       metadata: { rows: rowCount, purpose: parameters['purpose'], filters: { ...parameters, purpose: undefined } },
     });
-    await this.audit.emit(tx, ctx, { eventType: 'export.completed', aggregateType: 'export', aggregateId: job.id, payload: { exportId: job.id, exportType, rows: rowCount } });
+    return job;
+  }
+
+  /**
+   * Stores a finished file as an export job: written before the job is marked
+   * complete, expires after EXPORT_LIFETIME_HOURS, downloadable only by the
+   * member who made it (each download audited). The caller audits the creation.
+   */
+  async storeFile(
+    tx: Tx,
+    ctx: TenantContext,
+    file: { exportType: 'contacts' | 'leads' | 'subject_access'; format: 'csv' | 'json'; contentType: string; body: Buffer; rowCount: number; parameters: Record<string, unknown> },
+  ): Promise<ExportJobDto> {
+    const job = await tx
+      .insertInto('exportJobs')
+      .values({ companyId: ctx.companyId, exportType: file.exportType, format: file.format, parameters: JSON.stringify(file.parameters), status: 'running', requestedBy: ctx.membershipId })
+      .returning(['id', 'createdAt'])
+      .executeTakeFirstOrThrow();
+    const stamp = job.createdAt.toISOString().slice(0, 16).replace(/[-:T]/g, '');
+    const fileName = `${file.exportType.replace('_', '-')}-${stamp}.${file.format}`;
+    const storageKey = `exports/${ctx.companyId}/${job.id}.${file.format}`;
+    // The file is written before the job is marked complete. If the transaction
+    // fails afterwards, no job points at the object, so it can never be
+    // downloaded; a storage lifecycle rule on exports/ (deployment checklist)
+    // removes such objects.
+    await this.storage.write(storageKey, file.body, file.contentType);
+    await tx
+      .updateTable('exportJobs')
+      .set({
+        status: 'completed',
+        storageKey,
+        fileName,
+        rowCount: file.rowCount,
+        finishedAt: sql<Date>`now()`,
+        expiresAt: sql<Date>`now() + make_interval(hours => ${EXPORT_LIFETIME_HOURS})`,
+      })
+      .where('id', '=', job.id)
+      .execute();
+    await this.audit.emit(tx, ctx, { eventType: 'export.completed', aggregateType: 'export', aggregateId: job.id, payload: { exportId: job.id, exportType: file.exportType, rows: file.rowCount } });
     return this.get(tx, ctx, job.id);
   }
 
@@ -282,9 +296,9 @@ export async function expireExports(tx: Tx, ctx: TenantContext, storage: Storage
   return expired.length;
 }
 
-/** Exports are for members who may export, and for those who oversee users (admin dashboard). */
+/** Exports are for members who may export, those who oversee users (admin dashboard), and access reports' makers. */
 function assertExportAccess(ctx: TenantContext): void {
-  if (!['contact.export', 'lead.export', 'user.manage'].some((permission) => scopeFor(ctx, permission) !== null)) {
+  if (!['contact.export', 'lead.export', 'user.manage', 'privacy.fulfil'].some((permission) => scopeFor(ctx, permission) !== null)) {
     throw Problems.forbidden('Your role does not include exports.');
   }
 }

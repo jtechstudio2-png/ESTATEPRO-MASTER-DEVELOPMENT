@@ -47,5 +47,6 @@
   "leadsUnassigned": "{count, plural, one {عميل محتمل جديد غير مكلَّف} other {# عملاء محتملين جدد غير مكلَّفين}}",
   "leadsNewMine": "{count, plural, one {عميل محتمل جديد مكلّف بك} other {# عملاء محتملين جدد مكلّف بهم}}",
   "followUpsOverdue": "{count, plural, one {متابعة متأخرة واحدة} other {# متابعات متأخرة}}",
-  "identityChecks": "عمليات التحقق من الهوية"
+  "identityChecks": "عمليات التحقق من الهوية",
+  "privacyRequests": "طلبات الخصوصية"
 }

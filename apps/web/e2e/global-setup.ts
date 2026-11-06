@@ -102,6 +102,8 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
       STORAGE_ENDPOINT: storage.endpoint,
       STORAGE_REGION: "us-east-1",
       STORAGE_BUCKET: storage.bucket,
+      // Erasure ledger (ADR-007 §8): its own bucket, as in production.
+      ERASURE_LEDGER_BUCKET: process.env["E2E_LEDGER_BUCKET"] ?? "estatepro-e2e-ledger",
       STORAGE_ACCESS_KEY_ID: storage.accessKeyId,
       STORAGE_SECRET_ACCESS_KEY: storage.secretAccessKey,
       STORAGE_FORCE_PATH_STYLE: "true",

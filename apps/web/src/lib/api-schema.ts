@@ -2128,6 +2128,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/privacy-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Requests: open ones by default, soonest due first */
+        get: operations["PrivacyRequests_list"];
+        put?: never;
+        /** Log a request; it is due 30 days after it reached the company */
+        post: operations["PrivacyRequests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/assignable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Members who can be given requests */
+        get: operations["PrivacyRequests_assignable"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A request with its evidence and history */
+        get: operations["PrivacyRequests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Give the request to a member, or clear the assignee */
+        post: operations["PrivacyRequests_assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/verify-identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record how the requester's identity was verified (once) */
+        post: operations["PrivacyRequests_verifyIdentity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move the request on: verifying, in progress, completed (access), refused or withdrawn */
+        post: operations["PrivacyRequests_changeStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/extend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Extend the due date once, with the reason */
+        post: operations["PrivacyRequests_extend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record evidence: the request, identity proof seen, correspondence or the response (append-only) */
+        post: operations["PrivacyRequests_addEvidence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/access-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Produce the access report (JSON, protected details included) as a 24-hour export for you; audited */
+        post: operations["PrivacyRequests_accessReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/erase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Carry out the erasure (ADR-007 §8) and complete the request; cannot be undone */
+        post: operations["PrivacyRequests_erase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4057,10 +4228,10 @@ export interface components {
         };
         MergeBlockerDto: {
             /** @enum {string} */
-            code: "same_contact" | "already_merged" | "anonymised" | "keep_archived" | "different_types" | "financial_records" | "both_portal";
+            code: "same_contact" | "already_merged" | "anonymised" | "keep_archived" | "different_types" | "financial_records" | "both_portal" | "erasure_request";
             /** @description The reason in English */
             message: string;
-            /** @description financial_records: the tables holding the records that cannot move */
+            /** @description financial_records: the tables holding the records that cannot move; erasure_request: the open request references */
             records: string[];
         };
         MergePreviewDto: {
@@ -5180,8 +5351,10 @@ export interface components {
             identityChecksExpiring: number;
         };
         PrivacyDto: {
-            /** @description Not available until data-subject requests are built (encryption stage E6, gap G3) */
+            /** @description Open access and erasure requests (gap G3); null without privacy.view */
             dataSubjectRequestsOpen: number | null;
+            /** @description Open requests past their due date; null without privacy.view */
+            dataSubjectRequestsOverdue: number | null;
             /** @description Marketing consents withdrawn in the last 7 days */
             marketingWithdrawals: number;
             /** @description Protected details revealed in the last 7 days */
@@ -5280,8 +5453,11 @@ export interface components {
         ExportJobDto: {
             /** Format: uuid */
             id: string;
-            /** @enum {string} */
-            exportType: "contacts" | "leads";
+            /**
+             * @description subject_access: an access report for a data-subject request (JSON)
+             * @enum {string}
+             */
+            exportType: "contacts" | "leads" | "subject_access";
             /** @enum {string} */
             format: "csv";
             /** @enum {string} */
@@ -5324,6 +5500,208 @@ export interface components {
             url: string;
             /** Format: date-time */
             linkExpiresAt: string;
+        };
+        PrivacyRequestSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            requestType: "access" | "erasure";
+            /** @enum {string} */
+            status: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn";
+            /** @enum {string} */
+            channel: "email" | "phone" | "in_person" | "post" | "web_form" | "other";
+            contact: components["schemas"]["KycQueueContactDto"];
+            /** Format: date */
+            receivedOn: string;
+            /**
+             * Format: date
+             * @description The due date in force (extended if it was extended)
+             */
+            dueOn: string;
+            /** @description Open and past its due date */
+            overdue: boolean;
+            /** @description Days until the due date (negative when overdue); null once closed */
+            daysLeft: number | null;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** @description The requester's identity has been verified */
+            identityVerified: boolean;
+            /** Format: date-time */
+            closedAt: string | null;
+            version: number;
+        };
+        PrivacyRequestPageDto: {
+            data: components["schemas"]["PrivacyRequestSummaryDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        AssignableMemberDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        AccessReportDto: {
+            /**
+             * Format: uuid
+             * @description Export id: download with POST /api/v1/exports/{id}/download (the member who generated it, within 24 hours)
+             */
+            exportId: string;
+            /** @enum {string} */
+            status: "completed" | "expired";
+            /** Format: date-time */
+            expiresAt: string | null;
+            canDownload: boolean;
+        };
+        PrivacyRequestEvidenceDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "request" | "identity" | "correspondence" | "response" | "other";
+            summary: string;
+            /** Format: date */
+            receivedOn: string;
+            recordedBy: components["schemas"]["RefLabelDto"];
+            /** Format: date-time */
+            recordedAt: string;
+        };
+        PrivacyRequestEventDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            eventType: "created" | "status_changed" | "assigned" | "identity_verified" | "due_extended" | "evidence_added" | "access_report_generated" | "erasure_carried_out" | "erasure_blocked";
+            /** @enum {string|null} */
+            fromStatus: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn" | null;
+            /** @enum {string|null} */
+            toStatus: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn" | null;
+            /** @description Codes and ids only (assignee, method, new due date, counts, blocker codes) */
+            detail: {
+                [key: string]: unknown;
+            };
+            actor: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            occurredAt: string;
+        };
+        PrivacyRequestDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            requestType: "access" | "erasure";
+            /** @enum {string} */
+            status: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn";
+            /** @enum {string} */
+            channel: "email" | "phone" | "in_person" | "post" | "web_form" | "other";
+            contact: components["schemas"]["KycQueueContactDto"];
+            /** Format: date */
+            receivedOn: string;
+            /**
+             * Format: date
+             * @description The due date in force (extended if it was extended)
+             */
+            dueOn: string;
+            /** @description Open and past its due date */
+            overdue: boolean;
+            /** @description Days until the due date (negative when overdue); null once closed */
+            daysLeft: number | null;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** @description The requester's identity has been verified */
+            identityVerified: boolean;
+            /** Format: date-time */
+            closedAt: string | null;
+            version: number;
+            /**
+             * Format: date
+             * @description The original due date
+             */
+            originalDueOn: string;
+            extensionReason: string | null;
+            /** Format: date-time */
+            identityVerifiedAt: string | null;
+            identityVerifiedBy: components["schemas"]["RefLabelDto"] | null;
+            /** @enum {string|null} */
+            identityMethod: "documents_seen" | "known_contact_details" | "email_confirmation" | "other" | null;
+            outcomeNote: string | null;
+            closedBy: components["schemas"]["RefLabelDto"] | null;
+            createdBy: components["schemas"]["RefLabelDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: uuid
+             * @description Erasure ledger entry, once carried out
+             */
+            erasureLedgerEntryId: string | null;
+            accessReport: components["schemas"]["AccessReportDto"] | null;
+            /** @description For an open erasure request: why the person cannot be erased now (codes) */
+            erasureBlockers: string[];
+            evidence: components["schemas"]["PrivacyRequestEvidenceDto"][];
+            history: components["schemas"]["PrivacyRequestEventDto"][];
+            /** @description Statuses this member can move the request to now */
+            nextStatuses: ("verifying" | "in_progress" | "completed" | "refused" | "withdrawn")[];
+            canManage: boolean;
+            /** @description Can carry out the erasure or generate the access report now */
+            canFulfil: boolean;
+        };
+        CreatePrivacyRequestBody: {
+            /**
+             * Format: uuid
+             * @description The person the request is about
+             */
+            contactId: string;
+            /** @enum {string} */
+            requestType: "access" | "erasure";
+            /** @enum {string} */
+            channel: "email" | "phone" | "in_person" | "post" | "web_form" | "other";
+            /**
+             * Format: date
+             * @description When the request reached the company (not in the future); the due date counts from it
+             */
+            receivedOn: string;
+            /**
+             * Format: uuid
+             * @description Member who handles it (must be allowed to manage requests)
+             */
+            assignedTo?: string | null;
+            /** @description Summary of the request as received, recorded as the first evidence entry. Do not copy ID or bank numbers. */
+            summary?: string | null;
+        };
+        AssignPrivacyRequestBody: {
+            /** Format: uuid */
+            assignedTo: string | null;
+        };
+        VerifyIdentityBody: {
+            /** @enum {string} */
+            method: "documents_seen" | "known_contact_details" | "email_confirmation" | "other";
+            /** @description What was seen or confirmed (recorded as identity evidence). No document numbers. */
+            note?: string | null;
+        };
+        ChangePrivacyRequestStatusBody: {
+            /** @enum {string} */
+            status: "verifying" | "in_progress" | "completed" | "refused" | "withdrawn";
+            /** @description Required when refusing or recording a withdrawal */
+            note?: string | null;
+        };
+        ExtendPrivacyRequestBody: {
+            /**
+             * Format: date
+             * @description New due date: after the current one, at most 60 days after it
+             */
+            extendedDueOn: string;
+            /** @description Why more time is needed (told to the requester) */
+            reason: string;
+        };
+        AddEvidenceBody: {
+            /** @enum {string} */
+            kind: "request" | "identity" | "correspondence" | "response" | "other";
+            /** @description What was received or sent. Do not copy ID or bank numbers. */
+            summary: string;
+            /** Format: date */
+            receivedOn: string;
+        };
+        CarryOutErasureBody: {
+            /**
+             * @description Type ERASE to confirm; erasure cannot be undone
+             * @example ERASE
+             */
+            confirm: string;
         };
     };
     responses: never;
@@ -5589,6 +5967,20 @@ export type ContactExportBody = components['schemas']['ContactExportBody'];
 export type ExportJobDto = components['schemas']['ExportJobDto'];
 export type LeadExportBody = components['schemas']['LeadExportBody'];
 export type ExportDownloadDto = components['schemas']['ExportDownloadDto'];
+export type PrivacyRequestSummaryDto = components['schemas']['PrivacyRequestSummaryDto'];
+export type PrivacyRequestPageDto = components['schemas']['PrivacyRequestPageDto'];
+export type AssignableMemberDto = components['schemas']['AssignableMemberDto'];
+export type AccessReportDto = components['schemas']['AccessReportDto'];
+export type PrivacyRequestEvidenceDto = components['schemas']['PrivacyRequestEvidenceDto'];
+export type PrivacyRequestEventDto = components['schemas']['PrivacyRequestEventDto'];
+export type PrivacyRequestDto = components['schemas']['PrivacyRequestDto'];
+export type CreatePrivacyRequestBody = components['schemas']['CreatePrivacyRequestBody'];
+export type AssignPrivacyRequestBody = components['schemas']['AssignPrivacyRequestBody'];
+export type VerifyIdentityBody = components['schemas']['VerifyIdentityBody'];
+export type ChangePrivacyRequestStatusBody = components['schemas']['ChangePrivacyRequestStatusBody'];
+export type ExtendPrivacyRequestBody = components['schemas']['ExtendPrivacyRequestBody'];
+export type AddEvidenceBody = components['schemas']['AddEvidenceBody'];
+export type CarryOutErasureBody = components['schemas']['CarryOutErasureBody'];
 export type $defs = Record<string, never>;
 export interface operations {
     Health_health: {
@@ -9863,6 +10255,298 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExportDownloadDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_list: {
+        parameters: {
+            query?: {
+                "filter[assignedTo]"?: "me" | "none";
+                "filter[contactId]"?: string;
+                /** @description received, verifying, in_progress, completed, refused, withdrawn */
+                "filter[status]"?: unknown;
+                /** @description access, erasure */
+                "filter[requestType]"?: unknown;
+                "filter[view]"?: "open" | "overdue" | "closed" | "all";
+                sort?: "dueOn" | "-dueOn" | "createdAt" | "-createdAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestPageDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrivacyRequestBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_assignable: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignableMemberDto"][];
+                };
+            };
+        };
+    };
+    PrivacyRequests_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_assign: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignPrivacyRequestBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_verifyIdentity: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyIdentityBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_changeStatus: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePrivacyRequestStatusBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_extend: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExtendPrivacyRequestBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_addEvidence: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddEvidenceBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_accessReport: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_erase: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CarryOutErasureBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
                 };
             };
         };

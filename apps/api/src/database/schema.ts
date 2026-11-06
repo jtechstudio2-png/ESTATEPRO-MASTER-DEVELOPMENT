@@ -565,6 +565,56 @@ export interface CustomFieldDefinitions {
   version: Generated<number>;
 }
 
+export interface DataSubjectRequestEvents {
+  actor: string | null;
+  companyId: string;
+  detail: Generated<Json>;
+  eventType: string;
+  fromStatus: string | null;
+  id: Generated<string>;
+  occurredAt: Generated<Timestamp>;
+  requestId: string;
+  toStatus: string | null;
+}
+
+export interface DataSubjectRequestEvidence {
+  companyId: string;
+  id: Generated<string>;
+  kind: string;
+  receivedOn: string;
+  recordedAt: Generated<Timestamp>;
+  recordedBy: string;
+  requestId: string;
+  summary: string;
+}
+
+export interface DataSubjectRequests {
+  accessExportId: string | null;
+  assignedTo: string | null;
+  channel: string;
+  closedAt: Timestamp | null;
+  closedBy: string | null;
+  companyId: string;
+  contactId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string;
+  dueOn: string;
+  erasureLedgerEntryId: string | null;
+  extendedDueOn: string | null;
+  extensionReason: string | null;
+  id: Generated<string>;
+  identityMethod: string | null;
+  identityVerifiedAt: Timestamp | null;
+  identityVerifiedBy: string | null;
+  outcomeNote: string | null;
+  receivedOn: string;
+  reference: string;
+  requestType: string;
+  status: Generated<string>;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+}
+
 export interface DealAgents {
   agentRole: string;
   companyId: string;
@@ -2551,6 +2601,9 @@ export interface DB {
   countries: Countries;
   currencies: Currencies;
   customFieldDefinitions: CustomFieldDefinitions;
+  dataSubjectRequestEvents: DataSubjectRequestEvents;
+  dataSubjectRequestEvidence: DataSubjectRequestEvidence;
+  dataSubjectRequests: DataSubjectRequests;
   dealAgents: DealAgents;
   dealMilestones: DealMilestones;
   dealParties: DealParties;

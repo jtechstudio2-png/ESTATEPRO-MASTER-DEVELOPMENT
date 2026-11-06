@@ -74,6 +74,8 @@ test('main screens load within budget', { tag: '@performance' }, async ({ page, 
     ['Sellers view (SE-1)', '/contacts?view=seller', (p) => p.getByRole('table', { name: 'Sellers contacts' }).getByRole('rowheader').first()],
     ['Identity checks (SH-1)', '/identity-checks?queue=verified', (p) => p.getByRole('heading', { level: 1, name: 'Identity checks' })],
     ['Follow-ups (F-2)', '/follow-ups?range=done', (p) => p.getByRole('heading', { level: 1, name: 'Follow-ups' })],
+    ['Privacy requests (G3)', '/privacy-requests?view=all', (p) => p.getByRole('heading', { level: 1, name: 'Privacy requests' })],
+    ['Privacy request (G3)', `/privacy-requests/${state.records.privacy.overdueRequest.id}`, (p) => p.getByRole('heading', { name: 'History' })],
   ];
   const results: Array<Measure & { map: boolean }> = [];
   for (const [name, url, ready, map = false] of screens) results.push({ ...(await measure(page, name, url, ready)), map });

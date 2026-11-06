@@ -14,6 +14,7 @@ import { ContactsModule } from './contacts/contacts.module.js';
 import { CrmModule } from './crm/crm.module.js';
 import { DashboardsModule } from './dashboards/dashboards.module.js';
 import { ExportsModule } from './exports/exports.module.js';
+import { PrivacyModule } from './privacy/privacy.module.js';
 import { CryptoModule } from './crypto/crypto.module.js';
 import { sensitiveLogPaths } from './crypto/sensitive-fields.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -67,6 +68,7 @@ function withStream<T>(stream: DestinationStream | null, options: T): T | [T, De
     CrmModule,
     DashboardsModule,
     ExportsModule,
+    PrivacyModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],
