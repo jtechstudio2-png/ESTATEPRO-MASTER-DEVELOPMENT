@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 6 November 2026 |
-| Branch | `phase-5/preparation`, G3 commits (see §10) |
+| Branch | `phase-5/preparation`, commits `c965aa0`, `8bf5cab`; CI run 87 green |
 | Approvals | E5–E6 decisions E56-D1 to E56-D7 approved before work started |
 | Scope | Gap G3 of the wireframe verification (#8): a register of access and erasure requests with lifecycle, status, assignment, due dates, audit trail and evidence. Merges are blocked while an erasure request is open (C-4). The register appears on the admin dashboard (D-A) and the contact record (C-2). Erasure uses the E6 service; access reports use the C4 export path. Rectification and objection requests are not in scope |
-| Result | **G3 complete.** Results in §3; CI in §10 |
+| Result | **G3 complete.** Results in §3; CI run 87 green (§10) |
 
 ## 1. Deliverables
 
@@ -68,7 +68,7 @@
 | Reveal controls | The access report uses the reveal window and is audited like a reveal, without values | API tests |
 | Accessibility | Register, request page, log form and dialogs in the axe sweep, English and Arabic, desktop and 320 px | Browser tests |
 | Localisation validation | New `privacy` messages in English and Arabic; message check | Message check |
-| CI verification | See §10 | CI run |
+| CI verification | All required jobs green on the final commit | CI run 87 |
 
 ## 3. Tests
 
@@ -154,4 +154,5 @@ The register's open view uses a partial index on open requests by due date; the 
 | E5–E6 report | `docs/phase-5/P5-E5-E6-ROTATION-ERASURE-REPORT.md` |
 | Wireframes (#8), gap G3 | `docs/phase-5/P5-CRM-WIREFRAME-VERIFICATION.md` §4 |
 | Branch | `phase-5/preparation` |
-| Commits and CI run | Recorded after CI completes |
+| Commits | `c965aa0` (register), `8bf5cab` (dashboard test, report figures) |
+| CI run 87 (green, on `8bf5cab`; run 86 was cancelled by the later push) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42310103177 |
