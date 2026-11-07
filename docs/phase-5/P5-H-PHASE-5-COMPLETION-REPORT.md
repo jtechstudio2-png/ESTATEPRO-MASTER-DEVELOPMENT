@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Date | 7 November 2026 |
-| Branch | `phase-5/preparation`, commits `d5751bf` (#14), `91a0b08`, `193e00d` (ownership, #18), `5358071`, `249c772` (browser tests); CI run __RUN__ |
+| Branch | `phase-5/preparation`, commits `d5751bf` (#14), `91a0b08`, `193e00d` (ownership, #18), `5358071`, `249c772` (browser tests); CI run 95 |
 | Approvals | G3 decisions G3-D1 to G3-D8 approved before work started; the data-subject request register is approved |
 | Scope | The open Phase 5 items: ownership records (property "Ownership" tab and LL-1 "add ownership", both in the approved designs), the seller identity publish rule (#18), and explicit timeouts and retries on object storage (#14). No other new features |
-| Result | **P5-H complete.** Results in §3; CI run __RUN__ green (§10) |
+| Result | **P5-H complete.** Results in §3; CI run 95 green (§10) |
 
 ## 1. Deliverables
 
@@ -169,7 +169,7 @@ The ownership list is one query on `property_ownerships_property_idx`; the publi
 | Issues | #14 (storage limits), #18 (seller identity) |
 | Branch | `phase-5/preparation` |
 | Commits | `d5751bf` (#14), `91a0b08`, `193e00d` (ownership records, #18), `5358071`, `249c772` (browser tests) |
-| CI run __RUN__ | __RUNURL__ |
+| CI run 95 (green, on `0589ffc`; runs 91, 93 and 94 were cancelled by later pushes; run 92 failed in the browser tests fixed in `5358071` and `249c772`) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42342621124 |
 
 ## Approval
 
