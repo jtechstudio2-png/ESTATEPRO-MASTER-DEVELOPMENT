@@ -1175,6 +1175,161 @@
         ]
       }
     },
+    "/api/v1/properties/{propertyId}/ownerships": {
+      "get": {
+        "operationId": "Properties_listOwnerships",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnershipListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      },
+      "post": {
+        "operationId": "Properties_addOwnership",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "propertyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOwnershipBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnershipDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
+    "/api/v1/property-ownerships/{ownershipId}/end": {
+      "post": {
+        "operationId": "Properties_endOwnership",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownershipId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndOwnershipBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnershipDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Properties"
+        ]
+      }
+    },
     "/api/v1/units/{unitId}": {
       "get": {
         "operationId": "Properties_getUnit",
@@ -11944,6 +12099,272 @@
           "unitLabel"
         ]
       },
+      "OwnershipUnitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "unitLabel"
+        ]
+      },
+      "OwnershipOwnerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "person",
+              "organisation"
+            ]
+          },
+          "identityVerified": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Identity verified now (issue #18); null when the member cannot see identity checks"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "contactType",
+          "identityVerified"
+        ]
+      },
+      "RefLabelDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "OwnershipDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unit": {
+            "description": "Null for the whole property",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OwnershipUnitDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "owner": {
+            "description": "Null when the member cannot see the owner contact",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OwnershipOwnerDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sharePercent": {
+            "type": "number"
+          },
+          "ownershipType": {
+            "type": "string",
+            "enum": [
+              "legal_owner",
+              "beneficial_owner",
+              "leaseholder",
+              "developer"
+            ]
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Last day of ownership (inclusive)"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "Owner today, in the property time zone"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "endedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "endReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "unit",
+          "owner",
+          "sharePercent",
+          "ownershipType",
+          "effectiveFrom",
+          "effectiveTo",
+          "current",
+          "createdBy",
+          "createdAt",
+          "endedBy",
+          "endedAt",
+          "endReason"
+        ]
+      },
+      "OwnershipListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Current records first, then ended ones (most recent first)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnershipDto"
+            }
+          },
+          "canManage": {
+            "type": "boolean",
+            "description": "The member may add and end ownership records for this property"
+          }
+        },
+        "required": [
+          "data",
+          "canManage"
+        ]
+      },
+      "AddOwnershipBody": {
+        "type": "object",
+        "properties": {
+          "ownerContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The owner (a contact the member can see)"
+          },
+          "unitId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "A unit of this property; omit or null for the whole property"
+          },
+          "sharePercent": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0.0001,
+            "maximum": 100,
+            "default": 100,
+            "description": "Share in percent; current shares of one type for the same unit (or the whole property) add up to at most 100"
+          },
+          "ownershipType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "legal_owner",
+              "beneficial_owner",
+              "leaseholder",
+              "developer",
+              null
+            ],
+            "default": "legal_owner"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date",
+            "description": "First day of ownership (not in the future, in the property time zone)"
+          }
+        },
+        "required": [
+          "ownerContactId",
+          "effectiveFrom"
+        ]
+      },
+      "EndOwnershipBody": {
+        "type": "object",
+        "properties": {
+          "effectiveTo": {
+            "type": "string",
+            "format": "date",
+            "description": "Last day of ownership: after the start date, not in the future"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "description": "Why the ownership ended (for example: sold, transferred, recorded in error)"
+          }
+        },
+        "required": [
+          "effectiveTo",
+          "reason"
+        ]
+      },
       "UpdateUnitBody": {
         "type": "object",
         "properties": {
@@ -13210,6 +13631,7 @@
               "photos",
               "floor-plan",
               "unverified",
+              "no-owner",
               "missing"
             ]
           },
@@ -13587,7 +14009,7 @@
           },
           "requireSellerKyc": {
             "type": "boolean",
-            "description": "Listings cannot be published until seller KYC is verified"
+            "description": "Listings cannot be published until every current owner of the unit has a verified identity (#18). A jurisdiction can also require it (rule listing_owner_identity_required)"
           },
           "minPhotosToPublish": {
             "type": [
@@ -15897,22 +16319,6 @@
         "required": [
           "rejected",
           "recent"
-        ]
-      },
-      "RefLabelDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name"
         ]
       },
       "IdentityCheckSummaryDto": {
