@@ -156,3 +156,7 @@ The register's open view uses a partial index on open requests by due date; the 
 | Branch | `phase-5/preparation` |
 | Commits | `c965aa0` (register), `8bf5cab` (dashboard test, report figures) |
 | CI run 87 (green, on `8bf5cab`; run 86 was cancelled by the later push) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/42310103177 |
+
+## Approval
+
+Product owner, 7 November 2026: **G3-D1 to G3-D8 approved; the data-subject request register is approved.** Issues #24 (manual screen-reader pass) and #25 (Arabic native-speaker review) remain pre-launch requirements. Issue #20 (legal review) remains required before production deployment in Ghana and Qatar, including the response periods of G3-D3. Proceed to the next approved milestone with the same standards for tenant isolation, encryption controls, audit integrity, accessibility validation, localisation validation and CI verification.
