@@ -22,6 +22,7 @@ import {
   NO_LOCATION_FILTER,
 } from '../location/location-filter.js';
 import { mapResult, requireViewport } from '../location/map-results.js';
+import { ownerIdentityBlockers } from '../properties/owner-identity.js';
 import { isCalendarDate, nextReference } from '../properties/properties.service.js';
 import { propertyScopeSql } from '../properties/property-access.js';
 import { checkPicklistCode } from '../reference/picklists.js';
@@ -60,7 +61,7 @@ import {
   reductionExceeds,
   transitionError,
 } from './listing-rules.js';
-import { ListingSettingsService } from './listing-settings.service.js';
+import { ListingSettingsService, OWNER_IDENTITY_RULE } from './listing-settings.service.js';
 
 registerConstraintMessages({
   listings_one_open_per_unit_idx: 'This unit already has an open listing of this type.',
@@ -1291,13 +1292,9 @@ export class ListingsService {
     if (settings.requireFloorPlanToPublish && media.floorPlanCount === 0) {
       blockers.push({ field: 'media', code: 'floor-plan', message: 'A floor plan is required before publishing.' });
     }
-    if (settings.requireSellerKyc) {
-      // Seller identity comes from ownership records (Phase 5); until then the setting blocks publishing.
-      blockers.push({
-        field: 'sellerKyc',
-        code: 'unverified',
-        message: 'Your company requires verified seller KYC before publishing, and no verified seller is recorded for this unit.',
-      });
+    // Issue #18: the company setting or the jurisdiction rule requires every current owner's identity to be verified.
+    if (settings.requireSellerKyc || (await this.settings.jurisdictionRule(tx, OWNER_IDENTITY_RULE, unit.jurisdictionCode, today)) === true) {
+      blockers.push(...(await ownerIdentityBlockers(tx, unit.id)));
     }
 
     const jurisdiction = await tx.selectFrom('jurisdictions').select('parentCode').where('code', '=', unit.jurisdictionCode).executeTakeFirst();

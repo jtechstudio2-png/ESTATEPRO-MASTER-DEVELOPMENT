@@ -1963,8 +1963,15 @@ export interface PropertyNotes {
 export interface PropertyOwnerships {
   companyId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   effectiveFrom: string;
+  /**
+   * Last day of ownership (inclusive), as app.landlord_unit_access reads it. NULL = still owned.
+   */
   effectiveTo: string | null;
+  endedAt: Timestamp | null;
+  endedBy: string | null;
+  endReason: string | null;
   evidenceDocumentId: string | null;
   id: Generated<string>;
   ownerContactId: string;

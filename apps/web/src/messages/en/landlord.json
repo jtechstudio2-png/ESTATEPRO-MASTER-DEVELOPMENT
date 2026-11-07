@@ -22,5 +22,6 @@
     "tenant_buyer_contacts": "Tenants’ and buyers’ contact details",
     "staff_records": "Staff notes, activities and follow-ups",
     "protected_details": "Protected details (identity, tax and bank numbers)"
-  }
+  },
+  "addOwnership": "Add ownership"
 }

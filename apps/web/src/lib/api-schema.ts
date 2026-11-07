@@ -244,6 +244,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/properties/{propertyId}/ownerships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Properties_listOwnerships"];
+        put?: never;
+        post: operations["Properties_addOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/property-ownerships/{ownershipId}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Properties_endOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/units/{unitId}": {
         parameters: {
             query?: never;
@@ -2771,6 +2803,94 @@ export interface components {
             /** @default false */
             isWholeProperty: boolean;
         };
+        OwnershipUnitDto: {
+            /** Format: uuid */
+            id: string;
+            unitLabel: string;
+        };
+        OwnershipOwnerDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            contactType: "person" | "organisation";
+            /** @description Identity verified now (issue #18); null when the member cannot see identity checks */
+            identityVerified: boolean | null;
+        };
+        RefLabelDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        OwnershipDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Null for the whole property */
+            unit: components["schemas"]["OwnershipUnitDto"] | null;
+            /** @description Null when the member cannot see the owner contact */
+            owner: components["schemas"]["OwnershipOwnerDto"] | null;
+            sharePercent: number;
+            /** @enum {string} */
+            ownershipType: "legal_owner" | "beneficial_owner" | "leaseholder" | "developer";
+            /** Format: date */
+            effectiveFrom: string;
+            /**
+             * Format: date
+             * @description Last day of ownership (inclusive)
+             */
+            effectiveTo: string | null;
+            /** @description Owner today, in the property time zone */
+            current: boolean;
+            createdBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            endedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            endedAt: string | null;
+            endReason: string | null;
+        };
+        OwnershipListDto: {
+            /** @description Current records first, then ended ones (most recent first) */
+            data: components["schemas"]["OwnershipDto"][];
+            /** @description The member may add and end ownership records for this property */
+            canManage: boolean;
+        };
+        AddOwnershipBody: {
+            /**
+             * Format: uuid
+             * @description The owner (a contact the member can see)
+             */
+            ownerContactId: string;
+            /**
+             * Format: uuid
+             * @description A unit of this property; omit or null for the whole property
+             */
+            unitId?: string | null;
+            /**
+             * @description Share in percent; current shares of one type for the same unit (or the whole property) add up to at most 100
+             * @default 100
+             */
+            sharePercent: number | null;
+            /**
+             * @default legal_owner
+             * @enum {string|null}
+             */
+            ownershipType: "legal_owner" | "beneficial_owner" | "leaseholder" | "developer" | null;
+            /**
+             * Format: date
+             * @description First day of ownership (not in the future, in the property time zone)
+             */
+            effectiveFrom: string;
+        };
+        EndOwnershipBody: {
+            /**
+             * Format: date
+             * @description Last day of ownership: after the start date, not in the future
+             */
+            effectiveTo: string;
+            /** @description Why the ownership ended (for example: sold, transferred, recorded in error) */
+            reason: string;
+        };
         UpdateUnitBody: {
             /** Format: uuid */
             unitTypeId?: string | null;
@@ -3110,7 +3230,7 @@ export interface components {
         ReadinessBlockerDto: {
             field: string;
             /** @enum {string} */
-            code: "archived" | "closed" | "unavailable" | "expired" | "photos" | "floor-plan" | "unverified" | "missing";
+            code: "archived" | "closed" | "unavailable" | "expired" | "photos" | "floor-plan" | "unverified" | "no-owner" | "missing";
             message: string;
         };
         ListingReadinessDto: {
@@ -3208,7 +3328,7 @@ export interface components {
         ListingSettingsBody: {
             /** @description Price reductions above this percentage need manager approval; null = off */
             priceReductionApprovalPercent: number | null;
-            /** @description Listings cannot be published until seller KYC is verified */
+            /** @description Listings cannot be published until every current owner of the unit has a verified identity (#18). A jurisdiction can also require it (rule listing_owner_identity_required) */
             requireSellerKyc: boolean;
             /** @description Minimum photos to publish; null = off. Omitted = unchanged. */
             minPhotosToPublish?: number | null;
@@ -3858,11 +3978,6 @@ export interface components {
             rejected: number;
             /** @description Up to 10, newest first */
             recent: components["schemas"]["RejectedMediaDto"][];
-        };
-        RefLabelDto: {
-            /** Format: uuid */
-            id: string;
-            name: string;
         };
         IdentityCheckSummaryDto: {
             /** @enum {string} */
@@ -5747,6 +5862,13 @@ export type UnitDto = components['schemas']['UnitDto'];
 export type UnitPageDto = components['schemas']['UnitPageDto'];
 export type FloorAreaInput = components['schemas']['FloorAreaInput'];
 export type CreateUnitBody = components['schemas']['CreateUnitBody'];
+export type OwnershipUnitDto = components['schemas']['OwnershipUnitDto'];
+export type OwnershipOwnerDto = components['schemas']['OwnershipOwnerDto'];
+export type RefLabelDto = components['schemas']['RefLabelDto'];
+export type OwnershipDto = components['schemas']['OwnershipDto'];
+export type OwnershipListDto = components['schemas']['OwnershipListDto'];
+export type AddOwnershipBody = components['schemas']['AddOwnershipBody'];
+export type EndOwnershipBody = components['schemas']['EndOwnershipBody'];
 export type UpdateUnitBody = components['schemas']['UpdateUnitBody'];
 export type UnitAvailabilityBody = components['schemas']['UnitAvailabilityBody'];
 export type GeocodeSuggestionDto = components['schemas']['GeocodeSuggestionDto'];
@@ -5842,7 +5964,6 @@ export type KeysPanelDto = components['schemas']['KeysPanelDto'];
 export type LocationsPanelDto = components['schemas']['LocationsPanelDto'];
 export type RejectedMediaDto = components['schemas']['RejectedMediaDto'];
 export type MediaPanelDto = components['schemas']['MediaPanelDto'];
-export type RefLabelDto = components['schemas']['RefLabelDto'];
 export type IdentityCheckSummaryDto = components['schemas']['IdentityCheckSummaryDto'];
 export type NextFollowUpDto = components['schemas']['NextFollowUpDto'];
 export type ListingRefDto = components['schemas']['ListingRefDto'];
@@ -6492,6 +6613,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnitDto"];
+                };
+            };
+        };
+    };
+    Properties_listOwnerships: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                propertyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipListDto"];
+                };
+            };
+        };
+    };
+    Properties_addOwnership: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                propertyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddOwnershipBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipDto"];
+                };
+            };
+        };
+    };
+    Properties_endOwnership: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                ownershipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndOwnershipBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipDto"];
                 };
             };
         };

@@ -35,6 +35,8 @@ import {
   UpdatePropertyBody,
   UpdateUnitBody,
 } from './dto.js';
+import { AddOwnershipBody, EndOwnershipBody, OwnershipDto, OwnershipListDto } from './ownership.dto.js';
+import { OwnershipsService } from './ownerships.service.js';
 import { PropertiesService, type PropertySortField } from './properties.service.js';
 import { type UnitSortField, UnitsService } from './units.service.js';
 
@@ -65,6 +67,7 @@ export class PropertiesController {
     private readonly tenantDb: TenantDb,
     private readonly properties: PropertiesService,
     private readonly units: UnitsService,
+    private readonly ownerships: OwnershipsService,
     private readonly idempotency: IdempotencyService,
     private readonly limiter: RateLimiter,
     @Inject(APP_CONFIG) private readonly config: AppConfig,
@@ -266,6 +269,49 @@ export class PropertiesController {
     res.status(result.status).location(`/api/v1/units/${result.body.id}`);
     setVersionEtag(res, result.body.version);
     return result.body;
+  }
+
+  @Get('properties/:propertyId/ownerships')
+  @RequirePermission('property.view')
+  @ApiOkResponse({ type: OwnershipListDto })
+  listOwnerships(@Tenant() ctx: TenantContext, @Param('propertyId', UUID_PARAM) propertyId: string): Promise<OwnershipListDto> {
+    return this.tenantDb.run(ctx, (tx) => this.ownerships.list(tx, ctx, propertyId));
+  }
+
+  @Post('properties/:propertyId/ownerships')
+  @RequirePermission('property.update')
+  @ApiHeader({ name: 'Idempotency-Key', required: false })
+  @ApiCreatedResponse({ type: OwnershipDto })
+  async addOwnership(
+    @Tenant() ctx: TenantContext,
+    @Param('propertyId', UUID_PARAM) propertyId: string,
+    @Body() body: AddOwnershipBody,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
+    @Req() req: EstateProRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<OwnershipDto> {
+    const result = await this.tenantDb.run(ctx, (tx) =>
+      this.idempotency.run(tx, ctx, idempotencyKey, { method: 'POST', path: req.path, body: req.body as unknown }, async () => ({
+        status: 201,
+        body: await this.ownerships.add(tx, ctx, propertyId, body),
+      })),
+    );
+    res.status(result.status);
+    return result.body;
+  }
+
+  @Post('property-ownerships/:ownershipId/end')
+  @RequirePermission('property.update')
+  @ApiOkResponse({ type: OwnershipDto })
+  async endOwnership(
+    @Tenant() ctx: TenantContext,
+    @Param('ownershipId', UUID_PARAM) ownershipId: string,
+    @Body() body: EndOwnershipBody,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<OwnershipDto> {
+    const ended = await this.tenantDb.run(ctx, (tx) => this.ownerships.end(tx, ctx, ownershipId, body));
+    res.status(200);
+    return ended;
   }
 
   @Get('units/:unitId')

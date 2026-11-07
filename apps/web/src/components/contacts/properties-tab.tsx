@@ -5,6 +5,8 @@ import NextLink from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Ltr } from '@/components/crm/labels';
+import { useSession } from '@/components/session';
+import { LinkButton } from '@/components/ui/button';
 import { EmptyState, ErrorNotice, Notice, Skeleton, StatusLabel } from '@/components/ui/feedback';
 import { Panel, Stack } from '@/components/ui/layout';
 import type { PortalPreviewDto } from '@/lib/api-schema';
@@ -23,6 +25,7 @@ import styles from './contacts.module.css';
 export function PropertiesTab({ id }: { id: string }) {
   const t = useTranslations('landlord');
   const format = useFormat();
+  const { can, readOnly } = useSession();
   const preview = useQuery({
     queryKey: ['record', 'portal-preview', id],
     queryFn: ({ signal }) => bff<PortalPreviewDto>(`contacts/${id}/portal-visibility-preview`, { signal }),
@@ -43,7 +46,14 @@ export function PropertiesTab({ id }: { id: string }) {
   return (
     <Stack>
       {!data.hasLandlordRole ? <Notice tone="info">{t('notLandlord')}</Notice> : null}
-      <Panel title={t('propertiesTitle')}>
+      <Panel
+        title={t('propertiesTitle')}
+        actions={
+          can('property.update') && !readOnly ? (
+            <LinkButton href={`/ownerships/new?contactId=${id}`}>{t('addOwnership')}</LinkButton>
+          ) : undefined
+        }
+      >
         {data.properties.length === 0 ? (
           <EmptyState title={t('noProperties')} headingLevel={3}>
             {t('noPropertiesDetail')}

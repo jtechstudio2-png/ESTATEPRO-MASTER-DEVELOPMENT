@@ -291,7 +291,7 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       officeId: accra.officeId,
       relationships: ['tenant'],
     });
-    // Ama owns Labone Villa (ownership records arrive with Phase 7 screens; the resolver reads them now).
+    // Ama owns Labone Villa (recorded before the P5-H Ownership screens existed, as older data would be).
     await db.query(
       `INSERT INTO property_ownerships (company_id, property_id, owner_contact_id, effective_from) VALUES ($1, $2, $3, current_date - 400)`,
       [accra.companyId, laboneVilla.id, ama.id],

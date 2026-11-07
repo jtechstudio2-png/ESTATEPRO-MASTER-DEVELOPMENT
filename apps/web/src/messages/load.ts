@@ -34,6 +34,7 @@ export const NAMESPACES = [
   'myDay',
   'crmSettings',
   'privacy',
+  'ownership',
 ] as const;
 
 export async function loadMessages(language: UiLanguage): Promise<Record<string, unknown>> {

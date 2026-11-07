@@ -108,7 +108,7 @@ export class ListingSettingsBody {
   @ApiProperty({ type: Number, nullable: true, minimum: 1, maximum: 100, description: 'Price reductions above this percentage need manager approval; null = off' })
   @ValidateIf((o: ListingSettingsBody) => o.priceReductionApprovalPercent !== null) @IsInt() @Min(1) @Max(100)
   priceReductionApprovalPercent!: number | null;
-  @ApiProperty({ description: 'Listings cannot be published until seller KYC is verified' }) @IsBoolean() requireSellerKyc!: boolean;
+  @ApiProperty({ description: 'Listings cannot be published until every current owner of the unit has a verified identity (#18). A jurisdiction can also require it (rule listing_owner_identity_required)' }) @IsBoolean() requireSellerKyc!: boolean;
   @ApiPropertyOptional({ type: Number, nullable: true, minimum: 1, maximum: 60, description: 'Minimum photos to publish; null = off. Omitted = unchanged.' })
   @ValidateIf((o: ListingSettingsBody) => o.minPhotosToPublish !== null && o.minPhotosToPublish !== undefined) @IsInt() @Min(1) @Max(60)
   minPhotosToPublish?: number | null;
@@ -217,7 +217,7 @@ export class ListingDto extends ListingSummaryDto {
 
 export class ReadinessBlockerDto {
   @ApiProperty() field!: string;
-  @ApiProperty({ enum: ['archived', 'closed', 'unavailable', 'expired', 'photos', 'floor-plan', 'unverified', 'missing'] }) code!: string;
+  @ApiProperty({ enum: ['archived', 'closed', 'unavailable', 'expired', 'photos', 'floor-plan', 'unverified', 'no-owner', 'missing'] }) code!: string;
   @ApiProperty() message!: string;
 }
 

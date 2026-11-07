@@ -44,6 +44,7 @@ function crmScreens(contactId: string, leadId: string | null): string[] {
     '/settings/crm',
     '/privacy-requests',
     '/privacy-requests/new',
+    '/ownerships/new',
   ];
 }
 
@@ -59,6 +60,7 @@ test.describe('Screen sweep (issue #7)', () => {
       '/properties',
       property,
       `${property}/units`,
+      `${property}/ownership`,
       `${property}/listings`,
       `${property}/media`,
       `${property}/notes`,
@@ -109,6 +111,7 @@ test.describe('Screen sweep (issue #7)', () => {
       '/properties',
       property,
       `${property}/units`,
+      `${property}/ownership`,
       `${property}/media`,
       `${property}/notes`,
       `${property}/keys`,

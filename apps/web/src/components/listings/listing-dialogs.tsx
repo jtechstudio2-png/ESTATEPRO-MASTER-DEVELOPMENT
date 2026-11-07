@@ -25,8 +25,18 @@ import { useReadiness } from './use-listing';
 export type ListingAction = 'publish' | 'unpublish' | 'status' | 'reassign' | 'relist' | 'archive' | 'restore';
 
 /** Where each publishing blocker is fixed (L-5). */
-export function blockerHref(listing: Pick<ListingDto, 'id' | 'property' | 'unit'>, code: ListingReadinessDto['blockers'][number]['code']): string | null {
+export function blockerHref(
+  listing: Pick<ListingDto, 'id' | 'property' | 'unit'>,
+  { code, field }: Pick<ListingReadinessDto['blockers'][number], 'code' | 'field'>,
+): string | null {
   switch (code) {
+    case 'no-owner':
+      return `/properties/${listing.property.id}/ownership`;
+    case 'unverified': {
+      // Issue #18: one item per owner; the field names the owner contact.
+      const contactId = field.startsWith('sellerKyc.') ? field.slice('sellerKyc.'.length) : null;
+      return contactId ? `/contacts/${contactId}/identity` : `/properties/${listing.property.id}/ownership`;
+    }
     case 'photos':
       return `/listings/${listing.id}/gallery`;
     case 'floor-plan':
@@ -57,7 +67,7 @@ export function PublishChecklist({ listing, readiness }: { listing: ListingDto; 
   return (
     <ul className={styles.checklist}>
       {readiness.blockers.map((blocker) => {
-        const href = blockerHref(listing, blocker.code);
+        const href = blockerHref(listing, blocker);
         return (
           <li key={`${blocker.code}-${blocker.field}`}>
             <span aria-hidden="true" className={styles.cross}>

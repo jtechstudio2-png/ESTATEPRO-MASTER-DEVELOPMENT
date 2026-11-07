@@ -73,6 +73,7 @@ export function PropertyFrame({ id, children }: { id: string; children: ReactNod
   const tabs = [
     { href: base, label: t('tabs.overview'), current: pathname === base },
     { href: `${base}/units`, label: t('tabs.units'), count: counts?.units.total ?? null, current: pathname.startsWith(`${base}/units`) },
+    { href: `${base}/ownership`, label: t('tabs.ownership'), current: pathname.startsWith(`${base}/ownership`) },
     ...(can('listing.view') ? [{ href: `${base}/listings`, label: t('tabs.listings'), count: counts?.listings ? counts.listings.live + counts.listings.draft : null, current: pathname.startsWith(`${base}/listings`) }] : []),
     { href: `${base}/media`, label: t('tabs.media'), count: counts ? counts.media.photos + counts.media.plans + counts.media.links : null, current: pathname.startsWith(`${base}/media`) },
     ...(can('property_note.view') ? [{ href: `${base}/notes`, label: t('tabs.notes'), count: counts?.notes?.total ?? null, current: pathname.startsWith(`${base}/notes`) }] : []),
