@@ -83,20 +83,20 @@ test.describe('Ownership records and seller identity (P5-H, #18)', () => {
       await expectAccessible(page);
       const listingUrl = page.url();
 
-      // Record Esi (identity check still in review) as the owner of Flat 1B.
+      // Record Kojo (no identity check) as the owner of Flat 1B.
       await missing.getByRole('link', { name: 'Fix' }).click();
       await page.getByRole('link', { name: 'Add ownership' }).click();
-      await page.getByRole('combobox', { name: 'Owner' }).fill('Esi Sar');
-      await page.getByRole('option', { name: /Esi Sarpong/ }).click();
+      await page.getByRole('combobox', { name: 'Owner' }).fill('Kojo Req');
+      await page.getByRole('option', { name: /Kojo Requester/ }).click();
       await choose(page, 'Covers', /^Flat 1B/);
       await page.getByRole('button', { name: 'Record ownership' }).click();
       await expect(page).toHaveURL(new RegExp(`/properties/${state.records.osuCourt.id}/ownership$`));
-      await expect(page.getByRole('table', { name: 'Ownership records', exact: true }).getByRole('row').filter({ hasText: 'Esi Sarpong' })).toContainText('Flat 1B');
+      await expect(page.getByRole('table', { name: 'Ownership records', exact: true }).getByRole('row').filter({ hasText: 'Kojo Requester' })).toContainText('Flat 1B');
 
       await page.goto(listingUrl);
       const unverified = checklist.getByRole('listitem').filter({ hasText: 'Owner identity not verified' });
       await expect(unverified).toBeVisible();
-      await expect(unverified.getByRole('link', { name: 'Fix' })).toHaveAttribute('href', `/contacts/${state.records.crm.seller.id}/identity`);
+      await expect(unverified.getByRole('link', { name: 'Fix' })).toHaveAttribute('href', `/contacts/${state.records.privacy.requester.id}/identity`);
       await expect(checklist.getByText('No owner recorded')).toHaveCount(0);
     } finally {
       await page.goto('/settings/listings');
