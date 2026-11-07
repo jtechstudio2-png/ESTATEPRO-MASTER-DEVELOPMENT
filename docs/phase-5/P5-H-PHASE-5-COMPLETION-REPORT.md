@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 7 November 2026 |
-| Branch | `phase-5/preparation`, commits `d5751bf` (#14), `__H23__` (ownership, #18); CI run __RUN__ |
+| Branch | `phase-5/preparation`, commits `d5751bf` (#14), `91a0b08`, `193e00d` (ownership, #18), `5358071`, `249c772` (browser tests); CI run __RUN__ |
 | Approvals | G3 decisions G3-D1 to G3-D8 approved before work started; the data-subject request register is approved |
 | Scope | The open Phase 5 items: ownership records (property "Ownership" tab and LL-1 "add ownership", both in the approved designs), the seller identity publish rule (#18), and explicit timeouts and retries on object storage (#14). No other new features |
 | Result | **P5-H complete.** Results in §3; CI run __RUN__ green (§10) |
@@ -87,13 +87,13 @@ All new text is in English and Arabic (2,570 keys in both).
 | `api/test/storage-limits.test.ts` (stalled endpoint for all four operations, refused, unroutable, 5xx retried, 4xx not retried, 503/500 answers, classification) | 6 | ✅ |
 | `api/test/worker.test.ts` (new: storage outage releases the job for retry and rolls back its work) | 5 (1 new) | ✅ |
 | `api/test/ownerships.e2e.test.ts` (add, list, identity status, validation, shares, end, scopes, isolation; #18 rule off, no owner, partial and full verification, organisations, expiry, superseded check, erased owner, ended owner, jurisdiction rule) | 8 | ✅ |
-| Full API suite (`test:ci`) | __API__ | ✅ |
-| `web/e2e/ownership.spec.ts` (Ownership tab, LL-1 add then end, #18 checklist links, agent without the owner contact, Arabic) | 5 | __E2E1__ |
-| Full end-to-end suite (incl. sweep with the Ownership tab and the add form in English and Arabic, desktop and 320 px) | __E2E__ | __E2E2__ |
-| Web unit tests (new: checklist links) | __UNIT__ | ✅ |
+| Full API suite (`test:ci`) | 480 in 39 files | ✅ |
+| `web/e2e/ownership.spec.ts` (Ownership tab, LL-1 add then end, #18 checklist links, agent without the owner contact, Arabic) | 5 | ✅ |
+| Full end-to-end suite (incl. sweep with the Ownership tab and the add form in English and Arabic, desktop and 320 px) | 94 | ✅ |
+| Web unit tests (new: checklist links) | 79 | ✅ |
 | Lint, typecheck, message check (2,570 keys in both languages), OpenAPI and web types regenerated | — | ✅ |
 
-__COVERAGE__
+API coverage: 95.94 % statements, 90.48 % branches, 98.40 % functions, 98.19 % lines (thresholds 95/90 met). Web coverage: 98.14 % statements, 91.41 % branches.
 
 ### 3.1 Defects found and fixed before the milestone closed
 
@@ -101,6 +101,9 @@ __COVERAGE__
 |---|---|---|
 | A stalled store kept requests waiting: the storage client only logged a warning when the request timeout passed | Outage probe | `throwOnRequestTimeout`; the call now fails at the bound |
 | `sharePercent` appeared untyped in the OpenAPI document | Web typecheck | Typed as a nullable number |
+| The P-7 browser test (property types) could run its accessibility check before the page title was back after a filter change | Full browser suite | The test waits for the title (WCAG 2.4.2) before the check |
+
+Note: the key-rotation worker test can exceed its 20 s limit when the API performance suites run in the same database first (the worker then works through their 20,000-contact companies). CI runs them separately (`test:ci` excludes them), as before.
 
 ## 4. Security validation
 
@@ -129,7 +132,9 @@ Playwright performance spec (budget: ready and LCP 4,000 ms, script 300 KB):
 
 | Screen | Ready | LCP | Script |
 |---|---|---|---|
-__PERF__
+| Property Ownership tab | 292 ms | 228 ms | 241 KB ✅ |
+| Add ownership | 195 ms | 88 ms | 242 KB ✅ |
+| Contact record (C-2), unchanged | 290 ms | 236 ms | 260 KB ✅ |
 
 The ownership list is one query on `property_ownerships_property_idx`; the publish check adds one call to `app.unit_current_owners` and one identity query, only when the rule applies.
 
@@ -163,7 +168,7 @@ The ownership list is one query on `property_ownerships_property_idx`; the publi
 | G3 report | `docs/phase-5/P5-G3-DATA-SUBJECT-REQUESTS-REPORT.md` |
 | Issues | #14 (storage limits), #18 (seller identity) |
 | Branch | `phase-5/preparation` |
-| Commits | `d5751bf` (#14), `__H23__` (ownership records, #18) |
+| Commits | `d5751bf` (#14), `91a0b08`, `193e00d` (ownership records, #18), `5358071`, `249c772` (browser tests) |
 | CI run __RUN__ | __RUNURL__ |
 
 ## Approval
