@@ -173,4 +173,4 @@ The ownership list is one query on `property_ownerships_property_idx`; the publi
 
 ## Approval
 
-Awaiting product owner approval of H-D1 to H-D8 and of P5-H.
+Product owner, 7 November 2026: **P5-H approved; H-D1 to H-D8 approved. Phase 5 planned work is approved as complete.** Issue #20 (legal review) remains required before any jurisdiction rule is activated, including `listing_owner_identity_required`. Issues #24 (accessibility verification) and #25 (Arabic native-speaker review) remain pre-launch requirements. A Phase 5 consolidated completion report is to be reviewed before major Phase 6 work begins.
