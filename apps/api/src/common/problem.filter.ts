@@ -2,6 +2,7 @@ import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, Logger 
 import type { Response } from 'express';
 
 import { isPostgresError, problemFromPostgresError } from './db-errors.js';
+import { StorageError } from '../media/storage.js';
 import { ProblemError, Problems } from './problem.js';
 import type { EstateProRequest } from './request-context.js';
 
@@ -29,6 +30,12 @@ export class ProblemFilter implements ExceptionFilter {
 
   private toProblem(exception: unknown, req: EstateProRequest): ProblemError {
     if (exception instanceof ProblemError) return exception;
+    if (exception instanceof StorageError) {
+      // Issue #14: an outage answers quickly and plainly; a misconfiguration is an internal error.
+      return exception.transient
+        ? new ProblemError(503, 'storage-unavailable', 'Storage unavailable', 'File storage is not answering right now. Try again in a few minutes.')
+        : Problems.internal();
+    }
 
     if (isPostgresError(exception)) {
       const mapped = problemFromPostgresError(exception);

@@ -52,6 +52,14 @@ const configSchema = z.object({
   STORAGE_SECRET_ACCESS_KEY: z.string().min(1),
   /** Path-style addressing (needed by some S3-compatible services, e.g. SeaweedFS). */
   STORAGE_FORCE_PATH_STYLE: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
+  /**
+   * Storage client limits (issue #14): no storage call waits without bound.
+   * Worst case per call is about attempts × (connect + request timeout) plus
+   * a short exponential backoff between attempts.
+   */
+  STORAGE_CONNECT_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(3_000),
+  STORAGE_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(100).max(300_000).default(30_000),
+  STORAGE_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(3),
   /** Lifetime of signed upload (PUT) and download (GET) URLs. */
   MEDIA_UPLOAD_URL_TTL_SECONDS: z.coerce.number().int().min(60).max(3_600).default(300),
   MEDIA_DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900),

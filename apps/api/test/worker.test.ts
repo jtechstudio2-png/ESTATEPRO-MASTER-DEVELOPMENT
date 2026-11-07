@@ -84,6 +84,41 @@ describe('worker infrastructure', () => {
     }
   });
 
+  it('releases a job for retry when object storage is unreachable, leaving its work undone (issue #14)', async () => {
+    // A port nothing listens on: every storage call is refused after the configured attempts.
+    const { createServer } = await import('node:net');
+    const probe = createServer();
+    await new Promise<void>((resolve) => probe.listen(0, '127.0.0.1', resolve));
+    const closedPort = (probe.address() as { port: number }).port;
+    await new Promise<void>((resolve) => probe.close(() => resolve()));
+
+    const { membershipId } = await fx.member(companyId, { roleKey: 'office_admin' });
+    const exportJob = await fx.db
+      .insertInto('exportJobs')
+      .values({ companyId, exportType: 'contacts', format: 'csv', requestedBy: membershipId, status: 'completed', storageKey: `${companyId}/exports/outage.csv`, rowCount: 1, finishedAt: new Date(), expiresAt: new Date(Date.now() - 1_000) })
+      .returning('id')
+      .executeTakeFirstOrThrow();
+    const queue = new JobQueue(platform);
+    await queue.enqueue(companyId, 'export.expire', 'export.expire:outage');
+
+    const outage = { ...t.config, STORAGE_ENDPOINT: `http://127.0.0.1:${closedPort}`, STORAGE_CONNECT_TIMEOUT_MS: 200, STORAGE_REQUEST_TIMEOUT_MS: 300, STORAGE_MAX_ATTEMPTS: 2 };
+    const { worker, close } = createWorker(outage, silent, { scheduleEveryMs: 60_000 });
+    try {
+      const started = Date.now();
+      expect((await worker.runOnce()).failed).toBeGreaterThanOrEqual(1);
+      expect(Date.now() - started).toBeLessThan(10_000);
+    } finally {
+      await close();
+    }
+    const job = await fx.db.selectFrom('scheduledJobs').selectAll().where('idempotencyKey', '=', 'export.expire:outage').executeTakeFirstOrThrow();
+    expect(job).toMatchObject({ status: 'pending', attempts: 1 });
+    expect(job.lastError).toMatch(/Object storage remove failed \(retry exhausted, 2 attempts\)/);
+    // The expiry ran in the same transaction as the failed removal: it is rolled back, so the retry finds the export again.
+    expect((await fx.db.selectFrom('exportJobs').select('status').where('id', '=', exportJob.id).executeTakeFirstOrThrow()).status).toBe('completed');
+    await fx.db.deleteFrom('scheduledJobs').where('id', '=', job.id).execute();
+    await fx.db.updateTable('exportJobs').set({ status: 'expired' }).where('id', '=', exportJob.id).execute();
+  });
+
   it('treats a missing object as absent and surfaces other storage errors', async () => {
     const storage = S3Storage.fromConfig(t.config);
     try {
