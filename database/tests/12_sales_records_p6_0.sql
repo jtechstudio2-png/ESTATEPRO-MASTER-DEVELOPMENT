@@ -205,6 +205,14 @@ SELECT test_assert(NOT ('sale_record' = ANY (app.contact_erasure_blockers('a5600
   'once the retention period after completion has passed, the sale no longer blocks erasure');
 
 -- ------------------------------------------------- erasure covers the pipeline's free text
+-- Audit rows and outbox events about the pipeline records carry the text too; the erasure must reach them.
+INSERT INTO audit_logs (company_id, actor_type, action, entity_type, entity_id, changes, metadata) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'user', 'offer.submitted', 'offer', 'a9c00000-0000-0000-0000-000000000001',
+   '{"conditions": {"old": null, "new": "Subject to survey"}}', '{"amount": 400000}'),
+  ('a0000000-0000-0000-0000-000000000001', 'user', 'viewing.completed', 'viewing', 'a9f00000-0000-0000-0000-000000000001',
+   NULL, '{"feedback": "Loved the kitchen"}');
+INSERT INTO outbox_events (company_id, event_type, aggregate_type, aggregate_id, payload) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'deal.stage_changed', 'deal', 'a9b00000-0000-0000-0000-000000000001', '{"note": "Called the buyer"}');
 SELECT test_assert((app.erase_contact('a5600000-0000-0000-0000-000000000001') ->> 'offers')::int = 1, 'the erasure counts the offers whose text it redacted');
 SELECT test_assert(
   (SELECT bool_and(conditions IS NULL OR conditions = '[Erased]') AND bool_and(amount IN (400000, 440000)) FROM offers WHERE deal_id = 'a9b00000-0000-0000-0000-000000000001'),
@@ -216,6 +224,16 @@ SELECT test_assert(
   (SELECT bool_and(note IS NULL OR note = '[Erased]') FROM deal_stage_history WHERE deal_id = 'a9b00000-0000-0000-0000-000000000001'),
   'deal stage notes are erased');
 SELECT test_assert((SELECT notes = '[Erased]' FROM deal_milestones WHERE id = 'a9e00000-0000-0000-0000-000000000001'), 'milestone notes are erased');
+SELECT test_assert(
+  (SELECT changes = '{"conditions": {"old": null, "new": "[Erased]"}}'::jsonb AND metadata = '{"amount": 400000}'::jsonb
+     FROM audit_logs WHERE action = 'offer.submitted' AND entity_id = 'a9c00000-0000-0000-0000-000000000001'),
+  'audit rows about the pipeline keep their shape and numbers but lose the text');
+SELECT test_assert(
+  (SELECT metadata = '{"feedback": "[Erased]"}'::jsonb FROM audit_logs WHERE action = 'viewing.completed'),
+  'audit rows about the viewing lose the feedback');
+SELECT test_assert(
+  (SELECT payload = '{"note": "[Erased]"}'::jsonb FROM outbox_events WHERE aggregate_id = 'a9b00000-0000-0000-0000-000000000001'),
+  'outbox events about the deal lose the text');
 SELECT test_assert(
   (SELECT agreed_price = 440000 AND status = 'completed' AND completed_on = '2015-02-01' FROM sales_transactions WHERE reference = 'SAL-T-1'),
   'the sale record keeps its price, status and dates');
