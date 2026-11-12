@@ -552,7 +552,7 @@ export class ContactsService {
   async consentHistory(tx: Tx, ctx: TenantContext, contactId: string): Promise<ConsentDto[]> {
     const row = await this.loadRow(tx, contactId);
     if (!row || !(await this.canRead(tx, ctx, row))) throw Problems.notFound();
-    const rows = await tx.selectFrom('consents').selectAll().where('contactId', '=', contactId).orderBy('capturedAt', 'desc').orderBy('id', 'desc').limit(500).execute();
+    const rows = await tx.selectFrom('consents').selectAll().where('contactId', '=', contactId).orderBy('capturedAt', 'desc').orderBy('entryNo', 'desc').limit(500).execute();
     return rows.map(toConsentDto);
   }
 
@@ -576,7 +576,7 @@ export class ContactsService {
       .orderBy('purpose')
       .orderBy('channel')
       .orderBy('capturedAt', 'desc')
-      .orderBy('id', 'desc')
+      .orderBy('entryNo', 'desc')
       .execute();
     return rows.map(toConsentDto);
   }
@@ -805,7 +805,7 @@ export async function latestIdentityChecks(tx: Tx, contactIds: string[]): Promis
     select distinct on (k.contact_id) k.contact_id, ${effectiveKycStatusSql('k')} as status, k.reviewed_at
       from kyc_checks k
      where k.contact_id = any(${contactIds}::uuid[]) and k.check_type = 'identity'
-     order by k.contact_id, k.created_at desc, k.id desc`.execute(tx);
+     order by k.contact_id, k.created_at desc, k.entry_no desc`.execute(tx);
   for (const row of rows) result.set(row.contactId, { status: row.status, reviewedAt: row.reviewedAt?.toISOString() ?? null });
   return result;
 }

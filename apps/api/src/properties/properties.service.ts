@@ -5,10 +5,12 @@ import { AuditService, diffForAudit } from '../audit/audit.service.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
 import {
   keysetCondition,
+  keysetEntryCondition,
   type Page,
   type ParsedFilters,
   type ParsedListQuery,
   sortValueSql,
+  toEntryPage,
   toPage,
 } from '../common/list-query.js';
 import { APP_CONFIG, type AppConfig } from '../config/config.js';
@@ -286,6 +288,7 @@ export class PropertiesService {
       .leftJoin('users as us', 'us.id', 'm.userId')
       .select(['a.id', 'a.occurredAt', 'a.action', 'a.entityType', 'a.entityId', 'a.actorType', 'a.actorMembershipId', 'us.displayName', 'a.changes', 'a.metadata'])
       .select(sortValueSql('a.occurredAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`a.entry_no::text`.as('entryNoText'))
       .where(related);
     const types = query.filters['entityType'];
     if (Array.isArray(types)) qb = qb.where('a.entityType', 'in', types);
@@ -293,9 +296,9 @@ export class PropertiesService {
     const occurred = query.filters['occurredAt'] as { gte?: string; lte?: string } | undefined;
     if (occurred?.gte) qb = qb.where('a.occurredAt', '>=', sql<Date>`${occurred.gte}::date`);
     if (occurred?.lte) qb = qb.where('a.occurredAt', '<', sql<Date>`${occurred.lte}::date + 1`);
-    if (query.cursor) qb = qb.where(keysetCondition('a.occurredAt', 'a.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({
+    if (query.cursor) qb = qb.where(keysetEntryCondition('a.occurredAt', 'a.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => ({
       id: r.id,
       occurredAt: r.occurredAt.toISOString(),
       action: r.action,

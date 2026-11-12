@@ -115,6 +115,7 @@ export async function buildAccessReport(
     .select(['purpose', 'channel', 'status', 'lawfulBasis', 'capturedAt', 'capturedVia', 'evidence'])
     .where('contactId', 'in', subjects)
     .orderBy('capturedAt')
+    .orderBy('entryNo')
     .execute();
 
   const documentRows = await tx
@@ -146,6 +147,7 @@ export async function buildAccessReport(
     .select(['checkType', 'status', 'riskRating', 'provider', 'reviewedAt', 'expiresOn', 'notes', 'decisionReason', 'createdAt'])
     .where('contactId', 'in', subjects)
     .orderBy('createdAt')
+    .orderBy('entryNo')
     .execute();
   const requirements = await tx
     .selectFrom('requirements')

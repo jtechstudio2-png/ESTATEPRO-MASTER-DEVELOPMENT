@@ -4,7 +4,7 @@ import { type Selectable, sql } from 'kysely';
 import { AuditService, diffForAudit } from '../audit/audit.service.js';
 import { todayIn } from '../common/dates.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
-import { keysetCondition, type Page, type ParsedFilters, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
+import { keysetCondition, keysetEntryCondition, type Page, type ParsedFilters, type ParsedListQuery, sortValueSql, toEntryPage, toPage } from '../common/list-query.js';
 import { decimalPlaces, type MoneyInput, toMoney, toScaled } from '../common/money.js';
 import { type FieldError, ProblemError, Problems } from '../common/problem.js';
 import { actingMembership, type PermissionScope, type TenantContext } from '../common/request-context.js';
@@ -410,10 +410,11 @@ export class ListingsService {
       .leftJoin('users as cu', 'cu.id', 'cm.userId')
       .select(['h.id', 'h.fromStatus', 'h.toStatus', 'h.changedAt', 'h.changedBy', 'h.reason', 'cu.displayName as changedByName'])
       .select(sortValueSql('h.changedAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`h.entry_no::text`.as('entryNoText'))
       .where('h.listingId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('h.changedAt', 'h.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({
+    if (query.cursor) qb = qb.where(keysetEntryCondition('h.changedAt', 'h.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => ({
       id: r.id,
       fromStatus: r.fromStatus,
       toStatus: r.toStatus,
@@ -436,10 +437,11 @@ export class ListingsService {
       .select(['h.id', 'h.oldPrice', 'h.newPrice', 'h.currencyCode', 'cur.minorUnits', 'h.changedAt', 'h.changedBy', 'h.approvedBy', 'h.reason'])
       .select(['cu.displayName as changedByName', 'au.displayName as approvedByName'])
       .select(sortValueSql('h.changedAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`h.entry_no::text`.as('entryNoText'))
       .where('h.listingId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('h.changedAt', 'h.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({
+    if (query.cursor) qb = qb.where(keysetEntryCondition('h.changedAt', 'h.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => ({
       id: r.id,
       oldPrice: r.oldPrice === null ? null : toMoney(r.oldPrice, r.currencyCode, r.minorUnits),
       newPrice: toMoney(r.newPrice, r.currencyCode, r.minorUnits),
@@ -462,11 +464,12 @@ export class ListingsService {
       .leftJoin('users as us', 'us.id', 'm.userId')
       .select(['a.id', 'a.occurredAt', 'a.action', 'a.actorMembershipId', 'us.displayName', 'a.changes', 'a.metadata'])
       .select(sortValueSql('a.occurredAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`a.entry_no::text`.as('entryNoText'))
       .where('a.entityType', '=', 'listing')
       .where('a.entityId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('a.occurredAt', 'a.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => {
+    if (query.cursor) qb = qb.where(keysetEntryCondition('a.occurredAt', 'a.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => {
       const changes = (r.changes ?? null) as Record<string, unknown> | null;
       if (changes && !showFees && 'feeTerms' in changes) changes['feeTerms'] = { old: '(hidden)', new: '(hidden)' };
       return {

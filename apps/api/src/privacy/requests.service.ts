@@ -115,7 +115,7 @@ export class PrivacyRequestsService {
       .select(['v.id', 'v.kind', 'v.summary', 'v.receivedOn', 'v.recordedBy', 'u.displayName', 'v.recordedAt'])
       .where('v.requestId', '=', id)
       .orderBy('v.recordedAt')
-      .orderBy('v.id')
+      .orderBy('v.entryNo')
       .execute();
     const history = await tx
       .selectFrom('dataSubjectRequestEvents as h')
@@ -124,7 +124,7 @@ export class PrivacyRequestsService {
       .select(['h.id', 'h.eventType', 'h.fromStatus', 'h.toStatus', 'h.detail', 'h.actor', 'u.displayName', 'h.occurredAt'])
       .where('h.requestId', '=', id)
       .orderBy('h.occurredAt')
-      .orderBy('h.id')
+      .orderBy('h.entryNo')
       .execute();
     const status = row.status as RequestStatus;
     const canManage = scopeFor(ctx, 'privacy.manage') !== null;
@@ -469,13 +469,20 @@ export class PrivacyRequestsService {
   }
 }
 
-/** One error per blocker code (organisation, contact_payment_accounts, lease_parties, …) so screens can explain each. */
+const BLOCKER_MESSAGES: Record<string, string> = {
+  organisation: 'Erasure applies to people; an organisation is archived instead.',
+  // ADR-008: the sales pipeline.
+  open_deal: 'This person is a party to a deal that is still open. Close the deal first.',
+  sale_record: 'This person is a party to a recorded sale that is still in progress or within its retention period.',
+};
+
+/** One error per blocker code (organisation, open_deal, sale_record, lease_parties, …) so screens can explain each. */
 function blockedProblem(blockers: string[]): ProblemError {
   return Problems.validation(
     blockers.map((code) => ({
       field: 'contact',
       code: `erasure-blocked:${code}`,
-      message: code === 'organisation' ? 'Erasure applies to people; an organisation is archived instead.' : `Records the law requires us to keep refer to this person (${code.replace(/_/g, ' ')}).`,
+      message: BLOCKER_MESSAGES[code] ?? `Records the law requires us to keep refer to this person (${code.replace(/_/g, ' ')}).`,
     })),
   );
 }

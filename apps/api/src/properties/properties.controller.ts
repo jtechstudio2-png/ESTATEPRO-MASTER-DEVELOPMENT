@@ -165,6 +165,7 @@ export class PropertiesController {
         entityType: { type: 'enum', values: ['property', 'unit', 'media', 'property_note', 'key_set', 'listing'], multi: true },
         occurredAt: { type: 'range', pattern: /^\d{4}-\d{2}-\d{2}$/ },
       },
+      'entry',
     );
     return this.tenantDb.run(ctx, (tx) => this.properties.history(tx, ctx, id, parsed));
   }

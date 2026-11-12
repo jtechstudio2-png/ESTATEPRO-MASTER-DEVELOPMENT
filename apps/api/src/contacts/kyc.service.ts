@@ -214,7 +214,7 @@ export class KycService {
 
   async listChecks(tx: Tx, ctx: TenantContext, contactId: string): Promise<KycCheckDto[]> {
     const contact = await this.contactFor(tx, ctx, contactId, 'kyc.view');
-    const rows = await this.checkQuery(tx).where('k.contactId', '=', contactId).orderBy('k.createdAt', 'desc').orderBy('k.id', 'desc').execute();
+    const rows = await this.checkQuery(tx).where('k.contactId', '=', contactId).orderBy('k.createdAt', 'desc').orderBy('k.entryNo', 'desc').execute();
     return rows.map((row) => this.toCheckDto(ctx, contact, row));
   }
 

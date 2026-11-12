@@ -133,7 +133,7 @@ export function PrivacyRequestRecord({ id }: { id: string }) {
                     <Notice tone="warning" title={t('blockedTitle')}>
                       <ul>
                         {record.erasureBlockers.map((code) => (
-                          <li key={code}>{code === 'organisation' ? t('blocker.organisation') : t('blocker.records', { records: code.replace(/_/g, ' ') })}</li>
+                          <li key={code}>{code === 'organisation' ? t('blocker.organisation') : code === 'open_deal' ? t('blocker.openDeal') : code === 'sale_record' ? t('blocker.saleRecord') : t('blocker.records', { records: code.replace(/_/g, ' ') })}</li>
                         ))}
                       </ul>
                       <p>{t('blockedHelp')}</p>

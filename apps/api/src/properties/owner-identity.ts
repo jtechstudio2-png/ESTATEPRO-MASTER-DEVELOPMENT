@@ -25,7 +25,7 @@ export async function ownersVerified(tx: Tx, contactIds: readonly string[]): Pro
           from kyc_checks k
          where k.company_id = c.company_id and k.contact_id = c.id
            and k.check_type = case c.contact_type when 'organisation' then ${OWNER_CHECK_TYPE.organisation} else ${OWNER_CHECK_TYPE.person} end
-         order by k.created_at desc, k.id desc
+         order by k.created_at desc, k.entry_no desc
          limit 1) latest on true
      where c.id = any(${[...new Set(contactIds)]}::uuid[])`.execute(tx);
   for (const row of rows) result.set(row.contactId, row.verified);

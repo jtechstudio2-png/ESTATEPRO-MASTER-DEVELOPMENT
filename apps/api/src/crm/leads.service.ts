@@ -148,7 +148,7 @@ export class LeadsService {
         .select(['h.fromStatus', 'h.toStatus', 'h.changedAt', 'h.changedBy', 'u.displayName as changedByName', 'h.note'])
         .where('h.leadId', '=', id)
         .orderBy('h.changedAt')
-        .orderBy('h.id')
+        .orderBy('h.entryNo')
         .execute(),
       tx
         .selectFrom('leadAssignments as a')
@@ -159,7 +159,7 @@ export class LeadsService {
         .select(['a.assignedTo', 'tu.displayName as assignedToName', 'a.assignedBy', 'bu.displayName as assignedByName', 'a.assignedAt', 'a.note'])
         .where('a.leadId', '=', id)
         .orderBy('a.assignedAt')
-        .orderBy('a.id')
+        .orderBy('a.entryNo')
         .execute(),
     ]);
     const canEdit = canOnLead(ctx, 'lead.update', row) && row.archivedAt === null;

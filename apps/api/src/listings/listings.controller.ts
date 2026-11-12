@@ -377,7 +377,7 @@ export class ListingsController {
   @ApiQuery({ name: 'cursor', required: false })
   @ApiOkResponse({ type: StatusHistoryPageDto })
   async statusHistory(@Tenant() ctx: TenantContext, @Param('listingId', UUID_PARAM) id: string, @Query() query: ListQueryInput): Promise<StatusHistoryPageDto> {
-    const parsed = parseListQuery<'changedAt'>(query, { allowed: { ...HISTORY_SORT.allowed }, default: { ...HISTORY_SORT.default } }, {});
+    const parsed = parseListQuery<'changedAt'>(query, { allowed: { ...HISTORY_SORT.allowed }, default: { ...HISTORY_SORT.default } }, {}, 'entry');
     return this.tenantDb.run(ctx, (tx) => this.listings.statusHistory(tx, ctx, id, parsed));
   }
 
@@ -387,7 +387,7 @@ export class ListingsController {
   @ApiQuery({ name: 'cursor', required: false })
   @ApiOkResponse({ type: PriceHistoryPageDto })
   async priceHistory(@Tenant() ctx: TenantContext, @Param('listingId', UUID_PARAM) id: string, @Query() query: ListQueryInput): Promise<PriceHistoryPageDto> {
-    const parsed = parseListQuery<'changedAt'>(query, { allowed: { ...HISTORY_SORT.allowed }, default: { ...HISTORY_SORT.default } }, {});
+    const parsed = parseListQuery<'changedAt'>(query, { allowed: { ...HISTORY_SORT.allowed }, default: { ...HISTORY_SORT.default } }, {}, 'entry');
     return this.tenantDb.run(ctx, (tx) => this.listings.priceHistory(tx, ctx, id, parsed));
   }
 
@@ -397,7 +397,7 @@ export class ListingsController {
   @ApiQuery({ name: 'cursor', required: false })
   @ApiOkResponse({ type: HistoryPageDto })
   async history(@Tenant() ctx: TenantContext, @Param('listingId', UUID_PARAM) id: string, @Query() query: ListQueryInput): Promise<HistoryPageDto> {
-    const parsed = parseListQuery<'occurredAt'>(query, { allowed: { ...AUDIT_SORT.allowed }, default: { ...AUDIT_SORT.default } }, {});
+    const parsed = parseListQuery<'occurredAt'>(query, { allowed: { ...AUDIT_SORT.allowed }, default: { ...AUDIT_SORT.default } }, {}, 'entry');
     return this.tenantDb.run(ctx, (tx) => this.listings.history(tx, ctx, id, parsed));
   }
 

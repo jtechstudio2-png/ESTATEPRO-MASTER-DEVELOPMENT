@@ -182,6 +182,10 @@ export interface AuditLogs {
   companyId: string | null;
   entityId: string | null;
   entityType: string | null;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   id: Generated<string>;
   ipAddress: string | null;
   metadata: Generated<Json>;
@@ -402,6 +406,10 @@ export interface Consents {
   channel: string | null;
   companyId: string;
   contactId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   evidence: string | null;
   id: Generated<string>;
   lawfulBasis: string | null;
@@ -569,6 +577,10 @@ export interface DataSubjectRequestEvents {
   actor: string | null;
   companyId: string;
   detail: Generated<Json>;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   eventType: string;
   fromStatus: string | null;
   id: Generated<string>;
@@ -579,6 +591,10 @@ export interface DataSubjectRequestEvents {
 
 export interface DataSubjectRequestEvidence {
   companyId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   id: Generated<string>;
   kind: string;
   receivedOn: string;
@@ -682,6 +698,10 @@ export interface DealStageHistory {
   changedBy: string | null;
   companyId: string;
   dealId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   fromStageId: string | null;
   id: Generated<string>;
   note: string | null;
@@ -1060,6 +1080,10 @@ export interface JurisdictionSettings {
 export interface KeyMovements {
   companyId: string;
   dueBackAt: Timestamp | null;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   holderContactId: string | null;
   holderMembershipId: string | null;
   id: Generated<string>;
@@ -1116,6 +1140,10 @@ export interface KycChecks {
   createdAt: Generated<Timestamp>;
   dealId: string | null;
   decisionReason: string | null;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   expiresOn: string | null;
   id: Generated<string>;
   identityDocumentId: string | null;
@@ -1137,6 +1165,10 @@ export interface LeadAssignments {
   assignedTo: string;
   assignmentRule: string | null;
   companyId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   id: Generated<string>;
   leadId: string;
   note: string | null;
@@ -1178,6 +1210,10 @@ export interface LeadStatusHistory {
   changedAt: Generated<Timestamp>;
   changedBy: string | null;
   companyId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   fromStatus: string | null;
   id: Generated<string>;
   leadId: string;
@@ -1283,6 +1319,10 @@ export interface ListingPriceHistory {
   changedBy: string | null;
   companyId: string;
   currencyCode: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   id: Generated<string>;
   listingId: string;
   newPrice: Numeric;
@@ -1348,6 +1388,10 @@ export interface ListingStatusHistory {
   changedAt: Generated<Timestamp>;
   changedBy: string | null;
   companyId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   fromStatus: string | null;
   id: Generated<string>;
   listingId: string;
@@ -1623,6 +1667,10 @@ export interface Offers {
   currencyCode: string;
   dealId: string;
   direction: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   expiresAt: Timestamp | null;
   financingCode: string | null;
   id: Generated<string>;
@@ -1665,6 +1713,10 @@ export interface OutboxEvents {
   aggregateType: string;
   attempts: Generated<number>;
   companyId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
   eventType: string;
   id: Generated<string>;
   lastError: string | null;

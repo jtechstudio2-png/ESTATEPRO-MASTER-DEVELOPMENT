@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { encodeCursor, type FilterSpec, MAX_LIMIT, parseListQuery, type SortSpec, toPage } from '../src/common/list-query.js';
+import { encodeCursor, encodeEntryCursor, type FilterSpec, keysetEntryCondition, MAX_LIMIT, parseListQuery, type SortSpec, toEntryPage, toPage } from '../src/common/list-query.js';
 import { ProblemError } from '../src/common/problem.js';
 
 const SORT: SortSpec<'name' | 'createdAt'> = {
@@ -151,5 +151,49 @@ describe('toPage', () => {
     expect(JSON.parse(Buffer.from(page.page.nextCursor!, 'base64url').toString('utf8'))).toEqual({ v: 'B', id: 'b' });
     expect(toPage(rows, 3, (row) => row.name, (row) => row.id, (row) => row.name).page).toEqual({ limit: 3, nextCursor: null });
     expect(toPage([], 3, (row: { id: string }) => row.id, (row) => row.id, (row) => row).data).toEqual([]);
+  });
+});
+
+describe('history cursors (#15)', () => {
+  const HISTORY: SortSpec<'changedAt'> = { allowed: { changedAt: 'timestamp' }, default: { field: 'changedAt', direction: 'asc' } };
+  const at = '2026-11-12T09:00:00.123456+00:00';
+
+  it('carries the insertion number and reads it back', () => {
+    const cursor = encodeEntryCursor(at, '42');
+    expect(parseListQuery({ cursor }, HISTORY, {}, 'entry').cursor).toEqual({ v: at, id: '', n: '42' });
+  });
+
+  it('refuses a record-list cursor, a missing or malformed number, and a bad time', () => {
+    const refused = (cursor: string) => {
+      try {
+        parseListQuery({ cursor }, HISTORY, {}, 'entry');
+        return null;
+      } catch (error) {
+        return (error as ProblemError).extras.errors?.[0];
+      }
+    };
+    expect(refused(encodeCursor(new Date(at), '0b7c1f4e-1111-4222-8333-944455556666'))).toMatchObject({ field: 'cursor', code: 'invalid' });
+    expect(refused(Buffer.from(JSON.stringify({ v: at, n: '4x' })).toString('base64url'))).toMatchObject({ code: 'invalid' });
+    expect(refused(Buffer.from(JSON.stringify({ v: at, n: '1'.repeat(20) })).toString('base64url'))).toMatchObject({ code: 'invalid' });
+    expect(refused(Buffer.from(JSON.stringify({ v: 'yesterday', n: '4' })).toString('base64url'))).toMatchObject({ code: 'invalid' });
+    // A history cursor is not accepted by a record list either.
+    expect(() => parseListQuery({ cursor: encodeEntryCursor(at, '4') }, HISTORY, {})).toThrow(ProblemError);
+  });
+
+  it('pages with the insertion number of the last row', () => {
+    const rows = [
+      { t: at, n: '7' },
+      { t: at, n: '8' },
+      { t: at, n: '9' },
+    ];
+    const page = toEntryPage(rows, 2, (row) => row.t, (row) => row.n, (row) => row.n);
+    expect(page.data).toEqual(['7', '8']);
+    expect(JSON.parse(Buffer.from(page.page.nextCursor!, 'base64url').toString('utf8'))).toEqual({ v: at, n: '8' });
+    expect(toEntryPage(rows, 3, (row) => row.t, (row) => row.n, (row) => row).page.nextCursor).toBeNull();
+  });
+
+  it('builds a (time, entry_no) keyset condition in the sort direction', () => {
+    const parsed = parseListQuery({ cursor: encodeEntryCursor(at, '8'), sort: '-changedAt' }, HISTORY, {}, 'entry');
+    expect(keysetEntryCondition('h.changedAt', 'h.entryNo', parsed.sort, parsed.cursor!)).toBeDefined();
   });
 });

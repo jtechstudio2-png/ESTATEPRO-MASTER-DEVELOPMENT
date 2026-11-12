@@ -3,7 +3,7 @@ import { type Selectable, sql } from 'kysely';
 
 import { AuditService } from '../audit/audit.service.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
-import { keysetCondition, type Page, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
+import { keysetCondition, keysetEntryCondition, type Page, type ParsedListQuery, sortValueSql, toEntryPage, toPage } from '../common/list-query.js';
 import { type FieldError, Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import type { Tx } from '../database/database.module.js';
@@ -239,15 +239,16 @@ export class KeysService {
         'km.recordedBy',
         'ru.displayName as recorderName',
         sortValueSql('km.occurredAt', 'timestamp').as('cursorValue'),
+        sql<string>`km.entry_no::text`.as('entryNoText'),
       ])
       .where('km.keySetId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('km.occurredAt', 'km.id', query.sort, query.cursor));
+    if (query.cursor) qb = qb.where(keysetEntryCondition('km.occurredAt', 'km.entryNo', query.sort, query.cursor));
     const rows = await qb
       .orderBy('km.occurredAt', query.sort.direction)
-      .orderBy('km.id', query.sort.direction)
+      .orderBy('km.entryNo', query.sort.direction)
       .limit(query.limit + 1)
       .execute();
-    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({
+    return toEntryPage(rows, query.limit, (row) => row.cursorValue, (row) => row.entryNoText, (row) => ({
       id: row.id,
       movement: row.movement,
       holder: holderOf(row.holderMembershipId, row.holderMemberName, row.holderContactId, row.holderContactName),

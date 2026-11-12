@@ -63,7 +63,7 @@ export class ExportsService {
              o.name as office_name, u.display_name as owner_name, c.source_code,
              (select string_agg(coalesce(s.channel, 'any') || ':' || s.status, '; ' order by s.channel)
                 from (select distinct on (s.channel) s.channel, s.status from consents s
-                       where s.contact_id = c.id and s.purpose = 'marketing' order by s.channel, s.captured_at desc, s.id desc) s) as marketing,
+                       where s.contact_id = c.id and s.purpose = 'marketing' order by s.channel, s.captured_at desc, s.entry_no desc) s) as marketing,
              c.created_at, c.updated_at
         from contacts c
         left join offices o on o.id = c.office_id
@@ -74,7 +74,7 @@ export class ExportsService {
          ${body.officeId ? sql`and c.office_id = ${body.officeId}::uuid` : sql``}
          ${body.contactType ? sql`and c.contact_type = ${body.contactType}` : sql``}
          ${body.relationships?.length ? sql`and exists (select 1 from contact_relationships r where r.contact_id = c.id and r.status = 'active' and r.relationship_type = any(${body.relationships}::text[]))` : sql``}
-         ${body.excludeMarketingWithdrawn ? sql`and exists (select 1 from (select distinct on (s.channel) s.status from consents s where s.contact_id = c.id and s.purpose = 'marketing' order by s.channel, s.captured_at desc, s.id desc) latest where latest.status = 'granted')` : sql``}
+         ${body.excludeMarketingWithdrawn ? sql`and exists (select 1 from (select distinct on (s.channel) s.status from consents s where s.contact_id = c.id and s.purpose = 'marketing' order by s.channel, s.captured_at desc, s.entry_no desc) latest where latest.status = 'granted')` : sql``}
        order by c.display_name, c.id
        limit ${MAX_EXPORT_ROWS + 1}`.execute(tx);
     this.checkSize(rows.length);
