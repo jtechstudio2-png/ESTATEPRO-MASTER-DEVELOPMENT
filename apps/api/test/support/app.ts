@@ -6,7 +6,9 @@ import { Test } from '@nestjs/testing';
 import supertest from 'supertest';
 import { inject } from 'vitest';
 
-import { AppModule } from '../../src/app.module.js';
+import type { DestinationStream } from 'pino';
+
+import { AppModule, LOG_STREAM } from '../../src/app.module.js';
 import { configureApp } from '../../src/bootstrap.js';
 import { APP_CONFIG, type AppConfig, loadConfig } from '../../src/config/config.js';
 import { TestIdp } from './idp.js';
@@ -22,7 +24,7 @@ export interface TestApp {
 
 export async function createTestApp(
   overrides: Record<string, string> = {},
-  options: { controllers?: Type<unknown>[] } = {},
+  options: { controllers?: Type<unknown>[]; logStream?: DestinationStream } = {},
 ): Promise<TestApp> {
   const urls = inject('databaseUrls');
   const idp = new TestIdp();
@@ -48,6 +50,8 @@ export async function createTestApp(
   const moduleRef = await Test.createTestingModule({ imports: [AppModule, TestControllersModule] })
     .overrideProvider(APP_CONFIG)
     .useValue(config)
+    .overrideProvider(LOG_STREAM)
+    .useValue(options.logStream ?? null)
     .compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({ bodyParser: false, bufferLogs: true });
   configureApp(app, { trustProxyHops: config.TRUST_PROXY_HOPS });

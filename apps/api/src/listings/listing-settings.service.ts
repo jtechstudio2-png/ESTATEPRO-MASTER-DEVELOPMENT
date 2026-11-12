@@ -9,6 +9,8 @@ export const PRICE_APPROVAL_KEY = 'listing.price_reduction_approval_percent';
 export const SELLER_KYC_KEY = 'listing.require_seller_kyc';
 export const MIN_PHOTOS_KEY = 'listing.min_photos_to_publish';
 export const FLOOR_PLAN_KEY = 'listing.require_floor_plan_to_publish';
+/** Jurisdiction rule (migration 0028): every current owner's identity is verified before publishing. */
+export const OWNER_IDENTITY_RULE = 'listing_owner_identity_required';
 const KEYS = [PRICE_APPROVAL_KEY, SELLER_KYC_KEY, MIN_PHOTOS_KEY, FLOOR_PLAN_KEY];
 
 const FIELDS: Array<{ field: keyof ListingSettingsDto; key: string; off: number | boolean | null }> = [
@@ -85,6 +87,15 @@ export class ListingSettingsService {
     const company = overrides.find((row) => row.officeId === null);
     if (company) return company.value;
 
+    return this.jurisdictionRule(tx, key, jurisdictionCode, onDate);
+  }
+
+  /**
+   * The jurisdiction's value of a rule (or its parent's, or the definition
+   * default), ignoring company and office overrides: for legal requirements a
+   * company may tighten but not relax (issue #18).
+   */
+  async jurisdictionRule(tx: Tx, key: string, jurisdictionCode: string, onDate: string): Promise<unknown> {
     const jurisdiction = await tx.selectFrom('jurisdictions').select(['code', 'parentCode']).where('code', '=', jurisdictionCode).executeTakeFirst();
     const codes = [jurisdictionCode, ...(jurisdiction?.parentCode ? [jurisdiction.parentCode] : [])];
     for (const code of codes) {

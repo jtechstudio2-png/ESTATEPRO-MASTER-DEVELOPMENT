@@ -97,7 +97,7 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       await db.query(`INSERT INTO membership_offices (company_id, membership_id, office_id) VALUES ($1, $2, $3)`, [companyId, result.rows[0]!.id, officeId]);
       return result.rows[0]!.id;
     };
-    await member(accra.companyId, accra.officeId, users.agent.email, users.agent.name, 'agent');
+    const agentMembership = await member(accra.companyId, accra.officeId, users.agent.email, users.agent.name, 'agent');
     const managerMembership = await member(accra.companyId, accra.officeId, users.manager.email, users.manager.name, 'property_manager');
     await member(accra.companyId, accra.officeId, users.tech.email, users.tech.name, 'maintenance_staff');
     // The Accra owner also works for Doha (company picker and switching) and London (read-only banner).
@@ -204,6 +204,150 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       },
     });
 
+    // CRM (Phase 5 milestone C5): contacts, consent, identity, requirements, leads and follow-ups,
+    // created through the API so every business rule (encryption, duplicates, audit) applies.
+    await accraApi.call('PUT', 'settings/crm', { leadResponseMinutes: 60 });
+    const ama = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Ama Owusu',
+      givenName: 'Ama',
+      familyName: 'Owusu',
+      primaryPhone: '+233 24 555 4412',
+      primaryEmail: 'ama@example.test',
+      preferredChannel: 'whatsapp',
+      sourceCode: 'referral',
+      officeId: accra.officeId,
+      taxNumber: 'GHA-7788-4821',
+      relationships: ['buyer', 'landlord'],
+      consents: [{ purpose: 'marketing', channel: 'email', status: 'granted', lawfulBasis: 'consent', capturedVia: 'web_form' }],
+    });
+    await accraApi.call('POST', `contacts/${ama.id}/methods`, { methodType: 'whatsapp', value: '+233 24 555 4412' });
+    await accraApi.call('POST', `contacts/${ama.id}/consents`, { purpose: 'marketing', channel: 'email', status: 'withdrawn', capturedVia: 'portal' });
+    const amaDuplicate = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Ama Owusu-Boateng',
+      primaryPhone: '+233 24 555 4499',
+      primaryEmail: 'ama.ob@example.test',
+      officeId: accra.officeId,
+      relationships: ['tenant'],
+    });
+    const seller = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Esi Sarpong',
+      primaryPhone: '+233 20 111 2233',
+      officeId: accra.officeId,
+      relationships: ['seller'],
+    });
+    const passport = await accraApi.call<{ id: string }>('POST', `contacts/${seller.id}/identity-documents`, {
+      documentTypeCode: 'passport',
+      issuingCountryCode: 'GH',
+      documentNumber: 'G1234567',
+      expiresOn: '2031-04-30',
+    });
+    await accraApi.call('POST', `contacts/${seller.id}/kyc-checks`, { checkType: 'identity', status: 'in_review', identityDocumentId: passport.id });
+    await accraApi.call('POST', `contacts/${ama.id}/requirements`, {
+      requirementType: 'buy',
+      currencyCode: 'GHS',
+      minPrice: '900000',
+      maxPrice: '1200000',
+      minBedrooms: 3,
+      areas: [{ kind: 'locality', locality: 'East Legon' }],
+      financingStatus: 'mortgage_approved',
+    });
+    // A person erased at their request (ADR-007 E6): anonymised by app.erase_contact, as the erasure service does.
+    const erased = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Akua Erased',
+      primaryPhone: '+233 20 444 9911',
+      officeId: accra.officeId,
+      relationships: ['buyer'],
+    });
+    await accraApi.call('POST', `contacts/${erased.id}/identity-documents`, { documentTypeCode: 'passport', issuingCountryCode: 'GH', documentNumber: 'G7654321', expiresOn: '2030-01-31' });
+    await db.query('BEGIN');
+    await db.query(`SELECT set_config('app.company_id', $1, true)`, [accra.companyId]);
+    await db.query('SELECT app.erase_contact($1)', [erased.id]);
+    await db.query('COMMIT');
+    // Data-subject requests (gap G3): an access request received 35 days ago (overdue), and a person
+    // whose erasure request is logged during the browser test.
+    const requester = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Kojo Requester',
+      primaryPhone: '+233 20 555 1203',
+      officeId: accra.officeId,
+      relationships: ['buyer'],
+      dateOfBirth: '1986-03-14',
+    });
+    const overdueRequest = await accraApi.call<{ id: string; reference: string }>('POST', 'privacy-requests', {
+      contactId: requester.id,
+      requestType: 'access',
+      channel: 'email',
+      receivedOn: new Date(Date.now() - 35 * 86_400_000).toISOString().slice(0, 10),
+      summary: 'Email asking for a copy of the data we hold',
+    });
+    const toErase = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Afua Eraseme',
+      primaryPhone: '+233 20 555 1204',
+      officeId: accra.officeId,
+      relationships: ['tenant'],
+    });
+    // Ama owns Labone Villa (recorded before the P5-H Ownership screens existed, as older data would be).
+    await db.query(
+      `INSERT INTO property_ownerships (company_id, property_id, owner_contact_id, effective_from) VALUES ($1, $2, $3, current_date - 400)`,
+      [accra.companyId, laboneVilla.id, ama.id],
+    );
+    const portalLead = await accraApi.call<{ id: string; reference: string }>('POST', 'leads', {
+      contact: { contactType: 'person', displayName: 'Yaw Adjei', primaryPhone: '+233 20 777 7781', sourceCode: 'property_portal', relationships: ['applicant'] },
+      leadType: 'rent',
+      sourceCode: 'property_portal',
+      listingId: listing.id,
+      message: 'Is the flat still available? I can view this weekend.',
+      assignedTo: null,
+      officeId: accra.officeId,
+    });
+    const agentLead = await accraApi.call<{ id: string; reference: string }>('POST', 'leads', {
+      contactId: ama.id,
+      leadType: 'buy',
+      sourceCode: 'referral',
+      message: 'Looking for a 3-bed house in East Legon.',
+      assignedTo: agentMembership,
+      officeId: accra.officeId,
+    });
+    const agentTask = await accraApi.call<{ id: string }>('POST', 'tasks', {
+      title: 'Call Ama about East Legon options',
+      taskType: 'call',
+      dueAt: new Date(Date.now() + 3_600_000).toISOString(),
+      assignedTo: agentMembership,
+      about: { entityType: 'lead', entityId: agentLead.id },
+    });
+    // Due an hour ago: overdue on My day, the follow-up list and the dashboards.
+    await db.query(`UPDATE tasks SET due_at = now() - interval '1 hour' WHERE id = $1`, [agentTask.id]);
+    const dohaContact = await dohaApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Ahmed Al-Kuwari',
+      displayNameLocal: 'أحمد الكواري',
+      primaryPhone: '+974 5512 0193',
+      relationships: ['seller'],
+    });
+    const dohaErased = await dohaApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Fatima Erased',
+      primaryPhone: '+974 5512 0777',
+      relationships: ['buyer'],
+    });
+    await dohaApi.call('POST', `contacts/${dohaErased.id}/identity-documents`, { documentTypeCode: 'passport', issuingCountryCode: 'QA', documentNumber: 'Q9876543', expiresOn: '2030-01-31' });
+    const dohaRequest = await dohaApi.call<{ id: string; reference: string }>('POST', 'privacy-requests', {
+      contactId: dohaContact.id,
+      requestType: 'access',
+      channel: 'in_person',
+      receivedOn: new Date().toISOString().slice(0, 10),
+      summary: 'طلب نسخة من البيانات',
+    });
+    await db.query('BEGIN');
+    await db.query(`SELECT set_config('app.company_id', $1, true)`, [doha.companyId]);
+    await db.query('SELECT app.erase_contact($1)', [dohaErased.id]);
+    await db.query('COMMIT');
+
     return {
       users,
       companies: {
@@ -218,6 +362,8 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
         dohaTower,
         listing,
         keySet,
+        crm: { ama, amaDuplicate, seller, erased, portalLead, agentLead, agentTask, dohaContact, dohaErased },
+        privacy: { requester, overdueRequest, toErase, dohaRequest },
       },
     };
   } finally {

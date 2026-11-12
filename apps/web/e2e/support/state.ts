@@ -22,6 +22,23 @@ export interface E2eState {
     dohaTower: { id: string; reference: string };
     listing: { id: string; reference: string };
     keySet: { id: string };
+    crm: {
+      ama: { id: string; reference: string };
+      amaDuplicate: { id: string; reference: string };
+      seller: { id: string; reference: string };
+      erased: { id: string; reference: string };
+      portalLead: { id: string; reference: string };
+      agentLead: { id: string; reference: string };
+      agentTask: { id: string };
+      dohaContact: { id: string; reference: string };
+      dohaErased: { id: string; reference: string };
+    };
+    privacy: {
+      requester: { id: string; reference: string };
+      overdueRequest: { id: string; reference: string };
+      toErase: { id: string; reference: string };
+      dohaRequest: { id: string; reference: string };
+    };
   };
 }
 

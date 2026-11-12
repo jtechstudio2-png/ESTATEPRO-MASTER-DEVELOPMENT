@@ -244,6 +244,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/properties/{propertyId}/ownerships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Properties_listOwnerships"];
+        put?: never;
+        post: operations["Properties_addOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/property-ownerships/{ownershipId}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Properties_endOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/units/{unitId}": {
         parameters: {
             query?: never;
@@ -1220,6 +1252,1085 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contact register; Buyers, Sellers, Landlords and Tenants are filter[relationship] views */
+        get: operations["Contacts_list"];
+        put?: never;
+        /** Create a contact. Answers 409 possible-duplicates unless confirmNotDuplicate is true */
+        post: operations["Contacts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/duplicate-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Find contacts with the same email, phone or tax number (rate-limited; audited without values) */
+        post: operations["Contacts_duplicateCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Contacts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["Contacts_update"];
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Contacts_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Contacts_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Contacts_addMethod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/methods/{methodId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["Contacts_removeMethod"];
+        options?: never;
+        head?: never;
+        patch: operations["Contacts_updateMethod"];
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/relationships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Contacts_addRelationship"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/relationships/{relationshipId}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Contacts_endRelationship"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/consents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Contacts_consents"];
+        put?: never;
+        /** Record a consent or a withdrawal (append-only) */
+        post: operations["Contacts_recordConsent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/merge-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Contacts_mergePreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Merge another contact into this one (explicit; cannot be undone) */
+        post: operations["Contacts_merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/sensitive/{field}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reveal one protected detail of a contact (audited) */
+        post: operations["ContactSensitive_revealField"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/identity-documents/{documentId}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reveal the number of an identity document (audited) */
+        post: operations["ContactSensitive_revealDocumentNumber"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Requirements of contacts you can see (active by default), with match counts */
+        get: operations["RequirementsRegister_register"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ContactRequirements_list"];
+        put?: never;
+        /** Record what a buyer or tenant is looking for */
+        post: operations["ContactRequirements_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ContactRequirements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["ContactRequirements_update"];
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Published listings matching the requirement, best first (decision D4); needs listing.view */
+        get: operations["ContactRequirements_matches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}/exclusions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listings marked not suitable for this requirement */
+        get: operations["ContactRequirements_exclusions"];
+        put?: never;
+        /** Mark a listing not suitable, with a reason; it stops appearing as a match */
+        post: operations["ContactRequirements_exclude"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/requirements/{requirementId}/exclusions/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Let a listing marked not suitable appear as a match again */
+        delete: operations["ContactRequirements_restore"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/identity-documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Identity documents (masked: last characters only) */
+        get: operations["Kyc_listDocuments"];
+        put?: never;
+        /** Record an identity document. The number is encrypted; 409 possible-duplicates when another contact has it */
+        post: operations["Kyc_addDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/identity-documents/{documentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Correct a document that is not yet verified */
+        patch: operations["Kyc_updateDocument"];
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/identity-documents/{documentId}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive a document (it is kept as evidence) */
+        post: operations["Kyc_archiveDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/kyc-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Kyc_listChecks"];
+        put?: never;
+        /** Record a KYC/AML check (identity, address, source of funds, sanctions/PEP, company ownership) */
+        post: operations["Kyc_recordCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/kyc-checks/{checkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update an open check (pending or in review) */
+        patch: operations["Kyc_updateCheck"];
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/kyc-checks/{checkId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign a check off as verified, with a risk rating; a verified identity check also verifies its document */
+        post: operations["Kyc_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/kyc-checks/{checkId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign a check off as failed, with the reason */
+        post: operations["Kyc_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kyc-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Identity checks of contacts in your scope: open ones (pending, in review) by default, oldest first */
+        get: operations["KycQueue_queue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lead inbox and register (Inbox, Mine, Unassigned, All open, Closed are filters) */
+        get: operations["Leads_list"];
+        put?: never;
+        /** Capture a lead for an existing or a new contact (L-3) */
+        post: operations["Leads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Leads_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["Leads_update"];
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change status: contacted, qualified, unqualified (with a note), lost (with a reason); reopening is a manager action */
+        post: operations["Leads_changeStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign the lead to a team member in your scope who works in its office */
+        post: operations["Leads_assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Leads_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Leads_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/crm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** CRM settings: the lead response target (decision D3) */
+        get: operations["Leads_getSettings"];
+        put: operations["Leads_saveSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contact timeline: activities on the contact and its leads, newest first */
+        get: operations["Activities_contactTimeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lead timeline, newest first */
+        get: operations["Activities_leadTimeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Log a call, message, meeting or note (recorded, not sent) */
+        post: operations["Activities_log"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities/{activityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Activities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit your own activity within 24 hours; the earlier version is kept (D5) */
+        patch: operations["Activities_edit"];
+        trace?: never;
+    };
+    "/api/v1/activities/{activityId}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive with a reason (author, or a manager over a linked record) */
+        post: operations["Activities_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Follow-ups: Mine (default) or Team (managers); open by default, soonest first */
+        get: operations["Tasks_list"];
+        put?: never;
+        /** Schedule a follow-up for yourself, or (managers) for someone in your team */
+        post: operations["Tasks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Tasks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit or reschedule an open follow-up */
+        patch: operations["Tasks_update"];
+        trace?: never;
+    };
+    "/api/v1/tasks/{taskId}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Give the follow-up to someone in your team (D6) */
+        post: operations["Tasks_reassign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/{taskId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Tasks_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/{taskId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Tasks_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/portal-visibility-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What this landlord would see in the landlord portal (read-only, audited; needs property.view) */
+        get: operations["PortalPreview_landlord"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/crm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** CRM dashboard: waiting leads, follow-ups, statuses, response times, sources, requirements */
+        get: operations["Dashboards_crm"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin dashboard: attention items, access, lead flow by office, data quality, privacy, exports, account */
+        get: operations["Dashboards_admin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/my-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My day: my follow-ups due today or overdue and my new leads, in my office time zone */
+        get: operations["Dashboards_myDay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Export contacts in your scope as CSV (no protected details, notes or messages) */
+        post: operations["Exports_contacts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Export leads in your scope as CSV (no enquiry messages) */
+        post: operations["Exports_leads"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your exports (members who manage users see all) */
+        get: operations["Exports_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exports/{exportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Exports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exports/{exportId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A five-minute download link for your export (audited) */
+        post: operations["Exports_download"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Requests: open ones by default, soonest due first */
+        get: operations["PrivacyRequests_list"];
+        put?: never;
+        /** Log a request; it is due 30 days after it reached the company */
+        post: operations["PrivacyRequests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/assignable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Members who can be given requests */
+        get: operations["PrivacyRequests_assignable"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A request with its evidence and history */
+        get: operations["PrivacyRequests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Give the request to a member, or clear the assignee */
+        post: operations["PrivacyRequests_assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/verify-identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record how the requester's identity was verified (once) */
+        post: operations["PrivacyRequests_verifyIdentity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move the request on: verifying, in progress, completed (access), refused or withdrawn */
+        post: operations["PrivacyRequests_changeStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/extend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Extend the due date once, with the reason */
+        post: operations["PrivacyRequests_extend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record evidence: the request, identity proof seen, correspondence or the response (append-only) */
+        post: operations["PrivacyRequests_addEvidence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/access-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Produce the access report (JSON, protected details included) as a 24-hour export for you; audited */
+        post: operations["PrivacyRequests_accessReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-requests/{id}/erase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Carry out the erasure (ADR-007 §8) and complete the request; cannot be undone */
+        post: operations["PrivacyRequests_erase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1692,6 +2803,94 @@ export interface components {
             /** @default false */
             isWholeProperty: boolean;
         };
+        OwnershipUnitDto: {
+            /** Format: uuid */
+            id: string;
+            unitLabel: string;
+        };
+        OwnershipOwnerDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            contactType: "person" | "organisation";
+            /** @description Identity verified now (issue #18); null when the member cannot see identity checks */
+            identityVerified: boolean | null;
+        };
+        RefLabelDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        OwnershipDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Null for the whole property */
+            unit: components["schemas"]["OwnershipUnitDto"] | null;
+            /** @description Null when the member cannot see the owner contact */
+            owner: components["schemas"]["OwnershipOwnerDto"] | null;
+            sharePercent: number;
+            /** @enum {string} */
+            ownershipType: "legal_owner" | "beneficial_owner" | "leaseholder" | "developer";
+            /** Format: date */
+            effectiveFrom: string;
+            /**
+             * Format: date
+             * @description Last day of ownership (inclusive)
+             */
+            effectiveTo: string | null;
+            /** @description Owner today, in the property time zone */
+            current: boolean;
+            createdBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            endedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            endedAt: string | null;
+            endReason: string | null;
+        };
+        OwnershipListDto: {
+            /** @description Current records first, then ended ones (most recent first) */
+            data: components["schemas"]["OwnershipDto"][];
+            /** @description The member may add and end ownership records for this property */
+            canManage: boolean;
+        };
+        AddOwnershipBody: {
+            /**
+             * Format: uuid
+             * @description The owner (a contact the member can see)
+             */
+            ownerContactId: string;
+            /**
+             * Format: uuid
+             * @description A unit of this property; omit or null for the whole property
+             */
+            unitId?: string | null;
+            /**
+             * @description Share in percent; current shares of one type for the same unit (or the whole property) add up to at most 100
+             * @default 100
+             */
+            sharePercent: number | null;
+            /**
+             * @default legal_owner
+             * @enum {string|null}
+             */
+            ownershipType: "legal_owner" | "beneficial_owner" | "leaseholder" | "developer" | null;
+            /**
+             * Format: date
+             * @description First day of ownership (not in the future, in the property time zone)
+             */
+            effectiveFrom: string;
+        };
+        EndOwnershipBody: {
+            /**
+             * Format: date
+             * @description Last day of ownership: after the start date, not in the future
+             */
+            effectiveTo: string;
+            /** @description Why the ownership ended (for example: sold, transferred, recorded in error) */
+            reason: string;
+        };
         UpdateUnitBody: {
             /** Format: uuid */
             unitTypeId?: string | null;
@@ -2031,7 +3230,7 @@ export interface components {
         ReadinessBlockerDto: {
             field: string;
             /** @enum {string} */
-            code: "archived" | "closed" | "unavailable" | "expired" | "photos" | "floor-plan" | "unverified" | "missing";
+            code: "archived" | "closed" | "unavailable" | "expired" | "photos" | "floor-plan" | "unverified" | "no-owner" | "missing";
             message: string;
         };
         ListingReadinessDto: {
@@ -2129,7 +3328,7 @@ export interface components {
         ListingSettingsBody: {
             /** @description Price reductions above this percentage need manager approval; null = off */
             priceReductionApprovalPercent: number | null;
-            /** @description Listings cannot be published until seller KYC is verified */
+            /** @description Listings cannot be published until every current owner of the unit has a verified identity (#18). A jurisdiction can also require it (rule listing_owner_identity_required) */
             requireSellerKyc: boolean;
             /** @description Minimum photos to publish; null = off. Omitted = unchanged. */
             minPhotosToPublish?: number | null;
@@ -2780,6 +3979,1845 @@ export interface components {
             /** @description Up to 10, newest first */
             recent: components["schemas"]["RejectedMediaDto"][];
         };
+        IdentityCheckSummaryDto: {
+            /** @enum {string} */
+            status: "none" | "pending" | "in_review" | "verified" | "failed" | "expired";
+            /** Format: date-time */
+            reviewedAt: string | null;
+        };
+        NextFollowUpDto: {
+            /** Format: date-time */
+            dueAt: string;
+            overdue: boolean;
+        };
+        ListingRefDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            status: string;
+            isPublished: boolean;
+        };
+        ListingSummaryDto: {
+            /** @description Listings not closed (draft, available, reserved, under contract) that you may see */
+            active: number;
+            published: number;
+            /** @description Most recently updated */
+            latest: components["schemas"]["ListingRefDto"] | null;
+        };
+        LeadRefDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            status: string;
+        };
+        ContactSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string | null;
+            /** @enum {string} */
+            contactType: "person" | "organisation";
+            displayName: string;
+            displayNameLocal: string | null;
+            /** @description Active roles */
+            roles: ("buyer" | "seller" | "landlord" | "tenant" | "applicant" | "guarantor" | "supplier" | "developer" | "investor" | "other")[];
+            /** @description Partly masked for lists */
+            primaryPhoneMasked: string | null;
+            owner: components["schemas"]["RefLabelDto"] | null;
+            office: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description Latest identity check (Sellers view); null without kyc.view on this contact */
+            identityCheck: components["schemas"]["IdentityCheckSummaryDto"] | null;
+            /** @description Next open follow-up about the contact or one of its leads, among follow-ups you may see (B-1, SE-1, LL-1) */
+            nextFollowUp: components["schemas"]["NextFollowUpDto"] | null;
+            /** @description Sellers and Landlords views only: listings on units the contact owns or we manage for them, among those you may see; null without listing.view */
+            listings?: components["schemas"]["ListingSummaryDto"] | null;
+            /** @description Sellers view only: latest open sell or valuation lead you may see */
+            valuationLead?: components["schemas"]["LeadRefDto"] | null;
+            /** @description Landlords view only: properties owned or managed for them that you may see; null without property.view */
+            properties?: number | null;
+        };
+        ContactPageDto: {
+            data: components["schemas"]["ContactSummaryDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        ConsentInput: {
+            /** @enum {string} */
+            purpose: "marketing" | "property_alerts" | "data_processing" | "third_party_sharing" | "portal_terms";
+            /** @enum {string} */
+            channel: "email" | "sms" | "whatsapp" | "phone" | "post" | "any";
+            /** @enum {string} */
+            status: "granted" | "withdrawn";
+            /**
+             * @description Required when granted
+             * @enum {string}
+             */
+            lawfulBasis?: "consent" | "contract" | "legal_obligation" | "legitimate_interest";
+            /** @enum {string} */
+            capturedVia: "web_form" | "portal" | "verbal" | "paper" | "import" | "email";
+            /** @description Where the evidence is, e.g. "signed form, file 2026/031" */
+            evidence?: string | null;
+            /**
+             * Format: date-time
+             * @description When it was given (defaults to now; never in the future)
+             */
+            capturedAt?: string;
+        };
+        CreateContactBody: {
+            displayName?: string;
+            /** @description Name in its own script, e.g. Arabic */
+            displayNameLocal?: string | null;
+            givenName?: string | null;
+            familyName?: string | null;
+            otherNames?: string | null;
+            title?: string | null;
+            organisationName?: string | null;
+            /** @description Persons: stored encrypted and never returned (reveal only). Organisations: public register number */
+            organisationRegNumber?: string | null;
+            /** @description Persons: stored encrypted and never returned (reveal only). Organisations: public tax number */
+            taxNumber?: string | null;
+            /**
+             * Format: date
+             * @description Stored encrypted and never returned (reveal only)
+             */
+            dateOfBirth?: string | null;
+            primaryEmail?: string | null;
+            /** @description Any format; national numbers use the office country */
+            primaryPhone?: string | null;
+            /** @example en */
+            preferredLocaleCode?: string | null;
+            /** @enum {string|null} */
+            preferredChannel?: "email" | "phone" | "sms" | "whatsapp" | "post" | null;
+            /** @example GH */
+            nationalityCountryCode?: string | null;
+            /** @example GH */
+            residenceCountryCode?: string | null;
+            /** Format: uuid */
+            officeId?: string | null;
+            /**
+             * Format: uuid
+             * @description Responsible staff member
+             */
+            ownerMembershipId?: string | null;
+            /** @description Picklist lead_source */
+            sourceCode?: string | null;
+            /** @description Do not record ID or bank numbers here (ADR-007) */
+            notes?: string | null;
+            /** @description Save even though possible duplicates were found (the choice is audited) */
+            confirmNotDuplicate?: boolean;
+            /** @enum {string} */
+            contactType: "person" | "organisation";
+            relationships?: ("buyer" | "seller" | "landlord" | "tenant" | "applicant" | "guarantor" | "supplier" | "developer" | "investor" | "other")[];
+            consents?: components["schemas"]["ConsentInput"][];
+        };
+        RelationshipDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            relationshipType: "buyer" | "seller" | "landlord" | "tenant" | "applicant" | "guarantor" | "supplier" | "developer" | "investor" | "other";
+            /** @enum {string} */
+            status: "active" | "inactive";
+            /** Format: date */
+            startedOn: string;
+            /** Format: date */
+            endedOn: string | null;
+        };
+        MethodDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            methodType: "email" | "phone" | "mobile" | "whatsapp" | "fax" | "website" | "other";
+            value: string;
+            label: string | null;
+            isPrimary: boolean;
+            /** Format: date-time */
+            verifiedAt: string | null;
+            /** Format: date-time */
+            optedOutAt: string | null;
+        };
+        ConsentDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            purpose: "marketing" | "property_alerts" | "data_processing" | "third_party_sharing" | "portal_terms";
+            /** @enum {string|null} */
+            channel: "email" | "sms" | "whatsapp" | "phone" | "post" | "any" | null;
+            /** @enum {string} */
+            status: "granted" | "withdrawn";
+            /** @enum {string|null} */
+            lawfulBasis: "consent" | "contract" | "legal_obligation" | "legitimate_interest" | null;
+            /** Format: date-time */
+            capturedAt: string;
+            /**
+             * @description "merge": recorded when a merge kept a withdrawal in force
+             * @enum {string}
+             */
+            capturedVia: "web_form" | "portal" | "verbal" | "paper" | "import" | "email" | "merge";
+            evidence: string | null;
+            /** Format: uuid */
+            capturedByMembershipId: string | null;
+        };
+        ProtectedValueDto: {
+            /** @description A value is recorded (reveal it with the reveal endpoint) */
+            recorded: boolean;
+            /** @description Last characters, where stored */
+            last4: string | null;
+        };
+        ContactProtectedDto: {
+            dateOfBirth: components["schemas"]["ProtectedValueDto"];
+            taxNumber: components["schemas"]["ProtectedValueDto"];
+            organisationRegNumber: components["schemas"]["ProtectedValueDto"];
+        };
+        ContactAccessDto: {
+            canEdit: boolean;
+            canArchive: boolean;
+            canMerge: boolean;
+            canReveal: boolean;
+        };
+        ContactDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string | null;
+            /** @enum {string} */
+            contactType: "person" | "organisation";
+            displayName: string;
+            displayNameLocal: string | null;
+            givenName: string | null;
+            familyName: string | null;
+            otherNames: string | null;
+            title: string | null;
+            organisationName: string | null;
+            /** @description Organisations only */
+            organisationRegNumber: string | null;
+            /** @description Organisations only */
+            taxNumber: string | null;
+            primaryEmail: string | null;
+            /** @description E.164 */
+            primaryPhone: string | null;
+            preferredLocaleCode: string | null;
+            /** @enum {string|null} */
+            preferredChannel: "email" | "phone" | "sms" | "whatsapp" | "post" | null;
+            nationalityCountryCode: string | null;
+            residenceCountryCode: string | null;
+            office: components["schemas"]["RefLabelDto"] | null;
+            /** @description Responsible staff member (membership id) */
+            owner: components["schemas"]["RefLabelDto"] | null;
+            sourceCode: string | null;
+            notes: string | null;
+            relationships: components["schemas"]["RelationshipDto"][];
+            methods: components["schemas"]["MethodDto"][];
+            /** @description Current state per purpose and channel */
+            consents: components["schemas"]["ConsentDto"][];
+            /** @description Present only with kyc.view */
+            protected?: components["schemas"]["ContactProtectedDto"];
+            isAnonymised: boolean;
+            /**
+             * Format: uuid
+             * @description Set when this contact was merged into another
+             */
+            mergedIntoContactId: string | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            archivedReason: string | null;
+            access: components["schemas"]["ContactAccessDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+        };
+        DuplicateCheckBody: {
+            primaryEmail?: string | null;
+            primaryPhone?: string | null;
+            /** @description Tax number of a person (matched by keyed hash) */
+            taxNumber?: string | null;
+            /**
+             * Format: uuid
+             * @description Office whose country completes national phone numbers
+             */
+            officeId?: string | null;
+            /**
+             * Format: uuid
+             * @description Contact being edited (excluded from the results)
+             */
+            excludeContactId?: string | null;
+        };
+        DuplicateCandidateDto: {
+            /** @description False when the match is outside your access: no details are shown */
+            visible: boolean;
+            /** Format: uuid */
+            id: string | null;
+            reference: string | null;
+            displayName: string | null;
+            ownerName: string | null;
+            archived: boolean;
+            matchedOn: ("email" | "phone" | "tax_number" | "identity_document")[];
+        };
+        DuplicateCheckResultDto: {
+            candidates: components["schemas"]["DuplicateCandidateDto"][];
+        };
+        UpdateContactBody: {
+            displayName?: string;
+            /** @description Name in its own script, e.g. Arabic */
+            displayNameLocal?: string | null;
+            givenName?: string | null;
+            familyName?: string | null;
+            otherNames?: string | null;
+            title?: string | null;
+            organisationName?: string | null;
+            /** @description Persons: stored encrypted and never returned (reveal only). Organisations: public register number */
+            organisationRegNumber?: string | null;
+            /** @description Persons: stored encrypted and never returned (reveal only). Organisations: public tax number */
+            taxNumber?: string | null;
+            /**
+             * Format: date
+             * @description Stored encrypted and never returned (reveal only)
+             */
+            dateOfBirth?: string | null;
+            primaryEmail?: string | null;
+            /** @description Any format; national numbers use the office country */
+            primaryPhone?: string | null;
+            /** @example en */
+            preferredLocaleCode?: string | null;
+            /** @enum {string|null} */
+            preferredChannel?: "email" | "phone" | "sms" | "whatsapp" | "post" | null;
+            /** @example GH */
+            nationalityCountryCode?: string | null;
+            /** @example GH */
+            residenceCountryCode?: string | null;
+            /** Format: uuid */
+            officeId?: string | null;
+            /**
+             * Format: uuid
+             * @description Responsible staff member
+             */
+            ownerMembershipId?: string | null;
+            /** @description Picklist lead_source */
+            sourceCode?: string | null;
+            /** @description Do not record ID or bank numbers here (ADR-007) */
+            notes?: string | null;
+            /** @description Save even though possible duplicates were found (the choice is audited) */
+            confirmNotDuplicate?: boolean;
+        };
+        ArchiveContactBody: {
+            reason: string;
+        };
+        AddMethodBody: {
+            /** @enum {string} */
+            methodType: "email" | "phone" | "mobile" | "whatsapp" | "fax" | "website" | "other";
+            value: string;
+            label?: string | null;
+            isPrimary?: boolean;
+        };
+        UpdateMethodBody: {
+            label?: string | null;
+            isPrimary?: boolean;
+            /** @description The person asked not to be contacted this way */
+            optedOut?: boolean;
+            /** @description The value was confirmed with the person */
+            verified?: boolean;
+        };
+        AddRelationshipBody: {
+            /** @enum {string} */
+            relationshipType: "buyer" | "seller" | "landlord" | "tenant" | "applicant" | "guarantor" | "supplier" | "developer" | "investor" | "other";
+        };
+        EndRelationshipBody: {
+            /**
+             * Format: date
+             * @description Defaults to today
+             */
+            endedOn?: string;
+        };
+        ConsentHistoryDto: {
+            /** @description Every consent record, newest first */
+            data: components["schemas"]["ConsentDto"][];
+        };
+        MergeSideDto: {
+            contact: components["schemas"]["ContactDto"];
+            /** @description Rows that reference this contact, per table */
+            references: {
+                [key: string]: number;
+            };
+        };
+        MergeBlockerDto: {
+            /** @enum {string} */
+            code: "same_contact" | "already_merged" | "anonymised" | "keep_archived" | "different_types" | "financial_records" | "both_portal" | "erasure_request";
+            /** @description The reason in English */
+            message: string;
+            /** @description financial_records: the tables holding the records that cannot move; erasure_request: the open request references */
+            records: string[];
+        };
+        MergePreviewDto: {
+            keep: components["schemas"]["MergeSideDto"];
+            merge: components["schemas"]["MergeSideDto"];
+            /** @description Reasons the merge cannot go ahead (English); empty when it can */
+            blockers: string[];
+            /** @description The same reasons with codes, for translated screens */
+            blockerDetails: components["schemas"]["MergeBlockerDto"][];
+            choosableFields: ("displayName" | "displayNameLocal" | "givenName" | "familyName" | "otherNames" | "title" | "organisationName" | "organisationRegNumber" | "taxNumber" | "dateOfBirth" | "primaryEmail" | "primaryPhone" | "preferredLocaleCode" | "preferredChannel" | "nationalityCountryCode" | "residenceCountryCode" | "officeId" | "ownerMembershipId" | "sourceCode" | "notes")[];
+        };
+        MergeBody: {
+            /**
+             * Format: uuid
+             * @description The contact merged into this one (it is archived and points here)
+             */
+            mergeContactId: string;
+            /** @description Version of the merged contact, as shown in the preview */
+            mergeVersion: number;
+            /**
+             * @description For each field, whose value to keep: "keep" (default) or "merge". Fields: displayName, displayNameLocal, givenName, familyName, otherNames, title, organisationName, organisationRegNumber, taxNumber, dateOfBirth, primaryEmail, primaryPhone, preferredLocaleCode, preferredChannel, nationalityCountryCode, residenceCountryCode, officeId, ownerMembershipId, sourceCode, notes
+             * @example {
+             *       "primaryEmail": "merge"
+             *     }
+             */
+            fields?: {
+                [key: string]: "keep" | "merge";
+            };
+        };
+        MergeResultDto: {
+            contact: components["schemas"]["ContactDto"];
+            /** @description Rows moved to the kept contact, per table */
+            moved: {
+                [key: string]: number;
+            };
+        };
+        RevealBody: {
+            /**
+             * @description Why the value is needed (recorded in the audit log). Do not include the value itself.
+             * @example Verifying identity for the sale of Osu Court, flat 2
+             */
+            reason: string;
+        };
+        RevealedValueDto: {
+            /** @enum {string} */
+            field: "dateOfBirth" | "taxNumber" | "organisationRegNumber" | "documentNumber";
+            /** @description The protected value. Never cache, log or put it in a URL. */
+            value: string;
+            /** Format: date-time */
+            revealedAt: string;
+            /**
+             * @description Hide the value after this many seconds
+             * @example 60
+             */
+            hideAfterSeconds: number;
+        };
+        RequirementAreaDto: {
+            /** @enum {string} */
+            kind: "locality" | "radius" | "polygon";
+            locality?: string | null;
+            adminArea1?: string | null;
+            latitude?: number | null;
+            longitude?: number | null;
+            radiusMetres?: number | null;
+            points?: number[][] | null;
+            label?: string | null;
+        };
+        RequirementDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description The contact; name is its display name */
+            contact: components["schemas"]["RefLabelDto"];
+            /** @enum {string} */
+            requirementType: "buy" | "rent";
+            /** @enum {string} */
+            status: "active" | "paused" | "fulfilled" | "cancelled";
+            /** @example GHS */
+            currencyCode: string;
+            minPrice: components["schemas"]["MoneyDto"] | null;
+            maxPrice: components["schemas"]["MoneyDto"] | null;
+            /** @enum {string|null} */
+            rentFrequency: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual" | null;
+            minBedrooms: number | null;
+            maxBedrooms: number | null;
+            propertyTypeIds: string[];
+            areas: components["schemas"]["RequirementAreaDto"][];
+            mustHaveFeatures: string[];
+            /** Format: date */
+            moveBy: string | null;
+            /** @enum {string|null} */
+            financingStatus: "cash" | "mortgage_approved" | "mortgage_in_progress" | "not_started" | "not_applicable" | null;
+            notes: string | null;
+            /** @description Published listings matching now, at most 100 (null without listing.view) */
+            matchCount: number | null;
+            /** @description More than 100 listings match (show "100+"); the matches endpoint gives the exact total */
+            matchCountCapped: boolean;
+            /** @description Register (B-1) only: the contact's next open follow-up among those you may see */
+            nextFollowUp?: components["schemas"]["NextFollowUpDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+        };
+        RequirementPageDto: {
+            data: components["schemas"]["RequirementDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        RequirementAreaInput: {
+            /** @enum {string} */
+            kind: "locality" | "radius" | "polygon";
+            /** @example East Legon */
+            locality?: string | null;
+            /** @example Greater Accra */
+            adminArea1?: string | null;
+            /** @example 5.6355 */
+            latitude?: number | null;
+            /** @example -0.1617 */
+            longitude?: number | null;
+            radiusMetres?: number | null;
+            /** @description [longitude, latitude] pairs */
+            points?: number[][];
+            /** @description Name shown for a map area, e.g. "Near the school" */
+            label?: string | null;
+        };
+        CreateRequirementBody: {
+            /**
+             * @description Lowest price, in the requirement currency (rent: per rentFrequency)
+             * @example 900000
+             */
+            minPrice?: string | null;
+            /** @example 1200000 */
+            maxPrice?: string | null;
+            /**
+             * @description Rent requirements with a budget: the period the budget is for
+             * @enum {string|null}
+             */
+            rentFrequency?: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual" | null;
+            minBedrooms?: number | null;
+            maxBedrooms?: number | null;
+            /** @description Property or unit types wanted (ids from the property types list) */
+            propertyTypeIds?: string[];
+            areas?: components["schemas"]["RequirementAreaInput"][];
+            /** @description Codes from the "feature" picklist; listings with more of them rank higher */
+            mustHaveFeatures?: string[];
+            /** Format: date */
+            moveBy?: string | null;
+            /** @enum {string|null} */
+            financingStatus?: "cash" | "mortgage_approved" | "mortgage_in_progress" | "not_started" | "not_applicable" | null;
+            /** @description Do not record ID or bank numbers here */
+            notes?: string | null;
+            /** @enum {string} */
+            requirementType: "buy" | "rent";
+            /**
+             * @description ISO 4217; listings in other currencies never match
+             * @example GHS
+             */
+            currencyCode: string;
+            /**
+             * @default active
+             * @enum {string}
+             */
+            status: "active" | "paused";
+        };
+        UpdateRequirementBody: {
+            /**
+             * @description Lowest price, in the requirement currency (rent: per rentFrequency)
+             * @example 900000
+             */
+            minPrice?: string | null;
+            /** @example 1200000 */
+            maxPrice?: string | null;
+            /**
+             * @description Rent requirements with a budget: the period the budget is for
+             * @enum {string|null}
+             */
+            rentFrequency?: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual" | null;
+            minBedrooms?: number | null;
+            maxBedrooms?: number | null;
+            /** @description Property or unit types wanted (ids from the property types list) */
+            propertyTypeIds?: string[];
+            areas?: components["schemas"]["RequirementAreaInput"][];
+            /** @description Codes from the "feature" picklist; listings with more of them rank higher */
+            mustHaveFeatures?: string[];
+            /** Format: date */
+            moveBy?: string | null;
+            /** @enum {string|null} */
+            financingStatus?: "cash" | "mortgage_approved" | "mortgage_in_progress" | "not_started" | "not_applicable" | null;
+            /** @description Do not record ID or bank numbers here */
+            notes?: string | null;
+            /** @enum {string} */
+            status?: "active" | "paused" | "fulfilled" | "cancelled";
+            /** @example GHS */
+            currencyCode?: string;
+        };
+        MatchBreakdownDto: {
+            /** @description Wanted features the listing has */
+            featuresMatched: string[];
+            /** @description Wanted features the listing lacks */
+            featuresMissing: string[];
+            /** @description Listing is one of the wanted types (null when no types were given) */
+            propertyTypeMatched: boolean | null;
+            /** @description Bedrooms within the maximum (null when no maximum was given) */
+            withinMaxBedrooms: boolean | null;
+        };
+        RequirementMatchDto: {
+            /** Format: uuid */
+            listingId: string;
+            reference: string;
+            title: string;
+            /** @enum {string} */
+            listingType: "sale" | "rent";
+            price: components["schemas"]["MoneyDto"];
+            /** @enum {string|null} */
+            rentFrequency: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual" | null;
+            bedrooms: number | null;
+            locality: string | null;
+            /** Format: date-time */
+            publishedAt: string | null;
+            /** @description Ranking points: one per wanted feature, one for a wanted type, one for bedrooms within the maximum */
+            score: number;
+            breakdown: components["schemas"]["MatchBreakdownDto"];
+        };
+        RequirementMatchesDto: {
+            data: components["schemas"]["RequirementMatchDto"][];
+            /** @description All matching listings (data holds the best `limit`) */
+            total: number;
+            /** @description The rules applied (decision D4) */
+            rules: string[];
+        };
+        RequirementExclusionDto: {
+            /** Format: uuid */
+            listingId: string;
+            listingReference: string;
+            listingTitle: string;
+            reason: string;
+            excludedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            excludedAt: string;
+        };
+        ExcludeListingBody: {
+            /** Format: uuid */
+            listingId: string;
+            /** @example Too far from the children’s school */
+            reason: string;
+        };
+        VerificationDto: {
+            /** Format: date-time */
+            at: string;
+            by: components["schemas"]["RefLabelDto"];
+        };
+        IdentityDocumentDto: {
+            /** Format: uuid */
+            id: string;
+            documentTypeCode: string;
+            issuingCountryCode: string;
+            /**
+             * @description Last characters of the number, for recognising the document; null once the person has been erased
+             * @example 4821
+             */
+            numberLast4: string | null;
+            /** Format: date */
+            issuedOn: string | null;
+            /** Format: date */
+            expiresOn: string | null;
+            /** @description The expiry date has passed */
+            expired: boolean;
+            /** @description Set when an identity check using this document is signed off as verified */
+            verified: components["schemas"]["VerificationDto"] | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            archivedReason: string | null;
+            /** @description You may correct this document (kyc.manage; not verified or archived) */
+            canEdit: boolean;
+            /** @description You may reveal the number (contact.view_sensitive, with a recent second factor) */
+            canReveal: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+        };
+        CreateIdentityDocumentBody: {
+            /**
+             * @description Code from the id_document_type picklist for the issuing country
+             * @example ghana_card
+             */
+            documentTypeCode: string;
+            /** @example GH */
+            issuingCountryCode: string;
+            /** @description Document number. Encrypted at rest; never returned (reveal needs contact.view_sensitive and a recent second factor). */
+            documentNumber: string;
+            /** Format: date */
+            issuedOn?: string | null;
+            /** Format: date */
+            expiresOn?: string | null;
+            /** @description Record the document even though another contact has the same number */
+            confirmNotDuplicate?: boolean;
+        };
+        UpdateIdentityDocumentBody: {
+            /** @example passport */
+            documentTypeCode?: string;
+            /** @example GH */
+            issuingCountryCode?: string;
+            /** @description A corrected number (re-encrypted) */
+            documentNumber?: string;
+            /** Format: date */
+            issuedOn?: string | null;
+            /** Format: date */
+            expiresOn?: string | null;
+            confirmNotDuplicate?: boolean;
+        };
+        ArchiveIdentityDocumentBody: {
+            /** @example Replaced by a renewed passport */
+            reason: string;
+        };
+        KycDocumentRefDto: {
+            /** Format: uuid */
+            id: string;
+            documentTypeCode: string;
+            /** @description Null once the person has been erased */
+            numberLast4: string | null;
+        };
+        KycCheckDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            checkType: "identity" | "address" | "source_of_funds" | "sanctions_pep" | "company_ownership";
+            /**
+             * @description A verified check past its expiry date reads as expired
+             * @enum {string}
+             */
+            status: "pending" | "in_review" | "verified" | "failed" | "expired";
+            /** @enum {string|null} */
+            riskRating: "low" | "medium" | "high" | null;
+            provider: string | null;
+            providerReference: string | null;
+            identityDocument: components["schemas"]["KycDocumentRefDto"] | null;
+            recordedBy: components["schemas"]["RefLabelDto"] | null;
+            reviewedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            reviewedAt: string | null;
+            /** Format: date */
+            expiresOn: string | null;
+            notes: string | null;
+            /** @description The reviewer’s reason */
+            decisionReason: string | null;
+            /** @description You may edit this open check (kyc.manage) */
+            canEdit: boolean;
+            /** @description You may sign this open check off (kyc.approve) */
+            canDecide: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+        };
+        CreateKycCheckBody: {
+            /** @enum {string} */
+            checkType: "identity" | "address" | "source_of_funds" | "sanctions_pep" | "company_ownership";
+            /**
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "in_review";
+            /**
+             * Format: uuid
+             * @description The identity document examined
+             */
+            identityDocumentId?: string | null;
+            /** @description Who ran the check, if not your company */
+            provider?: string | null;
+            providerReference?: string | null;
+            /** @enum {string|null} */
+            riskRating?: "low" | "medium" | "high" | null;
+            /**
+             * Format: date
+             * @description When the result should be renewed
+             */
+            expiresOn?: string | null;
+            /** @description Do not record ID or bank numbers here */
+            notes?: string | null;
+        };
+        UpdateKycCheckBody: {
+            /** @enum {string} */
+            status?: "pending" | "in_review";
+            /** Format: uuid */
+            identityDocumentId?: string | null;
+            provider?: string | null;
+            providerReference?: string | null;
+            /** @enum {string|null} */
+            riskRating?: "low" | "medium" | "high" | null;
+            /** Format: date */
+            expiresOn?: string | null;
+            notes?: string | null;
+        };
+        ApproveKycCheckBody: {
+            /**
+             * @description Required when signing off a check as verified
+             * @enum {string}
+             */
+            riskRating: "low" | "medium" | "high";
+            /**
+             * Format: date
+             * @description When the check should be renewed
+             */
+            expiresOn?: string | null;
+            reason?: string | null;
+        };
+        RejectKycCheckBody: {
+            /** @example Name on the passport does not match the sale contract */
+            reason: string;
+            /** @enum {string|null} */
+            riskRating?: "low" | "medium" | "high" | null;
+        };
+        KycQueueContactDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            reference: string | null;
+        };
+        KycQueueItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            checkType: "identity" | "address" | "source_of_funds" | "sanctions_pep" | "company_ownership";
+            /**
+             * @description A verified check past its expiry date reads as expired
+             * @enum {string}
+             */
+            status: "pending" | "in_review" | "verified" | "failed" | "expired";
+            /** @enum {string|null} */
+            riskRating: "low" | "medium" | "high" | null;
+            provider: string | null;
+            providerReference: string | null;
+            identityDocument: components["schemas"]["KycDocumentRefDto"] | null;
+            recordedBy: components["schemas"]["RefLabelDto"] | null;
+            reviewedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            reviewedAt: string | null;
+            /** Format: date */
+            expiresOn: string | null;
+            notes: string | null;
+            /** @description The reviewer’s reason */
+            decisionReason: string | null;
+            /** @description You may edit this open check (kyc.manage) */
+            canEdit: boolean;
+            /** @description You may sign this open check off (kyc.approve) */
+            canDecide: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+            contact: components["schemas"]["KycQueueContactDto"];
+        };
+        KycQueuePageDto: {
+            data: components["schemas"]["KycQueueItemDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        LeadContactDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @description Partly masked */
+            primaryPhoneMasked: string | null;
+        };
+        LeadListingDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+        };
+        LeadResponseDto: {
+            /** Format: date-time */
+            dueAt: string;
+            /** @description Not yet answered and past the target */
+            overdue: boolean;
+            /** @description Answered after the target */
+            late: boolean;
+        };
+        LeadSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            contact: components["schemas"]["LeadContactDto"];
+            /** @enum {string} */
+            leadType: "buy" | "rent" | "sell" | "let" | "valuation" | "management" | "other";
+            /** @enum {string} */
+            status: "new" | "contacted" | "qualified" | "unqualified" | "converted" | "lost";
+            sourceCode: string;
+            sourceDetail: string | null;
+            listing: components["schemas"]["LeadListingDto"] | null;
+            office: components["schemas"]["RefLabelDto"] | null;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** @description First line of the enquiry, at most 120 characters */
+            messagePreview: string | null;
+            /** Format: date-time */
+            receivedAt: string;
+            /** Format: date-time */
+            firstResponseAt: string | null;
+            /** Format: date-time */
+            nextActionAt: string | null;
+            /** @description null when the company has no response target */
+            response: components["schemas"]["LeadResponseDto"] | null;
+            /** @description Shown only with its breakdown; no scoring rules exist in Phase 5 (D7) */
+            score: number | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        LeadPageDto: {
+            data: components["schemas"]["LeadSummaryDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        CreateLeadBody: {
+            /**
+             * Format: uuid
+             * @description An existing contact; or give `contact` to create one (duplicate check applies)
+             */
+            contactId?: string | null;
+            /** @description A new contact (needs contact.create) */
+            contact?: components["schemas"]["CreateContactBody"];
+            /** @enum {string} */
+            leadType: "buy" | "rent" | "sell" | "let" | "valuation" | "management" | "other";
+            /**
+             * @description Code from the lead_source picklist
+             * @example walk_in
+             */
+            sourceCode: string;
+            /** @description Portal name, referrer or campaign detail */
+            sourceDetail?: string | null;
+            campaign?: string | null;
+            /**
+             * Format: uuid
+             * @description The listing the enquiry is about
+             */
+            listingId?: string | null;
+            /**
+             * Format: uuid
+             * @description A requirement of the same contact
+             */
+            requirementId?: string | null;
+            /** @description The enquiry as received */
+            message?: string | null;
+            /**
+             * Format: uuid
+             * @description Defaults to you; someone else needs lead.assign (decision D6); null leaves it unassigned for the office inbox (managers)
+             */
+            assignedTo?: string | null;
+            /** Format: uuid */
+            officeId?: string | null;
+            /**
+             * Format: date-time
+             * @description When the enquiry arrived (default now)
+             */
+            receivedAt?: string;
+        };
+        ScoreRuleDto: {
+            rule: string;
+            points: number;
+        };
+        LeadStatusChangeDto: {
+            /** @enum {string|null} */
+            fromStatus: "new" | "contacted" | "qualified" | "unqualified" | "converted" | "lost" | null;
+            /** @enum {string} */
+            toStatus: "new" | "contacted" | "qualified" | "unqualified" | "converted" | "lost";
+            /** Format: date-time */
+            changedAt: string;
+            changedBy: components["schemas"]["RefLabelDto"] | null;
+            note: string | null;
+        };
+        LeadAssignmentDto: {
+            assignedTo: components["schemas"]["RefLabelDto"];
+            assignedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            assignedAt: string;
+            note: string | null;
+        };
+        LeadAccessDto: {
+            canEdit: boolean;
+            canAssign: boolean;
+            /** @description Reopen an unqualified or lost lead (managers, lead.assign) */
+            canReopen: boolean;
+            /** @description Statuses you may move this lead to now */
+            nextStatuses: ("contacted" | "qualified" | "unqualified" | "lost")[];
+        };
+        LeadDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            contact: components["schemas"]["LeadContactDto"];
+            /** @enum {string} */
+            leadType: "buy" | "rent" | "sell" | "let" | "valuation" | "management" | "other";
+            /** @enum {string} */
+            status: "new" | "contacted" | "qualified" | "unqualified" | "converted" | "lost";
+            sourceCode: string;
+            sourceDetail: string | null;
+            listing: components["schemas"]["LeadListingDto"] | null;
+            office: components["schemas"]["RefLabelDto"] | null;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** @description First line of the enquiry, at most 120 characters */
+            messagePreview: string | null;
+            /** Format: date-time */
+            receivedAt: string;
+            /** Format: date-time */
+            firstResponseAt: string | null;
+            /** Format: date-time */
+            nextActionAt: string | null;
+            /** @description null when the company has no response target */
+            response: components["schemas"]["LeadResponseDto"] | null;
+            /** @description Shown only with its breakdown; no scoring rules exist in Phase 5 (D7) */
+            score: number | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            campaign: string | null;
+            /** Format: uuid */
+            requirementId: string | null;
+            /** @description The enquiry as received */
+            message: string | null;
+            lostReasonCode: string | null;
+            archivedReason: string | null;
+            /** @description Rule → points; empty when there is no score (CRM-07) */
+            scoreBreakdown: components["schemas"]["ScoreRuleDto"][];
+            statusHistory: components["schemas"]["LeadStatusChangeDto"][];
+            assignments: components["schemas"]["LeadAssignmentDto"][];
+            access: components["schemas"]["LeadAccessDto"];
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+        };
+        UpdateLeadBody: {
+            /** @enum {string} */
+            leadType?: "buy" | "rent" | "sell" | "let" | "valuation" | "management" | "other";
+            sourceCode?: string;
+            sourceDetail?: string | null;
+            campaign?: string | null;
+            /** Format: uuid */
+            listingId?: string | null;
+            /** Format: uuid */
+            requirementId?: string | null;
+            /**
+             * Format: uuid
+             * @description Move the lead to another office within your scope
+             */
+            officeId?: string;
+        };
+        ChangeLeadStatusBody: {
+            /** @enum {string} */
+            status: "contacted" | "qualified" | "unqualified" | "lost";
+            /** @description Code from the lost_reason picklist; required for lost */
+            lostReasonCode?: string | null;
+            /** @description Required when marking unqualified or reopening */
+            note?: string | null;
+        };
+        AssignLeadBody: {
+            /** Format: uuid */
+            assignedTo: string;
+            note?: string | null;
+        };
+        ArchiveLeadBody: {
+            reason: string;
+        };
+        CrmSettingsDto: {
+            /** @description null: no response target set ("SLA not set") */
+            leadResponseMinutes: number | null;
+        };
+        CrmSettingsBody: {
+            /** @description Minutes to the first response to a new lead (decision D3); null = not set */
+            leadResponseMinutes: number | null;
+        };
+        ActivityLinkDto: {
+            /** @enum {string} */
+            entityType: "contact" | "lead" | "listing" | "property";
+            /** Format: uuid */
+            entityId: string;
+            /** @description Contact name, lead or listing reference */
+            label: string;
+        };
+        ActivityDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            activityType: "call" | "email" | "sms" | "whatsapp" | "meeting" | "note" | "viewing" | "offer" | "status_change" | "document" | "portal" | "system";
+            /** @enum {string|null} */
+            direction: "inbound" | "outbound" | "internal" | null;
+            subject: string | null;
+            body: string | null;
+            /** Format: date-time */
+            occurredAt: string;
+            durationSeconds: number | null;
+            outcomeCode: string | null;
+            performedBy: components["schemas"]["RefLabelDto"] | null;
+            /** @description Who logged it */
+            createdBy: components["schemas"]["RefLabelDto"] | null;
+            links: components["schemas"]["ActivityLinkDto"][];
+            /** @description Written by the system; never edited or archived */
+            isSystem: boolean;
+            /** Format: date-time */
+            editedAt: string | null;
+            /** Format: date-time */
+            editableUntil: string | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            archivedReason: string | null;
+            /** @description You wrote it and the edit window is open (D5) */
+            canEdit: boolean;
+            canArchive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+        };
+        ActivityPageDto: {
+            data: components["schemas"]["ActivityDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        ActivityLinkInput: {
+            /** @enum {string} */
+            entityType: "contact" | "lead" | "listing" | "property";
+            /** Format: uuid */
+            entityId: string;
+        };
+        LogActivityBody: {
+            subject?: string | null;
+            /** @description Do not record ID or bank numbers here */
+            body?: string | null;
+            durationSeconds?: number | null;
+            /** @description Code from the activity_outcome picklist */
+            outcomeCode?: string | null;
+            /** @enum {string} */
+            activityType: "call" | "email" | "sms" | "whatsapp" | "meeting" | "note";
+            /**
+             * @description Required for calls and messages; notes are internal
+             * @enum {string}
+             */
+            direction?: "inbound" | "outbound" | "internal";
+            /**
+             * Format: date-time
+             * @description When it happened (default now)
+             */
+            occurredAt?: string;
+            /**
+             * Format: uuid
+             * @description Who made the call or held the meeting (default you)
+             */
+            performedBy?: string;
+            /** @description At least one contact or lead; a lead also links its contact */
+            links: components["schemas"]["ActivityLinkInput"][];
+        };
+        ActivityRevisionDto: {
+            revisionNo: number;
+            subject: string | null;
+            body: string | null;
+            outcomeCode: string | null;
+            direction: string | null;
+            /** Format: date-time */
+            occurredAt: string;
+            durationSeconds: number | null;
+            editedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            editedAt: string;
+        };
+        ActivityDetailDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            activityType: "call" | "email" | "sms" | "whatsapp" | "meeting" | "note" | "viewing" | "offer" | "status_change" | "document" | "portal" | "system";
+            /** @enum {string|null} */
+            direction: "inbound" | "outbound" | "internal" | null;
+            subject: string | null;
+            body: string | null;
+            /** Format: date-time */
+            occurredAt: string;
+            durationSeconds: number | null;
+            outcomeCode: string | null;
+            performedBy: components["schemas"]["RefLabelDto"] | null;
+            /** @description Who logged it */
+            createdBy: components["schemas"]["RefLabelDto"] | null;
+            links: components["schemas"]["ActivityLinkDto"][];
+            /** @description Written by the system; never edited or archived */
+            isSystem: boolean;
+            /** Format: date-time */
+            editedAt: string | null;
+            /** Format: date-time */
+            editableUntil: string | null;
+            /** Format: date-time */
+            archivedAt: string | null;
+            archivedReason: string | null;
+            /** @description You wrote it and the edit window is open (D5) */
+            canEdit: boolean;
+            canArchive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+            /** @description Earlier versions, oldest first */
+            revisions: components["schemas"]["ActivityRevisionDto"][];
+        };
+        EditActivityBody: {
+            subject?: string | null;
+            /** @description Do not record ID or bank numbers here */
+            body?: string | null;
+            durationSeconds?: number | null;
+            /** @description Code from the activity_outcome picklist */
+            outcomeCode?: string | null;
+            /** @enum {string} */
+            direction?: "inbound" | "outbound" | "internal";
+            /** Format: date-time */
+            occurredAt?: string;
+        };
+        ArchiveActivityBody: {
+            reason: string;
+        };
+        TaskAboutDto: {
+            /** @enum {string} */
+            entityType: "contact" | "lead";
+            /** Format: uuid */
+            entityId: string;
+            /** @description Contact name, or lead reference and contact name */
+            label: string;
+        };
+        TaskDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description: string | null;
+            /** @enum {string} */
+            taskType: "follow_up" | "call" | "email" | "viewing_feedback" | "document_chase" | "renewal" | "arrears" | "inspection" | "other";
+            /** @enum {string} */
+            priority: "low" | "normal" | "high" | "urgent";
+            /** @enum {string} */
+            status: "open" | "done" | "cancelled";
+            /** Format: date-time */
+            dueAt: string | null;
+            /** Format: date-time */
+            remindAt: string | null;
+            /** @description Open and past its due time */
+            overdue: boolean;
+            /** @description Open and its reminder time has come (in-app reminder) */
+            reminderDue: boolean;
+            assignedTo: components["schemas"]["RefLabelDto"];
+            about: components["schemas"]["TaskAboutDto"] | null;
+            createdBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            completedAt: string | null;
+            completedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            cancelReason: string | null;
+            /** @description You may edit, reschedule, complete or cancel it */
+            canEdit: boolean;
+            /** @description You may give it to someone else (managers, D6) */
+            canReassign: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+        };
+        TaskPageDto: {
+            data: components["schemas"]["TaskDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        TaskAboutInput: {
+            /** @enum {string} */
+            entityType: "contact" | "lead";
+            /** Format: uuid */
+            entityId: string;
+        };
+        CreateTaskBody: {
+            /** @example Call back about East Legon options */
+            title: string;
+            description?: string | null;
+            /**
+             * @default follow_up
+             * @enum {string}
+             */
+            taskType: "follow_up" | "call" | "email" | "viewing_feedback" | "document_chase" | "other";
+            /**
+             * @default normal
+             * @enum {string}
+             */
+            priority: "low" | "normal" | "high" | "urgent";
+            /**
+             * Format: date-time
+             * @description Quick picks (later today, tomorrow) are computed by the client in the office timezone
+             */
+            dueAt: string;
+            /**
+             * Format: date-time
+             * @description In-app reminder time; not after dueAt
+             */
+            remindAt?: string | null;
+            /**
+             * Format: uuid
+             * @description Defaults to you; someone else is a manager action (lead.assign, decision D6)
+             */
+            assignedTo?: string;
+            /** @description The contact or lead it is about (one record, gap G4) */
+            about?: components["schemas"]["TaskAboutInput"] | null;
+        };
+        UpdateTaskBody: {
+            title?: string;
+            description?: string | null;
+            /** @enum {string} */
+            taskType?: "follow_up" | "call" | "email" | "viewing_feedback" | "document_chase" | "other";
+            /** @enum {string} */
+            priority?: "low" | "normal" | "high" | "urgent";
+            /**
+             * Format: date-time
+             * @description Reschedule
+             */
+            dueAt?: string;
+            /** Format: date-time */
+            remindAt?: string | null;
+        };
+        ReassignTaskBody: {
+            /** Format: uuid */
+            assignedTo: string;
+        };
+        CancelTaskBody: {
+            reason: string;
+        };
+        PreviewBasisDto: {
+            /** @enum {string} */
+            type: "ownership" | "management_agreement";
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: uuid
+             * @description null: the whole property
+             */
+            unitId: string | null;
+            /** @description Ownership share, e.g. "100.0000" */
+            sharePercent: string | null;
+            /** @description Ownership type or management service level */
+            kind: string | null;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            until: string | null;
+        };
+        PreviewUnitDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            label: string;
+        };
+        PreviewListingDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+            status: string;
+            isPublished: boolean;
+            /** Format: uuid */
+            unitId: string;
+        };
+        PreviewPropertyDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            name: string | null;
+            /** @description Access is judged in this time zone */
+            timezone: string;
+            basis: components["schemas"]["PreviewBasisDto"][];
+            units: components["schemas"]["PreviewUnitDto"][];
+            listings: components["schemas"]["PreviewListingDto"][];
+        };
+        PortalPreviewDto: {
+            contact: components["schemas"]["RefLabelDto"];
+            /** @enum {string} */
+            portal: "landlord";
+            /** @description The contact has an active landlord role */
+            hasLandlordRole: boolean;
+            /** Format: date-time */
+            generatedAt: string;
+            properties: components["schemas"]["PreviewPropertyDto"][];
+            /** @description What the landlord would not see (English) */
+            notVisible: string[];
+            /** @description The same list as codes, in the same order, for translated screens */
+            notVisibleCodes: ("other_owners" | "tenant_buyer_contacts" | "staff_records" | "protected_details")[];
+            /** @description Only properties you may view are listed here */
+            limitedToYourAccess: boolean;
+        };
+        DashboardScopeDto: {
+            /**
+             * Format: uuid
+             * @description Office filter, or null for everything in your scope
+             */
+            officeId: string | null;
+            /** @description IANA time zone used for "today" and "this week" */
+            timezone: string;
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        WaitingLeadDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            contactName: string;
+            sourceCode: string;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            receivedAt: string;
+            /** @description Past the response target (null when none is set) */
+            overdue: boolean | null;
+        };
+        WaitingLeadsDto: {
+            total: number;
+            /** @description Oldest first, at most 10 */
+            items: components["schemas"]["WaitingLeadDto"][];
+        };
+        FollowUpCountsDto: {
+            overdue: number;
+            /** @description Due later today */
+            today: number;
+            /** @description Due from now to the end of this week (Monday to Sunday) */
+            thisWeek: number;
+            /** @enum {string} */
+            view: "mine" | "team";
+        };
+        LeadStatusCountsDto: {
+            new: number;
+            contacted: number;
+            qualified: number;
+            unqualified: number;
+            lost: number;
+        };
+        AgentResponseRowDto: {
+            leads: number;
+            /** @description Median minutes to first response, of answered leads */
+            medianFirstResponseMinutes: number | null;
+            /** @description Leads answered within the target (null when none is set); base is `leads` */
+            withinTarget: number | null;
+            /** @description Percentage of `leads`, one decimal */
+            withinTargetPercent: number | null;
+            qualified: number;
+            assignee: components["schemas"]["RefLabelDto"];
+        };
+        SourceRowDto: {
+            leads: number;
+            /** @description Median minutes to first response, of answered leads */
+            medianFirstResponseMinutes: number | null;
+            /** @description Leads answered within the target (null when none is set); base is `leads` */
+            withinTarget: number | null;
+            /** @description Percentage of `leads`, one decimal */
+            withinTargetPercent: number | null;
+            qualified: number;
+            sourceCode: string;
+        };
+        RequirementCountsDto: {
+            buy: number;
+            rent: number;
+            /** @description Active requirements no published listing of the company matches, as of the last check (null without listing.view) */
+            noMatch: number | null;
+            /** @description Requirements added or changed since the last check (checked every 15 minutes) */
+            noMatchPending: number | null;
+            /**
+             * Format: date-time
+             * @description Oldest check in this count
+             */
+            noMatchCheckedAt: string | null;
+        };
+        CrmDashboardDto: {
+            scope: components["schemas"]["DashboardScopeDto"];
+            /** @description Company response target in minutes; null shows "SLA not set" */
+            responseTargetMinutes: number | null;
+            newNotContacted: components["schemas"]["WaitingLeadsDto"];
+            followUps: components["schemas"]["FollowUpCountsDto"];
+            /** @description Leads received in the period */
+            leadsByStatus: components["schemas"]["LeadStatusCountsDto"];
+            /** @description Per assignee; null for members who only see their own leads */
+            responseTimes: components["schemas"]["AgentResponseRowDto"][] | null;
+            leadsBySource: components["schemas"]["SourceRowDto"][];
+            /** @description null without contact.view */
+            requirements: components["schemas"]["RequirementCountsDto"] | null;
+        };
+        AttentionItemDto: {
+            /** @example unassigned_leads */
+            code: string;
+            count: number;
+            message: string;
+            /** @description API path of the list behind the number; null where that list is not built yet (invitations, imports, agent profiles) */
+            link: string | null;
+        };
+        UsersAccessDto: {
+            pendingInvitations: number;
+            expiredInvitations: number;
+            /** @description Not available: second factors are held by the identity provider (ADR-001) */
+            usersWithoutRequiredMfa: number | null;
+            /** @description Agent licences expiring within 60 days */
+            agentLicencesExpiring: number;
+        };
+        OfficeFlowRowDto: {
+            /** @description null: leads without an office */
+            office: components["schemas"]["RefLabelDto"] | null;
+            newLeads: number;
+            unassigned: number;
+            /** @description Not answered and past the target (null when none is set) */
+            noResponsePastTarget: number | null;
+        };
+        LeadFlowDto: {
+            days: number;
+            responseTargetMinutes: number | null;
+            offices: components["schemas"]["OfficeFlowRowDto"][];
+        };
+        DataQualityDto: {
+            /** @description Phone, email or identity numbers shared by more than one active contact */
+            possibleDuplicateGroups: number;
+            contactsWithoutOwner: number;
+            /** @description Identity documents expiring within 30 days */
+            identityDocumentsExpiring: number;
+            /** @description Verified checks due for renewal within 30 days */
+            identityChecksExpiring: number;
+        };
+        PrivacyDto: {
+            /** @description Open access and erasure requests (gap G3); null without privacy.view */
+            dataSubjectRequestsOpen: number | null;
+            /** @description Open requests past their due date; null without privacy.view */
+            dataSubjectRequestsOverdue: number | null;
+            /** @description Marketing consents withdrawn in the last 7 days */
+            marketingWithdrawals: number;
+            /** @description Protected details revealed in the last 7 days */
+            sensitiveReveals: number;
+            /** @description Contact and lead exports in the last 7 days */
+            exports: number;
+        };
+        ExportJobSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            exportType: string;
+            status: string;
+            rowCount: number | null;
+            requestedBy: components["schemas"]["RefLabelDto"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ImportsExportsDto: {
+            /** @description Latest 5 */
+            recentExports: components["schemas"]["ExportJobSummaryDto"][];
+            /** @description Imports that failed in the last 30 days */
+            failedImports: number;
+        };
+        UsageDto: {
+            used: number;
+            limit: number | null;
+        };
+        AccountDto: {
+            /** @description Active staff members of the subscription seats */
+            users: components["schemas"]["UsageDto"];
+            /** @description Bytes */
+            storage: components["schemas"]["UsageDto"];
+            supportAccessGrantsOpen: number;
+        };
+        AdminDashboardDto: {
+            scope: components["schemas"]["DashboardScopeDto"];
+            /** @description Most urgent first, at most 5 */
+            needsAttention: components["schemas"]["AttentionItemDto"][];
+            usersAndAccess: components["schemas"]["UsersAccessDto"];
+            leadFlow: components["schemas"]["LeadFlowDto"];
+            dataQuality: components["schemas"]["DataQualityDto"];
+            privacy: components["schemas"]["PrivacyDto"];
+            importsExports: components["schemas"]["ImportsExportsDto"];
+            account: components["schemas"]["AccountDto"];
+        };
+        DayItemDto: {
+            /** @enum {string} */
+            kind: "follow_up" | "new_lead";
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Due time, or when the lead arrived
+             */
+            at: string;
+            title: string;
+            /** @description Contact name, or lead reference and contact name */
+            about: string | null;
+            /** @enum {string|null} */
+            aboutType: "contact" | "lead" | null;
+            /** Format: uuid */
+            aboutId: string | null;
+            overdue: boolean;
+            /** @description Follow-ups: the version for If-Match (Done, Reschedule) */
+            version: number | null;
+        };
+        WaitingOnMeDto: {
+            newLeadsAssigned: number;
+            overdueFollowUps: number;
+            /** @description Past the response target without a reply (null when none is set) */
+            leadsPastTarget: number | null;
+        };
+        MyDayDto: {
+            timezone: string;
+            /** Format: date */
+            date: string;
+            /** @description Overdue first, then by time */
+            today: components["schemas"]["DayItemDto"][];
+            /** @description Follow-ups due later this week */
+            laterThisWeek: number;
+            waitingOnMe: components["schemas"]["WaitingOnMeDto"];
+            /** @description My open and closed leads (not archived) */
+            myLeadsByStatus: components["schemas"]["LeadStatusCountsDto"];
+        };
+        ContactExportBody: {
+            /** @example Quarterly landlord newsletter list for the Osu office */
+            purpose: string;
+            relationships?: ("buyer" | "seller" | "landlord" | "tenant" | "applicant" | "guarantor" | "supplier" | "developer" | "investor" | "other")[];
+            /** @enum {string} */
+            contactType?: "person" | "organisation";
+            /** Format: uuid */
+            officeId?: string;
+            /** @description Leave out contacts who withdrew marketing consent on every channel */
+            excludeMarketingWithdrawn?: boolean;
+        };
+        ExportJobDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description subject_access: an access report for a data-subject request (JSON)
+             * @enum {string}
+             */
+            exportType: "contacts" | "leads" | "subject_access";
+            /** @enum {string} */
+            format: "csv";
+            /** @enum {string} */
+            status: "completed" | "failed" | "expired";
+            rowCount: number | null;
+            fileName: string | null;
+            /** @description Filters and purpose, as requested */
+            parameters: {
+                [key: string]: unknown;
+            };
+            requestedBy: components["schemas"]["RefLabelDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string | null;
+            downloadCount: number;
+            /** @description Only the person who requested an export can download it, until it expires */
+            canDownload: boolean;
+        };
+        LeadExportBody: {
+            /** @example Quarterly landlord newsletter list for the Osu office */
+            purpose: string;
+            statuses?: ("new" | "contacted" | "qualified" | "unqualified" | "converted" | "lost")[];
+            leadTypes?: ("buy" | "rent" | "sell" | "let" | "valuation" | "management" | "other")[];
+            /** Format: uuid */
+            officeId?: string;
+            /**
+             * Format: date-time
+             * @description Received on or after
+             */
+            receivedFrom?: string;
+            /**
+             * Format: date-time
+             * @description Received before
+             */
+            receivedTo?: string;
+        };
+        ExportDownloadDto: {
+            /** @description Short-lived link to the file. Do not share it. */
+            url: string;
+            /** Format: date-time */
+            linkExpiresAt: string;
+        };
+        PrivacyRequestSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            requestType: "access" | "erasure";
+            /** @enum {string} */
+            status: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn";
+            /** @enum {string} */
+            channel: "email" | "phone" | "in_person" | "post" | "web_form" | "other";
+            contact: components["schemas"]["KycQueueContactDto"];
+            /** Format: date */
+            receivedOn: string;
+            /**
+             * Format: date
+             * @description The due date in force (extended if it was extended)
+             */
+            dueOn: string;
+            /** @description Open and past its due date */
+            overdue: boolean;
+            /** @description Days until the due date (negative when overdue); null once closed */
+            daysLeft: number | null;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** @description The requester's identity has been verified */
+            identityVerified: boolean;
+            /** Format: date-time */
+            closedAt: string | null;
+            version: number;
+        };
+        PrivacyRequestPageDto: {
+            data: components["schemas"]["PrivacyRequestSummaryDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        AssignableMemberDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        AccessReportDto: {
+            /**
+             * Format: uuid
+             * @description Export id: download with POST /api/v1/exports/{id}/download (the member who generated it, within 24 hours)
+             */
+            exportId: string;
+            /** @enum {string} */
+            status: "completed" | "expired";
+            /** Format: date-time */
+            expiresAt: string | null;
+            canDownload: boolean;
+        };
+        PrivacyRequestEvidenceDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "request" | "identity" | "correspondence" | "response" | "other";
+            summary: string;
+            /** Format: date */
+            receivedOn: string;
+            recordedBy: components["schemas"]["RefLabelDto"];
+            /** Format: date-time */
+            recordedAt: string;
+        };
+        PrivacyRequestEventDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            eventType: "created" | "status_changed" | "assigned" | "identity_verified" | "due_extended" | "evidence_added" | "access_report_generated" | "erasure_carried_out" | "erasure_blocked";
+            /** @enum {string|null} */
+            fromStatus: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn" | null;
+            /** @enum {string|null} */
+            toStatus: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn" | null;
+            /** @description Codes and ids only (assignee, method, new due date, counts, blocker codes) */
+            detail: {
+                [key: string]: unknown;
+            };
+            actor: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            occurredAt: string;
+        };
+        PrivacyRequestDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            requestType: "access" | "erasure";
+            /** @enum {string} */
+            status: "received" | "verifying" | "in_progress" | "completed" | "refused" | "withdrawn";
+            /** @enum {string} */
+            channel: "email" | "phone" | "in_person" | "post" | "web_form" | "other";
+            contact: components["schemas"]["KycQueueContactDto"];
+            /** Format: date */
+            receivedOn: string;
+            /**
+             * Format: date
+             * @description The due date in force (extended if it was extended)
+             */
+            dueOn: string;
+            /** @description Open and past its due date */
+            overdue: boolean;
+            /** @description Days until the due date (negative when overdue); null once closed */
+            daysLeft: number | null;
+            assignedTo: components["schemas"]["RefLabelDto"] | null;
+            /** @description The requester's identity has been verified */
+            identityVerified: boolean;
+            /** Format: date-time */
+            closedAt: string | null;
+            version: number;
+            /**
+             * Format: date
+             * @description The original due date
+             */
+            originalDueOn: string;
+            extensionReason: string | null;
+            /** Format: date-time */
+            identityVerifiedAt: string | null;
+            identityVerifiedBy: components["schemas"]["RefLabelDto"] | null;
+            /** @enum {string|null} */
+            identityMethod: "documents_seen" | "known_contact_details" | "email_confirmation" | "other" | null;
+            outcomeNote: string | null;
+            closedBy: components["schemas"]["RefLabelDto"] | null;
+            createdBy: components["schemas"]["RefLabelDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: uuid
+             * @description Erasure ledger entry, once carried out
+             */
+            erasureLedgerEntryId: string | null;
+            accessReport: components["schemas"]["AccessReportDto"] | null;
+            /** @description For an open erasure request: why the person cannot be erased now (codes) */
+            erasureBlockers: string[];
+            evidence: components["schemas"]["PrivacyRequestEvidenceDto"][];
+            history: components["schemas"]["PrivacyRequestEventDto"][];
+            /** @description Statuses this member can move the request to now */
+            nextStatuses: ("verifying" | "in_progress" | "completed" | "refused" | "withdrawn")[];
+            canManage: boolean;
+            /** @description Can carry out the erasure or generate the access report now */
+            canFulfil: boolean;
+        };
+        CreatePrivacyRequestBody: {
+            /**
+             * Format: uuid
+             * @description The person the request is about
+             */
+            contactId: string;
+            /** @enum {string} */
+            requestType: "access" | "erasure";
+            /** @enum {string} */
+            channel: "email" | "phone" | "in_person" | "post" | "web_form" | "other";
+            /**
+             * Format: date
+             * @description When the request reached the company (not in the future); the due date counts from it
+             */
+            receivedOn: string;
+            /**
+             * Format: uuid
+             * @description Member who handles it (must be allowed to manage requests)
+             */
+            assignedTo?: string | null;
+            /** @description Summary of the request as received, recorded as the first evidence entry. Do not copy ID or bank numbers. */
+            summary?: string | null;
+        };
+        AssignPrivacyRequestBody: {
+            /** Format: uuid */
+            assignedTo: string | null;
+        };
+        VerifyIdentityBody: {
+            /** @enum {string} */
+            method: "documents_seen" | "known_contact_details" | "email_confirmation" | "other";
+            /** @description What was seen or confirmed (recorded as identity evidence). No document numbers. */
+            note?: string | null;
+        };
+        ChangePrivacyRequestStatusBody: {
+            /** @enum {string} */
+            status: "verifying" | "in_progress" | "completed" | "refused" | "withdrawn";
+            /** @description Required when refusing or recording a withdrawal */
+            note?: string | null;
+        };
+        ExtendPrivacyRequestBody: {
+            /**
+             * Format: date
+             * @description New due date: after the current one, at most 60 days after it
+             */
+            extendedDueOn: string;
+            /** @description Why more time is needed (told to the requester) */
+            reason: string;
+        };
+        AddEvidenceBody: {
+            /** @enum {string} */
+            kind: "request" | "identity" | "correspondence" | "response" | "other";
+            /** @description What was received or sent. Do not copy ID or bank numbers. */
+            summary: string;
+            /** Format: date */
+            receivedOn: string;
+        };
+        CarryOutErasureBody: {
+            /**
+             * @description Type ERASE to confirm; erasure cannot be undone
+             * @example ERASE
+             */
+            confirm: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2824,6 +5862,13 @@ export type UnitDto = components['schemas']['UnitDto'];
 export type UnitPageDto = components['schemas']['UnitPageDto'];
 export type FloorAreaInput = components['schemas']['FloorAreaInput'];
 export type CreateUnitBody = components['schemas']['CreateUnitBody'];
+export type OwnershipUnitDto = components['schemas']['OwnershipUnitDto'];
+export type OwnershipOwnerDto = components['schemas']['OwnershipOwnerDto'];
+export type RefLabelDto = components['schemas']['RefLabelDto'];
+export type OwnershipDto = components['schemas']['OwnershipDto'];
+export type OwnershipListDto = components['schemas']['OwnershipListDto'];
+export type AddOwnershipBody = components['schemas']['AddOwnershipBody'];
+export type EndOwnershipBody = components['schemas']['EndOwnershipBody'];
 export type UpdateUnitBody = components['schemas']['UpdateUnitBody'];
 export type UnitAvailabilityBody = components['schemas']['UnitAvailabilityBody'];
 export type GeocodeSuggestionDto = components['schemas']['GeocodeSuggestionDto'];
@@ -2919,6 +5964,144 @@ export type KeysPanelDto = components['schemas']['KeysPanelDto'];
 export type LocationsPanelDto = components['schemas']['LocationsPanelDto'];
 export type RejectedMediaDto = components['schemas']['RejectedMediaDto'];
 export type MediaPanelDto = components['schemas']['MediaPanelDto'];
+export type IdentityCheckSummaryDto = components['schemas']['IdentityCheckSummaryDto'];
+export type NextFollowUpDto = components['schemas']['NextFollowUpDto'];
+export type ListingRefDto = components['schemas']['ListingRefDto'];
+export type ListingSummaryDto = components['schemas']['ListingSummaryDto'];
+export type LeadRefDto = components['schemas']['LeadRefDto'];
+export type ContactSummaryDto = components['schemas']['ContactSummaryDto'];
+export type ContactPageDto = components['schemas']['ContactPageDto'];
+export type ConsentInput = components['schemas']['ConsentInput'];
+export type CreateContactBody = components['schemas']['CreateContactBody'];
+export type RelationshipDto = components['schemas']['RelationshipDto'];
+export type MethodDto = components['schemas']['MethodDto'];
+export type ConsentDto = components['schemas']['ConsentDto'];
+export type ProtectedValueDto = components['schemas']['ProtectedValueDto'];
+export type ContactProtectedDto = components['schemas']['ContactProtectedDto'];
+export type ContactAccessDto = components['schemas']['ContactAccessDto'];
+export type ContactDto = components['schemas']['ContactDto'];
+export type DuplicateCheckBody = components['schemas']['DuplicateCheckBody'];
+export type DuplicateCandidateDto = components['schemas']['DuplicateCandidateDto'];
+export type DuplicateCheckResultDto = components['schemas']['DuplicateCheckResultDto'];
+export type UpdateContactBody = components['schemas']['UpdateContactBody'];
+export type ArchiveContactBody = components['schemas']['ArchiveContactBody'];
+export type AddMethodBody = components['schemas']['AddMethodBody'];
+export type UpdateMethodBody = components['schemas']['UpdateMethodBody'];
+export type AddRelationshipBody = components['schemas']['AddRelationshipBody'];
+export type EndRelationshipBody = components['schemas']['EndRelationshipBody'];
+export type ConsentHistoryDto = components['schemas']['ConsentHistoryDto'];
+export type MergeSideDto = components['schemas']['MergeSideDto'];
+export type MergeBlockerDto = components['schemas']['MergeBlockerDto'];
+export type MergePreviewDto = components['schemas']['MergePreviewDto'];
+export type MergeBody = components['schemas']['MergeBody'];
+export type MergeResultDto = components['schemas']['MergeResultDto'];
+export type RevealBody = components['schemas']['RevealBody'];
+export type RevealedValueDto = components['schemas']['RevealedValueDto'];
+export type RequirementAreaDto = components['schemas']['RequirementAreaDto'];
+export type RequirementDto = components['schemas']['RequirementDto'];
+export type RequirementPageDto = components['schemas']['RequirementPageDto'];
+export type RequirementAreaInput = components['schemas']['RequirementAreaInput'];
+export type CreateRequirementBody = components['schemas']['CreateRequirementBody'];
+export type UpdateRequirementBody = components['schemas']['UpdateRequirementBody'];
+export type MatchBreakdownDto = components['schemas']['MatchBreakdownDto'];
+export type RequirementMatchDto = components['schemas']['RequirementMatchDto'];
+export type RequirementMatchesDto = components['schemas']['RequirementMatchesDto'];
+export type RequirementExclusionDto = components['schemas']['RequirementExclusionDto'];
+export type ExcludeListingBody = components['schemas']['ExcludeListingBody'];
+export type VerificationDto = components['schemas']['VerificationDto'];
+export type IdentityDocumentDto = components['schemas']['IdentityDocumentDto'];
+export type CreateIdentityDocumentBody = components['schemas']['CreateIdentityDocumentBody'];
+export type UpdateIdentityDocumentBody = components['schemas']['UpdateIdentityDocumentBody'];
+export type ArchiveIdentityDocumentBody = components['schemas']['ArchiveIdentityDocumentBody'];
+export type KycDocumentRefDto = components['schemas']['KycDocumentRefDto'];
+export type KycCheckDto = components['schemas']['KycCheckDto'];
+export type CreateKycCheckBody = components['schemas']['CreateKycCheckBody'];
+export type UpdateKycCheckBody = components['schemas']['UpdateKycCheckBody'];
+export type ApproveKycCheckBody = components['schemas']['ApproveKycCheckBody'];
+export type RejectKycCheckBody = components['schemas']['RejectKycCheckBody'];
+export type KycQueueContactDto = components['schemas']['KycQueueContactDto'];
+export type KycQueueItemDto = components['schemas']['KycQueueItemDto'];
+export type KycQueuePageDto = components['schemas']['KycQueuePageDto'];
+export type LeadContactDto = components['schemas']['LeadContactDto'];
+export type LeadListingDto = components['schemas']['LeadListingDto'];
+export type LeadResponseDto = components['schemas']['LeadResponseDto'];
+export type LeadSummaryDto = components['schemas']['LeadSummaryDto'];
+export type LeadPageDto = components['schemas']['LeadPageDto'];
+export type CreateLeadBody = components['schemas']['CreateLeadBody'];
+export type ScoreRuleDto = components['schemas']['ScoreRuleDto'];
+export type LeadStatusChangeDto = components['schemas']['LeadStatusChangeDto'];
+export type LeadAssignmentDto = components['schemas']['LeadAssignmentDto'];
+export type LeadAccessDto = components['schemas']['LeadAccessDto'];
+export type LeadDto = components['schemas']['LeadDto'];
+export type UpdateLeadBody = components['schemas']['UpdateLeadBody'];
+export type ChangeLeadStatusBody = components['schemas']['ChangeLeadStatusBody'];
+export type AssignLeadBody = components['schemas']['AssignLeadBody'];
+export type ArchiveLeadBody = components['schemas']['ArchiveLeadBody'];
+export type CrmSettingsDto = components['schemas']['CrmSettingsDto'];
+export type CrmSettingsBody = components['schemas']['CrmSettingsBody'];
+export type ActivityLinkDto = components['schemas']['ActivityLinkDto'];
+export type ActivityDto = components['schemas']['ActivityDto'];
+export type ActivityPageDto = components['schemas']['ActivityPageDto'];
+export type ActivityLinkInput = components['schemas']['ActivityLinkInput'];
+export type LogActivityBody = components['schemas']['LogActivityBody'];
+export type ActivityRevisionDto = components['schemas']['ActivityRevisionDto'];
+export type ActivityDetailDto = components['schemas']['ActivityDetailDto'];
+export type EditActivityBody = components['schemas']['EditActivityBody'];
+export type ArchiveActivityBody = components['schemas']['ArchiveActivityBody'];
+export type TaskAboutDto = components['schemas']['TaskAboutDto'];
+export type TaskDto = components['schemas']['TaskDto'];
+export type TaskPageDto = components['schemas']['TaskPageDto'];
+export type TaskAboutInput = components['schemas']['TaskAboutInput'];
+export type CreateTaskBody = components['schemas']['CreateTaskBody'];
+export type UpdateTaskBody = components['schemas']['UpdateTaskBody'];
+export type ReassignTaskBody = components['schemas']['ReassignTaskBody'];
+export type CancelTaskBody = components['schemas']['CancelTaskBody'];
+export type PreviewBasisDto = components['schemas']['PreviewBasisDto'];
+export type PreviewUnitDto = components['schemas']['PreviewUnitDto'];
+export type PreviewListingDto = components['schemas']['PreviewListingDto'];
+export type PreviewPropertyDto = components['schemas']['PreviewPropertyDto'];
+export type PortalPreviewDto = components['schemas']['PortalPreviewDto'];
+export type DashboardScopeDto = components['schemas']['DashboardScopeDto'];
+export type WaitingLeadDto = components['schemas']['WaitingLeadDto'];
+export type WaitingLeadsDto = components['schemas']['WaitingLeadsDto'];
+export type FollowUpCountsDto = components['schemas']['FollowUpCountsDto'];
+export type LeadStatusCountsDto = components['schemas']['LeadStatusCountsDto'];
+export type AgentResponseRowDto = components['schemas']['AgentResponseRowDto'];
+export type SourceRowDto = components['schemas']['SourceRowDto'];
+export type RequirementCountsDto = components['schemas']['RequirementCountsDto'];
+export type CrmDashboardDto = components['schemas']['CrmDashboardDto'];
+export type AttentionItemDto = components['schemas']['AttentionItemDto'];
+export type UsersAccessDto = components['schemas']['UsersAccessDto'];
+export type OfficeFlowRowDto = components['schemas']['OfficeFlowRowDto'];
+export type LeadFlowDto = components['schemas']['LeadFlowDto'];
+export type DataQualityDto = components['schemas']['DataQualityDto'];
+export type PrivacyDto = components['schemas']['PrivacyDto'];
+export type ExportJobSummaryDto = components['schemas']['ExportJobSummaryDto'];
+export type ImportsExportsDto = components['schemas']['ImportsExportsDto'];
+export type UsageDto = components['schemas']['UsageDto'];
+export type AccountDto = components['schemas']['AccountDto'];
+export type AdminDashboardDto = components['schemas']['AdminDashboardDto'];
+export type DayItemDto = components['schemas']['DayItemDto'];
+export type WaitingOnMeDto = components['schemas']['WaitingOnMeDto'];
+export type MyDayDto = components['schemas']['MyDayDto'];
+export type ContactExportBody = components['schemas']['ContactExportBody'];
+export type ExportJobDto = components['schemas']['ExportJobDto'];
+export type LeadExportBody = components['schemas']['LeadExportBody'];
+export type ExportDownloadDto = components['schemas']['ExportDownloadDto'];
+export type PrivacyRequestSummaryDto = components['schemas']['PrivacyRequestSummaryDto'];
+export type PrivacyRequestPageDto = components['schemas']['PrivacyRequestPageDto'];
+export type AssignableMemberDto = components['schemas']['AssignableMemberDto'];
+export type AccessReportDto = components['schemas']['AccessReportDto'];
+export type PrivacyRequestEvidenceDto = components['schemas']['PrivacyRequestEvidenceDto'];
+export type PrivacyRequestEventDto = components['schemas']['PrivacyRequestEventDto'];
+export type PrivacyRequestDto = components['schemas']['PrivacyRequestDto'];
+export type CreatePrivacyRequestBody = components['schemas']['CreatePrivacyRequestBody'];
+export type AssignPrivacyRequestBody = components['schemas']['AssignPrivacyRequestBody'];
+export type VerifyIdentityBody = components['schemas']['VerifyIdentityBody'];
+export type ChangePrivacyRequestStatusBody = components['schemas']['ChangePrivacyRequestStatusBody'];
+export type ExtendPrivacyRequestBody = components['schemas']['ExtendPrivacyRequestBody'];
+export type AddEvidenceBody = components['schemas']['AddEvidenceBody'];
+export type CarryOutErasureBody = components['schemas']['CarryOutErasureBody'];
 export type $defs = Record<string, never>;
 export interface operations {
     Health_health: {
@@ -3430,6 +6613,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnitDto"];
+                };
+            };
+        };
+    };
+    Properties_listOwnerships: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                propertyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipListDto"];
+                };
+            };
+        };
+    };
+    Properties_addOwnership: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                propertyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddOwnershipBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipDto"];
+                };
+            };
+        };
+    };
+    Properties_endOwnership: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                ownershipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndOwnershipBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipDto"];
                 };
             };
         };
@@ -5347,6 +8608,2144 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MediaPanelDto"];
+                };
+            };
+        };
+    };
+    Contacts_list: {
+        parameters: {
+            query?: {
+                "filter[archived]"?: "false" | "true" | "all";
+                "filter[sourceCode]"?: unknown;
+                "filter[ownerMembershipId]"?: unknown;
+                "filter[officeId]"?: unknown;
+                /** @description person, organisation */
+                "filter[contactType]"?: unknown;
+                /** @description Comma-separated: buyer, seller, landlord, tenant, applicant, guarantor, supplier, developer, investor, other */
+                "filter[relationship]"?: unknown;
+                /** @description Name (any script), reference, email or phone number in any format */
+                q?: unknown;
+                sort?: "displayName" | "-displayName" | "createdAt" | "-createdAt" | "updatedAt" | "-updatedAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactPageDto"];
+                };
+            };
+        };
+    };
+    Contacts_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_duplicateCheck: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DuplicateCheckBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DuplicateCheckResultDto"];
+                };
+            };
+        };
+    };
+    Contacts_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContactBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_archive: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArchiveContactBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_restore: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_addMethod: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMethodBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_removeMethod: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                methodId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_updateMethod: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                methodId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMethodBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_addRelationship: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddRelationshipBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_endRelationship: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                relationshipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndRelationshipBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDto"];
+                };
+            };
+        };
+    };
+    Contacts_consents: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentHistoryDto"];
+                };
+            };
+        };
+    };
+    Contacts_recordConsent: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentHistoryDto"];
+                };
+            };
+        };
+    };
+    Contacts_mergePreview: {
+        parameters: {
+            query: {
+                /** @description The contact that would be merged into this one */
+                mergeContactId: string;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergePreviewDto"];
+                };
+            };
+        };
+    };
+    Contacts_merge: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                /** @description Version of the contact to keep */
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeResultDto"];
+                };
+            };
+        };
+    };
+    ContactSensitive_revealField: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                field: "dateOfBirth" | "taxNumber" | "organisationRegNumber";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevealBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevealedValueDto"];
+                };
+            };
+        };
+    };
+    ContactSensitive_revealDocumentNumber: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevealBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevealedValueDto"];
+                };
+            };
+        };
+    };
+    RequirementsRegister_register: {
+        parameters: {
+            query?: {
+                /** @description Requirements naming one of these areas */
+                "filter[locality]"?: unknown;
+                "filter[moveBy][lte]"?: unknown;
+                "filter[moveBy][gte]"?: unknown;
+                "filter[budget][lte]"?: unknown;
+                /** @description Budget overlaps this range */
+                "filter[budget][gte]"?: unknown;
+                "filter[contactId]"?: unknown;
+                "filter[financingStatus]"?: unknown;
+                "filter[currencyCode]"?: unknown;
+                /** @description Default active. active, paused, fulfilled, cancelled */
+                "filter[status]"?: unknown;
+                /** @description buy, rent */
+                "filter[requirementType]"?: unknown;
+                sort?: "updatedAt" | "-updatedAt" | "createdAt" | "-createdAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementPageDto"];
+                };
+            };
+        };
+    };
+    ContactRequirements_list: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDto"][];
+                };
+            };
+        };
+    };
+    ContactRequirements_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRequirementBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDto"];
+                };
+            };
+        };
+    };
+    ContactRequirements_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                requirementId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDto"];
+                };
+            };
+        };
+    };
+    ContactRequirements_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+                requirementId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRequirementBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDto"];
+                };
+            };
+        };
+    };
+    ContactRequirements_matches: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                requirementId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementMatchesDto"];
+                };
+            };
+        };
+    };
+    ContactRequirements_exclusions: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                requirementId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementExclusionDto"][];
+                };
+            };
+        };
+    };
+    ContactRequirements_exclude: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                requirementId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExcludeListingBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementExclusionDto"][];
+                };
+            };
+        };
+    };
+    ContactRequirements_restore: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                requirementId: string;
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementExclusionDto"][];
+                };
+            };
+        };
+    };
+    Kyc_listDocuments: {
+        parameters: {
+            query?: {
+                includeArchived?: "true" | "false";
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityDocumentDto"][];
+                };
+            };
+        };
+    };
+    Kyc_addDocument: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateIdentityDocumentBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityDocumentDto"];
+                };
+            };
+        };
+    };
+    Kyc_updateDocument: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateIdentityDocumentBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityDocumentDto"];
+                };
+            };
+        };
+    };
+    Kyc_archiveDocument: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArchiveIdentityDocumentBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityDocumentDto"];
+                };
+            };
+        };
+    };
+    Kyc_listChecks: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycCheckDto"][];
+                };
+            };
+        };
+    };
+    Kyc_recordCheck: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateKycCheckBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycCheckDto"];
+                };
+            };
+        };
+    };
+    Kyc_updateCheck: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+                checkId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateKycCheckBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycCheckDto"];
+                };
+            };
+        };
+    };
+    Kyc_approve: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+                checkId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveKycCheckBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycCheckDto"];
+                };
+            };
+        };
+    };
+    Kyc_reject: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                contactId: string;
+                checkId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectKycCheckBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycCheckDto"];
+                };
+            };
+        };
+    };
+    KycQueue_queue: {
+        parameters: {
+            query?: {
+                /** @description true: verified checks due for renewal within 30 days */
+                "filter[expiring]"?: unknown;
+                /** @description identity, address, source_of_funds, sanctions_pep, company_ownership */
+                "filter[checkType]"?: unknown;
+                /** @description Default pending,in_review. pending, in_review, verified, failed, expired */
+                "filter[status]"?: unknown;
+                sort?: "createdAt" | "-createdAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KycQueuePageDto"];
+                };
+            };
+        };
+    };
+    Leads_list: {
+        parameters: {
+            query?: {
+                "filter[archived]"?: "false" | "true" | "all";
+                /** @description response_overdue (needs a response target), no_next_action */
+                "filter[attention]"?: unknown;
+                "filter[receivedAt][lte]"?: unknown;
+                "filter[receivedAt][gte]"?: unknown;
+                /** @description Member ids, "me" or "unassigned" (needs lead.assign) */
+                "filter[assignedTo]"?: unknown;
+                "filter[listingId]"?: unknown;
+                "filter[contactId]"?: unknown;
+                "filter[officeId]"?: unknown;
+                "filter[sourceCode]"?: unknown;
+                "filter[leadType]"?: unknown;
+                "filter[status]"?: unknown;
+                /** @description Lead reference or contact name */
+                q?: unknown;
+                sort?: "receivedAt" | "-receivedAt" | "updatedAt" | "-updatedAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadPageDto"];
+                };
+            };
+        };
+    };
+    Leads_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLeadBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLeadBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_changeStatus: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeLeadStatusBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_assign: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignLeadBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_archive: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArchiveLeadBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_restore: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadDto"];
+                };
+            };
+        };
+    };
+    Leads_getSettings: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmSettingsDto"];
+                };
+            };
+        };
+    };
+    Leads_saveSettings: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrmSettingsBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmSettingsDto"];
+                };
+            };
+        };
+    };
+    Activities_contactTimeline: {
+        parameters: {
+            query?: {
+                "filter[archived]"?: "false" | "all";
+                /** @description call, email, sms, whatsapp, meeting, note, viewing, offer, status_change, document, portal, system */
+                "filter[activityType]"?: unknown;
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityPageDto"];
+                };
+            };
+        };
+    };
+    Activities_leadTimeline: {
+        parameters: {
+            query?: {
+                "filter[archived]"?: "false" | "all";
+                "filter[activityType]"?: unknown;
+                cursor?: unknown;
+                limit?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityPageDto"];
+                };
+            };
+        };
+    };
+    Activities_log: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogActivityBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityDetailDto"];
+                };
+            };
+        };
+    };
+    Activities_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                activityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityDetailDto"];
+                };
+            };
+        };
+    };
+    Activities_edit: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                activityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditActivityBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityDetailDto"];
+                };
+            };
+        };
+    };
+    Activities_archive: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                activityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArchiveActivityBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityDetailDto"];
+                };
+            };
+        };
+    };
+    Tasks_list: {
+        parameters: {
+            query?: {
+                "filter[entityId]"?: unknown;
+                "filter[entityType]"?: "contact" | "lead";
+                /** @description Team view only */
+                "filter[assignedTo]"?: unknown;
+                "filter[priority]"?: unknown;
+                "filter[dueAt][lte]"?: unknown;
+                /** @description Today / this week boundaries, computed by the client in the office timezone */
+                "filter[dueAt][gte]"?: unknown;
+                /** @description In-app reminders that are due */
+                "filter[reminderDue]"?: "true" | "false";
+                "filter[overdue]"?: "true" | "false";
+                /** @description Default open */
+                "filter[status]"?: unknown;
+                "filter[view]"?: "mine" | "team";
+                sort?: "dueAt" | "-dueAt";
+                cursor?: unknown;
+                limit?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskPageDto"];
+                };
+            };
+        };
+    };
+    Tasks_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaskBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDto"];
+                };
+            };
+        };
+    };
+    Tasks_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDto"];
+                };
+            };
+        };
+    };
+    Tasks_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTaskBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDto"];
+                };
+            };
+        };
+    };
+    Tasks_reassign: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignTaskBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDto"];
+                };
+            };
+        };
+    };
+    Tasks_complete: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDto"];
+                };
+            };
+        };
+    };
+    Tasks_cancel: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelTaskBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDto"];
+                };
+            };
+        };
+    };
+    PortalPreview_landlord: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalPreviewDto"];
+                };
+            };
+        };
+    };
+    Dashboards_crm: {
+        parameters: {
+            query?: {
+                /** @description IANA time zone for today and this week (default: your office) */
+                timezone?: unknown;
+                days?: number;
+                officeId?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmDashboardDto"];
+                };
+            };
+        };
+    };
+    Dashboards_admin: {
+        parameters: {
+            query?: {
+                officeId?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDashboardDto"];
+                };
+            };
+        };
+    };
+    Dashboards_myDay: {
+        parameters: {
+            query?: {
+                timezone?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyDayDto"];
+                };
+            };
+        };
+    };
+    Exports_contacts: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactExportBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobDto"];
+                };
+            };
+        };
+    };
+    Exports_leads: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadExportBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobDto"];
+                };
+            };
+        };
+    };
+    Exports_list: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobDto"][];
+                };
+            };
+        };
+    };
+    Exports_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                exportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobDto"];
+                };
+            };
+        };
+    };
+    Exports_download: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                exportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportDownloadDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_list: {
+        parameters: {
+            query?: {
+                "filter[assignedTo]"?: "me" | "none";
+                "filter[contactId]"?: string;
+                /** @description received, verifying, in_progress, completed, refused, withdrawn */
+                "filter[status]"?: unknown;
+                /** @description access, erasure */
+                "filter[requestType]"?: unknown;
+                "filter[view]"?: "open" | "overdue" | "closed" | "all";
+                sort?: "dueOn" | "-dueOn" | "createdAt" | "-createdAt";
+                cursor?: unknown;
+                limit?: number;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestPageDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrivacyRequestBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_assignable: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignableMemberDto"][];
+                };
+            };
+        };
+    };
+    PrivacyRequests_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_assign: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignPrivacyRequestBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_verifyIdentity: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyIdentityBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_changeStatus: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePrivacyRequestStatusBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_extend: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExtendPrivacyRequestBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_addEvidence: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddEvidenceBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_accessReport: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    PrivacyRequests_erase: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CarryOutErasureBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyRequestDto"];
                 };
             };
         };

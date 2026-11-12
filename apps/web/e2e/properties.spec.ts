@@ -146,6 +146,8 @@ test.describe('Properties (P-1 to P-7)', () => {
     await pickRadio(page, 'Company');
     await expect(page.getByRole('rowheader', { name: /Shop with flat/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Edit Shop with flat' })).toBeVisible();
+    // The filter changes the URL; the page title is streamed back after the navigation (WCAG 2.4.2).
+    await expect(page).toHaveTitle(/Property types/);
     await expectAccessible(page);
   });
 });

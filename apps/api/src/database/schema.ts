@@ -29,17 +29,29 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Activities {
   activityType: string;
+  archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   body: string | null;
   companyId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   direction: string | null;
   durationSeconds: number | null;
+  editedAt: Timestamp | null;
+  /**
+   * Insertion order; breaks ties between entries at the same time so timelines never reorder (gap G6, #15).
+   */
+  entryNo: Generated<Int8>;
   externalMessageId: string | null;
   id: Generated<string>;
+  isSystem: Generated<boolean | null>;
   occurredAt: Generated<Timestamp>;
   outcomeCode: string | null;
   performedBy: string | null;
   subject: string | null;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
 }
 
 export interface ActivityLinks {
@@ -47,6 +59,21 @@ export interface ActivityLinks {
   companyId: string;
   entityId: string;
   entityType: string;
+}
+
+export interface ActivityRevisions {
+  activityId: string;
+  body: string | null;
+  companyId: string;
+  direction: string | null;
+  durationSeconds: number | null;
+  editedAt: Generated<Timestamp>;
+  editedBy: string | null;
+  id: Generated<string>;
+  occurredAt: Timestamp;
+  outcomeCode: string | null;
+  revisionNo: number;
+  subject: string | null;
 }
 
 export interface Addresses {
@@ -65,8 +92,10 @@ export interface Addresses {
   geocodeSource: string | null;
   id: Generated<string>;
   latitude: Numeric | null;
+  latitudeF: Generated<number | null>;
   localComponents: Generated<Json>;
   locality: string | null;
+  localityKey: Generated<string | null>;
   /**
    * Calculated from latitude/longitude (ADR-006 L-D1). Never written by the application.
    */
@@ -76,6 +105,7 @@ export interface Addresses {
    */
   locationStale: Generated<boolean>;
   longitude: Numeric | null;
+  longitudeF: Generated<number | null>;
   postalCode: string | null;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
@@ -317,6 +347,18 @@ export interface Companies {
   version: Generated<number>;
 }
 
+export interface CompanyDataKeys {
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  destroyedAt: Timestamp | null;
+  kmsKeyRef: string;
+  purpose: string;
+  retiredAt: Timestamp | null;
+  status: Generated<string>;
+  version: number;
+  wrappedKey: Buffer | null;
+}
+
 export interface CompanyHolidays {
   companyId: string;
   createdAt: Generated<Timestamp>;
@@ -408,6 +450,13 @@ export interface ContactPaymentAccounts {
   verifiedBy: string | null;
 }
 
+export interface ContactReferenceColumns {
+  columnName: string;
+  handling: string;
+  reason: string;
+  tableName: string;
+}
+
 export interface ContactRelationships {
   companyId: string;
   contactId: string;
@@ -422,11 +471,16 @@ export interface ContactRelationships {
 export interface Contacts {
   addressId: string | null;
   archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   companyId: string;
   contactType: string;
   createdAt: Generated<Timestamp>;
   createdBy: string | null;
   customFields: Generated<Json>;
+  /**
+   * C3, ADR-007: AES-256-GCM with the company field key. Never hashed (low entropy).
+   */
   dateOfBirthEncrypted: Buffer | null;
   displayName: string;
   displayNameLocal: string | null;
@@ -440,6 +494,10 @@ export interface Contacts {
   officeId: string | null;
   organisationName: string | null;
   organisationRegNumber: string | null;
+  /**
+   * C3, ADR-007: registration number of a person (e.g. sole trader). Organisations use organisation_reg_number.
+   */
+  organisationRegNumberEncrypted: Buffer | null;
   otherNames: string | null;
   ownerMembershipId: string | null;
   preferredChannel: string | null;
@@ -451,6 +509,12 @@ export interface Contacts {
   searchVector: Generated<string | null>;
   sourceCode: string | null;
   taxNumber: string | null;
+  /**
+   * C3, ADR-007: tax number of a person. Organisations use tax_number.
+   */
+  taxNumberEncrypted: Buffer | null;
+  taxNumberHash: Buffer | null;
+  taxNumberLast4: string | null;
   title: string | null;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
@@ -497,6 +561,56 @@ export interface CustomFieldDefinitions {
   label: string;
   options: Generated<Json>;
   sortOrder: Generated<number>;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+}
+
+export interface DataSubjectRequestEvents {
+  actor: string | null;
+  companyId: string;
+  detail: Generated<Json>;
+  eventType: string;
+  fromStatus: string | null;
+  id: Generated<string>;
+  occurredAt: Generated<Timestamp>;
+  requestId: string;
+  toStatus: string | null;
+}
+
+export interface DataSubjectRequestEvidence {
+  companyId: string;
+  id: Generated<string>;
+  kind: string;
+  receivedOn: string;
+  recordedAt: Generated<Timestamp>;
+  recordedBy: string;
+  requestId: string;
+  summary: string;
+}
+
+export interface DataSubjectRequests {
+  accessExportId: string | null;
+  assignedTo: string | null;
+  channel: string;
+  closedAt: Timestamp | null;
+  closedBy: string | null;
+  companyId: string;
+  contactId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string;
+  dueOn: string;
+  erasureLedgerEntryId: string | null;
+  extendedDueOn: string | null;
+  extensionReason: string | null;
+  id: Generated<string>;
+  identityMethod: string | null;
+  identityVerifiedAt: Timestamp | null;
+  identityVerifiedBy: string | null;
+  outcomeNote: string | null;
+  receivedOn: string;
+  reference: string;
+  requestType: string;
+  status: Generated<string>;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
 }
@@ -730,8 +844,11 @@ export interface DocumentVersions {
 export interface ExportJobs {
   companyId: string;
   createdAt: Generated<Timestamp>;
+  downloadCount: Generated<number>;
   expiresAt: Timestamp | null;
   exportType: string;
+  failureReason: string | null;
+  fileName: string | null;
   finishedAt: Timestamp | null;
   format: string;
   id: Generated<string>;
@@ -816,19 +933,36 @@ export interface IdempotencyKeys {
 }
 
 export interface IdentityDocuments {
+  archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   companyId: string;
   contactId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   documentId: string | null;
   documentTypeCode: string;
+  /**
+   * Set when the person was erased (ADR-007 §8): the number, its hash and last characters are gone; type, country and dates stay for the KYC record.
+   */
+  erasedAt: Timestamp | null;
   expiresOn: string | null;
   id: Generated<string>;
   issuedOn: string | null;
   issuingCountryCode: string;
-  numberEncrypted: Buffer;
-  numberHash: Buffer;
+  /**
+   * C3, ADR-007: AES-256-GCM with the company field key.
+   */
+  numberEncrypted: Buffer | null;
+  /**
+   * ADR-007 §4.4: HMAC-SHA256 with the company lookup key, for duplicate detection.
+   */
+  numberHash: Buffer | null;
+  numberLast4: string | null;
+  updatedAt: Generated<Timestamp>;
   verifiedAt: Timestamp | null;
   verifiedBy: string | null;
+  version: Generated<number>;
 }
 
 export interface ImportJobs {
@@ -936,6 +1070,26 @@ export interface KeyMovements {
   recordedBy: string;
 }
 
+export interface KeyRotations {
+  companyId: string;
+  completedAt: Timestamp | null;
+  cursorField: Generated<number>;
+  cursorRowId: string | null;
+  fromVersion: number;
+  id: Generated<string>;
+  lastError: string | null;
+  pass: Generated<number>;
+  purpose: string;
+  reason: string;
+  requestedBy: string;
+  rowsRewritten: Generated<Int8>;
+  settleUntil: Timestamp | null;
+  startedAt: Generated<Timestamp>;
+  status: Generated<string>;
+  toVersion: number;
+  triggerType: string;
+}
+
 export interface KeySets {
   checkedOutAt: Timestamp | null;
   companyId: string;
@@ -961,11 +1115,14 @@ export interface KycChecks {
   contactId: string;
   createdAt: Generated<Timestamp>;
   dealId: string | null;
+  decisionReason: string | null;
   expiresOn: string | null;
   id: Generated<string>;
+  identityDocumentId: string | null;
   notes: string | null;
   provider: string | null;
   providerReference: string | null;
+  recordedBy: string | null;
   reviewedAt: Timestamp | null;
   reviewedBy: string | null;
   riskRating: string | null;
@@ -982,16 +1139,20 @@ export interface LeadAssignments {
   companyId: string;
   id: Generated<string>;
   leadId: string;
+  note: string | null;
 }
 
 export interface Leads {
   archivedAt: Timestamp | null;
+  archivedBy: string | null;
+  archivedReason: string | null;
   assignedTo: string | null;
   campaign: string | null;
   companyId: string;
   contactId: string;
   convertedDealId: string | null;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   customFields: Generated<Json>;
   firstResponseAt: Timestamp | null;
   id: Generated<string>;
@@ -1147,6 +1308,11 @@ export interface Listings {
   availableFrom: string | null;
   closedAt: Timestamp | null;
   companyId: string;
+  /**
+   * Sale price, or rent per year; for requirement matching (decision D4). Never written by the application.
+   */
+  comparablePrice: Generated<Numeric | null>;
+  comparablePriceFloor: Generated<Int8 | null>;
   createdAt: Generated<Timestamp>;
   createdBy: string | null;
   currencyCode: string;
@@ -1797,8 +1963,15 @@ export interface PropertyNotes {
 export interface PropertyOwnerships {
   companyId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   effectiveFrom: string;
+  /**
+   * Last day of ownership (inclusive), as app.landlord_unit_access reads it. NULL = still owned.
+   */
   effectiveTo: string | null;
+  endedAt: Timestamp | null;
+  endedBy: string | null;
+  endReason: string | null;
   evidenceDocumentId: string | null;
   id: Generated<string>;
   ownerContactId: string;
@@ -1906,10 +2079,45 @@ export interface RequiredDocumentRules {
   validityDays: number | null;
 }
 
-export interface Requirements {
+export interface RequirementExclusions {
   companyId: string;
+  excludedAt: Generated<Timestamp>;
+  excludedBy: string | null;
+  id: Generated<string>;
+  listingId: string;
+  reason: string;
+  requirementId: string;
+}
+
+export interface RequirementMatchStatus {
+  checkedAt: Generated<Timestamp>;
+  companyId: string;
+  hasMatch: boolean;
+  requirementId: string;
+}
+
+export interface Requirements {
+  areaAnywhere: Generated<boolean | null>;
+  /**
+   * Prefilter for matching; the exact test is app.requirement_area_covers. Never written by the application.
+   */
+  areaBbox: Generated<string | null>;
+  areaEast: Generated<number | null>;
+  areaLocalities: Generated<string[] | null>;
+  areaNorth: Generated<number | null>;
+  areaSouth: Generated<number | null>;
+  areaWest: Generated<number | null>;
+  companyId: string;
+  comparableMaxFloor: Generated<Int8 | null>;
+  comparableMaxPrice: Generated<Numeric | null>;
+  comparableMinFloor: Generated<Int8 | null>;
+  /**
+   * Budget bounds in the terms of listings.comparable_price (rent per year). Never written by the application.
+   */
+  comparableMinPrice: Generated<Numeric | null>;
   contactId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   currencyCode: string;
   financingStatus: string | null;
   id: Generated<string>;
@@ -2125,6 +2333,9 @@ export interface SupportAccessGrants {
 export interface Tasks {
   assignedTo: string;
   automationRuleId: string | null;
+  cancelledAt: Timestamp | null;
+  cancelledBy: string | null;
+  cancelReason: string | null;
   companyId: string;
   completedAt: Timestamp | null;
   completedBy: string | null;
@@ -2351,9 +2562,23 @@ export interface WebhookEndpoints {
   url: string;
 }
 
+export interface WebSessions {
+  accessExpiresAt: Timestamp;
+  createdAt: Generated<Timestamp>;
+  csrfToken: string;
+  expiresAt: Timestamp;
+  idHash: Buffer;
+  idleExpiresAt: Timestamp;
+  lastSeenAt: Generated<Timestamp>;
+  selectedCompanyId: string | null;
+  subject: string;
+  tokenCiphertext: Buffer;
+}
+
 export interface DB {
   activities: Activities;
   activityLinks: ActivityLinks;
+  activityRevisions: ActivityRevisions;
   addresses: Addresses;
   agentProfiles: AgentProfiles;
   aiRequests: AiRequests;
@@ -2369,6 +2594,7 @@ export interface DB {
   commissionPlans: CommissionPlans;
   commissions: Commissions;
   companies: Companies;
+  companyDataKeys: CompanyDataKeys;
   companyHolidays: CompanyHolidays;
   companyMemberships: CompanyMemberships;
   companySettings: CompanySettings;
@@ -2376,11 +2602,15 @@ export interface DB {
   contactLinks: ContactLinks;
   contactMethods: ContactMethods;
   contactPaymentAccounts: ContactPaymentAccounts;
+  contactReferenceColumns: ContactReferenceColumns;
   contactRelationships: ContactRelationships;
   contacts: Contacts;
   countries: Countries;
   currencies: Currencies;
   customFieldDefinitions: CustomFieldDefinitions;
+  dataSubjectRequestEvents: DataSubjectRequestEvents;
+  dataSubjectRequestEvidence: DataSubjectRequestEvidence;
+  dataSubjectRequests: DataSubjectRequests;
   dealAgents: DealAgents;
   dealMilestones: DealMilestones;
   dealParties: DealParties;
@@ -2410,6 +2640,7 @@ export interface DB {
   jurisdictionSettingDefinitions: JurisdictionSettingDefinitions;
   jurisdictionSettings: JurisdictionSettings;
   keyMovements: KeyMovements;
+  keyRotations: KeyRotations;
   keySets: KeySets;
   kycChecks: KycChecks;
   leadAssignments: LeadAssignments;
@@ -2469,6 +2700,8 @@ export interface DB {
   rentCharges: RentCharges;
   rentReviews: RentReviews;
   requiredDocumentRules: RequiredDocumentRules;
+  requirementExclusions: RequirementExclusions;
+  requirementMatchStatus: RequirementMatchStatus;
   requirements: Requirements;
   rolePermissions: RolePermissions;
   roles: Roles;
@@ -2498,4 +2731,5 @@ export interface DB {
   viewings: Viewings;
   webhookDeliveries: WebhookDeliveries;
   webhookEndpoints: WebhookEndpoints;
+  webSessions: WebSessions;
 }

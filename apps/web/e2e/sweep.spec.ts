@@ -17,8 +17,39 @@ async function settled(page: Page): Promise<void> {
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0, { timeout: 15_000 });
 }
 
+/** Every CRM screen of a company (C5): dashboards, registers, the contact record tabs, forms and settings. */
+function crmScreens(contactId: string, leadId: string | null): string[] {
+  const contact = `/contacts/${contactId}`;
+  return [
+    '/dashboards/admin',
+    '/dashboards/crm',
+    '/contacts',
+    '/contacts?view=landlord',
+    '/contacts/new',
+    contact,
+    `${contact}/activity`,
+    `${contact}/leads`,
+    `${contact}/requirements`,
+    `${contact}/properties`,
+    `${contact}/identity`,
+    `${contact}/consent`,
+    '/requirements',
+    '/identity-checks',
+    '/contacts?view=seller',
+    '/leads',
+    '/leads/new',
+    ...(leadId ? [`/leads/${leadId}`] : []),
+    '/follow-ups',
+    '/exports',
+    '/settings/crm',
+    '/privacy-requests',
+    '/privacy-requests/new',
+    '/ownerships/new',
+  ];
+}
+
 test.describe('Screen sweep (issue #7)', () => {
-  test.setTimeout(240_000);
+  test.setTimeout(480_000);
 
   test('every English screen passes axe on desktop and fits a 320 px phone', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
@@ -29,6 +60,7 @@ test.describe('Screen sweep (issue #7)', () => {
       '/properties',
       property,
       `${property}/units`,
+      `${property}/ownership`,
       `${property}/listings`,
       `${property}/media`,
       `${property}/notes`,
@@ -52,6 +84,13 @@ test.describe('Screen sweep (issue #7)', () => {
       '/settings/property-types',
       '/settings/listings',
       '/settings/storage',
+      // CRM (Phase 5 milestone C5).
+      ...crmScreens(state.records.crm.ama.id, state.records.crm.portalLead.id),
+      `/contacts/${state.records.crm.ama.id}/edit`,
+      `/contacts/${state.records.crm.seller.id}/identity`,
+      // Data-subject requests (gap G3).
+      `/privacy-requests/${state.records.privacy.overdueRequest.id}`,
+      '/privacy-requests?view=overdue',
     ];
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });
@@ -72,6 +111,7 @@ test.describe('Screen sweep (issue #7)', () => {
       '/properties',
       property,
       `${property}/units`,
+      `${property}/ownership`,
       `${property}/media`,
       `${property}/notes`,
       `${property}/keys`,
@@ -86,6 +126,11 @@ test.describe('Screen sweep (issue #7)', () => {
       '/settings/property-types',
       '/settings/listings',
       '/settings/storage',
+      ...crmScreens(state.records.crm.dohaContact.id, null),
+      // An erased person (ADR-007 E6): translated name, banner, document number gone.
+      `/contacts/${state.records.crm.dohaErased.id}`,
+      `/contacts/${state.records.crm.dohaErased.id}/identity`,
+      `/privacy-requests/${state.records.privacy.dohaRequest.id}`,
     ];
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });

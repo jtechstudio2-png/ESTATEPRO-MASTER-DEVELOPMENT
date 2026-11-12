@@ -2,6 +2,7 @@ import { sql } from 'kysely';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { inject } from 'vitest';
 
+import { SENSITIVE_FIELDS } from '../src/crypto/sensitive-fields.js';
 import { createKysely, type Db, SchemaCasePlugin } from '../src/database/database.module.js';
 
 class ExposedCasePlugin extends SchemaCasePlugin {
@@ -35,6 +36,43 @@ describe('database catalogue', () => {
        where n.nspname = 'public' and c.relkind in ('r', 'p') and not c.relispartition`.execute(admin);
     expect(rows.length).toBeGreaterThan(100);
     expect(rows.filter((row) => !row.rls || row.policies === 0)).toEqual([]);
+  });
+
+  it('registers every encrypted column with the field-encryption register (ADR-007 §3)', async () => {
+    const { rows } = await sql<{ tableName: string; columnName: string; dataType: string }>`
+      select table_name, column_name, data_type from information_schema.columns
+       where table_schema = 'public' and column_name like '%\_encrypted'`.execute(admin);
+    const inDatabase = rows.map((row) => `${row.tableName}.${row.columnName}`).sort();
+    const registered = SENSITIVE_FIELDS.map((field) => `${field.table}.${field.column}`).sort();
+    expect(inDatabase).toEqual(registered);
+    expect(rows.filter((row) => row.dataType !== 'bytea')).toEqual([]);
+    for (const field of SENSITIVE_FIELDS.filter((spec) => spec.lookup)) {
+      const hash = await sql<{ dataType: string }>`
+        select data_type from information_schema.columns
+         where table_schema = 'public' and table_name = ${field.table} and column_name = ${field.lookup!.hashColumn}`.execute(admin);
+      expect(hash.rows, `${field.table}.${field.lookup!.hashColumn}`).toEqual([{ dataType: 'bytea' }]);
+    }
+  });
+
+  it('never indexes an encrypted column, directly or in an expression (ADR-007 §6)', async () => {
+    const { rows } = await sql<{ indexName: string; definition: string }>`
+      select indexname as index_name, indexdef as definition from pg_indexes
+       where schemaname = 'public' and indexdef ~ '_encrypted'`.execute(admin);
+    expect(rows).toEqual([]);
+  });
+
+  it('classifies every column that references contacts for merging (migration 0022, wireframe C-4)', async () => {
+    const { rows: foreignKeys } = await sql<{ ref: string }>`
+      select c.conrelid::regclass::text || '.' || a.attname as ref
+        from pg_constraint c
+        join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[array_length(c.conkey, 1)]
+       where c.contype = 'f' and c.confrelid = 'contacts'::regclass`.execute(admin);
+    const { rows: register } = await sql<{ ref: string; handling: string }>`
+      select table_name || '.' || column_name as ref, handling from contact_reference_columns`.execute(admin);
+    expect(foreignKeys.map((row) => row.ref).sort()).toEqual(register.map((row) => row.ref).sort());
+    const byHandling = (handling: string) => register.filter((row) => row.handling === handling).map((row) => row.ref.split('.')[0]);
+    // Financial and contractual records are never re-attributed by a merge.
+    expect(byHandling('block')).toEqual(expect.arrayContaining(['ledger_entries', 'payments', 'payouts', 'statements', 'lease_parties', 'contact_payment_accounts']));
   });
 
   it('never lets the runtime role own a table (owners bypass RLS)', async () => {

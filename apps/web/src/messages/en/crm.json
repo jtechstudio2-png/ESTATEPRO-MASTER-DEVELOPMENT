@@ -1,0 +1,66 @@
+{
+  "noRoles": "No roles",
+  "overdue": "Overdue",
+  "system": "System",
+  "role": {
+    "buyer": "Buyer",
+    "seller": "Seller",
+    "landlord": "Landlord",
+    "tenant": "Tenant",
+    "applicant": "Applicant",
+    "guarantor": "Guarantor",
+    "supplier": "Supplier",
+    "developer": "Developer",
+    "investor": "Investor",
+    "other": "Other"
+  },
+  "contactType": {
+    "person": "Person",
+    "organisation": "Organisation"
+  },
+  "leadType": {
+    "buy": "Buy",
+    "rent": "Rent",
+    "sell": "Sell",
+    "let": "Let",
+    "valuation": "Valuation",
+    "management": "Management",
+    "other": "Other"
+  },
+  "leadStatus": {
+    "new": "New",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "unqualified": "Unqualified",
+    "converted": "Converted",
+    "lost": "Lost"
+  },
+  "identityStatus": {
+    "none": "No check",
+    "pending": "Pending",
+    "in_review": "In review",
+    "verified": "Verified",
+    "failed": "Failed",
+    "expired": "Expired"
+  },
+  "consentChannel": {
+    "any": "Any channel",
+    "email": "Email",
+    "sms": "SMS",
+    "whatsapp": "WhatsApp",
+    "phone": "Phone",
+    "post": "Post"
+  },
+  "priority": {
+    "low": "Low",
+    "normal": "Normal",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "response": {
+    "overdue": "Past response target",
+    "late": "Answered late"
+  },
+  "noFollowUp": "None scheduled",
+  "erasedContact": "Erased contact"
+}

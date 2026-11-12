@@ -18,6 +18,8 @@ export interface Problem {
   requestId?: string;
   errors?: FieldError[];
   conflictingResource?: { type: string; id: string };
+  /** Possible duplicate contacts (409 possible-duplicates, wireframe C-3). */
+  candidates?: unknown[];
 }
 
 const PREFIX = 'urn:estatepro:problem:';

@@ -23,5 +23,30 @@
   "mobile": "تنقل سريع",
   "menu": "القائمة",
   "main": "الرئيسية",
-  "keysOverdue": "{count, plural, zero {لا توجد مفاتيح متأخرة لديك} one {مجموعة مفاتيح واحدة متأخرة لديك} two {مجموعتا مفاتيح متأخرتان لديك} few {# مجموعات مفاتيح متأخرة لديك} many {# مجموعة مفاتيح متأخرة لديك} other {# مجموعة مفاتيح متأخرة لديك}}"
+  "keysOverdue": "{count, plural, zero {لا توجد مفاتيح متأخرة لديك} one {مجموعة مفاتيح واحدة متأخرة لديك} two {مجموعتا مفاتيح متأخرتان لديك} few {# مجموعات مفاتيح متأخرة لديك} many {# مجموعة مفاتيح متأخرة لديك} other {# مجموعة مفاتيح متأخرة لديك}}",
+  "myDay": "يومي",
+  "adminDashboard": "لوحة الإدارة",
+  "crmDashboard": "لوحة إدارة العملاء",
+  "contactsSection": "جهات الاتصال",
+  "contacts": "جهات الاتصال",
+  "view": {
+    "buyer": "المشترون",
+    "seller": "البائعون",
+    "landlord": "الملاك",
+    "tenant": "المستأجرون"
+  },
+  "requirements": "المتطلبات",
+  "exports": "التصديرات",
+  "salesSection": "المبيعات",
+  "leads": "العملاء المحتملون",
+  "followUps": "المتابعات",
+  "crmSettings": "إعدادات إدارة العملاء",
+  "createLead": "عميل محتمل",
+  "createContact": "جهة اتصال",
+  "createFollowUp": "متابعة",
+  "leadsUnassigned": "{count, plural, one {عميل محتمل جديد غير مكلَّف} other {# عملاء محتملين جدد غير مكلَّفين}}",
+  "leadsNewMine": "{count, plural, one {عميل محتمل جديد مكلّف بك} other {# عملاء محتملين جدد مكلّف بهم}}",
+  "followUpsOverdue": "{count, plural, one {متابعة متأخرة واحدة} other {# متابعات متأخرة}}",
+  "identityChecks": "عمليات التحقق من الهوية",
+  "privacyRequests": "طلبات الخصوصية"
 }

@@ -1,0 +1,66 @@
+{
+  "noRoles": "لا أدوار",
+  "overdue": "متأخر",
+  "system": "النظام",
+  "role": {
+    "buyer": "مشترٍ",
+    "seller": "بائع",
+    "landlord": "مالك",
+    "tenant": "مستأجر",
+    "applicant": "طالب إيجار",
+    "guarantor": "كفيل",
+    "supplier": "مورّد",
+    "developer": "مطوّر",
+    "investor": "مستثمر",
+    "other": "أخرى"
+  },
+  "contactType": {
+    "person": "فرد",
+    "organisation": "جهة"
+  },
+  "leadType": {
+    "buy": "شراء",
+    "rent": "استئجار",
+    "sell": "بيع",
+    "let": "تأجير",
+    "valuation": "تقييم",
+    "management": "إدارة",
+    "other": "أخرى"
+  },
+  "leadStatus": {
+    "new": "جديد",
+    "contacted": "تم التواصل",
+    "qualified": "مؤهَّل",
+    "unqualified": "غير مؤهَّل",
+    "converted": "تم التحويل",
+    "lost": "مفقود"
+  },
+  "identityStatus": {
+    "none": "لا تحقق",
+    "pending": "قيد الانتظار",
+    "in_review": "قيد المراجعة",
+    "verified": "تم التحقق",
+    "failed": "فشل",
+    "expired": "منتهي الصلاحية"
+  },
+  "consentChannel": {
+    "any": "أي قناة",
+    "email": "البريد الإلكتروني",
+    "sms": "رسالة نصية",
+    "whatsapp": "واتساب",
+    "phone": "الهاتف",
+    "post": "البريد"
+  },
+  "priority": {
+    "low": "منخفضة",
+    "normal": "عادية",
+    "high": "عالية",
+    "urgent": "عاجلة"
+  },
+  "response": {
+    "overdue": "تجاوز مهلة الرد",
+    "late": "تم الرد متأخرًا"
+  },
+  "noFollowUp": "لا شيء مجدول",
+  "erasedContact": "جهة اتصال محذوفة البيانات"
+}

@@ -1,0 +1,88 @@
+/* A-1 timeline, A-2, F-1, F-2. Logical properties only (wireframes §11). */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.entry {
+  padding-block: var(--ep-space-3);
+  border-block-end: var(--ep-border-width) solid var(--ep-color-border);
+}
+
+.entry:focus-visible {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: 2px;
+}
+
+.day {
+  margin: 0 0 var(--ep-space-2);
+  font-weight: 600;
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-200);
+}
+
+.entryRow {
+  display: flex;
+  gap: var(--ep-space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.entryMain {
+  display: grid;
+  gap: var(--ep-space-1);
+  min-inline-size: 0;
+}
+
+.entryHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-1) var(--ep-space-2);
+  margin: 0;
+  font-weight: 600;
+}
+
+.subject {
+  margin: 0;
+  font-weight: 600;
+}
+
+.body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-200);
+  font-weight: 400;
+}
+
+.quickPicks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+}

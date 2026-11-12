@@ -1,8 +1,11 @@
 import { sql } from 'kysely';
 
 import type { AuditService } from '../audit/audit.service.js';
+import type { KeyRotationService } from '../crypto/key-rotation.service.js';
 import { systemContext } from '../common/request-context.js';
 import type { Db, TenantDb } from '../database/database.module.js';
+import { refreshRequirementMatches } from '../dashboards/dashboards.service.js';
+import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { ARCHIVE_RETENTION_DAYS, MEDIA_PROCESS_JOB, purgeMedia } from '../media/media.service.js';
@@ -16,7 +19,13 @@ export const JOBS = {
   mediaTimeout: 'media.timeout',
   mediaPurge: 'media.purge',
   storageReconcile: 'storage.reconcile',
+  exportExpire: 'export.expire',
+  requirementMatchRefresh: 'requirement.match_refresh',
+  keyRotate: 'key.rotate',
 } as const;
+
+/** Batches (of 200 rows) one key-rotation job handles before handing over to a follow-up job. */
+const ROTATION_BATCHES_PER_JOB = 50;
 
 /** Pending media older than this with no live job is marked failed. */
 const PROCESSING_TIMEOUT_MINUTES = 30;
@@ -36,6 +45,7 @@ export interface WorkerDeps {
   processor: MediaProcessor;
   listings: ListingsService;
   audit: AuditService;
+  rotation: KeyRotationService;
   logger: WorkerLogger;
 }
 
@@ -142,6 +152,27 @@ export class Worker {
         where archived_at < ${now}::timestamptz - make_interval(days => ${ARCHIVE_RETENTION_DAYS}) and not legal_hold`,
     );
     enqueued += await discover(JOBS.storageReconcile, day, sql<{ companyId: string }>`select company_id as "companyId" from storage_usage`);
+    // The CRM dashboard's "no match" figure (decision D4 rules), every 15 minutes.
+    enqueued += await discover(
+      JOBS.requirementMatchRefresh,
+      quarter,
+      sql<{ companyId: string }>`select distinct company_id as "companyId" from requirements where status = 'active'`,
+    );
+    // Export files are deleted as soon as they expire (24 hours, CA-16).
+    enqueued += await discover(
+      JOBS.exportExpire,
+      quarter,
+      sql<{ companyId: string }>`select distinct company_id as "companyId" from export_jobs where status = 'completed' and expires_at <= ${now}::timestamptz`,
+    );
+
+    // Field-key rotation (ADR-007 §10): yearly per company, then every quarter
+    // hour while a rotation is in progress (rewriting or settling).
+    for (const companyId of await this.deps.rotation.dueCompanies(now)) {
+      if (await this.deps.queue.enqueue(companyId, JOBS.keyRotate, `${JOBS.keyRotate}:start:${day}`, { start: 'scheduled' })) enqueued += 1;
+    }
+    for (const companyId of await this.deps.rotation.openCompanies()) {
+      if (await this.deps.queue.enqueue(companyId, JOBS.keyRotate, `${JOBS.keyRotate}:${quarter}`)) enqueued += 1;
+    }
 
     // Global housekeeping: expired idempotency records (not company business data).
     await sql`delete from idempotency_keys where expires_at < ${now}::timestamptz`.execute(db);
@@ -279,6 +310,35 @@ export class Worker {
           this.deps.logger.warn('storage usage drift corrected', { companyId: job.companyId, used, reserved: held });
         });
         return;
+
+      case JOBS.requirementMatchRefresh:
+        await tenantDb.run(scope, async (tx) => {
+          await refreshRequirementMatches(tx, ctx);
+        });
+        return;
+
+      case JOBS.exportExpire:
+        await tenantDb.run(scope, async (tx) => {
+          const count = await expireExports(tx, ctx, storage, audit);
+          if (count > 0) this.deps.logger.info('exports expired', { companyId: job.companyId, count });
+        });
+        return;
+
+      case JOBS.keyRotate: {
+        const { rotation, logger, queue } = this.deps;
+        if (job.payload['start'] === 'scheduled') {
+          const started = await rotation.startScheduledIfDue(job.companyId, this.now(), requestId);
+          if (started) logger.info('key rotation started', { companyId: job.companyId, rotationId: started.id, purpose: started.purpose });
+        }
+        let more = false;
+        for (const open of await rotation.open(job.companyId)) {
+          const state = await rotation.step(open.id, { maxBatches: ROTATION_BATCHES_PER_JOB, now: () => this.now() });
+          if (state.status === 'completed') logger.info('key rotation completed', { companyId: job.companyId, rotationId: state.id, rows: state.rowsRewritten });
+          if (state.status === 'rewriting') more = true;
+        }
+        if (more) await queue.enqueue(job.companyId, JOBS.keyRotate, `${JOBS.keyRotate}:${job.id}:more`);
+        return;
+      }
 
       default:
         throw new Error(`Unknown job type ${job.jobType}`);

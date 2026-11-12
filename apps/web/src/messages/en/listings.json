@@ -143,7 +143,8 @@
       "expired": "Mandate expired",
       "photos": "Not enough photos",
       "floor-plan": "Floor plan required",
-      "unverified": "Seller identity not verified",
+      "unverified": "Owner identity not verified",
+      "no-owner": "No owner recorded",
       "missing": "Required information missing"
     }
   },
@@ -258,8 +259,8 @@
     "noApproval": "No approval",
     "approvalAbove": "Approval above a percentage",
     "percent": "Percentage",
-    "kyc": "Seller identity must be verified before publishing",
-    "kycNote": "Seller identity checks arrive with contacts (Phase 5).",
+    "kyc": "Every current owner's identity must be verified before publishing",
+    "kycNote": "Owners come from the property's Ownership tab. A country's rules can also require this, whatever this setting says.",
     "minPhotos": "Minimum photos to publish",
     "minPhotosHint": "Leave blank for no minimum.",
     "floorPlan": "Floor plan required to publish",

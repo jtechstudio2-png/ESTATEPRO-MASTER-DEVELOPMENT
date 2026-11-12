@@ -70,10 +70,13 @@ export class TokenVerifier {
     return token.amr.some((method) => this.config.OIDC_MFA_AMR_VALUES.includes(method));
   }
 
-  /** Step-up check for sensitive permissions: MFA and a recent authentication. */
-  hasRecentMfa(token: VerifiedToken, now: Date = new Date()): boolean {
+  /**
+   * Step-up check for sensitive permissions: MFA and a recent authentication.
+   * `maxAgeSeconds` tightens the window for particular actions (e.g. revealing protected data).
+   */
+  hasRecentMfa(token: VerifiedToken, now: Date = new Date(), maxAgeSeconds: number = this.config.STEP_UP_MAX_AGE_SECONDS): boolean {
     if (!this.hasMfa(token) || token.authTime === null) return false;
     const ageSeconds = now.getTime() / 1000 - token.authTime;
-    return ageSeconds <= this.config.STEP_UP_MAX_AGE_SECONDS;
+    return ageSeconds <= maxAgeSeconds;
   }
 }

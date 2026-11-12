@@ -102,11 +102,19 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
       STORAGE_ENDPOINT: storage.endpoint,
       STORAGE_REGION: "us-east-1",
       STORAGE_BUCKET: storage.bucket,
+      // Erasure ledger (ADR-007 §8): its own bucket, as in production.
+      ERASURE_LEDGER_BUCKET: process.env["E2E_LEDGER_BUCKET"] ?? "estatepro-e2e-ledger",
       STORAGE_ACCESS_KEY_ID: storage.accessKeyId,
       STORAGE_SECRET_ACCESS_KEY: storage.secretAccessKey,
       STORAGE_FORCE_PATH_STYLE: "true",
       CLAMAV_HOST: process.env["E2E_CLAMAV_HOST"] ?? "127.0.0.1",
       CLAMAV_PORT: process.env["E2E_CLAMAV_PORT"] ?? "3310",
+      // Field encryption (ADR-007): the local key provider with a fresh root key per run. It is
+      // refused in production; the company's first data key is created on first use.
+      KEY_PROVIDER: "local",
+      // The shortest reveal step-up window the API allows, so the C-5 spec can let it lapse.
+      REVEAL_STEP_UP_MAX_AGE_SECONDS: "30",
+      FIELD_ENCRYPTION_LOCAL_ROOT_KEY: randomBytes(32).toString("base64"),
     };
     children.push(start("api", "node", ["dist/main.js"], apiDir, apiEnv));
     children.push(
