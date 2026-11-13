@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Proposed** (P6-0, 12 November 2026; reviewed 13 November 2026, §8; for approval with the P6-0 report) |
+| Status | **Accepted** (approved 13 November 2026 with P6-0; reviewed 13 November 2026, §8) |
 | Date | 12 November 2026 |
 | Context | Phase 6 adds viewings, offers, deals, lead conversion and sales to the product. Their tables exist since migration 0007 and hold no data yet. Before any is written, the product owner asked for P6-0: deterministic history (#15), erasure of the pipeline's free text, limits on erasing parties to deals and sales, the accountant's access, and the audit, privacy, retention and integrity rules for sales records |
 | Builds on | ADR-003 (API conventions), ADR-004 (listing rules), ADR-007 (field encryption, erasure §8), Phase 1 specification §5.4 (SAL), §7.1 (journey from instruction to completion), §11.2 (permissions), §12.2 (deal life cycle) |

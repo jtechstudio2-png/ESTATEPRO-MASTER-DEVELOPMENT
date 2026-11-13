@@ -266,8 +266,8 @@ The first full `test:performance` run after the review fixes failed 2 of 11 test
 | R4 | Accountant audit-log scope not enforceable yet | Low | When the audit-log viewer is built |
 | R5 | Decisions P6-D1 to P6-D14 | — | **Closed**: approved 13 November |
 | R6 | An offer on a deal that has no listing yet (a unit-only deal) is not checked against a listing by the database (review finding 8) | Low | S2: the offer service refuses an offer on a deal without a listing |
-| R8 | (a) L-3 browser test types before the page is interactive (test timing race); (b) a call logged in the same minute a lead arrived does not count as its first response (minute-precision time against a seconds-precision receipt time) (§4.2) | Low (a), Medium (b) | Pre-existing. Proposed: (a) wait for the page to be ready in the test; (b) compare at minute precision, or default the form's time to the current second. Needs your decision |
-| R7 | Requirement match refresh (C2/C4, pre-existing): plan depends on other tenants' data; minutes instead of seconds per company; makes the dashboards and media performance suites fail in some orders (§8.1) | **High (launch, scale)** | Not changed by P6-0. Proposed fix in §8.1; needs your decision and a tracking issue |
+| R8 | (a) L-3 browser test types before the page is interactive (test timing race); (b) a call logged in the same minute a lead arrived does not count as its first response (minute-precision time against a seconds-precision receipt time) (§4.2) | Low (a), Medium (b) | Pre-existing. (a) #43, maintenance backlog; (b) #44, before Phase 6 closes |
+| R7 | Requirement match refresh (C2/C4, pre-existing): plan depends on other tenants' data; minutes instead of seconds per company; makes the dashboards and media performance suites fail in some orders (§8.1) | **High (launch, scale)** | Not changed by P6-0. #42: remediate before Phase 7 |
 | — | #20, #24, #25 | High (pre-launch) | Unchanged |
 
 ## 11. GitHub references
@@ -283,4 +283,13 @@ The first full `test:performance` run after the review fixes failed 2 of 11 test
 
 ## Approval
 
-Awaiting product owner approval of P6-0 (P60-D1 to P60-D8, ADR-008), and decisions on R7 and R8. Commits stay on `phase-6/readiness` and are not merged into `main` until P6-0 is approved (R9 decision). Viewings (S1), offers (S2), deals (S3), landlord visibility (S4) and lead conversion remain blocked until then.
+| Item | Decision | Date |
+|---|---|---|
+| P6-0 | **Approved** | 13 November 2026 |
+| ADR-008 | **Approved** (status Accepted) | 13 November 2026 |
+| P60-D1 to P60-D8 | **Approved** | 13 November 2026 |
+| R7 (requirement match refresh) | Tracked as [#42](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42), priority High, remediate before Phase 7 | 13 November 2026 |
+| R8a (L-3 browser test timing) | Tracked as [#43](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/43), priority Low, maintenance backlog | 13 November 2026 |
+| R8b (first response in the same minute) | Tracked as [#44](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/44), priority Medium, fix before Phase 6 closes | 13 November 2026 |
+
+Next: S1 (viewings), per the approved Phase 6 roadmap. The P6-0 commits stay on `phase-6/readiness` until Phase 6 work is merged through a reviewed pull request.
