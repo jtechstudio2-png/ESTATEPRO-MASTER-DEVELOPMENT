@@ -57,6 +57,8 @@ BEGIN
             WHERE m.company_id = NEW.company_id AND m.user_id = app.current_user_id()
             ORDER BY m.created_at LIMIT 1),
           nullif(current_setting('app.stage_note', true), ''));
+  -- A note belongs to one stage change: clear it so a later change in the same transaction does not repeat it.
+  PERFORM set_config('app.stage_note', '', true);
   RETURN NULL;
 END;
 $$;

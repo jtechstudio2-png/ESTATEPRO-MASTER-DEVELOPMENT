@@ -37,6 +37,17 @@ SELECT test_assert(
                          'consents', 'kyc_checks', 'deal_stage_history', 'offers')),
   'every history and audit stream has a required insertion number');
 
+SELECT test_assert(
+  NOT EXISTS (
+    SELECT 1 FROM information_schema.role_table_grants g
+     WHERE g.table_schema = 'public' AND g.privilege_type = 'INSERT'
+       AND g.grantee IN ('estatepro_app', 'estatepro_platform', 'estatepro_auth', 'estatepro_web')
+       AND g.table_name IN ('audit_logs', 'outbox_events', 'listing_status_history', 'listing_price_history', 'key_movements',
+                            'lead_status_history', 'lead_assignments', 'data_subject_request_events', 'data_subject_request_evidence',
+                            'consents', 'kyc_checks', 'deal_stage_history', 'offers')
+       AND NOT has_sequence_privilege(g.grantee, g.table_name || '_entry_no_seq', 'USAGE')),
+  'every role that may insert into a history may number its rows');
+
 -- ------------------------------------------------- deals: stage history by the database
 INSERT INTO contacts (id, company_id, contact_type, display_name, primary_email) VALUES
   ('a5600000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'person', 'Efua Buyer', 'efua@example.test'),
@@ -54,11 +65,11 @@ SELECT test_assert(
 SELECT set_config('app.stage_note', 'Called the buyer', true);
 UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'sale' AND code = 'qualification')
  WHERE id = 'a9b00000-0000-0000-0000-000000000001';
-SELECT set_config('app.stage_note', '', true);
 SELECT test_assert(
   (SELECT array_agg(coalesce(note, '-') ORDER BY changed_at, entry_no) FROM deal_stage_history WHERE deal_id = 'a9b00000-0000-0000-0000-000000000001')
     = ARRAY['-', 'Called the buyer'],
   'every stage change is recorded in order, with its note');
+SELECT test_assert(coalesce(current_setting('app.stage_note', true), '') = '', 'a stage note is used once and cleared');
 UPDATE deals SET expected_value = 450000 WHERE id = 'a9b00000-0000-0000-0000-000000000001';
 SELECT test_assert((SELECT count(*) = 2 FROM deal_stage_history WHERE deal_id = 'a9b00000-0000-0000-0000-000000000001'),
   'other edits do not add stage history');

@@ -24,6 +24,7 @@ LANGUAGE plpgsql AS $$
 DECLARE
   seq text := p_table::text || '_entry_no_seq';
   top bigint;
+  grantee text;
 BEGIN
   EXECUTE format('ALTER TABLE %s ADD COLUMN entry_no bigint', p_table);
   EXECUTE format('ALTER TABLE %s DISABLE TRIGGER USER', p_table);
@@ -39,7 +40,15 @@ BEGIN
   END IF;
   EXECUTE format('ALTER TABLE %s ALTER COLUMN entry_no SET DEFAULT nextval(%L)', p_table, seq);
   EXECUTE format('ALTER TABLE %s ALTER COLUMN entry_no SET NOT NULL', p_table);
-  EXECUTE format('GRANT USAGE ON SEQUENCE %I TO estatepro_app, estatepro_platform', seq);
+  -- Every role that may insert rows needs the sequence (estatepro_app, estatepro_platform,
+  -- and estatepro_auth for sign-in audit events).
+  FOR grantee IN
+    SELECT DISTINCT g.grantee FROM information_schema.role_table_grants g
+     WHERE g.table_schema = 'public' AND g.table_name = p_table::text AND g.privilege_type = 'INSERT'
+       AND g.grantee <> current_user AND g.grantee <> 'PUBLIC'
+  LOOP
+    EXECUTE format('GRANT USAGE ON SEQUENCE %I TO %I', seq, grantee);
+  END LOOP;
   EXECUTE format('COMMENT ON COLUMN %s.entry_no IS %L', p_table,
     'Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.');
 END
