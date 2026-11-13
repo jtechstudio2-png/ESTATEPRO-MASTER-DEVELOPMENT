@@ -70,6 +70,33 @@ SELECT app.add_entry_no('offers', 'submitted_at');
 
 DROP FUNCTION app.add_entry_no(regclass, text);
 
+-- An insertion number never changes, whoever updates the row: a changed number
+-- would reorder the history (for consents, it would change which consent is in
+-- force). Some streams are updatable by the runtime roles for other columns, so
+-- this is a trigger rather than a column privilege.
+CREATE FUNCTION app.entry_no_fixed() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'the insertion number of % rows never changes (#15)', TG_TABLE_NAME
+    USING ERRCODE = 'insufficient_privilege';
+END
+$$;
+
+DO $$
+DECLARE
+  t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['activities', 'audit_logs', 'outbox_events', 'listing_status_history', 'listing_price_history',
+                           'key_movements', 'lead_status_history', 'lead_assignments', 'data_subject_request_events',
+                           'data_subject_request_evidence', 'consents', 'kyc_checks', 'deal_stage_history', 'offers']
+  LOOP
+    EXECUTE format('CREATE TRIGGER %I BEFORE UPDATE OF entry_no ON %I FOR EACH ROW
+                      WHEN (OLD.entry_no IS DISTINCT FROM NEW.entry_no) EXECUTE FUNCTION app.entry_no_fixed()',
+                   t || '_entry_no_fixed', t);
+  END LOOP;
+END
+$$;
+
 -- Each number is used once (audit_logs is partitioned by time, so its
 -- uniqueness rests on the sequence alone).
 CREATE UNIQUE INDEX outbox_events_entry_no_idx ON outbox_events (entry_no);

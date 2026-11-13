@@ -48,6 +48,25 @@ SELECT test_assert(
        AND NOT has_sequence_privilege(g.grantee, g.table_name || '_entry_no_seq', 'USAGE')),
   'every role that may insert into a history may number its rows');
 
+SELECT test_assert(
+  (SELECT count(*) = 14 FROM pg_trigger WHERE tgname LIKE '%\_entry\_no\_fixed' AND NOT tgisinternal AND tgparentid = 0),
+  'every history and audit stream refuses a change to its insertion number');
+SELECT test_expect_error(
+  $$UPDATE consents SET entry_no = entry_no + 1000000
+     WHERE contact_id = 'a5000000-0000-0000-0000-000000000003' AND status = 'granted'$$,
+  '42501', 'an older consent cannot be renumbered to come into force');
+SELECT test_expect_error(
+  $$UPDATE listing_status_history SET entry_no = entry_no + 1000000 WHERE reason = 'first'$$,
+  '42501', 'listing status history cannot be reordered');
+INSERT INTO outbox_events (company_id, event_type, aggregate_type, aggregate_id, payload) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'listing.status_changed', 'listing', 'a9000000-0000-0000-0000-000000000002', '{"order": "test"}');
+SELECT test_expect_error(
+  $$UPDATE outbox_events SET entry_no = entry_no + 1000000 WHERE payload = '{"order": "test"}'$$,
+  '42501', 'outbox events cannot be reordered');
+SELECT test_assert(
+  (SELECT count(*) = 1 FROM outbox_events WHERE payload = '{"order": "test"}'),
+  'the outbox renumbering test had a row to renumber');
+
 -- ------------------------------------------------- deals: stage history by the database
 INSERT INTO contacts (id, company_id, contact_type, display_name, primary_email) VALUES
   ('a5600000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'person', 'Efua Buyer', 'efua@example.test'),
