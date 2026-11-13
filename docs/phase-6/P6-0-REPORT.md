@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Date | 13 November 2026 (implementation 12 November; review 13 November) |
-| Branch | `phase-6/readiness` (from `main` at `5ef896c`, after pull request #39), commits `3b6c329` (implementation), `2b22e6b` (documentation), `bc94bae` and `3a2e134` (review fixes), then this report; CI run __RUN__ |
+| Branch | `phase-6/readiness` (from `main` at `5ef896c`, after pull request #39), commits `3b6c329` (implementation), `2b22e6b` (documentation), `bc94bae` and `3a2e134` (review fixes), then this report; CI run 112 (`c2924f8`, green) |
 | Approvals | Phase 5 complete and P5-H decisions H-D1 to H-D8 approved (12 November 2026). Phase 6 Readiness Report and P6-D1 to P6-D14 approved (13 November 2026). R9 decision: commits `3b6c329` and `2b22e6b` kept on `phase-6/readiness` as the P6-0 implementation awaiting review; not merged into `main` until P6-0 is approved |
 | Scope | (1) Deterministic history ordering (#15); (2) erasure of viewing feedback, offer conditions and deal notes; (3) erasure restrictions for parties to active deals and recorded sales; (4) accountant permission review; (5) validation of the histories that viewings, offers, deals and lead conversion will write; (6) audit and privacy of sales records; (7) data retention; (8) transaction-history integrity |
 | Not in scope | Viewings (S1), offers (S2), deals (S3), landlord visibility (S4), lead conversion workflows, screens. No API endpoint for the pipeline was added |
-| Result | **P6-0 complete**, for approval. Review in §3, test results in §4; CI run __RUN__ green (§11) |
+| Result | **P6-0 complete**, for approval. Review in §3, test results in §4; CI run 112 green (§11) |
 
 ## 1. Deliverables
 
@@ -118,7 +118,7 @@ The review on 13 November read migrations 0029 and 0030 line by line against the
 | API performance suites, each on its own database | 11 in 8 files | ✅ (§8) |
 | API performance suites together (`test:performance`, one shared database) | 11 in 8 files | ⚠️ 9 of 11 in the first run; dashboards and media fail when run after other large suites: pre-existing defect, reproduced on `main` (§8.1, R7) |
 | Web: typecheck, lint, message check (2,572 keys in both languages); unit tests | 79 in 18 files (coverage 98.14 % statements, 91.41 % branches) | ✅ |
-| Browser suite (`test:e2e:ci`, local, 93 tests including the axe sweep in English and Arabic) | 88 passed, 1 failed, 4 not run (serial file stopped) | ⚠️ locally; the failure is a pre-existing test timing race, not P6-0 (§4.2). CI browser job green on `bc94bae` and on the final commit (§11) |
+| Browser suite (`test:e2e:ci`, local, 93 tests including the axe sweep in English and Arabic) | 88 passed, 1 failed, 4 not run (serial file stopped) | ⚠️ locally; the failure is a pre-existing test timing race, not P6-0 (§4.2). CI browser job green on `bc94bae` (run 111) and `c2924f8` (run 112, §11) |
 
 API coverage: 95.95 % statements, 90.50 % branches, 98.41 % functions, 98.19 % lines (thresholds 95/90 met). `list-query.ts`: 100 % statements, 96.7 % branches.
 
@@ -279,7 +279,7 @@ The first full `test:performance` run after the review fixes failed 2 of 11 test
 | Issue #5 (landlord visibility, S4) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/5 |
 | Issue #20 (legal review, retention values) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/20 |
 | Branch | `phase-6/readiness` |
-| CI run __RUN__ | __RUNURL__ |
+| CI run 112 (`c2924f8`, green) | __RUNURL__ |
 
 ## Approval
 
