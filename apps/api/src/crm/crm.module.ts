@@ -18,5 +18,6 @@ import { TasksService } from './tasks.service.js';
   imports: [AuthModule, ContactsModule],
   controllers: [LeadsController, ActivitiesController, TasksController, PortalPreviewController],
   providers: [LeadsService, ActivitiesService, TasksService, CrmSettingsService, IdempotencyService, PortalPreviewService],
+  exports: [LeadsService],
 })
 export class CrmModule {}

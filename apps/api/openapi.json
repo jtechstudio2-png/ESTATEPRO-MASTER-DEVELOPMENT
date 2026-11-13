@@ -1738,7 +1738,7 @@
             "name": "filter[attention]",
             "required": false,
             "in": "query",
-            "description": "Needs attention: not-ready, photos, floor-plan, mandate-expiring, cover-alt, price-stale",
+            "description": "Needs attention: not-ready, photos, floor-plan, mandate-expiring, cover-alt, price-stale, no-viewing",
             "schema": {}
           },
           {
@@ -4990,514 +4990,6 @@
         ]
       }
     },
-    "/api/v1/me/context": {
-      "get": {
-        "operationId": "Context_context",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionContextDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Session"
-        ]
-      }
-    },
-    "/api/v1/members": {
-      "get": {
-        "operationId": "Members_list",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[officeId]",
-            "required": false,
-            "in": "query",
-            "description": "With filter[permission]: the grant must cover this office",
-            "schema": {}
-          },
-          {
-            "name": "filter[permission]",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "example": "listing.update"
-            }
-          },
-          {
-            "name": "q",
-            "required": false,
-            "in": "query",
-            "description": "Name contains (2–100 characters)",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MemberListDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Session"
-        ]
-      }
-    },
-    "/api/v1/search": {
-      "get": {
-        "operationId": "Search_search",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "q",
-            "required": true,
-            "in": "query",
-            "description": "Reference, name, address or title (2–100 characters)",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SearchResultDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Session"
-        ]
-      }
-    },
-    "/api/v1/reference/countries": {
-      "get": {
-        "operationId": "Reference_countries",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CountryListDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Reference"
-        ]
-      }
-    },
-    "/api/v1/reference/currencies": {
-      "get": {
-        "operationId": "Reference_currencies",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrencyListDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Reference"
-        ]
-      }
-    },
-    "/api/v1/reference/locales": {
-      "get": {
-        "operationId": "Reference_locales",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocaleListDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Reference"
-        ]
-      }
-    },
-    "/api/v1/reference/picklists/{listKey}": {
-      "get": {
-        "operationId": "Reference_picklist",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "listKey",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "locale",
-            "required": false,
-            "in": "query",
-            "description": "Label language, e.g. ar-QA",
-            "schema": {}
-          },
-          {
-            "name": "countryCode",
-            "required": false,
-            "in": "query",
-            "description": "Values for all countries plus this one",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PicklistDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Reference"
-        ]
-      }
-    },
-    "/api/v1/dashboards/property/listings": {
-      "get": {
-        "operationId": "PropertyDashboard_listingAttention",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[listingType]",
-            "required": false,
-            "in": "query",
-            "description": "rent, sale or rent,sale (default: both)",
-            "schema": {}
-          },
-          {
-            "name": "filter[officeId]",
-            "required": false,
-            "in": "query",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Counts match GET /listings?filter[attention]=not-ready|photos|floor-plan|mandate-expiring|cover-alt|price-stale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingAttentionDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Dashboards"
-        ]
-      }
-    },
-    "/api/v1/dashboards/property/maintenance": {
-      "get": {
-        "operationId": "PropertyDashboard_maintenance",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[officeId]",
-            "required": false,
-            "in": "query",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaintenancePanelDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Dashboards"
-        ]
-      }
-    },
-    "/api/v1/dashboards/property/keys": {
-      "get": {
-        "operationId": "PropertyDashboard_keys",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[officeId]",
-            "required": false,
-            "in": "query",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Counts match GET /key-sets?filter[overdue]=true, filter[status]=checked_out and filter[status]=lost",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KeysPanelDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Dashboards"
-        ]
-      }
-    },
-    "/api/v1/dashboards/property/locations": {
-      "get": {
-        "operationId": "PropertyDashboard_locations",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[officeId]",
-            "required": false,
-            "in": "query",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Counts match GET /properties?filter[hasLocation]=false and filter[locationStale]=true",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationsPanelDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Dashboards"
-        ]
-      }
-    },
-    "/api/v1/dashboards/property/media": {
-      "get": {
-        "operationId": "PropertyDashboard_media",
-        "parameters": [
-          {
-            "name": "X-Company-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter[officeId]",
-            "required": false,
-            "in": "query",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MediaPanelDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Dashboards"
-        ]
-      }
-    },
     "/api/v1/contacts": {
       "get": {
         "operationId": "Contacts_list",
@@ -7780,6 +7272,514 @@
         "summary": "Identity checks of contacts in your scope: open ones (pending, in review) by default, oldest first",
         "tags": [
           "Contacts: identity and KYC"
+        ]
+      }
+    },
+    "/api/v1/me/context": {
+      "get": {
+        "operationId": "Context_context",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionContextDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Session"
+        ]
+      }
+    },
+    "/api/v1/members": {
+      "get": {
+        "operationId": "Members_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "description": "With filter[permission]: the grant must cover this office",
+            "schema": {}
+          },
+          {
+            "name": "filter[permission]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "listing.update"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Name contains (2–100 characters)",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Session"
+        ]
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "operationId": "Search_search",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Reference, name, address or title (2–100 characters)",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Session"
+        ]
+      }
+    },
+    "/api/v1/reference/countries": {
+      "get": {
+        "operationId": "Reference_countries",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Reference"
+        ]
+      }
+    },
+    "/api/v1/reference/currencies": {
+      "get": {
+        "operationId": "Reference_currencies",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrencyListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Reference"
+        ]
+      }
+    },
+    "/api/v1/reference/locales": {
+      "get": {
+        "operationId": "Reference_locales",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocaleListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Reference"
+        ]
+      }
+    },
+    "/api/v1/reference/picklists/{listKey}": {
+      "get": {
+        "operationId": "Reference_picklist",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listKey",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Label language, e.g. ar-QA",
+            "schema": {}
+          },
+          {
+            "name": "countryCode",
+            "required": false,
+            "in": "query",
+            "description": "Values for all countries plus this one",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PicklistDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Reference"
+        ]
+      }
+    },
+    "/api/v1/dashboards/property/listings": {
+      "get": {
+        "operationId": "PropertyDashboard_listingAttention",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[listingType]",
+            "required": false,
+            "in": "query",
+            "description": "rent, sale or rent,sale (default: both)",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counts match GET /listings?filter[attention]=not-ready|photos|floor-plan|mandate-expiring|cover-alt|price-stale|no-viewing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingAttentionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/dashboards/property/maintenance": {
+      "get": {
+        "operationId": "PropertyDashboard_maintenance",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenancePanelDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/dashboards/property/keys": {
+      "get": {
+        "operationId": "PropertyDashboard_keys",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counts match GET /key-sets?filter[overdue]=true, filter[status]=checked_out and filter[status]=lost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeysPanelDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/dashboards/property/locations": {
+      "get": {
+        "operationId": "PropertyDashboard_locations",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counts match GET /properties?filter[hasLocation]=false and filter[locationStale]=true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationsPanelDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/api/v1/dashboards/property/media": {
+      "get": {
+        "operationId": "PropertyDashboard_media",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaPanelDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Dashboards"
         ]
       }
     },
@@ -10297,6 +10297,631 @@
         "summary": "Carry out the erasure (ADR-007 §8) and complete the request; cannot be undone",
         "tags": [
           "Privacy requests"
+        ]
+      }
+    },
+    "/api/v1/viewings": {
+      "get": {
+        "operationId": "Viewings_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[needsOutcome]",
+            "required": false,
+            "in": "query",
+            "description": "Scheduled or confirmed and already over: record an outcome or a no-show",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "description": "Viewings this contact attends",
+            "schema": {}
+          },
+          {
+            "name": "filter[dealId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leadId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[listingId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[agentMembershipId]",
+            "required": false,
+            "in": "query",
+            "description": "One or more agents (your own calendar: your membership id)",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "Any of scheduled, confirmed, completed, cancelled, no_show, rescheduled",
+            "schema": {}
+          },
+          {
+            "name": "filter[scheduledStart][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[scheduledStart][gte]",
+            "required": false,
+            "in": "query",
+            "description": "Calendar range start (week or day boundaries computed by the client in the office time zone)",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "scheduledStart",
+                "-scheduledStart"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Viewings in your scope: the agent calendar (time range, agents), a listing, lead, deal or contact, and \"needing feedback\"",
+        "tags": [
+          "Viewings"
+        ]
+      },
+      "post": {
+        "operationId": "Viewings_book",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookViewingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Book a viewing on a live listing; from a lead or an open deal",
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}": {
+      "get": {
+        "operationId": "Viewings_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/confirm": {
+      "post": {
+        "operationId": "Viewings_confirm",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/reschedule": {
+      "post": {
+        "operationId": "Viewings_reschedule",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleViewingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move to a new time: the viewing is kept as rescheduled and a new one is booked with the same attendees (returned)",
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/cancel": {
+      "post": {
+        "operationId": "Viewings_cancel",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelViewingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/outcome": {
+      "post": {
+        "operationId": "Viewings_outcome",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordOutcomeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record the outcome, feedback and attendance once the viewing has started; final once recorded (P6-D3)",
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/no-show": {
+      "post": {
+        "operationId": "Viewings_noShow",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoShowBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/feedback-sharing": {
+      "post": {
+        "operationId": "Viewings_feedbackSharing",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackSharingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Share (or stop sharing) a completed viewing's feedback with the landlord",
+        "tags": [
+          "Viewings"
+        ]
+      }
+    },
+    "/api/v1/viewings/{viewingId}/keys/check-out": {
+      "post": {
+        "operationId": "Viewings_checkOutKeys",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewingKeyCheckOutBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeySetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check keys out for this viewing, to its agent or one of its attendees",
+        "tags": [
+          "Viewings"
         ]
       }
     }
@@ -15622,6 +16247,14 @@
               "null"
             ]
           },
+          "viewingId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The viewing a check-out was for"
+          },
           "occurredAt": {
             "type": "string",
             "format": "date-time"
@@ -15636,6 +16269,7 @@
           "holder",
           "dueBackAt",
           "note",
+          "viewingId",
           "occurredAt",
           "recordedBy"
         ]
@@ -15656,669 +16290,6 @@
         "required": [
           "data",
           "page"
-        ]
-      },
-      "ContextUserDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "displayName",
-          "email"
-        ]
-      },
-      "ContextCompanyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string",
-            "description": "Trading name, else legal name"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "trial",
-              "active",
-              "past_due",
-              "read_only",
-              "suspended",
-              "cancelled"
-            ]
-          },
-          "baseCurrencyCode": {
-            "type": "string",
-            "example": "GHS"
-          },
-          "headquartersCountryCode": {
-            "type": "string",
-            "example": "GH"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "status",
-          "baseCurrencyCode",
-          "headquartersCountryCode"
-        ]
-      },
-      "GrantDto": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "example": "listing.publish"
-          },
-          "scope": {
-            "type": "string",
-            "enum": [
-              "all",
-              "office",
-              "team",
-              "own",
-              "linked",
-              "assigned"
-            ]
-          },
-          "isSensitive": {
-            "type": "boolean",
-            "description": "Needs a recent sign-in with a second factor"
-          }
-        },
-        "required": [
-          "key",
-          "scope",
-          "isSensitive"
-        ]
-      },
-      "SessionContextDto": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/ContextUserDto"
-          },
-          "company": {
-            "$ref": "#/components/schemas/ContextCompanyDto"
-          },
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "roleKey": {
-            "type": "string"
-          },
-          "roleName": {
-            "type": "string"
-          },
-          "officeIds": {
-            "description": "Offices the member belongs to",
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "permissions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GrantDto"
-            }
-          },
-          "locale": {
-            "type": "string",
-            "example": "en-GH",
-            "description": "The user's locale, else the company's"
-          },
-          "textDirection": {
-            "type": "string",
-            "enum": [
-              "ltr",
-              "rtl"
-            ]
-          },
-          "timezone": {
-            "type": "string",
-            "example": "Africa/Accra",
-            "description": "The user's time zone, else the company's"
-          }
-        },
-        "required": [
-          "user",
-          "company",
-          "membershipId",
-          "roleKey",
-          "roleName",
-          "officeIds",
-          "permissions",
-          "locale",
-          "textDirection",
-          "timezone"
-        ]
-      },
-      "MemberDto": {
-        "type": "object",
-        "properties": {
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "roleName": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "membershipId",
-          "displayName",
-          "roleName"
-        ]
-      },
-      "MemberListDto": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MemberDto"
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "SearchHitDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reference": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string",
-            "description": "Main line (name, label or title)"
-          },
-          "context": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Context line (address, property, status)"
-          },
-          "propertyId": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid",
-            "description": "For units: the property"
-          }
-        },
-        "required": [
-          "id",
-          "reference",
-          "title",
-          "context",
-          "propertyId"
-        ]
-      },
-      "SearchGroupDto": {
-        "type": "object",
-        "properties": {
-          "hits": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SearchHitDto"
-            }
-          },
-          "hasMore": {
-            "type": "boolean",
-            "description": "More matches exist than shown"
-          }
-        },
-        "required": [
-          "hits",
-          "hasMore"
-        ]
-      },
-      "SearchResultDto": {
-        "type": "object",
-        "properties": {
-          "properties": {
-            "description": "null without property.view",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SearchGroupDto"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "units": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SearchGroupDto"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "listings": {
-            "description": "null without listing.view",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SearchGroupDto"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "properties",
-          "units",
-          "listings"
-        ]
-      },
-      "CountryDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "example": "GH"
-          },
-          "name": {
-            "type": "string"
-          },
-          "defaultCurrencyCode": {
-            "type": "string"
-          },
-          "defaultLocaleCode": {
-            "type": "string"
-          },
-          "defaultTimezone": {
-            "type": "string"
-          },
-          "areaDisplayUnit": {
-            "type": "string",
-            "enum": [
-              "sqm",
-              "sqft"
-            ]
-          },
-          "addressFormat": {
-            "type": "object",
-            "additionalProperties": true,
-            "description": "Field labels, required flags, patterns and local components"
-          },
-          "bounds": {
-            "description": "west, south, east, north (ADR-006 L-D5)",
-            "type": [
-              "array",
-              "null"
-            ],
-            "items": {
-              "type": "number"
-            }
-          }
-        },
-        "required": [
-          "code",
-          "name",
-          "defaultCurrencyCode",
-          "defaultLocaleCode",
-          "defaultTimezone",
-          "areaDisplayUnit",
-          "addressFormat",
-          "bounds"
-        ]
-      },
-      "CountryListDto": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CountryDto"
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CurrencyDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "minorUnits": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "code",
-          "name",
-          "symbol",
-          "minorUnits"
-        ]
-      },
-      "CurrencyListDto": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CurrencyDto"
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "LocaleDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "example": "ar-QA"
-          },
-          "name": {
-            "type": "string"
-          },
-          "textDirection": {
-            "type": "string",
-            "enum": [
-              "ltr",
-              "rtl"
-            ]
-          }
-        },
-        "required": [
-          "code",
-          "name",
-          "textDirection"
-        ]
-      },
-      "LocaleListDto": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocaleDto"
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "PicklistValueDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string",
-            "description": "In the requested locale when translated"
-          },
-          "countryCode": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "isCompanyValue": {
-            "type": "boolean",
-            "description": "Added by the company (not a platform value)"
-          }
-        },
-        "required": [
-          "code",
-          "label",
-          "countryCode",
-          "isCompanyValue"
-        ]
-      },
-      "PicklistDto": {
-        "type": "object",
-        "properties": {
-          "listKey": {
-            "type": "string"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PicklistValueDto"
-            }
-          }
-        },
-        "required": [
-          "listKey",
-          "data"
-        ]
-      },
-      "ListingAttentionDto": {
-        "type": "object",
-        "properties": {
-          "notReady": {
-            "type": "number",
-            "description": "Drafts failing a media, mandate or unit check of publishing"
-          },
-          "photos": {
-            "type": "number"
-          },
-          "floorPlan": {
-            "type": "number"
-          },
-          "mandateExpiring": {
-            "type": "number"
-          },
-          "coverAlt": {
-            "type": "number"
-          },
-          "priceStale": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "notReady",
-          "photos",
-          "floorPlan",
-          "mandateExpiring",
-          "coverAlt",
-          "priceStale"
-        ]
-      },
-      "MaintenanceUnitDto": {
-        "type": "object",
-        "properties": {
-          "unitId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "unitLabel": {
-            "type": "string"
-          },
-          "propertyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "propertyName": {
-            "type": "string"
-          },
-          "note": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "until": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date"
-          }
-        },
-        "required": [
-          "unitId",
-          "unitLabel",
-          "propertyId",
-          "propertyName",
-          "note",
-          "until"
-        ]
-      },
-      "MaintenancePanelDto": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "number"
-          },
-          "units": {
-            "description": "Up to 10, most recently changed first",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MaintenanceUnitDto"
-            }
-          }
-        },
-        "required": [
-          "count",
-          "units"
-        ]
-      },
-      "KeysPanelDto": {
-        "type": "object",
-        "properties": {
-          "overdue": {
-            "type": "number"
-          },
-          "out": {
-            "type": "number"
-          },
-          "lost": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "overdue",
-          "out",
-          "lost"
-        ]
-      },
-      "LocationsPanelDto": {
-        "type": "object",
-        "properties": {
-          "missing": {
-            "type": "number",
-            "description": "Properties without a location"
-          },
-          "stale": {
-            "type": "number",
-            "description": "Properties whose address changed after the pin was confirmed"
-          }
-        },
-        "required": [
-          "missing",
-          "stale"
-        ]
-      },
-      "RejectedMediaDto": {
-        "type": "object",
-        "properties": {
-          "mediaId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "propertyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "propertyName": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "reason": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "mediaId",
-          "propertyId",
-          "propertyName",
-          "fileName",
-          "reason",
-          "at"
-        ]
-      },
-      "MediaPanelDto": {
-        "type": "object",
-        "properties": {
-          "rejected": {
-            "type": "number",
-            "description": "Rejected or failed uploads in the last 7 days"
-          },
-          "recent": {
-            "description": "Up to 10, newest first",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RejectedMediaDto"
-            }
-          }
-        },
-        "required": [
-          "rejected",
-          "recent"
         ]
       },
       "IdentityCheckSummaryDto": {
@@ -19544,6 +19515,674 @@
         "required": [
           "data",
           "page"
+        ]
+      },
+      "ContextUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "email"
+        ]
+      },
+      "ContextCompanyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trading name, else legal name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "trial",
+              "active",
+              "past_due",
+              "read_only",
+              "suspended",
+              "cancelled"
+            ]
+          },
+          "baseCurrencyCode": {
+            "type": "string",
+            "example": "GHS"
+          },
+          "headquartersCountryCode": {
+            "type": "string",
+            "example": "GH"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "baseCurrencyCode",
+          "headquartersCountryCode"
+        ]
+      },
+      "GrantDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "listing.publish"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "office",
+              "team",
+              "own",
+              "linked",
+              "assigned"
+            ]
+          },
+          "isSensitive": {
+            "type": "boolean",
+            "description": "Needs a recent sign-in with a second factor"
+          }
+        },
+        "required": [
+          "key",
+          "scope",
+          "isSensitive"
+        ]
+      },
+      "SessionContextDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/ContextUserDto"
+          },
+          "company": {
+            "$ref": "#/components/schemas/ContextCompanyDto"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleKey": {
+            "type": "string"
+          },
+          "roleName": {
+            "type": "string"
+          },
+          "officeIds": {
+            "description": "Offices the member belongs to",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrantDto"
+            }
+          },
+          "locale": {
+            "type": "string",
+            "example": "en-GH",
+            "description": "The user's locale, else the company's"
+          },
+          "textDirection": {
+            "type": "string",
+            "enum": [
+              "ltr",
+              "rtl"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Africa/Accra",
+            "description": "The user's time zone, else the company's"
+          }
+        },
+        "required": [
+          "user",
+          "company",
+          "membershipId",
+          "roleKey",
+          "roleName",
+          "officeIds",
+          "permissions",
+          "locale",
+          "textDirection",
+          "timezone"
+        ]
+      },
+      "MemberDto": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "roleName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "membershipId",
+          "displayName",
+          "roleName"
+        ]
+      },
+      "MemberListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SearchHitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "Main line (name, label or title)"
+          },
+          "context": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Context line (address, property, status)"
+          },
+          "propertyId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "For units: the property"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title",
+          "context",
+          "propertyId"
+        ]
+      },
+      "SearchGroupDto": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchHitDto"
+            }
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "More matches exist than shown"
+          }
+        },
+        "required": [
+          "hits",
+          "hasMore"
+        ]
+      },
+      "SearchResultDto": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "description": "null without property.view",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchGroupDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "units": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchGroupDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listings": {
+            "description": "null without listing.view",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchGroupDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "properties",
+          "units",
+          "listings"
+        ]
+      },
+      "CountryDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "GH"
+          },
+          "name": {
+            "type": "string"
+          },
+          "defaultCurrencyCode": {
+            "type": "string"
+          },
+          "defaultLocaleCode": {
+            "type": "string"
+          },
+          "defaultTimezone": {
+            "type": "string"
+          },
+          "areaDisplayUnit": {
+            "type": "string",
+            "enum": [
+              "sqm",
+              "sqft"
+            ]
+          },
+          "addressFormat": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Field labels, required flags, patterns and local components"
+          },
+          "bounds": {
+            "description": "west, south, east, north (ADR-006 L-D5)",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "defaultCurrencyCode",
+          "defaultLocaleCode",
+          "defaultTimezone",
+          "areaDisplayUnit",
+          "addressFormat",
+          "bounds"
+        ]
+      },
+      "CountryListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountryDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CurrencyDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "minorUnits": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "symbol",
+          "minorUnits"
+        ]
+      },
+      "CurrencyListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LocaleDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "ar-QA"
+          },
+          "name": {
+            "type": "string"
+          },
+          "textDirection": {
+            "type": "string",
+            "enum": [
+              "ltr",
+              "rtl"
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "textDirection"
+        ]
+      },
+      "LocaleListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocaleDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "PicklistValueDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "In the requested locale when translated"
+          },
+          "countryCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isCompanyValue": {
+            "type": "boolean",
+            "description": "Added by the company (not a platform value)"
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "countryCode",
+          "isCompanyValue"
+        ]
+      },
+      "PicklistDto": {
+        "type": "object",
+        "properties": {
+          "listKey": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PicklistValueDto"
+            }
+          }
+        },
+        "required": [
+          "listKey",
+          "data"
+        ]
+      },
+      "ListingAttentionDto": {
+        "type": "object",
+        "properties": {
+          "notReady": {
+            "type": "number",
+            "description": "Drafts failing a media, mandate or unit check of publishing"
+          },
+          "photos": {
+            "type": "number"
+          },
+          "floorPlan": {
+            "type": "number"
+          },
+          "mandateExpiring": {
+            "type": "number"
+          },
+          "coverAlt": {
+            "type": "number"
+          },
+          "priceStale": {
+            "type": "number"
+          },
+          "noViewing": {
+            "type": "number",
+            "description": "Available for 21 days with no viewing in the last 21 days (S1)"
+          }
+        },
+        "required": [
+          "notReady",
+          "photos",
+          "floorPlan",
+          "mandateExpiring",
+          "coverAlt",
+          "priceStale",
+          "noViewing"
+        ]
+      },
+      "MaintenanceUnitDto": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        },
+        "required": [
+          "unitId",
+          "unitLabel",
+          "propertyId",
+          "propertyName",
+          "note",
+          "until"
+        ]
+      },
+      "MaintenancePanelDto": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number"
+          },
+          "units": {
+            "description": "Up to 10, most recently changed first",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaintenanceUnitDto"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "units"
+        ]
+      },
+      "KeysPanelDto": {
+        "type": "object",
+        "properties": {
+          "overdue": {
+            "type": "number"
+          },
+          "out": {
+            "type": "number"
+          },
+          "lost": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "overdue",
+          "out",
+          "lost"
+        ]
+      },
+      "LocationsPanelDto": {
+        "type": "object",
+        "properties": {
+          "missing": {
+            "type": "number",
+            "description": "Properties without a location"
+          },
+          "stale": {
+            "type": "number",
+            "description": "Properties whose address changed after the pin was confirmed"
+          }
+        },
+        "required": [
+          "missing",
+          "stale"
+        ]
+      },
+      "RejectedMediaDto": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "mediaId",
+          "propertyId",
+          "propertyName",
+          "fileName",
+          "reason",
+          "at"
+        ]
+      },
+      "MediaPanelDto": {
+        "type": "object",
+        "properties": {
+          "rejected": {
+            "type": "number",
+            "description": "Rejected or failed uploads in the last 7 days"
+          },
+          "recent": {
+            "description": "Up to 10, newest first",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RejectedMediaDto"
+            }
+          }
+        },
+        "required": [
+          "rejected",
+          "recent"
         ]
       },
       "LeadContactDto": {
@@ -23321,6 +23960,536 @@
         },
         "required": [
           "confirm"
+        ]
+      },
+      "ViewingListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title",
+          "listingType"
+        ]
+      },
+      "ViewingPlaceDto": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId",
+          "propertyName",
+          "unitId",
+          "unitLabel"
+        ]
+      },
+      "ViewingRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference"
+        ]
+      },
+      "ViewingAttendeeDto": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "attendance": {
+            "type": "string",
+            "enum": [
+              "expected",
+              "attended",
+              "absent"
+            ]
+          }
+        },
+        "required": [
+          "contact",
+          "attendance"
+        ]
+      },
+      "ViewingConflictDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduledEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          }
+        },
+        "required": [
+          "id",
+          "scheduledStart",
+          "scheduledEnd",
+          "agent"
+        ]
+      },
+      "ViewingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listing": {
+            "$ref": "#/components/schemas/ViewingListingDto"
+          },
+          "place": {
+            "$ref": "#/components/schemas/ViewingPlaceDto"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "lead": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ViewingRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ViewingRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "viewingType": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "virtual",
+              "open_house"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "confirmed",
+              "completed",
+              "cancelled",
+              "no_show",
+              "rescheduled"
+            ]
+          },
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduledEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "The property time zone (IANA), for showing the time with its zone name"
+          },
+          "meetingPoint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attendees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ViewingAttendeeDto"
+            }
+          },
+          "outcome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "interested",
+              "not_interested",
+              "second_viewing",
+              "offer_expected",
+              "offer_made",
+              null
+            ]
+          },
+          "feedback": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "feedbackShared": {
+            "type": "boolean",
+            "description": "The landlord may see the feedback (#5, S4)"
+          },
+          "cancelledReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rescheduledToId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "rescheduledFromId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "needsOutcome": {
+            "type": "boolean",
+            "description": "Live and its time has passed: record an outcome or a no-show (\"viewings needing feedback\")"
+          },
+          "unitConflicts": {
+            "description": "Other live viewings of the same unit at an overlapping time (a warning, not a refusal)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ViewingConflictDto"
+            }
+          },
+          "canManage": {
+            "type": "boolean",
+            "description": "You may confirm, reschedule, cancel and record it"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "listing",
+          "place",
+          "agent",
+          "lead",
+          "deal",
+          "viewingType",
+          "status",
+          "scheduledStart",
+          "scheduledEnd",
+          "timezone",
+          "meetingPoint",
+          "attendees",
+          "outcome",
+          "feedback",
+          "feedbackShared",
+          "cancelledReason",
+          "rescheduledToId",
+          "rescheduledFromId",
+          "needsOutcome",
+          "unitConflicts",
+          "canManage",
+          "createdBy",
+          "createdAt",
+          "version"
+        ]
+      },
+      "ViewingPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ViewingDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "BookViewingBody": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A live listing (available, reserved or under contract)"
+          },
+          "agentMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Who conducts it; defaults to you. Someone else is a manager action (office or company scope)"
+          },
+          "viewingType": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "virtual",
+              "open_house"
+            ],
+            "default": "in_person"
+          },
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start; shown in the property time zone"
+          },
+          "scheduledEnd": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End; after the start, at most 8 hours later"
+          },
+          "attendeeContactIds": {
+            "maxItems": 10,
+            "description": "Contacts attending. At least one, except for an open house; defaults to the lead's contact when a lead is given",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "leadId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The lead it comes from (moves a new lead to contacted)"
+          },
+          "dealId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The open deal it belongs to (moves the deal to the viewing stage if earlier)"
+          },
+          "meetingPoint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "Where to meet. Do not type identity or bank numbers"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Already confirmed with the attendees"
+          }
+        },
+        "required": [
+          "listingId",
+          "scheduledStart",
+          "scheduledEnd"
+        ]
+      },
+      "RescheduleViewingBody": {
+        "type": "object",
+        "properties": {
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduledEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agentMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A different agent for the new time (manager action)"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Why it moved"
+          }
+        },
+        "required": [
+          "scheduledStart",
+          "scheduledEnd"
+        ]
+      },
+      "CancelViewingBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "AttendanceInput": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attendance": {
+            "type": "string",
+            "enum": [
+              "attended",
+              "absent"
+            ]
+          }
+        },
+        "required": [
+          "contactId",
+          "attendance"
+        ]
+      },
+      "RecordOutcomeBody": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "interested",
+              "not_interested",
+              "second_viewing",
+              "offer_expected",
+              "offer_made"
+            ]
+          },
+          "feedback": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Final once recorded (P6-D3). Do not type identity or bank numbers"
+          },
+          "attendance": {
+            "description": "Who came; attendees not listed are recorded as attended",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendanceInput"
+            }
+          },
+          "shareFeedback": {
+            "type": "boolean",
+            "default": false,
+            "description": "Share the feedback with the landlord (can be decided later)"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "NoShowBody": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "FeedbackSharingBody": {
+        "type": "object",
+        "properties": {
+          "shared": {
+            "type": "boolean",
+            "description": "Whether the landlord may see the feedback"
+          }
+        },
+        "required": [
+          "shared"
+        ]
+      },
+      "ViewingKeyCheckOutBody": {
+        "type": "object",
+        "properties": {
+          "keySetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A key set of the viewing's property (and unit, when the set is for one unit)"
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An attendee taking the keys; omit for the viewing's agent"
+          },
+          "dueBackAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Defaults to one hour after the viewing ends"
+          }
+        },
+        "required": [
+          "keySetId"
         ]
       }
     }

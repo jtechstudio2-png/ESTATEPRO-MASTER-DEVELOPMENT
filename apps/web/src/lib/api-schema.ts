@@ -1060,198 +1060,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/me/context": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Context_context"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/members": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Members_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Search_search"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/reference/countries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Reference_countries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/reference/currencies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Reference_currencies"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/reference/locales": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Reference_locales"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/reference/picklists/{listKey}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["Reference_picklist"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/dashboards/property/listings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PropertyDashboard_listingAttention"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/dashboards/property/maintenance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PropertyDashboard_maintenance"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/dashboards/property/keys": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PropertyDashboard_keys"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/dashboards/property/locations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PropertyDashboard_locations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/dashboards/property/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PropertyDashboard_media"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/contacts": {
         parameters: {
             query?: never;
@@ -1714,6 +1522,198 @@ export interface paths {
         };
         /** Identity checks of contacts in your scope: open ones (pending, in review) by default, oldest first */
         get: operations["KycQueue_queue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Context_context"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Members_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Search_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reference/countries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Reference_countries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reference/currencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Reference_currencies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reference/locales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Reference_locales"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reference/picklists/{listKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Reference_picklist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/property/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PropertyDashboard_listingAttention"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/property/maintenance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PropertyDashboard_maintenance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/property/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PropertyDashboard_keys"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/property/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PropertyDashboard_locations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/property/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PropertyDashboard_media"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2325,6 +2325,156 @@ export interface paths {
         put?: never;
         /** Carry out the erasure (ADR-007 §8) and complete the request; cannot be undone */
         post: operations["PrivacyRequests_erase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Viewings in your scope: the agent calendar (time range, agents), a listing, lead, deal or contact, and "needing feedback" */
+        get: operations["Viewings_list"];
+        put?: never;
+        /** Book a viewing on a live listing; from a lead or an open deal */
+        post: operations["Viewings_book"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Viewings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Viewings_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/reschedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move to a new time: the viewing is kept as rescheduled and a new one is booked with the same attendees (returned) */
+        post: operations["Viewings_reschedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Viewings_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record the outcome, feedback and attendance once the viewing has started; final once recorded (P6-D3) */
+        post: operations["Viewings_outcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/no-show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Viewings_noShow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/feedback-sharing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Share (or stop sharing) a completed viewing's feedback with the landlord */
+        post: operations["Viewings_feedbackSharing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewings/{viewingId}/keys/check-out": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check keys out for this viewing, to its agent or one of its attendees */
+        post: operations["Viewings_checkOutKeys"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3784,6 +3934,11 @@ export interface components {
             /** Format: date-time */
             dueBackAt: string | null;
             note: string | null;
+            /**
+             * Format: uuid
+             * @description The viewing a check-out was for
+             */
+            viewingId: string | null;
             /** Format: date-time */
             occurredAt: string;
             recordedBy: components["schemas"]["KeyHolderDto"];
@@ -3791,193 +3946,6 @@ export interface components {
         KeyMovementPageDto: {
             data: components["schemas"]["KeyMovementDto"][];
             page: components["schemas"]["PageDto"];
-        };
-        ContextUserDto: {
-            /** Format: uuid */
-            id: string;
-            displayName: string;
-            email: string;
-        };
-        ContextCompanyDto: {
-            /** Format: uuid */
-            id: string;
-            /** @description Trading name, else legal name */
-            name: string;
-            /** @enum {string} */
-            status: "trial" | "active" | "past_due" | "read_only" | "suspended" | "cancelled";
-            /** @example GHS */
-            baseCurrencyCode: string;
-            /** @example GH */
-            headquartersCountryCode: string;
-        };
-        GrantDto: {
-            /** @example listing.publish */
-            key: string;
-            /** @enum {string} */
-            scope: "all" | "office" | "team" | "own" | "linked" | "assigned";
-            /** @description Needs a recent sign-in with a second factor */
-            isSensitive: boolean;
-        };
-        SessionContextDto: {
-            user: components["schemas"]["ContextUserDto"];
-            company: components["schemas"]["ContextCompanyDto"];
-            /** Format: uuid */
-            membershipId: string;
-            roleKey: string;
-            roleName: string;
-            /** @description Offices the member belongs to */
-            officeIds: string[];
-            permissions: components["schemas"]["GrantDto"][];
-            /**
-             * @description The user's locale, else the company's
-             * @example en-GH
-             */
-            locale: string;
-            /** @enum {string} */
-            textDirection: "ltr" | "rtl";
-            /**
-             * @description The user's time zone, else the company's
-             * @example Africa/Accra
-             */
-            timezone: string;
-        };
-        MemberDto: {
-            /** Format: uuid */
-            membershipId: string;
-            displayName: string;
-            roleName: string;
-        };
-        MemberListDto: {
-            data: components["schemas"]["MemberDto"][];
-        };
-        SearchHitDto: {
-            /** Format: uuid */
-            id: string;
-            reference: string;
-            /** @description Main line (name, label or title) */
-            title: string;
-            /** @description Context line (address, property, status) */
-            context: string | null;
-            /**
-             * Format: uuid
-             * @description For units: the property
-             */
-            propertyId: string | null;
-        };
-        SearchGroupDto: {
-            hits: components["schemas"]["SearchHitDto"][];
-            /** @description More matches exist than shown */
-            hasMore: boolean;
-        };
-        SearchResultDto: {
-            /** @description null without property.view */
-            properties: components["schemas"]["SearchGroupDto"] | null;
-            units: components["schemas"]["SearchGroupDto"] | null;
-            /** @description null without listing.view */
-            listings: components["schemas"]["SearchGroupDto"] | null;
-        };
-        CountryDto: {
-            /** @example GH */
-            code: string;
-            name: string;
-            defaultCurrencyCode: string;
-            defaultLocaleCode: string;
-            defaultTimezone: string;
-            /** @enum {string} */
-            areaDisplayUnit: "sqm" | "sqft";
-            /** @description Field labels, required flags, patterns and local components */
-            addressFormat: {
-                [key: string]: unknown;
-            };
-            /** @description west, south, east, north (ADR-006 L-D5) */
-            bounds: number[] | null;
-        };
-        CountryListDto: {
-            data: components["schemas"]["CountryDto"][];
-        };
-        CurrencyDto: {
-            code: string;
-            name: string;
-            symbol: string | null;
-            minorUnits: number;
-        };
-        CurrencyListDto: {
-            data: components["schemas"]["CurrencyDto"][];
-        };
-        LocaleDto: {
-            /** @example ar-QA */
-            code: string;
-            name: string;
-            /** @enum {string} */
-            textDirection: "ltr" | "rtl";
-        };
-        LocaleListDto: {
-            data: components["schemas"]["LocaleDto"][];
-        };
-        PicklistValueDto: {
-            code: string;
-            /** @description In the requested locale when translated */
-            label: string;
-            countryCode: string | null;
-            /** @description Added by the company (not a platform value) */
-            isCompanyValue: boolean;
-        };
-        PicklistDto: {
-            listKey: string;
-            data: components["schemas"]["PicklistValueDto"][];
-        };
-        ListingAttentionDto: {
-            /** @description Drafts failing a media, mandate or unit check of publishing */
-            notReady: number;
-            photos: number;
-            floorPlan: number;
-            mandateExpiring: number;
-            coverAlt: number;
-            priceStale: number;
-        };
-        MaintenanceUnitDto: {
-            /** Format: uuid */
-            unitId: string;
-            unitLabel: string;
-            /** Format: uuid */
-            propertyId: string;
-            propertyName: string;
-            note: string | null;
-            /** Format: date */
-            until: string | null;
-        };
-        MaintenancePanelDto: {
-            count: number;
-            /** @description Up to 10, most recently changed first */
-            units: components["schemas"]["MaintenanceUnitDto"][];
-        };
-        KeysPanelDto: {
-            overdue: number;
-            out: number;
-            lost: number;
-        };
-        LocationsPanelDto: {
-            /** @description Properties without a location */
-            missing: number;
-            /** @description Properties whose address changed after the pin was confirmed */
-            stale: number;
-        };
-        RejectedMediaDto: {
-            /** Format: uuid */
-            mediaId: string;
-            /** Format: uuid */
-            propertyId: string;
-            propertyName: string;
-            fileName: string | null;
-            reason: string | null;
-            /** Format: date-time */
-            at: string;
-        };
-        MediaPanelDto: {
-            /** @description Rejected or failed uploads in the last 7 days */
-            rejected: number;
-            /** @description Up to 10, newest first */
-            recent: components["schemas"]["RejectedMediaDto"][];
         };
         IdentityCheckSummaryDto: {
             /** @enum {string} */
@@ -4804,6 +4772,195 @@ export interface components {
         KycQueuePageDto: {
             data: components["schemas"]["KycQueueItemDto"][];
             page: components["schemas"]["PageDto"];
+        };
+        ContextUserDto: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            email: string;
+        };
+        ContextCompanyDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Trading name, else legal name */
+            name: string;
+            /** @enum {string} */
+            status: "trial" | "active" | "past_due" | "read_only" | "suspended" | "cancelled";
+            /** @example GHS */
+            baseCurrencyCode: string;
+            /** @example GH */
+            headquartersCountryCode: string;
+        };
+        GrantDto: {
+            /** @example listing.publish */
+            key: string;
+            /** @enum {string} */
+            scope: "all" | "office" | "team" | "own" | "linked" | "assigned";
+            /** @description Needs a recent sign-in with a second factor */
+            isSensitive: boolean;
+        };
+        SessionContextDto: {
+            user: components["schemas"]["ContextUserDto"];
+            company: components["schemas"]["ContextCompanyDto"];
+            /** Format: uuid */
+            membershipId: string;
+            roleKey: string;
+            roleName: string;
+            /** @description Offices the member belongs to */
+            officeIds: string[];
+            permissions: components["schemas"]["GrantDto"][];
+            /**
+             * @description The user's locale, else the company's
+             * @example en-GH
+             */
+            locale: string;
+            /** @enum {string} */
+            textDirection: "ltr" | "rtl";
+            /**
+             * @description The user's time zone, else the company's
+             * @example Africa/Accra
+             */
+            timezone: string;
+        };
+        MemberDto: {
+            /** Format: uuid */
+            membershipId: string;
+            displayName: string;
+            roleName: string;
+        };
+        MemberListDto: {
+            data: components["schemas"]["MemberDto"][];
+        };
+        SearchHitDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @description Main line (name, label or title) */
+            title: string;
+            /** @description Context line (address, property, status) */
+            context: string | null;
+            /**
+             * Format: uuid
+             * @description For units: the property
+             */
+            propertyId: string | null;
+        };
+        SearchGroupDto: {
+            hits: components["schemas"]["SearchHitDto"][];
+            /** @description More matches exist than shown */
+            hasMore: boolean;
+        };
+        SearchResultDto: {
+            /** @description null without property.view */
+            properties: components["schemas"]["SearchGroupDto"] | null;
+            units: components["schemas"]["SearchGroupDto"] | null;
+            /** @description null without listing.view */
+            listings: components["schemas"]["SearchGroupDto"] | null;
+        };
+        CountryDto: {
+            /** @example GH */
+            code: string;
+            name: string;
+            defaultCurrencyCode: string;
+            defaultLocaleCode: string;
+            defaultTimezone: string;
+            /** @enum {string} */
+            areaDisplayUnit: "sqm" | "sqft";
+            /** @description Field labels, required flags, patterns and local components */
+            addressFormat: {
+                [key: string]: unknown;
+            };
+            /** @description west, south, east, north (ADR-006 L-D5) */
+            bounds: number[] | null;
+        };
+        CountryListDto: {
+            data: components["schemas"]["CountryDto"][];
+        };
+        CurrencyDto: {
+            code: string;
+            name: string;
+            symbol: string | null;
+            minorUnits: number;
+        };
+        CurrencyListDto: {
+            data: components["schemas"]["CurrencyDto"][];
+        };
+        LocaleDto: {
+            /** @example ar-QA */
+            code: string;
+            name: string;
+            /** @enum {string} */
+            textDirection: "ltr" | "rtl";
+        };
+        LocaleListDto: {
+            data: components["schemas"]["LocaleDto"][];
+        };
+        PicklistValueDto: {
+            code: string;
+            /** @description In the requested locale when translated */
+            label: string;
+            countryCode: string | null;
+            /** @description Added by the company (not a platform value) */
+            isCompanyValue: boolean;
+        };
+        PicklistDto: {
+            listKey: string;
+            data: components["schemas"]["PicklistValueDto"][];
+        };
+        ListingAttentionDto: {
+            /** @description Drafts failing a media, mandate or unit check of publishing */
+            notReady: number;
+            photos: number;
+            floorPlan: number;
+            mandateExpiring: number;
+            coverAlt: number;
+            priceStale: number;
+            /** @description Available for 21 days with no viewing in the last 21 days (S1) */
+            noViewing: number;
+        };
+        MaintenanceUnitDto: {
+            /** Format: uuid */
+            unitId: string;
+            unitLabel: string;
+            /** Format: uuid */
+            propertyId: string;
+            propertyName: string;
+            note: string | null;
+            /** Format: date */
+            until: string | null;
+        };
+        MaintenancePanelDto: {
+            count: number;
+            /** @description Up to 10, most recently changed first */
+            units: components["schemas"]["MaintenanceUnitDto"][];
+        };
+        KeysPanelDto: {
+            overdue: number;
+            out: number;
+            lost: number;
+        };
+        LocationsPanelDto: {
+            /** @description Properties without a location */
+            missing: number;
+            /** @description Properties whose address changed after the pin was confirmed */
+            stale: number;
+        };
+        RejectedMediaDto: {
+            /** Format: uuid */
+            mediaId: string;
+            /** Format: uuid */
+            propertyId: string;
+            propertyName: string;
+            fileName: string | null;
+            reason: string | null;
+            /** Format: date-time */
+            at: string;
+        };
+        MediaPanelDto: {
+            /** @description Rejected or failed uploads in the last 7 days */
+            rejected: number;
+            /** @description Up to 10, newest first */
+            recent: components["schemas"]["RejectedMediaDto"][];
         };
         LeadContactDto: {
             /** Format: uuid */
@@ -5818,6 +5975,191 @@ export interface components {
              */
             confirm: string;
         };
+        ViewingListingDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+            /** @enum {string} */
+            listingType: "sale" | "rent";
+        };
+        ViewingPlaceDto: {
+            /** Format: uuid */
+            propertyId: string;
+            propertyName: string;
+            /** Format: uuid */
+            unitId: string;
+            unitLabel: string;
+        };
+        ViewingRefDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+        };
+        ViewingAttendeeDto: {
+            contact: components["schemas"]["RefLabelDto"];
+            /** @enum {string} */
+            attendance: "expected" | "attended" | "absent";
+        };
+        ViewingConflictDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            scheduledStart: string;
+            /** Format: date-time */
+            scheduledEnd: string;
+            agent: components["schemas"]["RefLabelDto"];
+        };
+        ViewingDto: {
+            /** Format: uuid */
+            id: string;
+            listing: components["schemas"]["ViewingListingDto"];
+            place: components["schemas"]["ViewingPlaceDto"];
+            agent: components["schemas"]["RefLabelDto"];
+            lead: components["schemas"]["ViewingRefDto"] | null;
+            deal: components["schemas"]["ViewingRefDto"] | null;
+            /** @enum {string} */
+            viewingType: "in_person" | "virtual" | "open_house";
+            /** @enum {string} */
+            status: "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show" | "rescheduled";
+            /** Format: date-time */
+            scheduledStart: string;
+            /** Format: date-time */
+            scheduledEnd: string;
+            /** @description The property time zone (IANA), for showing the time with its zone name */
+            timezone: string;
+            meetingPoint: string | null;
+            attendees: components["schemas"]["ViewingAttendeeDto"][];
+            /** @enum {string|null} */
+            outcome: "interested" | "not_interested" | "second_viewing" | "offer_expected" | "offer_made" | null;
+            feedback: string | null;
+            /** @description The landlord may see the feedback (#5, S4) */
+            feedbackShared: boolean;
+            cancelledReason: string | null;
+            /** Format: uuid */
+            rescheduledToId: string | null;
+            /** Format: uuid */
+            rescheduledFromId: string | null;
+            /** @description Live and its time has passed: record an outcome or a no-show ("viewings needing feedback") */
+            needsOutcome: boolean;
+            /** @description Other live viewings of the same unit at an overlapping time (a warning, not a refusal) */
+            unitConflicts: components["schemas"]["ViewingConflictDto"][];
+            /** @description You may confirm, reschedule, cancel and record it */
+            canManage: boolean;
+            createdBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+        };
+        ViewingPageDto: {
+            data: components["schemas"]["ViewingDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        BookViewingBody: {
+            /**
+             * Format: uuid
+             * @description A live listing (available, reserved or under contract)
+             */
+            listingId: string;
+            /**
+             * Format: uuid
+             * @description Who conducts it; defaults to you. Someone else is a manager action (office or company scope)
+             */
+            agentMembershipId?: string;
+            /**
+             * @default in_person
+             * @enum {string}
+             */
+            viewingType: "in_person" | "virtual" | "open_house";
+            /**
+             * Format: date-time
+             * @description Start; shown in the property time zone
+             */
+            scheduledStart: string;
+            /**
+             * Format: date-time
+             * @description End; after the start, at most 8 hours later
+             */
+            scheduledEnd: string;
+            /** @description Contacts attending. At least one, except for an open house; defaults to the lead's contact when a lead is given */
+            attendeeContactIds?: string[];
+            /**
+             * Format: uuid
+             * @description The lead it comes from (moves a new lead to contacted)
+             */
+            leadId?: string;
+            /**
+             * Format: uuid
+             * @description The open deal it belongs to (moves the deal to the viewing stage if earlier)
+             */
+            dealId?: string;
+            /** @description Where to meet. Do not type identity or bank numbers */
+            meetingPoint?: string | null;
+            /**
+             * @description Already confirmed with the attendees
+             * @default false
+             */
+            confirmed: boolean;
+        };
+        RescheduleViewingBody: {
+            /** Format: date-time */
+            scheduledStart: string;
+            /** Format: date-time */
+            scheduledEnd: string;
+            /**
+             * Format: uuid
+             * @description A different agent for the new time (manager action)
+             */
+            agentMembershipId?: string;
+            /** @description Why it moved */
+            reason?: string;
+        };
+        CancelViewingBody: {
+            reason: string;
+        };
+        AttendanceInput: {
+            /** Format: uuid */
+            contactId: string;
+            /** @enum {string} */
+            attendance: "attended" | "absent";
+        };
+        RecordOutcomeBody: {
+            /** @enum {string} */
+            outcome: "interested" | "not_interested" | "second_viewing" | "offer_expected" | "offer_made";
+            /** @description Final once recorded (P6-D3). Do not type identity or bank numbers */
+            feedback?: string | null;
+            /** @description Who came; attendees not listed are recorded as attended */
+            attendance?: components["schemas"]["AttendanceInput"][];
+            /**
+             * @description Share the feedback with the landlord (can be decided later)
+             * @default false
+             */
+            shareFeedback: boolean;
+        };
+        NoShowBody: {
+            note?: string;
+        };
+        FeedbackSharingBody: {
+            /** @description Whether the landlord may see the feedback */
+            shared: boolean;
+        };
+        ViewingKeyCheckOutBody: {
+            /**
+             * Format: uuid
+             * @description A key set of the viewing's property (and unit, when the set is for one unit)
+             */
+            keySetId: string;
+            /**
+             * Format: uuid
+             * @description An attendee taking the keys; omit for the viewing's agent
+             */
+            contactId?: string;
+            /**
+             * Format: date-time
+             * @description Defaults to one hour after the viewing ends
+             */
+            dueBackAt?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -5940,30 +6282,6 @@ export type KeyNoteBody = components['schemas']['KeyNoteBody'];
 export type RetireKeySetBody = components['schemas']['RetireKeySetBody'];
 export type KeyMovementDto = components['schemas']['KeyMovementDto'];
 export type KeyMovementPageDto = components['schemas']['KeyMovementPageDto'];
-export type ContextUserDto = components['schemas']['ContextUserDto'];
-export type ContextCompanyDto = components['schemas']['ContextCompanyDto'];
-export type GrantDto = components['schemas']['GrantDto'];
-export type SessionContextDto = components['schemas']['SessionContextDto'];
-export type MemberDto = components['schemas']['MemberDto'];
-export type MemberListDto = components['schemas']['MemberListDto'];
-export type SearchHitDto = components['schemas']['SearchHitDto'];
-export type SearchGroupDto = components['schemas']['SearchGroupDto'];
-export type SearchResultDto = components['schemas']['SearchResultDto'];
-export type CountryDto = components['schemas']['CountryDto'];
-export type CountryListDto = components['schemas']['CountryListDto'];
-export type CurrencyDto = components['schemas']['CurrencyDto'];
-export type CurrencyListDto = components['schemas']['CurrencyListDto'];
-export type LocaleDto = components['schemas']['LocaleDto'];
-export type LocaleListDto = components['schemas']['LocaleListDto'];
-export type PicklistValueDto = components['schemas']['PicklistValueDto'];
-export type PicklistDto = components['schemas']['PicklistDto'];
-export type ListingAttentionDto = components['schemas']['ListingAttentionDto'];
-export type MaintenanceUnitDto = components['schemas']['MaintenanceUnitDto'];
-export type MaintenancePanelDto = components['schemas']['MaintenancePanelDto'];
-export type KeysPanelDto = components['schemas']['KeysPanelDto'];
-export type LocationsPanelDto = components['schemas']['LocationsPanelDto'];
-export type RejectedMediaDto = components['schemas']['RejectedMediaDto'];
-export type MediaPanelDto = components['schemas']['MediaPanelDto'];
 export type IdentityCheckSummaryDto = components['schemas']['IdentityCheckSummaryDto'];
 export type NextFollowUpDto = components['schemas']['NextFollowUpDto'];
 export type ListingRefDto = components['schemas']['ListingRefDto'];
@@ -6022,6 +6340,30 @@ export type RejectKycCheckBody = components['schemas']['RejectKycCheckBody'];
 export type KycQueueContactDto = components['schemas']['KycQueueContactDto'];
 export type KycQueueItemDto = components['schemas']['KycQueueItemDto'];
 export type KycQueuePageDto = components['schemas']['KycQueuePageDto'];
+export type ContextUserDto = components['schemas']['ContextUserDto'];
+export type ContextCompanyDto = components['schemas']['ContextCompanyDto'];
+export type GrantDto = components['schemas']['GrantDto'];
+export type SessionContextDto = components['schemas']['SessionContextDto'];
+export type MemberDto = components['schemas']['MemberDto'];
+export type MemberListDto = components['schemas']['MemberListDto'];
+export type SearchHitDto = components['schemas']['SearchHitDto'];
+export type SearchGroupDto = components['schemas']['SearchGroupDto'];
+export type SearchResultDto = components['schemas']['SearchResultDto'];
+export type CountryDto = components['schemas']['CountryDto'];
+export type CountryListDto = components['schemas']['CountryListDto'];
+export type CurrencyDto = components['schemas']['CurrencyDto'];
+export type CurrencyListDto = components['schemas']['CurrencyListDto'];
+export type LocaleDto = components['schemas']['LocaleDto'];
+export type LocaleListDto = components['schemas']['LocaleListDto'];
+export type PicklistValueDto = components['schemas']['PicklistValueDto'];
+export type PicklistDto = components['schemas']['PicklistDto'];
+export type ListingAttentionDto = components['schemas']['ListingAttentionDto'];
+export type MaintenanceUnitDto = components['schemas']['MaintenanceUnitDto'];
+export type MaintenancePanelDto = components['schemas']['MaintenancePanelDto'];
+export type KeysPanelDto = components['schemas']['KeysPanelDto'];
+export type LocationsPanelDto = components['schemas']['LocationsPanelDto'];
+export type RejectedMediaDto = components['schemas']['RejectedMediaDto'];
+export type MediaPanelDto = components['schemas']['MediaPanelDto'];
 export type LeadContactDto = components['schemas']['LeadContactDto'];
 export type LeadListingDto = components['schemas']['LeadListingDto'];
 export type LeadResponseDto = components['schemas']['LeadResponseDto'];
@@ -6102,6 +6444,21 @@ export type ChangePrivacyRequestStatusBody = components['schemas']['ChangePrivac
 export type ExtendPrivacyRequestBody = components['schemas']['ExtendPrivacyRequestBody'];
 export type AddEvidenceBody = components['schemas']['AddEvidenceBody'];
 export type CarryOutErasureBody = components['schemas']['CarryOutErasureBody'];
+export type ViewingListingDto = components['schemas']['ViewingListingDto'];
+export type ViewingPlaceDto = components['schemas']['ViewingPlaceDto'];
+export type ViewingRefDto = components['schemas']['ViewingRefDto'];
+export type ViewingAttendeeDto = components['schemas']['ViewingAttendeeDto'];
+export type ViewingConflictDto = components['schemas']['ViewingConflictDto'];
+export type ViewingDto = components['schemas']['ViewingDto'];
+export type ViewingPageDto = components['schemas']['ViewingPageDto'];
+export type BookViewingBody = components['schemas']['BookViewingBody'];
+export type RescheduleViewingBody = components['schemas']['RescheduleViewingBody'];
+export type CancelViewingBody = components['schemas']['CancelViewingBody'];
+export type AttendanceInput = components['schemas']['AttendanceInput'];
+export type RecordOutcomeBody = components['schemas']['RecordOutcomeBody'];
+export type NoShowBody = components['schemas']['NoShowBody'];
+export type FeedbackSharingBody = components['schemas']['FeedbackSharingBody'];
+export type ViewingKeyCheckOutBody = components['schemas']['ViewingKeyCheckOutBody'];
 export type $defs = Record<string, never>;
 export interface operations {
     Health_health: {
@@ -6872,7 +7229,7 @@ export interface operations {
                 "filter[locality]"?: unknown;
                 /** @description Comma-separated regions (case-insensitive) */
                 "filter[adminArea1]"?: unknown;
-                /** @description Needs attention: not-ready, photos, floor-plan, mandate-expiring, cover-alt, price-stale */
+                /** @description Needs attention: not-ready, photos, floor-plan, mandate-expiring, cover-alt, price-stale, no-viewing */
                 "filter[attention]"?: unknown;
                 "filter[mandateExpiresOn][lte]"?: unknown;
                 "filter[availableFrom][lte]"?: unknown;
@@ -8329,289 +8686,6 @@ export interface operations {
             };
         };
     };
-    Context_context: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionContextDto"];
-                };
-            };
-        };
-    };
-    Members_list: {
-        parameters: {
-            query?: {
-                /** @description With filter[permission]: the grant must cover this office */
-                "filter[officeId]"?: unknown;
-                "filter[permission]"?: unknown;
-                /** @description Name contains (2–100 characters) */
-                q?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberListDto"];
-                };
-            };
-        };
-    };
-    Search_search: {
-        parameters: {
-            query: {
-                /** @description Reference, name, address or title (2–100 characters) */
-                q: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SearchResultDto"];
-                };
-            };
-        };
-    };
-    Reference_countries: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CountryListDto"];
-                };
-            };
-        };
-    };
-    Reference_currencies: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CurrencyListDto"];
-                };
-            };
-        };
-    };
-    Reference_locales: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LocaleListDto"];
-                };
-            };
-        };
-    };
-    Reference_picklist: {
-        parameters: {
-            query?: {
-                /** @description Label language, e.g. ar-QA */
-                locale?: unknown;
-                /** @description Values for all countries plus this one */
-                countryCode?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path: {
-                listKey: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PicklistDto"];
-                };
-            };
-        };
-    };
-    PropertyDashboard_listingAttention: {
-        parameters: {
-            query?: {
-                /** @description rent, sale or rent,sale (default: both) */
-                "filter[listingType]"?: unknown;
-                "filter[officeId]"?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Counts match GET /listings?filter[attention]=not-ready|photos|floor-plan|mandate-expiring|cover-alt|price-stale */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListingAttentionDto"];
-                };
-            };
-        };
-    };
-    PropertyDashboard_maintenance: {
-        parameters: {
-            query?: {
-                "filter[officeId]"?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MaintenancePanelDto"];
-                };
-            };
-        };
-    };
-    PropertyDashboard_keys: {
-        parameters: {
-            query?: {
-                "filter[officeId]"?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Counts match GET /key-sets?filter[overdue]=true, filter[status]=checked_out and filter[status]=lost */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KeysPanelDto"];
-                };
-            };
-        };
-    };
-    PropertyDashboard_locations: {
-        parameters: {
-            query?: {
-                "filter[officeId]"?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Counts match GET /properties?filter[hasLocation]=false and filter[locationStale]=true */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LocationsPanelDto"];
-                };
-            };
-        };
-    };
-    PropertyDashboard_media: {
-        parameters: {
-            query?: {
-                "filter[officeId]"?: unknown;
-            };
-            header: {
-                "X-Company-Id": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MediaPanelDto"];
-                };
-            };
-        };
-    };
     Contacts_list: {
         parameters: {
             query?: {
@@ -9615,6 +9689,289 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KycQueuePageDto"];
+                };
+            };
+        };
+    };
+    Context_context: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionContextDto"];
+                };
+            };
+        };
+    };
+    Members_list: {
+        parameters: {
+            query?: {
+                /** @description With filter[permission]: the grant must cover this office */
+                "filter[officeId]"?: unknown;
+                "filter[permission]"?: unknown;
+                /** @description Name contains (2–100 characters) */
+                q?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberListDto"];
+                };
+            };
+        };
+    };
+    Search_search: {
+        parameters: {
+            query: {
+                /** @description Reference, name, address or title (2–100 characters) */
+                q: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResultDto"];
+                };
+            };
+        };
+    };
+    Reference_countries: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountryListDto"];
+                };
+            };
+        };
+    };
+    Reference_currencies: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrencyListDto"];
+                };
+            };
+        };
+    };
+    Reference_locales: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocaleListDto"];
+                };
+            };
+        };
+    };
+    Reference_picklist: {
+        parameters: {
+            query?: {
+                /** @description Label language, e.g. ar-QA */
+                locale?: unknown;
+                /** @description Values for all countries plus this one */
+                countryCode?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                listKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PicklistDto"];
+                };
+            };
+        };
+    };
+    PropertyDashboard_listingAttention: {
+        parameters: {
+            query?: {
+                /** @description rent, sale or rent,sale (default: both) */
+                "filter[listingType]"?: unknown;
+                "filter[officeId]"?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Counts match GET /listings?filter[attention]=not-ready|photos|floor-plan|mandate-expiring|cover-alt|price-stale|no-viewing */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListingAttentionDto"];
+                };
+            };
+        };
+    };
+    PropertyDashboard_maintenance: {
+        parameters: {
+            query?: {
+                "filter[officeId]"?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaintenancePanelDto"];
+                };
+            };
+        };
+    };
+    PropertyDashboard_keys: {
+        parameters: {
+            query?: {
+                "filter[officeId]"?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Counts match GET /key-sets?filter[overdue]=true, filter[status]=checked_out and filter[status]=lost */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeysPanelDto"];
+                };
+            };
+        };
+    };
+    PropertyDashboard_locations: {
+        parameters: {
+            query?: {
+                "filter[officeId]"?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Counts match GET /properties?filter[hasLocation]=false and filter[locationStale]=true */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocationsPanelDto"];
+                };
+            };
+        };
+    };
+    PropertyDashboard_media: {
+        parameters: {
+            query?: {
+                "filter[officeId]"?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaPanelDto"];
                 };
             };
         };
@@ -10746,6 +11103,284 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PrivacyRequestDto"];
+                };
+            };
+        };
+    };
+    Viewings_list: {
+        parameters: {
+            query?: {
+                /** @description Scheduled or confirmed and already over: record an outcome or a no-show */
+                "filter[needsOutcome]"?: "true" | "false";
+                /** @description Viewings this contact attends */
+                "filter[contactId]"?: unknown;
+                "filter[dealId]"?: unknown;
+                "filter[leadId]"?: unknown;
+                "filter[listingId]"?: unknown;
+                /** @description One or more agents (your own calendar: your membership id) */
+                "filter[agentMembershipId]"?: unknown;
+                /** @description Any of scheduled, confirmed, completed, cancelled, no_show, rescheduled */
+                "filter[status]"?: unknown;
+                "filter[scheduledStart][lte]"?: unknown;
+                /** @description Calendar range start (week or day boundaries computed by the client in the office time zone) */
+                "filter[scheduledStart][gte]"?: unknown;
+                sort?: "scheduledStart" | "-scheduledStart";
+                cursor?: unknown;
+                limit?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingPageDto"];
+                };
+            };
+        };
+    };
+    Viewings_book: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookViewingBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_confirm: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_reschedule: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RescheduleViewingBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_cancel: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelViewingBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_outcome: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordOutcomeBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_noShow: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoShowBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_feedbackSharing: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackSharingBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewingDto"];
+                };
+            };
+        };
+    };
+    Viewings_checkOutKeys: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                viewingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewingKeyCheckOutBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeySetDto"];
                 };
             };
         };

@@ -27,6 +27,7 @@ import { MediaModule } from './media/media.module.js';
 import { NotesModule } from './notes/notes.module.js';
 import { WorkspaceModule } from './workspace/workspace.module.js';
 import { PropertiesModule } from './properties/properties.module.js';
+import { ViewingsModule } from './viewings/viewings.module.js';
 
 /** Log destination override (tests capture the real log output); null means standard output. */
 export const LOG_STREAM = Symbol('LOG_STREAM');
@@ -69,6 +70,7 @@ function withStream<T>(stream: DestinationStream | null, options: T): T | [T, De
     DashboardsModule,
     ExportsModule,
     PrivacyModule,
+    ViewingsModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],

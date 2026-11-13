@@ -177,9 +177,11 @@ SELECT test_assert((SELECT count(*) = 3 FROM deal_stage_history WHERE deal_id = 
   'closing is recorded as a stage change');
 
 -- ------------------------------------------------- viewings
-INSERT INTO viewings (id, company_id, listing_id, unit_id, deal_id, agent_membership_id, scheduled_start, scheduled_end, timezone, meeting_point) VALUES
+-- (The deal above is closed: since S1 a viewing is booked on open deals only, so this one is for the
+-- listing; the erasure still finds it through its attendee.)
+INSERT INTO viewings (id, company_id, listing_id, unit_id, agent_membership_id, scheduled_start, scheduled_end, timezone, meeting_point) VALUES
   ('a9f00000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'a9000000-0000-0000-0000-000000000002',
-   'a8000000-0000-0000-0000-000000000002', 'a9b00000-0000-0000-0000-000000000001', 'a4000000-0000-0000-0000-000000000002',
+   'a8000000-0000-0000-0000-000000000002', 'a4000000-0000-0000-0000-000000000002',
    '2015-01-10 10:00+00', '2015-01-10 10:30+00', 'Africa/Accra', 'Gate by the mango tree');
 INSERT INTO viewing_attendees (company_id, viewing_id, contact_id) VALUES
   ('a0000000-0000-0000-0000-000000000001', 'a9f00000-0000-0000-0000-000000000001', 'a5600000-0000-0000-0000-000000000001');

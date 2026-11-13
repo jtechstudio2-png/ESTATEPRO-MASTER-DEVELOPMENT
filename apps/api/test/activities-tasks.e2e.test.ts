@@ -226,7 +226,7 @@ describe('activity timeline and follow-ups (Phase 5 milestone C3; A-1, A-2, F-1,
       expect(edited.body.revisions).toEqual([expect.objectContaining({ revisionNo: 1, body: 'Spoke to Ama', editedBy: expect.objectContaining({ id: members['agent'] }) })]);
       const again = await as('agent').patch(path, { direction: 'inbound', occurredAt: new Date(Date.now() - 60_000).toISOString() }, 2).expect(200);
       expect(again.body.revisions).toHaveLength(2);
-      const audit = await fx.db.selectFrom('auditLogs').select('metadata').where('entityId', '=', entry.id).where('action', '=', 'activity.edited').execute();
+      const audit = await fx.db.selectFrom('auditLogs').select('metadata').where('entityId', '=', entry.id).where('action', '=', 'activity.edited').orderBy('entryNo').execute();
       expect(audit[0]!.metadata).toEqual({ fields: ['body', 'outcomeCode', 'durationSeconds'], revisionNo: 1 });
       expect(JSON.stringify(audit)).not.toContain('Kojo');
       for (const body of [{ direction: 'internal' }, { durationSeconds: 99999999 }, { occurredAt: inHours(3) }, { outcomeCode: 'teleported' }]) {

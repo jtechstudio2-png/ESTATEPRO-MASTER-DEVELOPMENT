@@ -68,7 +68,8 @@ describe('key register (Phase 4 M5, ADR-006 L-D10)', () => {
     contractorId = (
       await fx.db
         .insertInto('contacts')
-        .values({ companyId: company.companyId, contactType: 'person', displayName: 'Kwame the plumber' })
+        // The agent's own contact: since S1 a contact holder must be in the member's contact scope (readiness R7).
+        .values({ companyId: company.companyId, contactType: 'person', displayName: 'Kwame the plumber', ownerMembershipId: members['agent']!, officeId: company.officeId })
         .returning('id')
         .executeTakeFirstOrThrow()
     ).id;
@@ -139,6 +140,10 @@ describe('key register (Phase 4 M5, ADR-006 L-D10)', () => {
     const back = await as('agent').action(`${path}/check-in`, 2, { note: 'All keys returned' }).expect(200);
     expect(back.body).toMatchObject({ status: 'in_office', holder: null, dueBackAt: null, checkedOutAt: null });
 
+    // A contact outside the agent's contact scope cannot hold the keys (readiness R7).
+    const stranger = await fx.db.insertInto('contacts').values({ companyId: company.companyId, contactType: 'person', displayName: 'Unknown caller' }).returning('id').executeTakeFirstOrThrow();
+    const outOfScope = await as('agent').action(`${path}/check-out`, back.body.version, { holderContactId: stranger.id }).expect(422);
+    expect(outOfScope.body.errors).toContainEqual(expect.objectContaining({ field: 'holderContactId', code: 'not-found' }));
     const contractor = await as('agent').action(`${path}/check-out`, back.body.version, { holderContactId: contractorId }).expect(200);
     expect(contractor.body.holder).toEqual({ type: 'contact', id: contractorId, displayName: 'Kwame the plumber' });
     const lost = await as('agent').action(`${path}/report-lost`, contractor.body.version, { note: 'Contractor lost them' }).expect(200);

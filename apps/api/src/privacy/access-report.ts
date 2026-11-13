@@ -30,6 +30,8 @@ export interface AccessReport {
   leads: Record<string, unknown>[];
   activities: Record<string, unknown>[];
   followUps: Record<string, unknown>[];
+  /** Viewings the person attends, and viewings of their leads (S1). */
+  viewings: Record<string, unknown>[];
   privacyRequests: Record<string, unknown>[];
 }
 
@@ -181,6 +183,15 @@ export async function buildAccessReport(
     )
     .orderBy('dueAt')
     .execute();
+  const { rows: viewings } = await sql<Record<string, unknown>>`
+    select l.reference as "listingReference", l.title as "listingTitle", v.viewing_type as "viewingType", v.status,
+           v.scheduled_start as "scheduledStart", v.scheduled_end as "scheduledEnd", v.timezone, v.meeting_point as "meetingPoint",
+           v.outcome, v.feedback, v.cancelled_reason as "cancelledReason",
+           (select a.attendance from viewing_attendees a where a.viewing_id = v.id and a.contact_id = any(${subjects}::uuid[]) limit 1) as "attendance"
+      from viewings v join listings l on l.id = v.listing_id
+     where exists (select 1 from viewing_attendees a where a.viewing_id = v.id and a.contact_id = any(${subjects}::uuid[]))
+        or v.lead_id = any(${leadIds.length > 0 ? leadIds : [contactId]}::uuid[])
+     order by v.scheduled_start, v.id`.execute(tx);
   const privacyRequests = await tx
     .selectFrom('dataSubjectRequests')
     .select(['reference', 'requestType', 'status', 'receivedOn', 'closedAt'])
@@ -210,11 +221,12 @@ export async function buildAccessReport(
     leads,
     activities: activities.map(stamp),
     followUps: followUps.map(stamp),
+    viewings: viewings.map(stamp),
     privacyRequests: privacyRequests.map(stamp),
   };
   const rowCount =
     contacts.length + contactMethods.length + roles.length + consents.length + identityDocuments.length + identityChecks.length + requirements.length +
-    leads.length + activities.length + followUps.length + privacyRequests.length;
+    leads.length + activities.length + followUps.length + viewings.length + privacyRequests.length;
   return { report, rowCount, protectedFields: [...new Set(protectedFields)] };
 }
 

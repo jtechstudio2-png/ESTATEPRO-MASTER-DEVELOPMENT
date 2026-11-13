@@ -1092,6 +1092,10 @@ export interface KeyMovements {
   note: string | null;
   occurredAt: Generated<Timestamp>;
   recordedBy: string;
+  /**
+   * The viewing a check-out is for (S1).
+   */
+  viewingId: string | null;
 }
 
 export interface KeyRotations {

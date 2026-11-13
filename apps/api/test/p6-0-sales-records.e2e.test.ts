@@ -250,11 +250,17 @@ describe('P6-0: history order (#15) and sales-record protection', () => {
         .returning('id')
         .executeTakeFirstOrThrow();
       await fx.db.updateTable('offers').set({ status: 'accepted', respondedAt: new Date() }).where('id', '=', offer.id).execute();
-      const viewing = await fx.db
-        .insertInto('viewings')
-        .values({ companyId: company.companyId, listingId, unitId, dealId: id, agentMembershipId: company.ownerMembershipId, scheduledStart: new Date('2016-01-04T10:00:00Z'), scheduledEnd: new Date('2016-01-04T10:30:00Z'), timezone: 'Africa/Accra' })
-        .returning('id')
-        .executeTakeFirstOrThrow();
+      // Since S1 a viewing is booked on a live listing, with an attendee, in one transaction.
+      await fx.db.updateTable('listings').set({ status: 'available' }).where('id', '=', listingId).where('status', '=', 'draft').execute();
+      const viewing = await fx.db.transaction().execute(async (tx) => {
+        const row = await tx
+          .insertInto('viewings')
+          .values({ companyId: company.companyId, listingId, unitId, dealId: id, agentMembershipId: company.ownerMembershipId, scheduledStart: new Date('2016-01-04T10:00:00Z'), scheduledEnd: new Date('2016-01-04T10:30:00Z'), timezone: 'Africa/Accra' })
+          .returning('id')
+          .executeTakeFirstOrThrow();
+        await tx.insertInto('viewingAttendees').values({ companyId: company.companyId, viewingId: row.id, contactId: buyer.id }).execute();
+        return row;
+      });
       await fx.db.updateTable('viewings').set({ status: 'completed', outcome: 'offer_made', feedback: 'Asked about the school run for their children' }).where('id', '=', viewing.id).execute();
       await fx.db.insertInto('salesTransactions').values({ companyId: company.companyId, reference: `SAL-P6-${randomUUID().slice(0, 8)}`, dealId: id, listingId, unitId, acceptedOfferId: offer.id, currencyCode: 'GHS', agreedPrice: '850000' }).execute();
       await fx.db.updateTable('salesTransactions').set({ status: 'exchanged', contractSignedOn: '2016-01-20' }).where('dealId', '=', id).execute();

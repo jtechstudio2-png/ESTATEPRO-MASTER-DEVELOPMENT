@@ -1460,7 +1460,7 @@ interface SummaryRow {
   updatedAt: Date;
 }
 
-export const ATTENTION_KINDS = ['not-ready', 'photos', 'floor-plan', 'mandate-expiring', 'cover-alt', 'price-stale'] as const;
+export const ATTENTION_KINDS = ['not-ready', 'photos', 'floor-plan', 'mandate-expiring', 'cover-alt', 'price-stale', 'no-viewing'] as const;
 export type AttentionKind = (typeof ATTENTION_KINDS)[number];
 interface AttentionRules {
   minPhotos: number | null;
@@ -1468,6 +1468,7 @@ interface AttentionRules {
 }
 const PRICE_STALE_DAYS = 60;
 const MANDATE_WARNING_DAYS = 14;
+const NO_VIEWING_DAYS = 21;
 
 /**
  * "Needs attention" conditions on alias l, shared by filter[attention] on the
@@ -1480,6 +1481,8 @@ const MANDATE_WARNING_DAYS = 14;
  *   mandate-expiring  live listings whose mandate ends within 14 days (property's date)
  *   cover-alt         open listings whose cover photo has no alt text
  *   price-stale       available listings whose price has not changed for 60 days
+ *   no-viewing        available listings on the market for 21 days with no viewing booked or held in
+ *                     the last 21 days (cancelled, no-show and rescheduled viewings do not count; S1)
  */
 function attentionSql(kind: AttentionKind, rules: AttentionRules) {
   const open = sql`l.status in ('draft', 'available', 'reserved', 'under_contract')`;
@@ -1503,6 +1506,10 @@ function attentionSql(kind: AttentionKind, rules: AttentionRules) {
       return sql<boolean>`(l.status = 'available' and coalesce(
         (select max(h.changed_at) from listing_price_history h where h.listing_id = l.id), l.listed_at, l.created_at)
         < now() - make_interval(days => ${PRICE_STALE_DAYS}))`;
+    case 'no-viewing':
+      return sql<boolean>`(l.status = 'available' and coalesce(l.listed_at, l.published_at, l.created_at) < now() - make_interval(days => ${NO_VIEWING_DAYS})
+        and not exists (select 1 from viewings v where v.company_id = l.company_id and v.listing_id = l.id
+                         and v.status in ('scheduled', 'confirmed', 'completed') and v.scheduled_start > now() - make_interval(days => ${NO_VIEWING_DAYS})))`;
     case 'not-ready':
       return sql<boolean>`(l.status = 'draft' and (${photosShort} or ${planMissing}
         or (l.mandate_expires_on is not null and l.mandate_expires_on < ${propertyToday})
