@@ -279,7 +279,7 @@ The first full `test:performance` run after the review fixes failed 2 of 11 test
 | Issue #5 (landlord visibility, S4) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/5 |
 | Issue #20 (legal review, retention values) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/20 |
 | Branch | `phase-6/readiness` |
-| CI run 112 (`c2924f8`, green) | __RUNURL__ |
+| CI run 112 (`c2924f8`, all checks green, including the browser suite) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/43449020877 |
 
 ## Approval
 
