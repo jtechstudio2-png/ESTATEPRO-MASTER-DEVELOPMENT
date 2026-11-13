@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Date | 13 November 2026 |
-| Branch | `phase-6/readiness`, commits `2c5982c` (implementation) and the report commit; CI run __RUN__ |
+| Branch | `phase-6/readiness`, commits `2c5982c` (implementation) and the report commit; CI run 117 |
 | Approvals | P6-0 approved, ADR-008 accepted, P60-D1 to P60-D8 approved (13 November 2026). "You may proceed to S1 (Viewings) according to the approved Phase 6 roadmap" |
 | Scope | Viewings as approved in the readiness report: book, confirm, reschedule, cancel, record outcome and feedback, no-show; the agent calendar; conflict check; key check-out for a viewing; "viewings needing feedback" (§2.1, §4.1); the "No viewing in 21 days" listing flag (§5); the contact-scope fix for key check-out (readiness R7) |
 | Not in scope | Offers (S2), deals (S3), landlord visibility (S4, the feedback-sharing choice is recorded now and shown to landlords in S4), screens (S5, after the P6-W wireframes), delivery of reminders (Phase 12) |
-| Result | **S1 complete**, for approval before S2. Results in §3; CI run __RUN__ green (§9) |
+| Result | **S1 complete**, for approval before S2. Results in §3; CI run 117 green (§9) |
 
 ## 1. Deliverables
 
@@ -72,7 +72,7 @@ All writes take `If-Match` (except booking and keys), return `ETag`, and answer 
 | API performance: viewings (200,000) | 1 | ✅ (§6) |
 | API performance: listings, dashboards, data protection, re-run after S1 | 5 | ✅ |
 | Web: typecheck, lint, message check (2,572 keys in both languages), unit tests | 79 | ✅ |
-| Browser suite (CI) | 93 | __E2E__ |
+| Browser suite (CI, functional and accessibility, English and Arabic) | 93 | ✅ (run 117) |
 
 API coverage: 96.08 % statements, 90.72 % branches, 98.42 % functions, 98.26 % lines (thresholds 95/90; up from 95.95/90.50). Viewings module: 98.8 % statements, 92.5 % branches.
 
@@ -154,7 +154,7 @@ S1 adds no screens (S1-D12). Every refusal carries a stable code (for example `l
 | P6-0 report (approved) | `docs/phase-6/P6-0-REPORT.md` |
 | Issue #5 (landlord visibility, S4) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/5 |
 | Issues #42, #43, #44 | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42 · /43 · /44 |
-| CI run __RUN__ | __RUNURL__ |
+| CI run 117 (`9519100`, all six checks green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/43526248934 |
 
 ## Approval
 
