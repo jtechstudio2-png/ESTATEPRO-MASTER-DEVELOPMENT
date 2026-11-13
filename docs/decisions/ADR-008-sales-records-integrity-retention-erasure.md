@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Proposed** (P6-0, 12 November 2026; for approval with the P6-0 report) |
+| Status | **Proposed** (P6-0, 12 November 2026; reviewed 13 November 2026, §8; for approval with the P6-0 report) |
 | Date | 12 November 2026 |
 | Context | Phase 6 adds viewings, offers, deals, lead conversion and sales to the product. Their tables exist since migration 0007 and hold no data yet. Before any is written, the product owner asked for P6-0: deterministic history (#15), erasure of the pipeline's free text, limits on erasing parties to deals and sales, the accountant's access, and the audit, privacy, retention and integrity rules for sales records |
 | Builds on | ADR-003 (API conventions), ADR-004 (listing rules), ADR-007 (field encryption, erasure §8), Phase 1 specification §5.4 (SAL), §7.1 (journey from instruction to completion), §11.2 (permissions), §12.2 (deal life cycle) |
@@ -13,7 +13,7 @@
 | ID | Decision |
 |---|---|
 | S-D1 | **Every history and audit stream has an insertion number** (`entry_no`), from a per-table sequence. Readers sort by (time, `entry_no`); history cursors carry `entry_no`; record lists keep their (sort value, id) cursors. This closes #15 for all 14 streams, including the sales histories before they hold data |
-| S-D2 | **Deal stage history is written by the database** on every stage change (with the member and an optional note) and is append-only. The application cannot insert, change or delete it |
+| S-D2 | **Deal stage history is written by the database** on every stage change (with the member and an optional note, used for that one change only) and is append-only. The application cannot insert, change or delete it |
 | S-D3 | **Offers are a negotiation record**: terms never change; statuses move only submitted → countered / accepted / rejected / withdrawn / expired, and accepted → withdrawn; a counter-offer answers an open offer of the other side in the same deal; an offer is for its deal's listing and in its currency; one accepted offer per listing (migration 0007) |
 | S-D4 | **Viewings are final when finished** (completed, cancelled, no-show, rescheduled): only the "share feedback with the landlord" choice may change afterwards. A cancellation needs a reason; a reschedule links the new viewing |
 | S-D5 | **Milestones are final when completed**; what a milestone is never changes |
@@ -47,7 +47,7 @@ PostgreSQL's `now()` is fixed for a transaction and UUIDv7 is ordered only to th
 | `deal_stage_history`, `offers` | `changed_at`, `submitted_at` | Phase 6 |
 | `activities` | `occurred_at` | Timeline (since migration 0024) |
 
-Existing rows were numbered in the order users saw them (time, then id), so nothing reorders on upgrade. Cursors issued before #15 on a history endpoint are refused with a validation error asking for the first page.
+Existing rows were numbered in the order users saw them (time, then id), so nothing reorders on upgrade. The number never changes once written (a trigger on every stream refuses it, whatever the role). Each sequence is granted (`USAGE`) to every role that may insert into its table, read from the table's grants at migration time, so a role that writes a stream (for example `estatepro_auth`, which writes sign-in audit rows) can always number its rows. Cursors issued before #15 on a history endpoint are refused with a validation error asking for the first page.
 
 ### 2.3 Guards
 
@@ -58,7 +58,7 @@ Guards are database triggers, so every path (API, worker, CLI, future integratio
 | Record | Anonymised | Kept |
 |---|---|---|
 | Viewings of the person (attendee, or on their lead or deal) | Feedback, cancellation reason, meeting point | Listing, unit, agent, times, status, outcome, sharing choice |
-| Offers made by the person or on their deals | Conditions | Amount, currency, direction, status, dates, chain |
+| Offers made by the person, and every offer on their deals (including the other side's counter-offers) | Conditions | Amount, currency, direction, status, dates, chain |
 | Deals where the person is primary contact, a party, or whose lead was theirs | Lost notes, custom fields | Type, stage, values, dates, close reason code |
 | Stage history of those deals | Notes | Stages, who, when |
 | Milestones of those deals | Notes | Code, due and completion dates |
@@ -66,6 +66,8 @@ Guards are database triggers, so every path (API, worker, CLI, future integratio
 | Audit rows and outbox events of all of these | Values (`app.redact_json`) | Action, entity, field names, time |
 
 The erasure ledger (ADR-007 §8) records the erasure as before, so a restore cannot bring the text back.
+
+**Scope is the whole deal, on purpose.** Free text on a deal is about its parties together: a seller's counter-offer conditions usually name or describe the buyer ("subject to the buyer's mortgage with …"), and a stage note may record what either party said. The erasure cannot tell whose personal data a sentence holds, so it anonymises all free text on the deals the person was a party to, including the other side's counter-offer conditions and the deal's custom fields. The other parties lose free text, never facts: amounts, dates, stages, statuses and the offer chain stay. A party who needs a record of their own words keeps it in their documents (Phase 10).
 
 ## 4. Erasure blockers and retention (S-D11)
 
@@ -105,3 +107,21 @@ Lost and closed deals without a sale do not block erasure; their free text is an
 - New history tables in later phases add `entry_no` from the start and use `toEntryPage` and `keysetEntryCondition`.
 - Migrations that change a history table's rows must run as a maintenance role (they disable guards only inside the migration).
 - Until #20 sets retention values, people who bought or sold through a company cannot be erased in that jurisdiction; the privacy request shows the reason.
+- Code that sets `app.stage_note` must set it immediately before the stage update it belongs to; the trigger clears it after use.
+- A future outbox relay polls unpublished events by `entry_no` (the index `outbox_events_unpublished_idx` is on it).
+
+## 8. Review (13 November 2026)
+
+The P6-0 review read migrations 0029 and 0030 line by line against migration 0007 (pipeline tables), 0013 (sign-in audit) and 0026 (erasure), and checked every claim in this ADR.
+
+| # | Finding | Outcome |
+|---|---|---|
+| 1 | Migration 0029 granted the new sequences to `estatepro_app` and `estatepro_platform` only. `estatepro_auth` inserts into `audit_logs` (sign-in events, migration 0013) and would fail with "permission denied for sequence" | **Fixed** (`bc94bae`): grants follow the table's INSERT grants; SQL test checks every inserting role has `USAGE` on its stream's sequence |
+| 2 | `app.stage_note` stayed set for the rest of the transaction, so a second stage change in the same transaction repeated the first note | **Fixed** (`bc94bae`): the trigger clears it after use; SQL test |
+| 2a | The runtime roles may update `consents`, `listing_status_history`, `listing_price_history` and `outbox_events` (no update guard), so `entry_no` could be changed and the history reordered; on consents, an older grant could become the consent in force | **Fixed**: a trigger on all 14 streams refuses any change to `entry_no`; SQL tests |
+| 3 | Erasing one party anonymises the other side's counter-offer conditions on the same deal | **Kept, documented** (§3): deliberate and conservative |
+| 4 | Guards compare with `<>`, which passes on a missing row (NULL). Checked: every reference they read (`deal_id`, `parent_offer_id`, `accepted_offer_id`, `listing_id`) has a foreign key that includes `company_id`, checked after the trigger, so a missing or other-company row is still refused | No change |
+| 5 | The `sale_record` blocker joins `units` with an inner join; a sale with no unit would be missed. Checked: `sales_transactions.unit_id` is NOT NULL | No change |
+| 6 | Every free-text column in the pipeline (`deals.lost_notes`, `deals.custom_fields`, `deal_stage_history.note`, `deal_milestones.notes`, `offers.conditions`, `viewings.feedback`, `.cancelled_reason`, `.meeting_point`, `sales_transactions.fallen_through_reason`) is anonymised; the remaining text columns are codes, statuses or references | Coverage complete |
+| 7 | §6: "partitioned tables in PostgreSQL 16 do not support identity columns" | Confirmed on PostgreSQL 16 (adding an identity column to `audit_logs` is refused) |
+| 8 | An offer on a deal with no listing (a unit-only deal) is not checked against a listing | Recorded for S2: the offer service will refuse an offer on a deal that has no listing yet (risk R6 in the P6-0 report) |

@@ -6,7 +6,8 @@
 | Branch | `phase-6/readiness`, from `main` at `5ef896c` (pull request #39) |
 | Scope | Readiness for Phase 6: viewings, offers, deals, lead conversion and landlord visibility (#5), with the preparatory milestone P6-0 (#15, erasure, permissions) |
 | **Recommendation** | **GO for Phase 6 once the decisions in §8 (P6-D1 to P6-D14) are approved**, starting with P6-0. Viewings, offers, deals, landlord visibility and lead conversion start only after P6-0 is approved |
-| Status of P6-0 | Work was started on 12 November under the instruction "Phase 6 begins with P6-0 only" and is **halted** by the instruction of 12 November to present this report first. See §3.5 for exactly what exists on this branch |
+| **Approval** | **Approved** by the product owner on 13 November 2026, with P6-D1 to P6-D14 (see Approval at the end) |
+| Status of P6-0 | Commits `3b6c329` and `2b22e6b` are kept on this branch as the P6-0 implementation, awaiting review and approval (R9 decision). Not merged to `main` until P6-0 is approved |
 
 ## Contents
 
@@ -131,7 +132,7 @@ Erasure restrictions (P6-D12): a person cannot be erased while a party to an **a
 | Audit log | R (finance) | `audit.view` (all) | **Finding** (§3.3) |
 | Protected contact details | Reveal approved in ADR-007 (E-Q5) | `contact.view_sensitive` | Aligned |
 
-### 3.5 What exists on this branch for P6-0 (halted)
+### 3.5 What exists on this branch for P6-0
 
 Under the instruction of 12 November ("Phase 6 begins with P6-0 only"), P6-0 was implemented and pushed to `phase-6/readiness` before the instruction to present this report first. It is **not merged** to `main`, **not reported** and **not approved**; work on it has stopped.
 
@@ -140,7 +141,7 @@ Under the instruction of 12 November ("Phase 6 begins with P6-0 only"), P6-0 was
 | `3b6c329` | Migration 0029 (#15 insertion order on 13 streams), migration 0030 (sales-record guards, erasure coverage and blockers, retention rule, accountant grants), API readers and history cursors, erasure blocker messages (en, ar), SQL suite 12 and API tests |
 | `2b22e6b` | ADR-008 (proposed), P6-0 implementation notes, P6-0 report draft (incomplete), one further SQL test |
 
-Local results before the halt: SQL suites pass; full API suite 492 tests pass (coverage 95.95 % statements, 90.50 % branches). The performance and browser suites were not completed. **Your direction is needed** (§7, R9): keep these commits on the branch for review as P6-0 once this report is approved, or revert them now so the branch holds only this report.
+Local results before the halt: SQL suites pass; full API suite 492 tests pass (coverage 95.95 % statements, 90.50 % branches). The performance and browser suites were not completed. **Decision (13 November, R9):** keep both commits on this branch, do not revert them, treat them as the P6-0 implementation awaiting review and approval, and do not merge them into `main` until P6-0 is fully reviewed. The review and its results are in the [P6-0 report](P6-0-REPORT.md).
 
 ## 4. Workflows
 
@@ -343,7 +344,7 @@ Built on the landlord resolver from C4: a landlord is a contact with a **current
 | R6 | Accountant audit-log limit not enforceable yet | Low | When an audit-log viewer is built |
 | R7 | Key check-out to a contact does not check contact scope | Low | Fixed with viewings (S1) |
 | R8 | #6 and #28 still open | High (launch) | No shared environment, as in Phase 5 |
-| R9 | P6-0 code exists on this branch ahead of this report's approval (§3.5) | Low | Not merged; your direction: keep for review as P6-0, or revert |
+| R9 | P6-0 code exists on this branch ahead of this report's approval (§3.5) | Low | **Closed by decision (13 November):** kept as the P6-0 implementation for review; not merged until P6-0 is approved |
 | R10 | Wireframes for Phase 6 screens do not exist yet | Medium | P6-W before any screen work (§10) |
 | — | #20, #24, #25 | High (pre-launch) | Unchanged |
 
@@ -395,4 +396,10 @@ Proposed performance budgets: API p95 under 1,000 ms with 20,000 open deals, 200
 
 ## Approval
 
-Awaiting product owner approval of this report and of P6-D1 to P6-D14, and direction on the halted P6-0 commits (R9). No further Phase 6 work proceeds until then.
+| Item | Decision | Date |
+|---|---|---|
+| Phase 6 Readiness Report | **Approved** | 13 November 2026 |
+| P6-D1 to P6-D14 | **Approved** | 13 November 2026 |
+| R9 (P6-0 commits ahead of approval) | Keep `3b6c329` and `2b22e6b` on `phase-6/readiness`; do not revert; treat as the P6-0 implementation awaiting review and approval; do not merge into `main` until P6-0 is fully reviewed | 13 November 2026 |
+
+Next: P6-0 review and report ([P6-0 report](P6-0-REPORT.md)). Viewings (S1), offers (S2), deals (S3) and landlord visibility (S4) do not start until P6-0 is reviewed and approved.

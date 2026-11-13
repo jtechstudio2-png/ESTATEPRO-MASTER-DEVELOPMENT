@@ -18,7 +18,7 @@ No public response shape changed. History cursors changed format (§3).
 
 ## 2. Writing history rows
 
-Every history or audit table has `entry_no bigint NOT NULL` with a sequence default. Never set it; the database does.
+Every history or audit table has `entry_no bigint NOT NULL` with a sequence default. Never set it; the database does, and refuses any later change (`42501`, trigger `<table>_entry_no_fixed`).
 
 When you add a new history table:
 
@@ -31,9 +31,11 @@ CREATE TABLE something_history (
   entry_no    bigint      NOT NULL GENERATED ALWAYS AS IDENTITY   -- new, empty table: identity is fine
 );
 CREATE INDEX something_history_idx ON something_history (company_id, parent_id, changed_at, entry_no);
+CREATE TRIGGER something_history_entry_no_fixed BEFORE UPDATE OF entry_no ON something_history
+  FOR EACH ROW WHEN (OLD.entry_no IS DISTINCT FROM NEW.entry_no) EXECUTE FUNCTION app.entry_no_fixed();
 ```
 
-Identity is fine for a new empty table. For an existing table with rows, follow migration 0029 (number in visible order first, then attach a sequence) and grant `USAGE` on the sequence to `estatepro_app` and `estatepro_platform`.
+Identity is fine for a new empty table (not for a partitioned one: use a sequence). For an existing table with rows, follow migration 0029: number in visible order first, then attach a sequence, and grant `USAGE` on the sequence to every role that holds INSERT on the table (0029 reads them from `information_schema.role_table_grants`; `estatepro_auth` writes sign-in audit rows).
 
 ## 3. Reading histories
 
@@ -61,7 +63,7 @@ return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText
 
 | Table | Rule | Error |
 |---|---|---|
-| `deals` | Stage history is written on insert and on every `stage_id` change. To attach a note, run `select set_config('app.stage_note', $note, true)` in the same transaction before the update | — |
+| `deals` | Stage history is written on insert and on every `stage_id` change. To attach a note, run `select set_config('app.stage_note', $note, true)` in the same transaction immediately before the update; the trigger clears it after use, so it belongs to one stage change only | — |
 | `deals` | A closed deal (won or lost) keeps its stage, type, listing, unit, currency, close time, lost reason and notes | `23514` |
 | `deals` | One deal per lead | `23505` |
 | `deal_stage_history` | The application cannot insert, update or delete | `42501` |
