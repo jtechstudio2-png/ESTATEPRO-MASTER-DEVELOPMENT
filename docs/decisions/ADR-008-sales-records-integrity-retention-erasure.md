@@ -84,7 +84,7 @@ Lost and closed deals without a sale do not block erasure; their free text is an
 
 | Concern | Rule |
 |---|---|
-| Audit actions (S1–S3) | `viewing.booked`, `.confirmed`, `.rescheduled`, `.cancelled`, `.completed`, `.feedback_shared`; `offer.submitted`, `.countered`, `.accepted`, `.rejected`, `.withdrawn`, `.expired`; `deal.created`, `.stage_changed`, `.reassigned`, `.party_added`, `.party_removed`, `.milestone_completed`, `.lost`, `.won`; `lead.converted`; `sale.recorded`, `.exchanged`, `.completed`, `.fallen_through`. Ids and codes in metadata; free text only in the record itself |
+| Audit actions (S1–S3) | `viewing.booked`, `.confirmed`, `.rescheduled`, `.cancelled`, `.completed`, `.no_show` (added in S1), `.feedback_shared`; `offer.submitted`, `.countered`, `.accepted`, `.rejected`, `.withdrawn`, `.expired`; `deal.created`, `.stage_changed`, `.reassigned`, `.party_added`, `.party_removed`, `.milestone_completed`, `.lost`, `.won`; `lead.converted`; `sale.recorded`, `.exchanged`, `.completed`, `.fallen_through`. Ids and codes in metadata; free text only in the record itself |
 | Outbox | The same events, ordered by `entry_no` |
 | Who sees what | Agents: their own deals and the offers and viewings on them. Managers: their office. Accountants: read all (S-D12). Landlords: the reduced views of #5 (Phase 6 S4, portal in Phase 7) |
 | Personal data in sales records | Names and contact details come from contacts (masked as in C5); deal parties are links, not copies; offers and viewings hold no contact details |

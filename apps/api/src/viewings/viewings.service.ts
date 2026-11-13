@@ -252,7 +252,6 @@ export class ViewingsService {
       changes: { status: { old: current.status, new: 'rescheduled' } },
       metadata: {
         rescheduledToId: newId,
-        reason: body.reason ?? null,
         from: { start: current.scheduledStart.toISOString(), end: current.scheduledEnd.toISOString(), agentMembershipId: current.agentMembershipId },
         to: { start: start.toISOString(), end: end.toISOString(), agentMembershipId: agentId },
       },
@@ -278,7 +277,8 @@ export class ViewingsService {
       body: reason,
       links: timelineLinks(current.listingId, current.leadId, attendees),
     });
-    await this.audit.record(tx, ctx, { action: 'viewing.cancelled', entityType: 'viewing', entityId: id, changes: { status: { old: current.status, new: 'cancelled' } }, metadata: { reason } });
+    // The reason is in the viewing record and the timeline (free text never in audit metadata, ADR-008 §5).
+    await this.audit.record(tx, ctx, { action: 'viewing.cancelled', entityType: 'viewing', entityId: id, changes: { status: { old: current.status, new: 'cancelled' } } });
     await this.emit(tx, ctx, 'viewing.cancelled', id, { scheduledStart: current.scheduledStart.toISOString(), timezone: current.timezone, attendeeContactIds: attendees });
     return this.get(tx, ctx, id);
   }
@@ -325,7 +325,7 @@ export class ViewingsService {
       entityType: 'viewing',
       entityId: id,
       changes: { status: { old: current.status, new: 'completed' }, outcome: { old: null, new: body.outcome } },
-      metadata: { feedback, absentContactIds: [...absent], feedbackShared: body.shareFeedback === true },
+      metadata: { feedbackRecorded: feedback !== null, absentContactIds: [...absent], feedbackShared: body.shareFeedback === true },
     });
     await this.emit(tx, ctx, 'viewing.completed', id, { outcome: body.outcome, feedbackShared: body.shareFeedback === true });
     if (body.shareFeedback) await this.emit(tx, ctx, 'viewing.feedback_shared', id, { shared: true });
@@ -339,7 +339,13 @@ export class ViewingsService {
     }
     await tx.updateTable('viewingAttendees').set({ attendance: 'absent' }).where('viewingId', '=', id).execute();
     await tx.updateTable('viewings').set({ status: 'no_show' }).where('id', '=', id).execute();
-    await this.audit.record(tx, ctx, { action: 'viewing.no_show', entityType: 'viewing', entityId: id, changes: { status: { old: current.status, new: 'no_show' } }, metadata: { note } });
+    await recordSystemActivity(tx, ctx, {
+      activityType: 'system',
+      subject: `Viewing no-show: ${await this.listingReference(tx, current.listingId)}, ${formatLocal(current.scheduledStart, current.timezone)}`,
+      body: note,
+      links: timelineLinks(current.listingId, current.leadId, await this.attendeeIds(tx, id)),
+    });
+    await this.audit.record(tx, ctx, { action: 'viewing.no_show', entityType: 'viewing', entityId: id, changes: { status: { old: current.status, new: 'no_show' } } });
     await this.emit(tx, ctx, 'viewing.no_show', id, {});
     return this.get(tx, ctx, id);
   }

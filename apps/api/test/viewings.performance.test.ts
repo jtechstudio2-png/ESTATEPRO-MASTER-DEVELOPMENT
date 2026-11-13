@@ -13,7 +13,7 @@ import { Fixtures } from './support/fixtures.js';
  * Requests go through the full API as owner (all), sales manager (office)
  * and agent (own): calendars, "needing feedback", a listing's and a
  * contact's viewings, one viewing, bookings, and the "No viewing in 21 days"
- * listing filter.
+ * listing filter and the property dashboard counts that include it.
  */
 const PROPERTIES = 1_000;
 const AGENTS = 50;
@@ -153,6 +153,7 @@ describe('viewings performance (200,000 viewings)', () => {
       await time('contact owner', () => get('owner', `/api/v1/viewings?limit=50&filter[contactId]=${contactIds[run]}`));
       await time('viewing owner', () => get('owner', `/api/v1/viewings/${viewingId}`));
       await time('no-viewing-flag owner', () => get('owner', '/api/v1/listings?limit=50&filter[attention]=no-viewing'));
+      await time('dashboard-counts owner', () => get('owner', '/api/v1/dashboards/property/listings'));
     }
     // Bookings: scope, attendee and conflict checks, effects, timeline, audit and outbox in one transaction.
     for (let run = 0; run < 5; run += 1) {

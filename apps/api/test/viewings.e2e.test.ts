@@ -364,6 +364,9 @@ describe('S1: viewings', () => {
       expect(unshared.body.feedbackShared).toBe(false);
       const events = await fx.db.selectFrom('outboxEvents').select('eventType').where('aggregateId', '=', past.id).orderBy('entryNo').execute();
       expect(events.map((row) => row.eventType)).toEqual(['viewing.completed', 'viewing.feedback_shared', 'viewing.feedback_shared']);
+      const audit = await fx.db.selectFrom('auditLogs').select(['action', 'metadata']).where('entityId', '=', past.id).orderBy('entryNo').execute();
+      expect(audit[0]).toMatchObject({ action: 'viewing.completed', metadata: { feedbackRecorded: true, absentContactIds: [second.id] } });
+      expect(JSON.stringify(audit)).not.toContain('daylight');
     });
 
     it('marks a no-show once the time has come; every attendee is absent', async () => {
@@ -371,6 +374,11 @@ describe('S1: viewings', () => {
       const past = await pastViewing(person.id);
       const noShow = await as('owner').action(`/api/v1/viewings/${past.id}/no-show`, past.version, { note: 'Phone off' }).expect(200);
       expect(noShow.body).toMatchObject({ status: 'no_show', attendees: [{ attendance: 'absent' }] });
+      const timeline = await as('owner').get(`/api/v1/contacts/${person.id}/activities`).expect(200);
+      expect(timeline.body.data).toContainEqual(expect.objectContaining({ subject: expect.stringContaining('Viewing no-show'), body: 'Phone off' }));
+      // Free text stays in the record and the timeline, never in audit metadata (ADR-008 §5).
+      const audit = await fx.db.selectFrom('auditLogs').select(['metadata']).where('entityId', '=', past.id).execute();
+      expect(JSON.stringify(audit)).not.toContain('Phone off');
       await as('owner').action(`/api/v1/viewings/${past.id}/feedback-sharing`, noShow.body.version, { shared: true }).expect(422);
     });
 
