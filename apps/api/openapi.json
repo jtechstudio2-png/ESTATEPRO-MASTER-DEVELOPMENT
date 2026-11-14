@@ -12469,6 +12469,139 @@
           "Deals"
         ]
       }
+    },
+    "/api/v1/portal/landlord/listings": {
+      "get": {
+        "operationId": "Landlord_listings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandlordListingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Landlord portal: your listings, with open offers, upcoming viewings and open deals (landlord portal accounts)",
+        "tags": [
+          "Landlord visibility"
+        ]
+      }
+    },
+    "/api/v1/portal/landlord/listings/{listingId}": {
+      "get": {
+        "operationId": "Landlord_listing",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandlordListingViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Landlord portal: offers, deal progress and viewings on one of your listings, in reduced form",
+        "tags": [
+          "Landlord visibility"
+        ]
+      }
+    },
+    "/api/v1/contacts/{contactId}/portal-visibility-preview/listings/{listingId}": {
+      "get": {
+        "operationId": "Landlord_preview",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandlordPreviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What this landlord could see on one listing (LL-1): limited to what you may see; read-only, audited",
+        "tags": [
+          "Landlord visibility",
+          "Contacts: portal preview"
+        ]
+      }
     }
   },
   "info": {
@@ -27668,6 +27801,443 @@
         },
         "required": [
           "lostReasonCode"
+        ]
+      },
+      "LandlordListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "listingType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "rent"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "propertyName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unitLabel": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Time zone of the property (dates and times below are judged in it)"
+          },
+          "visibleSince": {
+            "type": "string",
+            "format": "date",
+            "description": "Activity from this day is shown: when your current link to the unit began"
+          },
+          "openOffers": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Open offers (null without offer access)"
+          },
+          "upcomingViewings": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Scheduled or confirmed viewings from now on (null without viewing access)"
+          },
+          "openDeals": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Open deals (null without deal access)"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title",
+          "listingType",
+          "status",
+          "propertyName",
+          "unitLabel",
+          "timezone",
+          "visibleSince",
+          "openOffers",
+          "upcomingViewings",
+          "openDeals"
+        ]
+      },
+      "LandlordListingsDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandlordListingDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LandlordOfferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "from_buyer",
+              "from_seller"
+            ]
+          },
+          "offeredByName": {
+            "type": "string",
+            "description": "The buyer or tenant by name only (never contact details)"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "conditions": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "financingCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "respondedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "parentOfferId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The offer this one answers"
+          }
+        },
+        "required": [
+          "id",
+          "direction",
+          "offeredByName",
+          "amount",
+          "rentFrequency",
+          "conditions",
+          "financingCode",
+          "status",
+          "submittedAt",
+          "expiresAt",
+          "respondedAt",
+          "parentOfferId"
+        ]
+      },
+      "LandlordMilestoneDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "dueDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        },
+        "required": [
+          "name",
+          "done",
+          "dueDate"
+        ]
+      },
+      "LandlordDealDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stageName": {
+            "type": "string",
+            "description": "The stage's name as the company calls it"
+          },
+          "stageClass": {
+            "type": "string",
+            "description": "Stage class code, for translated screens"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "won",
+              "lost"
+            ]
+          },
+          "milestones": {
+            "description": "The progress checklist (name, done or not, due date)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandlordMilestoneDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "stageName",
+          "stageClass",
+          "status",
+          "milestones"
+        ]
+      },
+      "LandlordViewingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduledEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "viewingType": {
+            "type": "string",
+            "enum": [
+              "in_person",
+              "virtual",
+              "open_house"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "confirmed",
+              "completed",
+              "cancelled",
+              "no_show"
+            ]
+          },
+          "outcome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Once completed"
+          },
+          "feedback": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Only where the agent shared it with the landlord"
+          }
+        },
+        "required": [
+          "id",
+          "scheduledStart",
+          "scheduledEnd",
+          "timezone",
+          "viewingType",
+          "status",
+          "outcome",
+          "feedback"
+        ]
+      },
+      "LandlordListingViewDto": {
+        "type": "object",
+        "properties": {
+          "listing": {
+            "$ref": "#/components/schemas/LandlordListingDto"
+          },
+          "offers": {
+            "description": "Newest first; null without offer access",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LandlordOfferDto"
+            }
+          },
+          "deals": {
+            "description": "null without deal access",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LandlordDealDto"
+            }
+          },
+          "viewings": {
+            "description": "Newest first; null without viewing access",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LandlordViewingDto"
+            }
+          },
+          "notShown": {
+            "type": "array",
+            "description": "What these views never show",
+            "items": {
+              "type": "string",
+              "enum": [
+                "buyer_contact_details",
+                "internal_notes",
+                "activities",
+                "commission_fees_splits",
+                "documents",
+                "other_parties",
+                "attendee_identities",
+                "unshared_feedback",
+                "activity_before_link"
+              ]
+            }
+          }
+        },
+        "required": [
+          "listing",
+          "offers",
+          "deals",
+          "viewings",
+          "notShown"
+        ]
+      },
+      "LandlordPreviewDto": {
+        "type": "object",
+        "properties": {
+          "listing": {
+            "$ref": "#/components/schemas/LandlordListingDto"
+          },
+          "offers": {
+            "description": "Newest first; null without offer access",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LandlordOfferDto"
+            }
+          },
+          "deals": {
+            "description": "null without deal access",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LandlordDealDto"
+            }
+          },
+          "viewings": {
+            "description": "Newest first; null without viewing access",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LandlordViewingDto"
+            }
+          },
+          "notShown": {
+            "type": "array",
+            "description": "What these views never show",
+            "items": {
+              "type": "string",
+              "enum": [
+                "buyer_contact_details",
+                "internal_notes",
+                "activities",
+                "commission_fees_splits",
+                "documents",
+                "other_parties",
+                "attendee_identities",
+                "unshared_feedback",
+                "activity_before_link"
+              ]
+            }
+          },
+          "contactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The landlord contact previewed"
+          },
+          "limitedToYourAccess": {
+            "type": "boolean",
+            "description": "Only what you may see yourself is listed; the landlord may see more"
+          }
+        },
+        "required": [
+          "listing",
+          "offers",
+          "deals",
+          "viewings",
+          "notShown",
+          "contactId",
+          "limitedToYourAccess"
         ]
       }
     }

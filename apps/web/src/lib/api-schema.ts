@@ -2838,6 +2838,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/portal/landlord/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Landlord portal: your listings, with open offers, upcoming viewings and open deals (landlord portal accounts) */
+        get: operations["Landlord_listings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/portal/landlord/listings/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Landlord portal: offers, deal progress and viewings on one of your listings, in reduced form */
+        get: operations["Landlord_listing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contactId}/portal-visibility-preview/listings/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What this landlord could see on one listing (LL-1): limited to what you may see; read-only, audited */
+        get: operations["Landlord_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6983,6 +7034,121 @@ export interface components {
             /** @description Kept on the record, never in audit. Do not type identity or bank numbers. Becomes the fall-through reason of an exchanged sale */
             notes?: string;
         };
+        LandlordListingDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+            /** @enum {string} */
+            listingType: "sale" | "rent";
+            status: string;
+            propertyName: string | null;
+            unitLabel: string;
+            /** @description Time zone of the property (dates and times below are judged in it) */
+            timezone: string;
+            /**
+             * Format: date
+             * @description Activity from this day is shown: when your current link to the unit began
+             */
+            visibleSince: string;
+            /** @description Open offers (null without offer access) */
+            openOffers: number | null;
+            /** @description Scheduled or confirmed viewings from now on (null without viewing access) */
+            upcomingViewings: number | null;
+            /** @description Open deals (null without deal access) */
+            openDeals: number | null;
+        };
+        LandlordListingsDto: {
+            data: components["schemas"]["LandlordListingDto"][];
+        };
+        LandlordOfferDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            direction: "from_buyer" | "from_seller";
+            /** @description The buyer or tenant by name only (never contact details) */
+            offeredByName: string;
+            amount: components["schemas"]["MoneyDto"];
+            rentFrequency: string | null;
+            conditions: string | null;
+            financingCode: string | null;
+            status: string;
+            /** Format: date-time */
+            submittedAt: string;
+            /** Format: date-time */
+            expiresAt: string | null;
+            /** Format: date-time */
+            respondedAt: string | null;
+            /**
+             * Format: uuid
+             * @description The offer this one answers
+             */
+            parentOfferId: string | null;
+        };
+        LandlordMilestoneDto: {
+            name: string;
+            done: boolean;
+            /** Format: date */
+            dueDate: string | null;
+        };
+        LandlordDealDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description The stage's name as the company calls it */
+            stageName: string;
+            /** @description Stage class code, for translated screens */
+            stageClass: string;
+            /** @enum {string} */
+            status: "open" | "won" | "lost";
+            /** @description The progress checklist (name, done or not, due date) */
+            milestones: components["schemas"]["LandlordMilestoneDto"][];
+        };
+        LandlordViewingDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            scheduledStart: string;
+            /** Format: date-time */
+            scheduledEnd: string;
+            timezone: string;
+            /** @enum {string} */
+            viewingType: "in_person" | "virtual" | "open_house";
+            /** @enum {string} */
+            status: "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show";
+            /** @description Once completed */
+            outcome: string | null;
+            /** @description Only where the agent shared it with the landlord */
+            feedback: string | null;
+        };
+        LandlordListingViewDto: {
+            listing: components["schemas"]["LandlordListingDto"];
+            /** @description Newest first; null without offer access */
+            offers: components["schemas"]["LandlordOfferDto"][] | null;
+            /** @description null without deal access */
+            deals: components["schemas"]["LandlordDealDto"][] | null;
+            /** @description Newest first; null without viewing access */
+            viewings: components["schemas"]["LandlordViewingDto"][] | null;
+            /** @description What these views never show */
+            notShown: ("buyer_contact_details" | "internal_notes" | "activities" | "commission_fees_splits" | "documents" | "other_parties" | "attendee_identities" | "unshared_feedback" | "activity_before_link")[];
+        };
+        LandlordPreviewDto: {
+            listing: components["schemas"]["LandlordListingDto"];
+            /** @description Newest first; null without offer access */
+            offers: components["schemas"]["LandlordOfferDto"][] | null;
+            /** @description null without deal access */
+            deals: components["schemas"]["LandlordDealDto"][] | null;
+            /** @description Newest first; null without viewing access */
+            viewings: components["schemas"]["LandlordViewingDto"][] | null;
+            /** @description What these views never show */
+            notShown: ("buyer_contact_details" | "internal_notes" | "activities" | "commission_fees_splits" | "documents" | "other_parties" | "attendee_identities" | "unshared_feedback" | "activity_before_link")[];
+            /**
+             * Format: uuid
+             * @description The landlord contact previewed
+             */
+            contactId: string;
+            /** @description Only what you may see yourself is listed; the landlord may see more */
+            limitedToYourAccess: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -7321,6 +7487,14 @@ export type CompleteMilestoneBody = components['schemas']['CompleteMilestoneBody
 export type ExchangeBody = components['schemas']['ExchangeBody'];
 export type CompleteBody = components['schemas']['CompleteBody'];
 export type LoseDealBody = components['schemas']['LoseDealBody'];
+export type LandlordListingDto = components['schemas']['LandlordListingDto'];
+export type LandlordListingsDto = components['schemas']['LandlordListingsDto'];
+export type LandlordOfferDto = components['schemas']['LandlordOfferDto'];
+export type LandlordMilestoneDto = components['schemas']['LandlordMilestoneDto'];
+export type LandlordDealDto = components['schemas']['LandlordDealDto'];
+export type LandlordViewingDto = components['schemas']['LandlordViewingDto'];
+export type LandlordListingViewDto = components['schemas']['LandlordListingViewDto'];
+export type LandlordPreviewDto = components['schemas']['LandlordPreviewDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     Health_health: {
@@ -12921,6 +13095,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Landlord_listings: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandlordListingsDto"];
+                };
+            };
+        };
+    };
+    Landlord_listing: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandlordListingViewDto"];
+                };
+            };
+        };
+    };
+    Landlord_preview: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                contactId: string;
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LandlordPreviewDto"];
                 };
             };
         };
