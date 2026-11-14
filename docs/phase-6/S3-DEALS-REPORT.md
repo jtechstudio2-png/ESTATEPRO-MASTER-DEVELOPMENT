@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Date | 14 November 2026 |
-| Branch | `phase-6/readiness`, commits `89a747c` (implementation) and the report commit; CI run 123 (`89a747c`, in progress) |
+| Branch | `phase-6/readiness`, commits `89a747c` (implementation) and the report commit; CI run 124 (`5719db7`, the implementation plus this report; all six checks green; run 123 on `89a747c` was cancelled when 124 started) |
 | Approvals | S2 approved with S2-D1 to S2-D13; S2 risks reviewed and accepted (14 November 2026). "Proceed with S3 (Deals) according to the approved Phase 6 roadmap" |
 | Scope | Deals as approved in the readiness report: stages through actions; parties and agents with splits; milestones after acceptance; exchange and completion (sale); ownership transfer on completion; stalled flags; forecast; the pipeline list and board data (§2.1, §4.3); lead conversion (§4.4, P6-D11); the listing effects of exchange, completion and fall-through (§5, P6-D5); P6-D2, P6-D6 to P6-D8. Also the S2 follow-ups: one deal scope (S2-R3), listing withdrawal after S3 (S2-R2), milestones and identity checks on acceptance (S2-R4) |
 | Not in scope | Landlord visibility (S4), screens and the drag-free board UI (S5, to the P6-W wireframes), dashboards and close-out (S6), leases from letting deals (Phase 7, P6-D2), commission records (finance phase, P6-D9), contract documents (Phase 10, P6-D14), delivery of notifications (Phase 12) |
-| Result | **S3 complete**, for approval before S4. Results in §3; CI run 123 in progress (§9) |
+| Result | **S3 complete**, for approval before S4. Results in §3; CI run 124 green (§9) |
 
 ## 1. Deliverables
 
@@ -90,7 +90,7 @@ Other changes:
 | API performance: deals (20,000 open deals) | 1 | ✅ (§6) |
 | API performance re-run after S3: listings, viewings, offers | 3 | ✅ |
 | Web: typecheck, lint, message check (2,572 keys in both languages), unit tests | 79 | ✅ |
-| Browser suite (CI) | 93 | Pending (run 123) |
+| Browser suite (CI) | 93 | ✅ (run 124) |
 
 API coverage: 96.17 % statements, 90.70 % branches, 98.44 % functions, 98.32 % lines (thresholds 95/90; S2: 96.13/90.79). Deals module: 96.6 % statements, 88.2 % branches.
 
@@ -168,7 +168,7 @@ S3 adds no screens (S3-D1). Every refusal carries a stable code for the S5 scree
 | S1 and S2 reports (approved) | `docs/phase-6/S1-VIEWINGS-REPORT.md`, `docs/phase-6/S2-OFFERS-REPORT.md` |
 | ADR-008 (updated §3: owner-change notes) | `docs/decisions/ADR-008-sales-records-integrity-retention-erasure.md` |
 | Issues #42, #43, #44 | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42 · /43 · /44 |
-| CI run 123 (`89a747c`, in progress) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/43634094781 |
+| CI run 124 (`5719db7`, six checks green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/43634339056 |
 
 ## Approval
 
