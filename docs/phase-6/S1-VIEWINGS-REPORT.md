@@ -43,22 +43,22 @@ Other changes: `filter[attention]=no-viewing` on listings and `noViewing` on the
 
 All writes take `If-Match` (except booking and keys), return `ETag`, and answer refusals with a field and a code (screens translate codes, as since C6).
 
-## 2. Decisions taken in S1 (for confirmation)
+## 2. Decisions taken in S1 (approved 14 November 2026)
 
-| # | Decision | Reason |
-|---|---|---|
-| S1-D1 | "Live listing" means available, reserved or under contract, not archived; the unit must not be under maintenance | Readiness §4.1 and §5; second viewings after an accepted offer remain possible |
-| S1-D2 | Viewing scope: **all**; **office** = listings of the member's offices; **own** = viewings the member conducts, and viewings of their listings, of leads assigned to them and of deals they own | Readiness §4.1 ("agents for their own listings, leads and deals") |
-| S1-D3 | Booking needs `viewing.manage` covering the listing, lead or deal (conducting it does not count for own scope). Booking for another agent is a manager action (office or company scope); the agent must be active staff with `viewing.manage`, in one of an office manager's offices | Same rule as follow-ups (D6) |
-| S1-D4 | Rescheduling keeps the old viewing (status rescheduled, linked) and books a new one with the same attendees; the response is the new viewing | Keeps the history of what was arranged |
-| S1-D5 | Outcome or no-show only once the viewing has started; attendees not listed as absent are recorded as attended; a no-show marks every attendee absent | Readiness §4.1 diagram |
-| S1-D6 | Booking from a **new** lead moves it to contacted; a deal at lead or qualification moves to the viewing stage, with the stage note "Viewing booked" | Readiness §4.1 effects |
-| S1-D7 | An agent cannot hold two overlapping live viewings (refused, 409, database); the same unit at the same time is a warning (`unitConflicts`) | Readiness §4.1 conflicts |
-| S1-D8 | New times are from now on (5 minutes' tolerance); a viewing lasts at most 8 hours | Guards against typing errors; open houses fit |
-| S1-D9 | "No viewing in 21 days": available listings on the market for 21 days with no scheduled, confirmed or completed viewing starting in the last 21 days | Readiness §5 (flag hidden since Phase 4) |
-| S1-D10 | Keys for a viewing go to its agent or an attendee, due back one hour after the viewing unless given; any contact key holder must be in the member's contact scope | Readiness R7 |
-| S1-D11 | Reminders: outbox events only (booked, confirmed, rescheduled, cancelled, completed, no-show, feedback shared) with times and time zone; delivery in Phase 12. Booking, rescheduling, cancelling and completing add system entries to the timeline of the listing, lead and attendees | P6-D14 |
-| S1-D12 | S1 delivers the API and database; screens follow the P6-W wireframes in S5, as in the approved milestone order | Readiness §10 |
+| # | Decision | Reason | Status |
+|---|---|---|---|
+| S1-D1 | "Live listing" means available, reserved or under contract, not archived; the unit must not be under maintenance | Readiness §4.1 and §5; second viewings after an accepted offer remain possible | **Approved** |
+| S1-D2 | Viewing scope: **all**; **office** = listings of the member's offices; **own** = viewings the member conducts, and viewings of their listings, of leads assigned to them and of deals they own | Readiness §4.1 ("agents for their own listings, leads and deals") | **Approved** |
+| S1-D3 | Booking needs `viewing.manage` covering the listing, lead or deal (conducting it does not count for own scope). Booking for another agent is a manager action (office or company scope); the agent must be active staff with `viewing.manage`, in one of an office manager's offices | Same rule as follow-ups (D6) | **Approved** |
+| S1-D4 | Rescheduling keeps the old viewing (status rescheduled, linked) and books a new one with the same attendees; the response is the new viewing | Keeps the history of what was arranged | **Approved** |
+| S1-D5 | Outcome or no-show only once the viewing has started; attendees not listed as absent are recorded as attended; a no-show marks every attendee absent | Readiness §4.1 diagram | **Approved** |
+| S1-D6 | Booking from a **new** lead moves it to contacted; a deal at lead or qualification moves to the viewing stage, with the stage note "Viewing booked" | Readiness §4.1 effects | **Approved** |
+| S1-D7 | An agent cannot hold two overlapping live viewings (refused, 409, database); the same unit at the same time is a warning (`unitConflicts`) | Readiness §4.1 conflicts | **Approved** |
+| S1-D8 | New times are from now on (5 minutes' tolerance); a viewing lasts at most 8 hours | Guards against typing errors; open houses fit | **Approved** |
+| S1-D9 | "No viewing in 21 days": available listings on the market for 21 days with no scheduled, confirmed or completed viewing starting in the last 21 days | Readiness §5 (flag hidden since Phase 4) | **Approved** |
+| S1-D10 | Keys for a viewing go to its agent or an attendee, due back one hour after the viewing unless given; any contact key holder must be in the member's contact scope | Readiness R7 | **Approved** |
+| S1-D11 | Reminders: outbox events only (booked, confirmed, rescheduled, cancelled, completed, no-show, feedback shared) with times and time zone; delivery in Phase 12. Booking, rescheduling, cancelling, completing and no-shows add system entries to the timeline of the listing, lead and attendees (a no-show note is kept there, not in audit, ADR-008 §5) | P6-D14 | **Approved** |
+| S1-D12 | S1 delivers the API and database; screens follow the P6-W wireframes in S5, as in the approved milestone order | Readiness §10 | **Approved** |
 
 ## 3. Tests
 
@@ -158,4 +158,9 @@ S1 adds no screens (S1-D12). Every refusal carries a stable code (for example `l
 
 ## Approval
 
-Awaiting product owner approval of S1 (S1-D1 to S1-D12) before S2 (offers) begins.
+| Item | Decision | Date |
+|---|---|---|
+| S1 (viewings) | **Approved** | 14 November 2026 |
+| S1-D1 to S1-D12 | **Approved**, each individually | 14 November 2026 |
+
+Next: S2 (offers), per the approved Phase 6 roadmap.
