@@ -10,10 +10,11 @@ import type { TenantContext } from '../common/request-context.js';
 import { ContactsService } from '../contacts/contacts.service.js';
 import { recordSystemActivity } from '../crm/system-activity.js';
 import type { Tx } from '../database/database.module.js';
+import { onOfferAccepted } from '../deals/deal-effects.js';
 import { asPipelineAction, moveDealToStage } from '../deals/deal-stage.js';
 import { ListingsService } from '../listings/listings.service.js';
 import { checkPicklistCode } from '../reference/picklists.js';
-import { canOnDeal, type DealAccessRow, dealScopeSql } from './offer-access.js';
+import { canOnDeal, type DealAccessRow, dealScopeSql } from '../deals/deal-access.js';
 import { releaseAcceptedOffer } from './offer-effects.js';
 import type { CounterOfferBody, OfferDto, RecordOfferBody } from './offers.dto.js';
 
@@ -141,6 +142,8 @@ export class OffersService {
     await tx.updateTable('offers').set({ status: 'accepted', respondedAt: new Date() }).where('id', '=', offer.id).execute();
     await moveDealToStage(tx, deal, 'offer_accepted', 'Offer accepted');
     await this.listings.pipelineStatus(tx, ctx, offer.listingId, 'reserved', 'Offer accepted');
+    // S3 (§4.2 note, P6-D6, P6-D7): milestones copied, buyer identity checks started.
+    await onOfferAccepted(tx, ctx, this.audit, deal);
     await this.timeline(tx, ctx, deal, offer.offeredByContactId, `Offer accepted: ${listing.reference}, ${await this.amountLabel(tx, offer)}`, null);
     await this.audit.record(tx, ctx, { action: 'offer.accepted', entityType: 'offer', entityId: offer.id, changes: { status: { old: 'submitted', new: 'accepted' } }, metadata: { dealId: deal.id, listingId: offer.listingId } });
     await this.emit(tx, ctx, 'offer.accepted', offer, {});

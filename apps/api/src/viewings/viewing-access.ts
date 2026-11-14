@@ -7,7 +7,8 @@ import type { PermissionScope, TenantContext } from '../common/request-context.j
  *   all     every viewing of the company
  *   office  viewings of listings in the member's offices
  *   own     viewings the member conducts, and viewings of their own listings,
- *           of leads assigned to them and of deals they own
+ *           of leads assigned to them and of their own deals (owner or agent
+ *           on the deal, the one deal scope since S3)
  * Other scopes match nothing (fail closed).
  */
 export interface ViewingAccessRow {
@@ -16,6 +17,7 @@ export interface ViewingAccessRow {
   listingAgentId: string;
   leadAssignedTo: string | null;
   dealOwnerId: string | null;
+  dealAgentIds: readonly string[];
 }
 
 export function viewingWithin(scope: PermissionScope | null | undefined, ctx: TenantContext, row: ViewingAccessRow): boolean {
@@ -25,7 +27,7 @@ export function viewingWithin(scope: PermissionScope | null | undefined, ctx: Te
     case 'office':
       return ctx.officeIds.includes(row.listingOfficeId);
     case 'own':
-      return [row.agentMembershipId, row.listingAgentId, row.leadAssignedTo, row.dealOwnerId].includes(ctx.membershipId);
+      return [row.agentMembershipId, row.listingAgentId, row.leadAssignedTo, row.dealOwnerId].includes(ctx.membershipId) || row.dealAgentIds.includes(ctx.membershipId);
     default:
       return false;
   }
@@ -44,7 +46,8 @@ export function viewingScopeSql(scope: PermissionScope | null | undefined, ctx: 
       return ctx.officeIds.length > 0 ? sql<boolean>`l.office_id = any(${[...ctx.officeIds]}::uuid[])` : sql<boolean>`false`;
     case 'own': {
       const me = sql`${ctx.membershipId}::uuid`;
-      return sql<boolean>`(v.agent_membership_id = ${me} or l.agent_membership_id = ${me} or ld.assigned_to = ${me} or d.owner_membership_id = ${me})`;
+      return sql<boolean>`(v.agent_membership_id = ${me} or l.agent_membership_id = ${me} or ld.assigned_to = ${me} or d.owner_membership_id = ${me}
+        or (v.deal_id is not null and exists (select 1 from deal_agents da where da.company_id = v.company_id and da.deal_id = v.deal_id and da.membership_id = ${me})))`;
     }
     default:
       return sql<boolean>`false`;

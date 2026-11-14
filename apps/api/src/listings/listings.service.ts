@@ -830,6 +830,13 @@ export class ListingsService {
     if (reasonRequired(from, to) && reason === undefined) {
       throw Problems.validation([{ field: 'reason', code: 'required', message: 'Give a reason for this change.' }]);
     }
+    // P6-D5: with exchanged contracts the sale falls through on its deal first (S3).
+    const exchanged = await tx.selectFrom('salesTransactions').select('dealId').where('listingId', '=', id).where('status', '=', 'exchanged').executeTakeFirst();
+    if (exchanged) {
+      throw Problems.validation([
+        { field: 'status', code: 'listing-sale-exchanged', message: 'Contracts are exchanged on this listing: its status follows the deal. Record the fall-through on the deal first.' },
+      ]);
+    }
     // P6-D5: with an accepted offer the status follows the deal; withdrawing the listing withdraws the offer too.
     const accepted = await tx.selectFrom('offers').select(['id', 'dealId', 'listingId', 'status']).where('listingId', '=', id).where('status', '=', 'accepted').executeTakeFirst();
     if (accepted && to !== 'withdrawn') {
@@ -837,7 +844,7 @@ export class ListingsService {
         { field: 'status', code: 'listing-has-accepted-offer', message: 'This listing has an accepted offer: its status follows the deal. Withdraw the accepted offer first, or withdraw the listing.' },
       ]);
     }
-    if (accepted) await releaseAcceptedOffer(tx, ctx, this.audit, accepted, 'Listing withdrawn');
+    if (accepted) await releaseAcceptedOffer(tx, ctx, this.audit, accepted, 'Listing withdrawn', 'listing');
 
     const unit = await tx
       .selectFrom('units as u')
@@ -864,16 +871,25 @@ export class ListingsService {
   }
 
   /**
-   * Status change made by an offer action (P6-D5): accepting reserves an
-   * available listing; withdrawing the accepted offer makes a reserved listing
-   * available again. The caller has checked access to the deal.
+   * Status change made by an offer or deal action (P6-D5): accepting reserves
+   * an available listing; withdrawing the accepted offer or losing the deal
+   * makes it available again; exchanging contracts puts it under contract;
+   * completing the sale sells it (final: unpublished and closed). The caller
+   * has checked access to the deal.
    */
-  async pipelineStatus(tx: Tx, ctx: TenantContext, id: string, to: 'reserved' | 'available', reason: string): Promise<void> {
+  async pipelineStatus(tx: Tx, ctx: TenantContext, id: string, to: 'reserved' | 'available' | 'under_contract' | 'sold', reason: string): Promise<void> {
     const current = await this.lockListing(tx, id);
     const from = current.status as ListingStatus;
     if (from === to) return;
+    const invalid = transitionError(current.listingType, from, to);
+    if (invalid) throw Problems.businessRule(invalid);
     await asPipelineAction(tx);
-    await tx.updateTable('listings').set({ status: to }).where('id', '=', id).execute();
+    const closing = isTerminal(to);
+    await tx
+      .updateTable('listings')
+      .set({ status: to, ...(closing ? { isPublished: false, closedAt: new Date() } : {}) })
+      .where('id', '=', id)
+      .execute();
     await this.recordStatus(tx, ctx, id, from, to, reason);
   }
 

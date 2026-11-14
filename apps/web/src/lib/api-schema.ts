@@ -2582,6 +2582,262 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/deals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Deals in your scope (pipeline list): open deals by default, most recently changed first */
+        get: operations["Deals_list"];
+        put?: never;
+        /** Create a deal directly (walk-in, referral); it starts at the lead stage with its primary contact as buyer or tenant */
+        post: operations["Deals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/pipeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pipeline board columns (SAL-06): open deals per stage with stalled counts and totals per currency */
+        get: operations["Deals_pipeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Forecast (SAL-07): open deals by expected close month; expected value × probability, per currency */
+        get: operations["Deals_forecast"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/leads/{leadId}/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Convert a buy or rent lead into its one deal (needs lead.update and deal.create); the lead keeps its history */
+        post: operations["Deals_convert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Deals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit the expected value, fee, close date and probability; the listing until offers are recorded */
+        patch: operations["Deals_update"];
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/stage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move the deal among lead, qualification, viewing and negotiation as the life cycle allows (later stages follow their actions) */
+        post: operations["Deals_moveStage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/reassign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hand the deal to another agent (managers); recorded with the note */
+        post: operations["Deals_reassign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the agents credited and their splits (managers); splits add up to 100 % */
+        put: operations["Deals_setAgents"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/parties": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a party (buyer, seller, lawyer, lender, …); after acceptance a new buyer gets an identity check */
+        post: operations["Deals_addParty"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/parties/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Remove a party role (the primary contact stays) */
+        post: operations["Deals_removeParty"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/milestones/{milestoneId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change an open milestone's due date or notes */
+        patch: operations["Deals_updateMilestone"];
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/milestones/{milestoneId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a milestone done (identity milestones complete themselves, P6-D7) */
+        post: operations["Deals_completeMilestone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Contracts exchanged (sales): the sale is recorded, the deal moves to contract, the listing goes under contract (buyers verified, P6-D6) */
+        post: operations["Deals_exchange"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Completion (sales; company owner and sales managers): required milestones done; the deal is won, the listing sold, the ownership transferred (P6-D8) */
+        post: operations["Deals_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/deals/{dealId}/lose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close the deal as lost with a reason (company owner and sales managers); an accepted offer is withdrawn and an exchanged sale falls through */
+        post: operations["Deals_lose"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5227,6 +5483,11 @@ export interface components {
             /** @description The enquiry as received */
             message: string | null;
             lostReasonCode: string | null;
+            /**
+             * Format: uuid
+             * @description The deal this lead was converted to (S3)
+             */
+            convertedDealId: string | null;
             archivedReason: string | null;
             /** @description Rule → points; empty when there is no score (CRM-07) */
             scoreBreakdown: components["schemas"]["ScoreRuleDto"][];
@@ -6366,6 +6627,362 @@ export interface components {
             /** @description Why (kept on the timeline). Required to withdraw an accepted offer */
             reason?: string;
         };
+        DealStageDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** @enum {string} */
+            stageClass: "lead" | "qualification" | "viewing" | "negotiation" | "offer_accepted" | "contract" | "closed_won" | "closed_lost";
+            sortOrder: number;
+        };
+        DealListingDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+            status: string;
+        };
+        DealSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            dealType: "sale" | "letting";
+            stage: components["schemas"]["DealStageDto"];
+            /** @enum {string} */
+            status: "open" | "won" | "lost";
+            listing: components["schemas"]["DealListingDto"] | null;
+            primaryContact: components["schemas"]["RefLabelDto"];
+            office: components["schemas"]["RefLabelDto"];
+            /** @description The responsible agent */
+            owner: components["schemas"]["RefLabelDto"];
+            expectedValue: components["schemas"]["MoneyDto"] | null;
+            /** @description Expected value × probability (open deals) */
+            weightedValue: components["schemas"]["MoneyDto"] | null;
+            /** @description Percent: the override, else the stage's probability */
+            probability: number;
+            /** Format: date */
+            expectedCloseDate: string | null;
+            /** Format: date-time */
+            stageEnteredAt: string;
+            /** @description Open longer in this stage than the stage allows (SAL-06) */
+            stalled: boolean;
+            /** Format: date-time */
+            closedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DealSummaryPageDto: {
+            data: components["schemas"]["DealSummaryDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        PipelineTotalDto: {
+            currency: string;
+            count: number;
+            expectedValue: components["schemas"]["MoneyDto"];
+            weightedValue: components["schemas"]["MoneyDto"];
+        };
+        PipelineColumnDto: {
+            stage: components["schemas"]["DealStageDto"];
+            count: number;
+            stalledCount: number;
+            /** @description Per currency (never converted) */
+            totals: components["schemas"]["PipelineTotalDto"][];
+        };
+        PipelineDto: {
+            /** @enum {string} */
+            dealType: "sale" | "letting";
+            /** @description Every active stage in order, open deals only; cards come from GET /deals?filter[stageId]=… */
+            columns: components["schemas"]["PipelineColumnDto"][];
+        };
+        ForecastMonthDto: {
+            /** @example 2026-12 */
+            month: string;
+            totals: components["schemas"]["PipelineTotalDto"][];
+        };
+        ForecastDto: {
+            /** @enum {string} */
+            dealType: "sale" | "letting";
+            /** @description Open deals by expected close month */
+            months: components["schemas"]["ForecastMonthDto"][];
+            /** @description Open deals expected to close before the first month */
+            overdue: components["schemas"]["PipelineTotalDto"][];
+            /** @description Open deals with no expected close date */
+            undated: components["schemas"]["PipelineTotalDto"][];
+        };
+        CreateDealBody: {
+            /** @enum {string} */
+            dealType: "sale" | "letting";
+            /**
+             * Format: uuid
+             * @description The buyer or tenant applicant
+             */
+            primaryContactId: string;
+            /**
+             * Format: uuid
+             * @description A live listing of the matching type (sale for sales, rent for lettings); needed before offers
+             */
+            listingId?: string;
+            /**
+             * Format: uuid
+             * @description Default: the listing's office, else your first office
+             */
+            officeId?: string;
+            /**
+             * Format: uuid
+             * @description The responsible agent (default: you); someone else is a manager action
+             */
+            ownerMembershipId?: string;
+            /** @description Expected price, or rent per year; default from the listing */
+            expectedValue?: components["schemas"]["MoneyInput"];
+            /** @description Expected agency income */
+            expectedFee?: components["schemas"]["MoneyInput"];
+            /** @example 2027-03-31 */
+            expectedCloseDate?: string;
+            /** @description Overrides the stage's probability in the forecast */
+            probabilityOverride?: number;
+            /** @description Picklist "lead_source" (walk-in, referral, …) */
+            sourceCode?: string;
+        };
+        DealPartyDto: {
+            contact: components["schemas"]["RefLabelDto"];
+            /** @enum {string} */
+            partyRole: "buyer" | "seller" | "tenant" | "landlord" | "guarantor" | "buyer_lawyer" | "seller_lawyer" | "lender" | "other_agent" | "other";
+            isPrimary: boolean;
+            /** @description Identity verified (null when you cannot see identity checks) */
+            identityVerified: boolean | null;
+        };
+        DealAgentDto: {
+            member: components["schemas"]["RefLabelDto"];
+            /** @enum {string} */
+            agentRole: "lister" | "seller_agent" | "co_agent" | "referrer";
+            splitPercent: number;
+        };
+        DealMilestoneDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            sortOrder: number;
+            isRequired: boolean;
+            /** @description Completes itself when the identities are verified (P6-D7) */
+            automatic: boolean;
+            /** Format: date */
+            dueDate: string | null;
+            /** @description Open and past its due date */
+            overdue: boolean;
+            /** Format: date-time */
+            completedAt: string | null;
+            completedBy: components["schemas"]["RefLabelDto"] | null;
+            notes: string | null;
+        };
+        DealStageChangeDto: {
+            fromStage: components["schemas"]["DealStageDto"] | null;
+            toStage: components["schemas"]["DealStageDto"];
+            /** Format: date-time */
+            changedAt: string;
+            changedBy: components["schemas"]["RefLabelDto"] | null;
+            note: string | null;
+        };
+        DealAssignmentDto: {
+            from: components["schemas"]["RefLabelDto"] | null;
+            to: components["schemas"]["RefLabelDto"];
+            assignedBy: components["schemas"]["RefLabelDto"] | null;
+            /** Format: date-time */
+            assignedAt: string;
+            note: string | null;
+        };
+        DealOfferRefDto: {
+            /** Format: uuid */
+            id: string;
+            amount: components["schemas"]["MoneyDto"];
+            rentFrequency: string | null;
+            offeredBy: components["schemas"]["RefLabelDto"];
+        };
+        DealSaleDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            status: "pending" | "exchanged" | "completed" | "fallen_through" | "rescinded";
+            agreedPrice: components["schemas"]["MoneyDto"];
+            agencyFee: components["schemas"]["MoneyDto"] | null;
+            /** Format: date */
+            contractSignedOn: string | null;
+            /** Format: date */
+            completionDueOn: string | null;
+            /** Format: date */
+            completedOn: string | null;
+            titleTransferRef: string | null;
+            fallenThroughReason: string | null;
+        };
+        DealIdentityDto: {
+            /** @description P6-D6: buyers are verified before contracts (sales where the jurisdiction requires it) */
+            required: boolean;
+            /** @description Buyers whose identity is not verified (empty when you cannot see identity checks) */
+            unverifiedBuyerIds: string[];
+        };
+        DealAccessDto: {
+            canEdit: boolean;
+            /** @description Stages you can move it to by hand now */
+            nextStages: components["schemas"]["DealStageDto"][];
+            /** @description Reassign and set agents (managers) */
+            canReassign: boolean;
+            canExchange: boolean;
+            canComplete: boolean;
+            canLose: boolean;
+        };
+        DealDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            /** @enum {string} */
+            dealType: "sale" | "letting";
+            stage: components["schemas"]["DealStageDto"];
+            /** @enum {string} */
+            status: "open" | "won" | "lost";
+            listing: components["schemas"]["DealListingDto"] | null;
+            primaryContact: components["schemas"]["RefLabelDto"];
+            office: components["schemas"]["RefLabelDto"];
+            /** @description The responsible agent */
+            owner: components["schemas"]["RefLabelDto"];
+            expectedValue: components["schemas"]["MoneyDto"] | null;
+            /** @description Expected value × probability (open deals) */
+            weightedValue: components["schemas"]["MoneyDto"] | null;
+            /** @description Percent: the override, else the stage's probability */
+            probability: number;
+            /** Format: date */
+            expectedCloseDate: string | null;
+            /** Format: date-time */
+            stageEnteredAt: string;
+            /** @description Open longer in this stage than the stage allows (SAL-06) */
+            stalled: boolean;
+            /** Format: date-time */
+            closedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            expectedFee: components["schemas"]["MoneyDto"] | null;
+            probabilityOverride: number | null;
+            sourceCode: string | null;
+            lostReasonCode: string | null;
+            lostNotes: string | null;
+            /** @description The lead it was converted from */
+            lead: components["schemas"]["RefLabelDto"] | null;
+            parties: components["schemas"]["DealPartyDto"][];
+            agents: components["schemas"]["DealAgentDto"][];
+            milestones: components["schemas"]["DealMilestoneDto"][];
+            stageHistory: components["schemas"]["DealStageChangeDto"][];
+            assignments: components["schemas"]["DealAssignmentDto"][];
+            acceptedOffer: components["schemas"]["DealOfferRefDto"] | null;
+            sale: components["schemas"]["DealSaleDto"] | null;
+            identity: components["schemas"]["DealIdentityDto"];
+            access: components["schemas"]["DealAccessDto"];
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
+        };
+        ConvertLeadBody: {
+            /**
+             * Format: uuid
+             * @description Default: the lead's listing
+             */
+            listingId?: string;
+            /**
+             * Format: uuid
+             * @description Default: the lead's assignee, else you
+             */
+            ownerMembershipId?: string;
+            expectedValue?: components["schemas"]["MoneyInput"];
+            /** @example 2027-03-31 */
+            expectedCloseDate?: string;
+        };
+        UpdateDealBody: {
+            /**
+             * Format: uuid
+             * @description Only before any offer is recorded on the deal
+             */
+            listingId?: Record<string, never> | null;
+            expectedValue?: components["schemas"]["MoneyInput"] | null;
+            expectedFee?: components["schemas"]["MoneyInput"] | null;
+            /** @example 2027-03-31 */
+            expectedCloseDate?: string | null;
+            probabilityOverride?: number | null;
+        };
+        MoveStageBody: {
+            /**
+             * Format: uuid
+             * @description A stage of the deal's pipeline: lead, qualification, viewing or negotiation (the life cycle decides which)
+             */
+            stageId: string;
+            /** @description Kept on the record, never in audit. Do not type identity or bank numbers */
+            note?: string;
+        };
+        ReassignDealBody: {
+            /** Format: uuid */
+            ownerMembershipId: string;
+            /** @description Kept on the record, never in audit. Do not type identity or bank numbers */
+            note?: string;
+        };
+        DealAgentInput: {
+            /** Format: uuid */
+            membershipId: string;
+            /** @enum {string} */
+            agentRole: "lister" | "seller_agent" | "co_agent" | "referrer";
+            /** @description Share of the credit, up to 4 decimal places */
+            splitPercent: number;
+        };
+        SetDealAgentsBody: {
+            /** @description The whole list; splits add up to 100 %. An empty list clears it (the owner has all the credit) */
+            agents: components["schemas"]["DealAgentInput"][];
+        };
+        DealPartyBody: {
+            /** Format: uuid */
+            contactId: string;
+            /** @enum {string} */
+            partyRole: "buyer" | "seller" | "tenant" | "landlord" | "guarantor" | "buyer_lawyer" | "seller_lawyer" | "lender" | "other_agent" | "other";
+        };
+        UpdateMilestoneBody: {
+            /** @example 2026-12-15 */
+            dueDate?: string | null;
+            /** @description Kept on the record, never in audit. Do not type identity or bank numbers */
+            notes?: string | null;
+        };
+        CompleteMilestoneBody: {
+            /** @description Kept on the record, never in audit. Do not type identity or bank numbers */
+            notes?: string;
+        };
+        ExchangeBody: {
+            /**
+             * @description The day contracts were signed (not in the future)
+             * @example 2026-11-14
+             */
+            contractSignedOn: string;
+            /** @example 2027-01-31 */
+            completionDueOn?: string;
+            /** @description Default: the deal's expected fee */
+            agencyFee?: components["schemas"]["MoneyInput"];
+        };
+        CompleteBody: {
+            /**
+             * @description The completion day (not in the future, not before contracts)
+             * @example 2027-01-31
+             */
+            completedOn: string;
+            /** @description Land registry or title reference */
+            titleTransferRef?: string;
+            /**
+             * @description P6-D8: end the current ownership records of the unit and record the buyers as owners from the completion day
+             * @default true
+             */
+            transferOwnership: boolean;
+        };
+        LoseDealBody: {
+            /** @description Picklist "lost_reason" */
+            lostReasonCode: string;
+            /** @description Kept on the record, never in audit. Do not type identity or bank numbers. Becomes the fall-through reason of an exchanged sale */
+            notes?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -6672,6 +7289,38 @@ export type OfferPageDto = components['schemas']['OfferPageDto'];
 export type RecordOfferBody = components['schemas']['RecordOfferBody'];
 export type CounterOfferBody = components['schemas']['CounterOfferBody'];
 export type OfferReasonBody = components['schemas']['OfferReasonBody'];
+export type DealStageDto = components['schemas']['DealStageDto'];
+export type DealListingDto = components['schemas']['DealListingDto'];
+export type DealSummaryDto = components['schemas']['DealSummaryDto'];
+export type DealSummaryPageDto = components['schemas']['DealSummaryPageDto'];
+export type PipelineTotalDto = components['schemas']['PipelineTotalDto'];
+export type PipelineColumnDto = components['schemas']['PipelineColumnDto'];
+export type PipelineDto = components['schemas']['PipelineDto'];
+export type ForecastMonthDto = components['schemas']['ForecastMonthDto'];
+export type ForecastDto = components['schemas']['ForecastDto'];
+export type CreateDealBody = components['schemas']['CreateDealBody'];
+export type DealPartyDto = components['schemas']['DealPartyDto'];
+export type DealAgentDto = components['schemas']['DealAgentDto'];
+export type DealMilestoneDto = components['schemas']['DealMilestoneDto'];
+export type DealStageChangeDto = components['schemas']['DealStageChangeDto'];
+export type DealAssignmentDto = components['schemas']['DealAssignmentDto'];
+export type DealOfferRefDto = components['schemas']['DealOfferRefDto'];
+export type DealSaleDto = components['schemas']['DealSaleDto'];
+export type DealIdentityDto = components['schemas']['DealIdentityDto'];
+export type DealAccessDto = components['schemas']['DealAccessDto'];
+export type DealDto = components['schemas']['DealDto'];
+export type ConvertLeadBody = components['schemas']['ConvertLeadBody'];
+export type UpdateDealBody = components['schemas']['UpdateDealBody'];
+export type MoveStageBody = components['schemas']['MoveStageBody'];
+export type ReassignDealBody = components['schemas']['ReassignDealBody'];
+export type DealAgentInput = components['schemas']['DealAgentInput'];
+export type SetDealAgentsBody = components['schemas']['SetDealAgentsBody'];
+export type DealPartyBody = components['schemas']['DealPartyBody'];
+export type UpdateMilestoneBody = components['schemas']['UpdateMilestoneBody'];
+export type CompleteMilestoneBody = components['schemas']['CompleteMilestoneBody'];
+export type ExchangeBody = components['schemas']['ExchangeBody'];
+export type CompleteBody = components['schemas']['CompleteBody'];
+export type LoseDealBody = components['schemas']['LoseDealBody'];
 export type $defs = Record<string, never>;
 export interface operations {
     Health_health: {
@@ -11782,6 +12431,496 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OfferDto"];
+                };
+            };
+        };
+    };
+    Deals_list: {
+        parameters: {
+            query?: {
+                "filter[expectedCloseDate][lte]"?: unknown;
+                "filter[expectedCloseDate][gte]"?: unknown;
+                /** @description stalled: longer in its stage than the stage allows */
+                "filter[attention]"?: unknown;
+                "filter[leadId]"?: unknown;
+                /** @description Primary contact or any party */
+                "filter[contactId]"?: unknown;
+                "filter[listingId]"?: unknown;
+                /** @description Member ids or "me" */
+                "filter[ownerMembershipId]"?: unknown;
+                "filter[officeId]"?: unknown;
+                "filter[stageClass]"?: unknown;
+                /** @description Board column */
+                "filter[stageId]"?: unknown;
+                /** @description open (default), won, lost */
+                "filter[status]"?: unknown;
+                /** @description sale, letting */
+                "filter[dealType]"?: unknown;
+                /** @description Reference prefix or contact name */
+                q?: unknown;
+                sort?: "updatedAt" | "-updatedAt" | "createdAt" | "-createdAt" | "stageEnteredAt" | "-stageEnteredAt";
+                cursor?: unknown;
+                limit?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealSummaryPageDto"];
+                };
+            };
+        };
+    };
+    Deals_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDealBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_pipeline: {
+        parameters: {
+            query: {
+                /** @description Comma-separated member ids or "me" */
+                ownerMembershipId?: unknown;
+                /** @description Comma-separated office ids */
+                officeId?: unknown;
+                dealType: "sale" | "letting";
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDto"];
+                };
+            };
+        };
+    };
+    Deals_forecast: {
+        parameters: {
+            query: {
+                ownerMembershipId?: unknown;
+                officeId?: unknown;
+                /** @description 1 to 24 (default 12) */
+                months?: unknown;
+                /** @description First month, YYYY-MM (default: this month) */
+                from?: unknown;
+                dealType: "sale" | "letting";
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastDto"];
+                };
+            };
+        };
+    };
+    Deals_convert: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                /** @description Version of the lead */
+                "If-Match": string;
+            };
+            path: {
+                leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConvertLeadBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDealBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_moveStage: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveStageBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_reassign: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignDealBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_setAgents: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDealAgentsBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_addParty: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DealPartyBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_removeParty: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DealPartyBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_updateMilestone: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                /** @description Version of the deal */
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+                milestoneId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMilestoneBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_completeMilestone: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                /** @description Version of the deal */
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+                milestoneId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteMilestoneBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_exchange: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExchangeBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_complete: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
+                };
+            };
+        };
+    };
+    Deals_lose: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                dealId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoseDealBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DealDto"];
                 };
             };
         };

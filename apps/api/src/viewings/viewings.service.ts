@@ -11,6 +11,7 @@ import { canOnLead, memberGrant } from '../crm/lead-access.js';
 import { LeadsService } from '../crm/leads.service.js';
 import { recordSystemActivity } from '../crm/system-activity.js';
 import type { Tx } from '../database/database.module.js';
+import { canOnDeal } from '../deals/deal-access.js';
 import { moveDealToStage } from '../deals/deal-stage.js';
 import { KeysService } from '../keys/keys.service.js';
 import type { KeySetDto } from '../keys/dto.js';
@@ -130,6 +131,7 @@ export class ViewingsService {
       listingAgentId: listing.agentMembershipId,
       leadAssignedTo: lead?.assignedTo ?? null,
       dealOwnerId: deal?.ownerMembershipId ?? null,
+      dealAgentIds: deal?.agentIds ?? [],
     };
     await this.checkBookingRights(tx, ctx, access, agentId, 'agentMembershipId');
     await this.checkAgentFree(tx, agentId, start, end, null);
@@ -421,6 +423,7 @@ export class ViewingsService {
         'ld.assignedTo as leadAssignedTo',
         'd.reference as dealReference',
         'd.ownerMembershipId as dealOwnerId',
+        sql<string[]>`coalesce((select array_agg(da.membership_id::text) from deal_agents da where da.deal_id = v.deal_id), '{}')`.as('dealAgentIds'),
         'cu.displayName as createdByName',
         sql<string | null>`(select r.id from viewings r where r.rescheduled_to_id = v.id limit 1)`.as('rescheduledFromId'),
       ]);
@@ -544,20 +547,15 @@ export class ViewingsService {
     return lead;
   }
 
-  /** An open deal the member can see (deal.view scope: own deals, office deals, or all), for the same listing. */
+  /** An open deal the member can see (deal.view scope, deals/deal-access.ts: own or agent on, office, or all), for the same listing. */
   private async openDeal(tx: Tx, ctx: TenantContext, dealId: string, listingId: string, errors: FieldError[]) {
-    const deal = await tx
+    const row = await tx
       .selectFrom('deals')
       .select(['id', 'reference', 'status', 'listingId', 'officeId', 'ownerMembershipId', 'dealType', 'stageClass'])
       .where('id', '=', dealId)
       .executeTakeFirst();
-    const scope = ctx.permissions.get('deal.view')?.scope;
-    const visible =
-      deal !== undefined &&
-      (scope === 'all' ||
-        (scope === 'office' && deal.officeId !== null && ctx.officeIds.includes(deal.officeId)) ||
-        (scope === 'own' && deal.ownerMembershipId === ctx.membershipId));
-    if (!deal || !visible) {
+    const deal = row ? { ...row, agentIds: (await tx.selectFrom('dealAgents').select('membershipId').where('dealId', '=', row.id).execute()).map((a) => a.membershipId) } : undefined;
+    if (!deal || !canOnDeal(ctx, 'deal.view', deal)) {
       errors.push({ field: 'dealId', code: 'not-found', message: 'Choose a deal you can see.' });
       return null;
     }
@@ -651,6 +649,7 @@ function accessOf(row: {
   listingAgentId: string;
   leadAssignedTo: string | null;
   dealOwnerId: string | null;
+  dealAgentIds: string[];
 }): ViewingAccessRow {
   return {
     agentMembershipId: row.agentMembershipId,
@@ -658,6 +657,7 @@ function accessOf(row: {
     listingAgentId: row.listingAgentId,
     leadAssignedTo: row.leadAssignedTo,
     dealOwnerId: row.dealOwnerId,
+    dealAgentIds: row.dealAgentIds,
   };
 }
 

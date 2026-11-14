@@ -11335,6 +11335,1140 @@
           "Offers"
         ]
       }
+    },
+    "/api/v1/deals": {
+      "get": {
+        "operationId": "Deals_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[expectedCloseDate][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[expectedCloseDate][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[attention]",
+            "required": false,
+            "in": "query",
+            "description": "stalled: longer in its stage than the stage allows",
+            "schema": {}
+          },
+          {
+            "name": "filter[leadId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "description": "Primary contact or any party",
+            "schema": {}
+          },
+          {
+            "name": "filter[listingId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[ownerMembershipId]",
+            "required": false,
+            "in": "query",
+            "description": "Member ids or \"me\"",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[stageClass]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[stageId]",
+            "required": false,
+            "in": "query",
+            "description": "Board column",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "open (default), won, lost",
+            "schema": {}
+          },
+          {
+            "name": "filter[dealType]",
+            "required": false,
+            "in": "query",
+            "description": "sale, letting",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Reference prefix or contact name",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "updatedAt",
+                "-updatedAt",
+                "createdAt",
+                "-createdAt",
+                "stageEnteredAt",
+                "-stageEnteredAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealSummaryPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deals in your scope (pipeline list): open deals by default, most recently changed first",
+        "tags": [
+          "Deals"
+        ]
+      },
+      "post": {
+        "operationId": "Deals_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a deal directly (walk-in, referral); it starts at the lead stage with its primary contact as buyer or tenant",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/pipeline": {
+      "get": {
+        "operationId": "Deals_pipeline",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerMembershipId",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated member ids or \"me\"",
+            "schema": {}
+          },
+          {
+            "name": "officeId",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated office ids",
+            "schema": {}
+          },
+          {
+            "name": "dealType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "sale",
+                "letting"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pipeline board columns (SAL-06): open deals per stage with stalled counts and totals per currency",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/forecast": {
+      "get": {
+        "operationId": "Deals_forecast",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerMembershipId",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "officeId",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "months",
+            "required": false,
+            "in": "query",
+            "description": "1 to 24 (default 12)",
+            "schema": {}
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "First month, YYYY-MM (default: this month)",
+            "schema": {}
+          },
+          {
+            "name": "dealType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "sale",
+                "letting"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Forecast (SAL-07): open deals by expected close month; expected value × probability, per currency",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/leads/{leadId}/convert": {
+      "post": {
+        "operationId": "Deals_convert",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the lead",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertLeadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Convert a buy or rent lead into its one deal (needs lead.update and deal.create); the lead keeps its history",
+        "tags": [
+          "Deals",
+          "Leads"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}": {
+      "get": {
+        "operationId": "Deals_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Deals"
+        ]
+      },
+      "patch": {
+        "operationId": "Deals_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit the expected value, fee, close date and probability; the listing until offers are recorded",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/stage": {
+      "post": {
+        "operationId": "Deals_moveStage",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveStageBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move the deal among lead, qualification, viewing and negotiation as the life cycle allows (later stages follow their actions)",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/reassign": {
+      "post": {
+        "operationId": "Deals_reassign",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReassignDealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Hand the deal to another agent (managers); recorded with the note",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/agents": {
+      "put": {
+        "operationId": "Deals_setAgents",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDealAgentsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set the agents credited and their splits (managers); splits add up to 100 %",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/parties": {
+      "post": {
+        "operationId": "Deals_addParty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealPartyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a party (buyer, seller, lawyer, lender, …); after acceptance a new buyer gets an identity check",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/parties/remove": {
+      "post": {
+        "operationId": "Deals_removeParty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealPartyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a party role (the primary contact stays)",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/milestones/{milestoneId}": {
+      "patch": {
+        "operationId": "Deals_updateMilestone",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the deal",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMilestoneBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change an open milestone's due date or notes",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/milestones/{milestoneId}/complete": {
+      "post": {
+        "operationId": "Deals_completeMilestone",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the deal",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteMilestoneBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a milestone done (identity milestones complete themselves, P6-D7)",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/exchange": {
+      "post": {
+        "operationId": "Deals_exchange",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Contracts exchanged (sales): the sale is recorded, the deal moves to contract, the listing goes under contract (buyers verified, P6-D6)",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/complete": {
+      "post": {
+        "operationId": "Deals_complete",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Completion (sales; company owner and sales managers): required milestones done; the deal is won, the listing sold, the ownership transferred (P6-D8)",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/lose": {
+      "post": {
+        "operationId": "Deals_lose",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoseDealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Close the deal as lost with a reason (company owner and sales managers); an accepted offer is withdrawn and an exchanged sale falls through",
+        "tags": [
+          "Deals"
+        ]
+      }
     }
   },
   "info": {
@@ -21228,6 +22362,14 @@
               "null"
             ]
           },
+          "convertedDealId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The deal this lead was converted to (S3)"
+          },
           "archivedReason": {
             "type": [
               "string",
@@ -21287,6 +22429,7 @@
           "requirementId",
           "message",
           "lostReasonCode",
+          "convertedDealId",
           "archivedReason",
           "scoreBreakdown",
           "statusHistory",
@@ -25214,6 +26357,1318 @@
             "description": "Why (kept on the timeline). Required to withdraw an accepted offer"
           }
         }
+      },
+      "DealStageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stageClass": {
+            "type": "string",
+            "enum": [
+              "lead",
+              "qualification",
+              "viewing",
+              "negotiation",
+              "offer_accepted",
+              "contract",
+              "closed_won",
+              "closed_lost"
+            ]
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "stageClass",
+          "sortOrder"
+        ]
+      },
+      "DealListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title",
+          "status"
+        ]
+      },
+      "DealSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "dealType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "letting"
+            ]
+          },
+          "stage": {
+            "$ref": "#/components/schemas/DealStageDto"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "won",
+              "lost"
+            ]
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DealListingDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "primaryContact": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "office": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "owner": {
+            "description": "The responsible agent",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              }
+            ]
+          },
+          "expectedValue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "weightedValue": {
+            "description": "Expected value × probability (open deals)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "probability": {
+            "type": "number",
+            "description": "Percent: the override, else the stage's probability"
+          },
+          "expectedCloseDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "stageEnteredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stalled": {
+            "type": "boolean",
+            "description": "Open longer in this stage than the stage allows (SAL-06)"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "dealType",
+          "stage",
+          "status",
+          "listing",
+          "primaryContact",
+          "office",
+          "owner",
+          "expectedValue",
+          "weightedValue",
+          "probability",
+          "expectedCloseDate",
+          "stageEnteredAt",
+          "stalled",
+          "closedAt",
+          "updatedAt"
+        ]
+      },
+      "DealSummaryPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "PipelineTotalDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "expectedValue": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "weightedValue": {
+            "$ref": "#/components/schemas/MoneyDto"
+          }
+        },
+        "required": [
+          "currency",
+          "count",
+          "expectedValue",
+          "weightedValue"
+        ]
+      },
+      "PipelineColumnDto": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "$ref": "#/components/schemas/DealStageDto"
+          },
+          "count": {
+            "type": "number"
+          },
+          "stalledCount": {
+            "type": "number"
+          },
+          "totals": {
+            "description": "Per currency (never converted)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PipelineTotalDto"
+            }
+          }
+        },
+        "required": [
+          "stage",
+          "count",
+          "stalledCount",
+          "totals"
+        ]
+      },
+      "PipelineDto": {
+        "type": "object",
+        "properties": {
+          "dealType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "letting"
+            ]
+          },
+          "columns": {
+            "description": "Every active stage in order, open deals only; cards come from GET /deals?filter[stageId]=…",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PipelineColumnDto"
+            }
+          }
+        },
+        "required": [
+          "dealType",
+          "columns"
+        ]
+      },
+      "ForecastMonthDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-12"
+          },
+          "totals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PipelineTotalDto"
+            }
+          }
+        },
+        "required": [
+          "month",
+          "totals"
+        ]
+      },
+      "ForecastDto": {
+        "type": "object",
+        "properties": {
+          "dealType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "letting"
+            ]
+          },
+          "months": {
+            "description": "Open deals by expected close month",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastMonthDto"
+            }
+          },
+          "overdue": {
+            "description": "Open deals expected to close before the first month",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PipelineTotalDto"
+            }
+          },
+          "undated": {
+            "description": "Open deals with no expected close date",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PipelineTotalDto"
+            }
+          }
+        },
+        "required": [
+          "dealType",
+          "months",
+          "overdue",
+          "undated"
+        ]
+      },
+      "CreateDealBody": {
+        "type": "object",
+        "properties": {
+          "dealType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "letting"
+            ]
+          },
+          "primaryContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The buyer or tenant applicant"
+          },
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A live listing of the matching type (sale for sales, rent for lettings); needed before offers"
+          },
+          "officeId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Default: the listing's office, else your first office"
+          },
+          "ownerMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The responsible agent (default: you); someone else is a manager action"
+          },
+          "expectedValue": {
+            "description": "Expected price, or rent per year; default from the listing",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "expectedFee": {
+            "description": "Expected agency income",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "expectedCloseDate": {
+            "type": "string",
+            "example": "2027-03-31"
+          },
+          "probabilityOverride": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Overrides the stage's probability in the forecast"
+          },
+          "sourceCode": {
+            "type": "string",
+            "description": "Picklist \"lead_source\" (walk-in, referral, …)"
+          }
+        },
+        "required": [
+          "dealType",
+          "primaryContactId"
+        ]
+      },
+      "DealPartyDto": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "partyRole": {
+            "type": "string",
+            "enum": [
+              "buyer",
+              "seller",
+              "tenant",
+              "landlord",
+              "guarantor",
+              "buyer_lawyer",
+              "seller_lawyer",
+              "lender",
+              "other_agent",
+              "other"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "identityVerified": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Identity verified (null when you cannot see identity checks)"
+          }
+        },
+        "required": [
+          "contact",
+          "partyRole",
+          "isPrimary",
+          "identityVerified"
+        ]
+      },
+      "DealAgentDto": {
+        "type": "object",
+        "properties": {
+          "member": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "agentRole": {
+            "type": "string",
+            "enum": [
+              "lister",
+              "seller_agent",
+              "co_agent",
+              "referrer"
+            ]
+          },
+          "splitPercent": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "member",
+          "agentRole",
+          "splitPercent"
+        ]
+      },
+      "DealMilestoneDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "isRequired": {
+            "type": "boolean"
+          },
+          "automatic": {
+            "type": "boolean",
+            "description": "Completes itself when the identities are verified (P6-D7)"
+          },
+          "dueDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Open and past its due date"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "sortOrder",
+          "isRequired",
+          "automatic",
+          "dueDate",
+          "overdue",
+          "completedAt",
+          "completedBy",
+          "notes"
+        ]
+      },
+      "DealStageChangeDto": {
+        "type": "object",
+        "properties": {
+          "fromStage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DealStageDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "toStage": {
+            "$ref": "#/components/schemas/DealStageDto"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "fromStage",
+          "toStage",
+          "changedAt",
+          "changedBy",
+          "note"
+        ]
+      },
+      "DealAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "to": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "assignedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "assignedBy",
+          "assignedAt",
+          "note"
+        ]
+      },
+      "DealOfferRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "offeredBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          }
+        },
+        "required": [
+          "id",
+          "amount",
+          "rentFrequency",
+          "offeredBy"
+        ]
+      },
+      "DealSaleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "exchanged",
+              "completed",
+              "fallen_through",
+              "rescinded"
+            ]
+          },
+          "agreedPrice": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "agencyFee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contractSignedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "completionDueOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "completedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "titleTransferRef": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fallenThroughReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "agreedPrice",
+          "agencyFee",
+          "contractSignedOn",
+          "completionDueOn",
+          "completedOn",
+          "titleTransferRef",
+          "fallenThroughReason"
+        ]
+      },
+      "DealIdentityDto": {
+        "type": "object",
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "description": "P6-D6: buyers are verified before contracts (sales where the jurisdiction requires it)"
+          },
+          "unverifiedBuyerIds": {
+            "description": "Buyers whose identity is not verified (empty when you cannot see identity checks)",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "required",
+          "unverifiedBuyerIds"
+        ]
+      },
+      "DealAccessDto": {
+        "type": "object",
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "nextStages": {
+            "description": "Stages you can move it to by hand now",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealStageDto"
+            }
+          },
+          "canReassign": {
+            "type": "boolean",
+            "description": "Reassign and set agents (managers)"
+          },
+          "canExchange": {
+            "type": "boolean"
+          },
+          "canComplete": {
+            "type": "boolean"
+          },
+          "canLose": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "canEdit",
+          "nextStages",
+          "canReassign",
+          "canExchange",
+          "canComplete",
+          "canLose"
+        ]
+      },
+      "DealDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "dealType": {
+            "type": "string",
+            "enum": [
+              "sale",
+              "letting"
+            ]
+          },
+          "stage": {
+            "$ref": "#/components/schemas/DealStageDto"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "won",
+              "lost"
+            ]
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DealListingDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "primaryContact": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "office": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "owner": {
+            "description": "The responsible agent",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              }
+            ]
+          },
+          "expectedValue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "weightedValue": {
+            "description": "Expected value × probability (open deals)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "probability": {
+            "type": "number",
+            "description": "Percent: the override, else the stage's probability"
+          },
+          "expectedCloseDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "stageEnteredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stalled": {
+            "type": "boolean",
+            "description": "Open longer in this stage than the stage allows (SAL-06)"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedFee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "probabilityOverride": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sourceCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lostReasonCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lostNotes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lead": {
+            "description": "The lead it was converted from",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealPartyDto"
+            }
+          },
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealAgentDto"
+            }
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealMilestoneDto"
+            }
+          },
+          "stageHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealStageChangeDto"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealAssignmentDto"
+            }
+          },
+          "acceptedOffer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DealOfferRefDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sale": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DealSaleDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identity": {
+            "$ref": "#/components/schemas/DealIdentityDto"
+          },
+          "access": {
+            "$ref": "#/components/schemas/DealAccessDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "dealType",
+          "stage",
+          "status",
+          "listing",
+          "primaryContact",
+          "office",
+          "owner",
+          "expectedValue",
+          "weightedValue",
+          "probability",
+          "expectedCloseDate",
+          "stageEnteredAt",
+          "stalled",
+          "closedAt",
+          "updatedAt",
+          "expectedFee",
+          "probabilityOverride",
+          "sourceCode",
+          "lostReasonCode",
+          "lostNotes",
+          "lead",
+          "parties",
+          "agents",
+          "milestones",
+          "stageHistory",
+          "assignments",
+          "acceptedOffer",
+          "sale",
+          "identity",
+          "access",
+          "createdAt",
+          "version"
+        ]
+      },
+      "ConvertLeadBody": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Default: the lead's listing"
+          },
+          "ownerMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Default: the lead's assignee, else you"
+          },
+          "expectedValue": {
+            "$ref": "#/components/schemas/MoneyInput"
+          },
+          "expectedCloseDate": {
+            "type": "string",
+            "example": "2027-03-31"
+          }
+        }
+      },
+      "UpdateDealBody": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Only before any offer is recorded on the deal"
+          },
+          "expectedValue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expectedFee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expectedCloseDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "2027-03-31"
+          },
+          "probabilityOverride": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "MoveStageBody": {
+        "type": "object",
+        "properties": {
+          "stageId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A stage of the deal's pipeline: lead, qualification, viewing or negotiation (the life cycle decides which)"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Kept on the record, never in audit. Do not type identity or bank numbers"
+          }
+        },
+        "required": [
+          "stageId"
+        ]
+      },
+      "ReassignDealBody": {
+        "type": "object",
+        "properties": {
+          "ownerMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Kept on the record, never in audit. Do not type identity or bank numbers"
+          }
+        },
+        "required": [
+          "ownerMembershipId"
+        ]
+      },
+      "DealAgentInput": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agentRole": {
+            "type": "string",
+            "enum": [
+              "lister",
+              "seller_agent",
+              "co_agent",
+              "referrer"
+            ]
+          },
+          "splitPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Share of the credit, up to 4 decimal places"
+          }
+        },
+        "required": [
+          "membershipId",
+          "agentRole",
+          "splitPercent"
+        ]
+      },
+      "SetDealAgentsBody": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "description": "The whole list; splits add up to 100 %. An empty list clears it (the owner has all the credit)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DealAgentInput"
+            }
+          }
+        },
+        "required": [
+          "agents"
+        ]
+      },
+      "DealPartyBody": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyRole": {
+            "type": "string",
+            "enum": [
+              "buyer",
+              "seller",
+              "tenant",
+              "landlord",
+              "guarantor",
+              "buyer_lawyer",
+              "seller_lawyer",
+              "lender",
+              "other_agent",
+              "other"
+            ]
+          }
+        },
+        "required": [
+          "contactId",
+          "partyRole"
+        ]
+      },
+      "UpdateMilestoneBody": {
+        "type": "object",
+        "properties": {
+          "dueDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "2026-12-15"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Kept on the record, never in audit. Do not type identity or bank numbers"
+          }
+        }
+      },
+      "CompleteMilestoneBody": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Kept on the record, never in audit. Do not type identity or bank numbers"
+          }
+        }
+      },
+      "ExchangeBody": {
+        "type": "object",
+        "properties": {
+          "contractSignedOn": {
+            "type": "string",
+            "example": "2026-11-14",
+            "description": "The day contracts were signed (not in the future)"
+          },
+          "completionDueOn": {
+            "type": "string",
+            "example": "2027-01-31"
+          },
+          "agencyFee": {
+            "description": "Default: the deal's expected fee",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contractSignedOn"
+        ]
+      },
+      "CompleteBody": {
+        "type": "object",
+        "properties": {
+          "completedOn": {
+            "type": "string",
+            "example": "2027-01-31",
+            "description": "The completion day (not in the future, not before contracts)"
+          },
+          "titleTransferRef": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Land registry or title reference"
+          },
+          "transferOwnership": {
+            "type": "boolean",
+            "default": true,
+            "description": "P6-D8: end the current ownership records of the unit and record the buyers as owners from the completion day"
+          }
+        },
+        "required": [
+          "completedOn"
+        ]
+      },
+      "LoseDealBody": {
+        "type": "object",
+        "properties": {
+          "lostReasonCode": {
+            "type": "string",
+            "description": "Picklist \"lost_reason\""
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Kept on the record, never in audit. Do not type identity or bank numbers. Becomes the fall-through reason of an exchanged sale"
+          }
+        },
+        "required": [
+          "lostReasonCode"
+        ]
       }
     }
   }

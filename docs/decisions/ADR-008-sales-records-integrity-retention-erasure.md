@@ -61,6 +61,7 @@ Guards are database triggers, so every path (API, worker, CLI, future integratio
 | Offers made by the person, and every offer on their deals (including the other side's counter-offers) | Conditions | Amount, currency, direction, status, dates, chain |
 | Deals where the person is primary contact, a party, or whose lead was theirs | Lost notes, custom fields | Type, stage, values, dates, close reason code |
 | Stage history of those deals | Notes | Stages, who, when |
+| Owner history of those deals (`deal_assignments`, S3, migration 0033) | Notes | Who had the deal, who has it, who changed it, when |
 | Milestones of those deals | Notes | Code, due and completion dates |
 | Sales of those deals | Fall-through reason | Price, status, dates, references |
 | Audit rows and outbox events of all of these | Values (`app.redact_json`) | Action, entity, field names, time |

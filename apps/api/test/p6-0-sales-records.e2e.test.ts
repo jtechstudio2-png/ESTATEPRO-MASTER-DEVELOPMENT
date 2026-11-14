@@ -266,10 +266,20 @@ describe('P6-0: history order (#15) and sales-record protection', () => {
         await tx.updateTable('offers').set({ status: 'accepted', respondedAt: new Date() }).where('id', '=', offer.id).execute();
         await tx.updateTable('deals').set({ stageId: await stageId('sale', 'offer_accepted') }).where('id', '=', id).execute();
       });
-      await fx.db.insertInto('salesTransactions').values({ companyId: company.companyId, reference: `SAL-P6-${randomUUID().slice(0, 8)}`, dealId: id, listingId, unitId, acceptedOfferId: offer.id, currencyCode: 'GHS', agreedPrice: '850000' }).execute();
-      await fx.db.updateTable('salesTransactions').set({ status: 'exchanged', contractSignedOn: '2016-01-20' }).where('dealId', '=', id).execute();
-      await fx.db.updateTable('salesTransactions').set({ status: 'completed', completedOn: '2016-03-01' }).where('dealId', '=', id).execute();
-      await fx.db.updateTable('deals').set({ stageId: await stageId('sale', 'closed_won'), closedAt: new Date('2016-03-01T12:00:00Z') }).where('id', '=', id).execute();
+      // Since S3 contracts need a verified buyer (P6-D6), and the sale and the deal stage move together (migration 0033).
+      await fx.db
+        .insertInto('kycChecks')
+        .values({ companyId: company.companyId, contactId: buyer.id, checkType: 'identity', status: 'verified', riskRating: 'low', reviewedBy: company.ownerMembershipId, reviewedAt: new Date(), recordedBy: company.ownerMembershipId })
+        .execute();
+      await fx.db.transaction().execute(async (tx) => {
+        await tx.insertInto('salesTransactions').values({ companyId: company.companyId, reference: `SAL-P6-${randomUUID().slice(0, 8)}`, dealId: id, listingId, unitId, acceptedOfferId: offer.id, currencyCode: 'GHS', agreedPrice: '850000' }).execute();
+        await tx.updateTable('salesTransactions').set({ status: 'exchanged', contractSignedOn: '2016-01-20' }).where('dealId', '=', id).execute();
+        await tx.updateTable('deals').set({ stageId: await stageId('sale', 'contract') }).where('id', '=', id).execute();
+      });
+      await fx.db.transaction().execute(async (tx) => {
+        await tx.updateTable('salesTransactions').set({ status: 'completed', completedOn: '2016-03-01' }).where('dealId', '=', id).execute();
+        await tx.updateTable('deals').set({ stageId: await stageId('sale', 'closed_won'), closedAt: new Date('2016-03-01T12:00:00Z') }).where('id', '=', id).execute();
+      });
 
       const sellerRequest = await erasureRequest(seller.id);
       expect((await as('owner').get(`/api/v1/privacy-requests/${sellerRequest.id}`).expect(200)).body.erasureBlockers).toEqual(['sale_record']);

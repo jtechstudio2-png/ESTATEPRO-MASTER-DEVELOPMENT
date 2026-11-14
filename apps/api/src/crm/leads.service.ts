@@ -135,7 +135,7 @@ export class LeadsService {
 
   async get(tx: Tx, ctx: TenantContext, id: string): Promise<LeadDto> {
     const row = await this.summaryQuery(tx)
-      .select(['l.campaign', 'l.requirementId', 'l.message', 'l.lostReasonCode', 'l.archivedReason', 'l.scoreBreakdown', 'l.createdAt', 'l.version'])
+      .select(['l.campaign', 'l.requirementId', 'l.message', 'l.lostReasonCode', 'l.convertedDealId', 'l.archivedReason', 'l.scoreBreakdown', 'l.createdAt', 'l.version'])
       .where('l.id', '=', id)
       .executeTakeFirst();
     if (!row || !canOnLead(ctx, 'lead.view', row)) throw Problems.notFound();
@@ -170,6 +170,7 @@ export class LeadsService {
       requirementId: row.requirementId,
       message: row.message,
       lostReasonCode: row.lostReasonCode,
+      convertedDealId: row.convertedDealId,
       archivedReason: row.archivedReason,
       scoreBreakdown: row.score === null ? [] : scoreRules(row.scoreBreakdown),
       statusHistory: history.map((h) => ({

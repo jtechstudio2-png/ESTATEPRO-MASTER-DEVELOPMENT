@@ -30,11 +30,11 @@ SELECT test_assert(
   'the consent recorded last is the one in force, even at the same instant');
 
 SELECT test_assert(
-  (SELECT bool_and(is_nullable = 'NO') AND count(*) = 14 FROM information_schema.columns
+  (SELECT bool_and(is_nullable = 'NO') AND count(*) = 15 FROM information_schema.columns
     WHERE column_name = 'entry_no' AND table_schema = 'public'
       AND table_name IN ('activities', 'audit_logs', 'outbox_events', 'listing_status_history', 'listing_price_history', 'key_movements',
                          'lead_status_history', 'lead_assignments', 'data_subject_request_events', 'data_subject_request_evidence',
-                         'consents', 'kyc_checks', 'deal_stage_history', 'offers')),
+                         'consents', 'kyc_checks', 'deal_stage_history', 'offers', 'deal_assignments')),
   'every history and audit stream has a required insertion number');
 
 SELECT test_assert(
@@ -49,7 +49,7 @@ SELECT test_assert(
   'every role that may insert into a history may number its rows');
 
 SELECT test_assert(
-  (SELECT count(*) = 14 FROM pg_trigger WHERE tgname LIKE '%\_entry\_no\_fixed' AND NOT tgisinternal AND tgparentid = 0),
+  (SELECT count(*) = 15 FROM pg_trigger WHERE tgname LIKE '%\_entry\_no\_fixed' AND NOT tgisinternal AND tgparentid = 0),
   'every history and audit stream refuses a change to its insertion number');
 SELECT test_expect_error(
   $$UPDATE consents SET entry_no = entry_no + 1000000
@@ -167,13 +167,26 @@ SELECT test_expect_error($$UPDATE deal_milestones SET name = 'Something else' WH
 SELECT test_expect_error($$DELETE FROM deal_milestones WHERE id = 'a9e00000-0000-0000-0000-000000000001'$$, '42501', 'milestones are never deleted');
 
 -- ------------------------------------------------- closed deals are final
+-- Since S3 (migration 0033) the deal walks its life cycle: offer accepted, contract (buyer verified), won.
+INSERT INTO kyc_checks (company_id, contact_id, check_type, status, risk_rating, reviewed_by, reviewed_at, recorded_by) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'a5600000-0000-0000-0000-000000000001', 'identity', 'verified', 'low',
+   'a4000000-0000-0000-0000-000000000001', now(), 'a4000000-0000-0000-0000-000000000001');
+UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'sale' AND code = 'negotiation')
+ WHERE id = 'a9b00000-0000-0000-0000-000000000001';
+UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'sale' AND code = 'offer_accepted')
+ WHERE id = 'a9b00000-0000-0000-0000-000000000001';
+UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'sale' AND code = 'contract')
+ WHERE id = 'a9b00000-0000-0000-0000-000000000001';
 UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'sale' AND code = 'closed_won'), closed_at = now()
  WHERE id = 'a9b00000-0000-0000-0000-000000000001';
 SELECT test_expect_error(
   $$UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'sale' AND code = 'negotiation'), closed_at = NULL
      WHERE id = 'a9b00000-0000-0000-0000-000000000001'$$,
   '23514', 'a closed deal does not reopen');
-SELECT test_assert((SELECT count(*) = 3 FROM deal_stage_history WHERE deal_id = 'a9b00000-0000-0000-0000-000000000001'),
+SELECT test_assert(
+  (SELECT s.stage_class = 'closed_won' FROM deal_stage_history h JOIN pipeline_stages s ON s.id = h.to_stage_id
+    WHERE h.deal_id = 'a9b00000-0000-0000-0000-000000000001' ORDER BY h.changed_at DESC, h.entry_no DESC LIMIT 1)
+  AND (SELECT count(*) = 6 FROM deal_stage_history WHERE deal_id = 'a9b00000-0000-0000-0000-000000000001'),
   'closing is recorded as a stage change');
 
 -- ------------------------------------------------- viewings

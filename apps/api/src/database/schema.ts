@@ -639,6 +639,21 @@ export interface DealAgents {
   splitPercent: Numeric;
 }
 
+export interface DealAssignments {
+  assignedAt: Generated<Timestamp>;
+  assignedBy: string | null;
+  companyId: string;
+  dealId: string;
+  /**
+   * Insertion order (#15): breaks ties between rows written at the same time, so this history never reorders.
+   */
+  entryNo: Generated<Int8>;
+  fromMembershipId: string | null;
+  id: Generated<string>;
+  note: string | null;
+  toMembershipId: string;
+}
+
 export interface DealMilestones {
   code: string;
   companyId: string;
@@ -684,6 +699,10 @@ export interface Deals {
   primaryContactId: string;
   probabilityOverride: Numeric | null;
   reference: string;
+  /**
+   * Where the deal came from (picklist lead_source), carried over from its lead on conversion (§4.4).
+   */
+  sourceCode: string | null;
   stageClass: string;
   stageEnteredAt: Generated<Timestamp>;
   stageId: string;
@@ -2668,6 +2687,7 @@ export interface DB {
   dataSubjectRequestEvidence: DataSubjectRequestEvidence;
   dataSubjectRequests: DataSubjectRequests;
   dealAgents: DealAgents;
+  dealAssignments: DealAssignments;
   dealMilestones: DealMilestones;
   dealParties: DealParties;
   deals: Deals;

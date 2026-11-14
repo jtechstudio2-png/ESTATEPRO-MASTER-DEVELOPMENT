@@ -29,6 +29,7 @@ import { WorkspaceModule } from './workspace/workspace.module.js';
 import { PropertiesModule } from './properties/properties.module.js';
 import { ViewingsModule } from './viewings/viewings.module.js';
 import { OffersModule } from './offers/offers.module.js';
+import { DealsModule } from './deals/deals.module.js';
 
 /** Log destination override (tests capture the real log output); null means standard output. */
 export const LOG_STREAM = Symbol('LOG_STREAM');
@@ -73,6 +74,7 @@ function withStream<T>(stream: DestinationStream | null, options: T): T | [T, De
     PrivacyModule,
     ViewingsModule,
     OffersModule,
+    DealsModule,
   ],
   controllers: [HealthController, MeController, CompanyController],
   providers: [{ provide: APP_FILTER, useClass: ProblemFilter }],

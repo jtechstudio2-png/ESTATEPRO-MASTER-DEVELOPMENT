@@ -356,8 +356,8 @@ describe('S2: offers', () => {
       const forbidden = await as('agent').post('/api/v1/offers', { dealId: theirs.dealId, offeredByContactId: buyer.id, amount: ghs('1.00') });
       expect(forbidden.status).toBe(422);
       expect(forbidden.body.errors[0]).toMatchObject({ field: 'dealId', code: 'not-found' });
-      // A co-agent on the deal sees it.
-      await fx.db.insertInto('dealAgents').values({ companyId: company.companyId, dealId: theirs.dealId, membershipId: members['agent']!, agentRole: 'co_agent', splitPercent: '0' }).execute();
+      // A co-agent on the deal sees it (since S3 the credited agents' splits add up to 100 %).
+      await fx.db.insertInto('dealAgents').values({ companyId: company.companyId, dealId: theirs.dealId, membershipId: members['agent']!, agentRole: 'co_agent', splitPercent: '100' }).execute();
       await as('agent').get(`/api/v1/offers/${offer.id}`).expect(200);
 
       const read = await as('accountant').get(`/api/v1/offers/${offer.id}`).expect(200);

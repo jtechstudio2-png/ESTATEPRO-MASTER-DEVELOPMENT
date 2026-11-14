@@ -416,16 +416,16 @@ describe('S1: viewings', () => {
       await fx.db.updateTable('leads').set({ archivedAt: new Date(), archivedReason: 'Duplicate' }).where('id', '=', lead.body.id).execute();
       expect(await fieldErrors({ leadId: lead.body.id })).toContain('leadId:archived');
       expect(await fieldErrors({ dealId: randomUUID() })).toContain('dealId:not-found');
+      // Since S3 a deal starts before "offer accepted" (migration 0033) and is then lost.
+      const stage = async (code: string) => (await fx.db.selectFrom('pipelineStages').select('id').where('companyId', 'is', null).where('dealType', '=', 'sale').where('code', '=', code).executeTakeFirstOrThrow()).id;
       const lost = await fx.db
         .insertInto('deals')
         .values({
           companyId: company.companyId,
           reference: `DEA-S1-${randomUUID().slice(0, 8)}`,
           dealType: 'sale',
-          stageId: (await fx.db.selectFrom('pipelineStages').select('id').where('companyId', 'is', null).where('dealType', '=', 'sale').where('code', '=', 'closed_lost').executeTakeFirstOrThrow()).id,
-          stageClass: 'closed_lost',
-          lostReasonCode: 'price',
-          closedAt: new Date(),
+          stageId: await stage('lead'),
+          stageClass: 'lead',
           primaryContactId: person.id,
           officeId: company.officeId,
           ownerMembershipId: members['owner']!,
@@ -435,6 +435,7 @@ describe('S1: viewings', () => {
         })
         .returning('id')
         .executeTakeFirstOrThrow();
+      await fx.db.updateTable('deals').set({ stageId: await stage('closed_lost'), lostReasonCode: 'price', closedAt: new Date() }).where('id', '=', lost.id).execute();
       expect(await fieldErrors({ dealId: lost.id })).toContain('dealId:deal-closed');
       const gone = await contact();
       await fx.db.updateTable('contacts').set({ archivedAt: new Date(), archivedReason: 'Left the country' }).where('id', '=', gone.id).execute();
