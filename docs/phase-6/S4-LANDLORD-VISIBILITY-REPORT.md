@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Date | 14 November 2026 |
-| Branch | `phase-6/readiness`, commits `c035988` (implementation) and the report commit; CI pending |
+| Branch | `phase-6/readiness`, commits `c035988` (implementation) and the report commit; CI run 128 (`a01475d`, the implementation plus this report; all six checks green; run 127 on `c035988` was cancelled when 128 started) |
 | Approvals | S3 approved with S3-D1 to S3-D16; S3 risks reviewed and accepted (14 November 2026). "Proceed to S4 (Landlord Visibility) according to the approved Phase 6 roadmap" |
 | Scope | Landlord visibility as approved in the readiness report (§2.1, §6; P6-D10; issue #5): reduced, read-only views of offers, deal progress and viewings on the landlord's own listings; the reduced API, its field-level tests, and the staff-side preview ("What this landlord could see", LL-1) |
 | Not in scope | Landlord portal screens and landlord sign-up (Phase 7), the staff preview screen (S5, to the P6-W wireframes), dashboards (S6) |
-| Result | **S4 complete**, for approval before S5. Results in §3; CI pending (§9) |
+| Result | **S4 complete**, for approval before S5. Results in §3; CI run 128 green (§9) |
 
 ## 1. Deliverables
 
@@ -60,7 +60,7 @@ Portal access: the auth guard keeps every endpoint for company staff only, as be
 | Full API suite (`test:ci`) | 555 in 45 files | ✅ |
 | API performance: landlord views | 1 | ✅ (§6) |
 | Web: typecheck, lint, message check (2,572 keys in both languages), unit tests | 79 | ✅ |
-| Browser suite (CI) | 93 | Pending |
+| Browser suite (CI) | 93 | ✅ (run 128) |
 
 API coverage: 96.18 % statements, 90.63 % branches, 98.42 % functions, 98.33 % lines (thresholds 95/90). Landlord module: 97.2 % statements, 100 % lines.
 
@@ -126,7 +126,7 @@ S4 adds no screens (S4-D1). The views carry codes for translated screens (status
 | S1, S2 and S3 reports (approved) | `docs/phase-6/S1-VIEWINGS-REPORT.md`, `S2-OFFERS-REPORT.md`, `S3-DEALS-REPORT.md` |
 | Issue #5 (landlord visibility) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/5 |
 | Issues #42, #43, #44 | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42 · /43 · /44 |
-| CI run (pending) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions |
+| CI run 128 (`a01475d`, six checks green) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/43644083685 |
 
 ## Approval
 
