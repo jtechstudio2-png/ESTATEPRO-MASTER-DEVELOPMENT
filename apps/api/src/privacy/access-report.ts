@@ -32,6 +32,8 @@ export interface AccessReport {
   followUps: Record<string, unknown>[];
   /** Viewings the person attends, and viewings of their leads (S1). */
   viewings: Record<string, unknown>[];
+  /** Offers the person made (S2). */
+  offers: Record<string, unknown>[];
   privacyRequests: Record<string, unknown>[];
 }
 
@@ -192,6 +194,13 @@ export async function buildAccessReport(
      where exists (select 1 from viewing_attendees a where a.viewing_id = v.id and a.contact_id = any(${subjects}::uuid[]))
         or v.lead_id = any(${leadIds.length > 0 ? leadIds : [contactId]}::uuid[])
      order by v.scheduled_start, v.id`.execute(tx);
+  const { rows: offers } = await sql<Record<string, unknown>>`
+    select l.reference as "listingReference", l.title as "listingTitle", o.direction, o.status, o.currency_code as "currency",
+           o.amount::text as "amount", o.rent_frequency as "rentFrequency", o.conditions, o.financing_code as "financing",
+           o.submitted_at as "submittedAt", o.expires_at as "expiresAt", o.responded_at as "respondedAt"
+      from offers o join listings l on l.id = o.listing_id
+     where o.offered_by_contact_id = any(${subjects}::uuid[])
+     order by o.submitted_at, o.entry_no`.execute(tx);
   const privacyRequests = await tx
     .selectFrom('dataSubjectRequests')
     .select(['reference', 'requestType', 'status', 'receivedOn', 'closedAt'])
@@ -222,11 +231,12 @@ export async function buildAccessReport(
     activities: activities.map(stamp),
     followUps: followUps.map(stamp),
     viewings: viewings.map(stamp),
+    offers: offers.map(stamp),
     privacyRequests: privacyRequests.map(stamp),
   };
   const rowCount =
     contacts.length + contactMethods.length + roles.length + consents.length + identityDocuments.length + identityChecks.length + requirements.length +
-    leads.length + activities.length + followUps.length + viewings.length + privacyRequests.length;
+    leads.length + activities.length + followUps.length + viewings.length + offers.length + privacyRequests.length;
   return { report, rowCount, protectedFields: [...new Set(protectedFields)] };
 }
 

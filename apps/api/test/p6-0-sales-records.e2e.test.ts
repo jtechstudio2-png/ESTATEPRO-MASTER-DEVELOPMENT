@@ -249,7 +249,6 @@ describe('P6-0: history order (#15) and sales-record protection', () => {
         .values({ companyId: company.companyId, dealId: id, listingId, offeredByContactId: buyer.id, direction: 'from_buyer', currencyCode: 'GHS', amount: '850000', conditions: 'Subject to the buyer selling their flat in Osu', recordedBy: company.ownerMembershipId })
         .returning('id')
         .executeTakeFirstOrThrow();
-      await fx.db.updateTable('offers').set({ status: 'accepted', respondedAt: new Date() }).where('id', '=', offer.id).execute();
       // Since S1 a viewing is booked on a live listing, with an attendee, in one transaction.
       await fx.db.updateTable('listings').set({ status: 'available' }).where('id', '=', listingId).where('status', '=', 'draft').execute();
       const viewing = await fx.db.transaction().execute(async (tx) => {
@@ -262,6 +261,11 @@ describe('P6-0: history order (#15) and sales-record protection', () => {
         return row;
       });
       await fx.db.updateTable('viewings').set({ status: 'completed', outcome: 'offer_made', feedback: 'Asked about the school run for their children' }).where('id', '=', viewing.id).execute();
+      // Since S2 an offer is accepted together with its deal's stage (migration 0032).
+      await fx.db.transaction().execute(async (tx) => {
+        await tx.updateTable('offers').set({ status: 'accepted', respondedAt: new Date() }).where('id', '=', offer.id).execute();
+        await tx.updateTable('deals').set({ stageId: await stageId('sale', 'offer_accepted') }).where('id', '=', id).execute();
+      });
       await fx.db.insertInto('salesTransactions').values({ companyId: company.companyId, reference: `SAL-P6-${randomUUID().slice(0, 8)}`, dealId: id, listingId, unitId, acceptedOfferId: offer.id, currencyCode: 'GHS', agreedPrice: '850000' }).execute();
       await fx.db.updateTable('salesTransactions').set({ status: 'exchanged', contractSignedOn: '2016-01-20' }).where('dealId', '=', id).execute();
       await fx.db.updateTable('salesTransactions').set({ status: 'completed', completedOn: '2016-03-01' }).where('dealId', '=', id).execute();

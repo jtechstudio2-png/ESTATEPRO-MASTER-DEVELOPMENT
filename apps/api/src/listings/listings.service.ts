@@ -9,6 +9,8 @@ import { decimalPlaces, type MoneyInput, toMoney, toScaled } from '../common/mon
 import { type FieldError, ProblemError, Problems } from '../common/problem.js';
 import { actingMembership, type PermissionScope, type TenantContext } from '../common/request-context.js';
 import { APP_CONFIG, type AppConfig } from '../config/config.js';
+import { asPipelineAction } from '../deals/deal-stage.js';
+import { releaseAcceptedOffer } from '../offers/offer-effects.js';
 import type { Tx } from '../database/database.module.js';
 import type { Listings } from '../database/schema.js';
 import {
@@ -828,6 +830,14 @@ export class ListingsService {
     if (reasonRequired(from, to) && reason === undefined) {
       throw Problems.validation([{ field: 'reason', code: 'required', message: 'Give a reason for this change.' }]);
     }
+    // P6-D5: with an accepted offer the status follows the deal; withdrawing the listing withdraws the offer too.
+    const accepted = await tx.selectFrom('offers').select(['id', 'dealId', 'listingId', 'status']).where('listingId', '=', id).where('status', '=', 'accepted').executeTakeFirst();
+    if (accepted && to !== 'withdrawn') {
+      throw Problems.validation([
+        { field: 'status', code: 'listing-has-accepted-offer', message: 'This listing has an accepted offer: its status follows the deal. Withdraw the accepted offer first, or withdraw the listing.' },
+      ]);
+    }
+    if (accepted) await releaseAcceptedOffer(tx, ctx, this.audit, accepted, 'Listing withdrawn');
 
     const unit = await tx
       .selectFrom('units as u')
@@ -851,6 +861,20 @@ export class ListingsService {
       .execute();
     await this.recordStatus(tx, ctx, id, from, to, reason ?? null);
     return this.get(tx, ctx, id);
+  }
+
+  /**
+   * Status change made by an offer action (P6-D5): accepting reserves an
+   * available listing; withdrawing the accepted offer makes a reserved listing
+   * available again. The caller has checked access to the deal.
+   */
+  async pipelineStatus(tx: Tx, ctx: TenantContext, id: string, to: 'reserved' | 'available', reason: string): Promise<void> {
+    const current = await this.lockListing(tx, id);
+    const from = current.status as ListingStatus;
+    if (from === to) return;
+    await asPipelineAction(tx);
+    await tx.updateTable('listings').set({ status: to }).where('id', '=', id).execute();
+    await this.recordStatus(tx, ctx, id, from, to, reason);
   }
 
   async assign(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: AssignAgentBody): Promise<ListingDto> {

@@ -8,6 +8,7 @@ import { refreshRequirementMatches } from '../dashboards/dashboards.service.js';
 import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
 import type { MediaProcessor } from '../media/media-processor.js';
+import { expireOffers } from '../offers/offers.service.js';
 import { ARCHIVE_RETENTION_DAYS, MEDIA_PROCESS_JOB, purgeMedia } from '../media/media.service.js';
 import type { StoragePort } from '../media/storage.js';
 import type { ClaimedJob, JobQueue } from './queue.js';
@@ -22,6 +23,7 @@ export const JOBS = {
   exportExpire: 'export.expire',
   requirementMatchRefresh: 'requirement.match_refresh',
   keyRotate: 'key.rotate',
+  offerExpire: 'offer.expire',
 } as const;
 
 /** Batches (of 200 rows) one key-rotation job handles before handing over to a follow-up job. */
@@ -163,6 +165,13 @@ export class Worker {
       JOBS.exportExpire,
       quarter,
       sql<{ companyId: string }>`select distinct company_id as "companyId" from export_jobs where status = 'completed' and expires_at <= ${now}::timestamptz`,
+    );
+
+    // Open offers past their expiry time (S2), every 15 minutes.
+    enqueued += await discover(
+      JOBS.offerExpire,
+      quarter,
+      sql<{ companyId: string }>`select distinct company_id as "companyId" from offers where status = 'submitted' and expires_at <= ${now}::timestamptz`,
     );
 
     // Field-key rotation (ADR-007 §10): yearly per company, then every quarter
@@ -314,6 +323,13 @@ export class Worker {
       case JOBS.requirementMatchRefresh:
         await tenantDb.run(scope, async (tx) => {
           await refreshRequirementMatches(tx, ctx);
+        });
+        return;
+
+      case JOBS.offerExpire:
+        await tenantDb.run(scope, async (tx) => {
+          const count = await expireOffers(tx, ctx, audit, this.now());
+          if (count > 0) this.deps.logger.info('offers expired', { companyId: job.companyId, count });
         });
         return;
 

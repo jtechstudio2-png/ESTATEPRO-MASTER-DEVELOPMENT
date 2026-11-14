@@ -11,6 +11,7 @@ import { canOnLead, memberGrant } from '../crm/lead-access.js';
 import { LeadsService } from '../crm/leads.service.js';
 import { recordSystemActivity } from '../crm/system-activity.js';
 import type { Tx } from '../database/database.module.js';
+import { moveDealToStage } from '../deals/deal-stage.js';
 import { KeysService } from '../keys/keys.service.js';
 import type { KeySetDto } from '../keys/dto.js';
 import { canOnViewing, type ViewingAccessRow, viewingScopeSql } from './viewing-access.js';
@@ -627,18 +628,7 @@ export class ViewingsService {
   /** A deal before the viewing stage moves to its pipeline's viewing stage (stage history by the database). */
   private async advanceDeal(tx: Tx, deal: { id: string; dealType: string; stageClass: string }): Promise<void> {
     if (!STAGES_BEFORE_VIEWING.includes(deal.stageClass)) return;
-    const stage = await tx
-      .selectFrom('pipelineStages')
-      .select('id')
-      .where('dealType', '=', deal.dealType)
-      .where('stageClass', '=', 'viewing')
-      .where('isActive', '=', true)
-      .orderBy(sql`company_id is null`)
-      .orderBy('sortOrder')
-      .executeTakeFirst();
-    if (!stage) return;
-    await sql`select set_config('app.stage_note', 'Viewing booked', true)`.execute(tx);
-    await tx.updateTable('deals').set({ stageId: stage.id }).where('id', '=', deal.id).execute();
+    await moveDealToStage(tx, deal, 'viewing', 'Viewing booked');
   }
 
   private async attendeeIds(tx: Tx, viewingId: string): Promise<string[]> {

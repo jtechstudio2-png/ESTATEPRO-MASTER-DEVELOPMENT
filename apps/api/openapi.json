@@ -10924,6 +10924,417 @@
           "Viewings"
         ]
       }
+    },
+    "/api/v1/offers": {
+      "get": {
+        "operationId": "Offers_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "description": "Any of submitted, countered, accepted, rejected, withdrawn, expired",
+            "schema": {}
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "description": "Offers this contact made",
+            "schema": {}
+          },
+          {
+            "name": "filter[listingId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[dealId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "submittedAt",
+                "-submittedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Offers in your scope (by deal): a deal's negotiation, a listing's offers, a contact's offers; newest first",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "post": {
+        "operationId": "Offers_record",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordOfferBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record an offer on an open deal (moves an early deal to negotiation)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/offers/{offerId}": {
+      "get": {
+        "operationId": "Offers_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/offers/{offerId}/counter": {
+      "post": {
+        "operationId": "Offers_counter",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the offer being countered",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterOfferBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Counter an open offer: a new offer from the other side, linked to it; returns the counter-offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/offers/{offerId}/accept": {
+      "post": {
+        "operationId": "Offers_accept",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept (company owner, sales managers): the deal moves to \"offer accepted\" and the listing is reserved",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/offers/{offerId}/reject": {
+      "post": {
+        "operationId": "Offers_reject",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferReasonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/offers/{offerId}/withdraw": {
+      "post": {
+        "operationId": "Offers_withdraw",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferReasonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw an open offer, or an accepted one with a reason (the deal returns to negotiation, the listing to available)",
+        "tags": [
+          "Offers"
+        ]
+      }
     }
   },
   "info": {
@@ -24491,6 +24902,318 @@
         "required": [
           "keySetId"
         ]
+      },
+      "OfferRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference"
+        ]
+      },
+      "OfferListingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "The listing's status now"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "title",
+          "status"
+        ]
+      },
+      "OfferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deal": {
+            "$ref": "#/components/schemas/OfferRefDto"
+          },
+          "listing": {
+            "$ref": "#/components/schemas/OfferListingDto"
+          },
+          "offeredBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "from_buyer",
+              "from_seller"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual",
+              null
+            ]
+          },
+          "conditions": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "financingCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "submitted",
+              "countered",
+              "accepted",
+              "rejected",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "respondedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "parentOfferId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The offer this one answers"
+          },
+          "counterOfferIds": {
+            "description": "Counter-offers answering this one",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "otherOfferAccepted": {
+            "type": "boolean",
+            "description": "Another offer on this listing is accepted (P6-D4: this one stays recorded)"
+          },
+          "recordedBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "canManage": {
+            "type": "boolean",
+            "description": "You may counter, reject or withdraw it"
+          },
+          "canAccept": {
+            "type": "boolean",
+            "description": "You may accept it (offer.accept, P6-D4)"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "deal",
+          "listing",
+          "offeredBy",
+          "direction",
+          "amount",
+          "rentFrequency",
+          "conditions",
+          "financingCode",
+          "status",
+          "submittedAt",
+          "expiresAt",
+          "respondedAt",
+          "parentOfferId",
+          "counterOfferIds",
+          "otherOfferAccepted",
+          "recordedBy",
+          "canManage",
+          "canAccept",
+          "version"
+        ]
+      },
+      "OfferPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfferDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "RecordOfferBody": {
+        "type": "object",
+        "properties": {
+          "dealId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An open deal with a listing"
+          },
+          "offeredByContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Who makes the offer: a buyer or tenant on the deal, or (from the seller) a current owner or a seller or landlord on the deal"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "from_buyer",
+              "from_seller"
+            ],
+            "default": "from_buyer"
+          },
+          "amount": {
+            "description": "In the deal's currency",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ],
+            "description": "Lettings only (required for them)"
+          },
+          "conditions": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Never changes once recorded. Do not type identity or bank numbers"
+          },
+          "financingCode": {
+            "type": "string",
+            "description": "Picklist \"financing\": cash, mortgage, part_exchange, developer_plan"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the offer lapses if not answered (the worker marks it expired)"
+          }
+        },
+        "required": [
+          "dealId",
+          "offeredByContactId",
+          "amount"
+        ]
+      },
+      "CounterOfferBody": {
+        "type": "object",
+        "properties": {
+          "offeredByContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Who counters (the other side of the offer being answered)"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyInput"
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ]
+          },
+          "conditions": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "financingCode": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "offeredByContactId",
+          "amount"
+        ]
+      },
+      "OfferReasonBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Why (kept on the timeline). Required to withdraw an accepted offer"
+          }
+        }
       }
     }
   }

@@ -2481,6 +2481,107 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Offers in your scope (by deal): a deal's negotiation, a listing's offers, a contact's offers; newest first */
+        get: operations["Offers_list"];
+        put?: never;
+        /** Record an offer on an open deal (moves an early deal to negotiation) */
+        post: operations["Offers_record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/offers/{offerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Offers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/offers/{offerId}/counter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Counter an open offer: a new offer from the other side, linked to it; returns the counter-offer */
+        post: operations["Offers_counter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/offers/{offerId}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept (company owner, sales managers): the deal moves to "offer accepted" and the listing is reserved */
+        post: operations["Offers_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/offers/{offerId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Offers_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/offers/{offerId}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw an open offer, or an accepted one with a reason (the deal returns to negotiation, the listing to available) */
+        post: operations["Offers_withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6160,6 +6261,111 @@ export interface components {
              */
             dueBackAt?: string;
         };
+        OfferRefDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+        };
+        OfferListingDto: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+            /** @description The listing's status now */
+            status: string;
+        };
+        OfferDto: {
+            /** Format: uuid */
+            id: string;
+            deal: components["schemas"]["OfferRefDto"];
+            listing: components["schemas"]["OfferListingDto"];
+            offeredBy: components["schemas"]["RefLabelDto"];
+            /** @enum {string} */
+            direction: "from_buyer" | "from_seller";
+            amount: components["schemas"]["MoneyDto"];
+            /** @enum {string|null} */
+            rentFrequency: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual" | null;
+            conditions: string | null;
+            financingCode: string | null;
+            /** @enum {string} */
+            status: "submitted" | "countered" | "accepted" | "rejected" | "withdrawn" | "expired";
+            /** Format: date-time */
+            submittedAt: string;
+            /** Format: date-time */
+            expiresAt: string | null;
+            /** Format: date-time */
+            respondedAt: string | null;
+            /**
+             * Format: uuid
+             * @description The offer this one answers
+             */
+            parentOfferId: string | null;
+            /** @description Counter-offers answering this one */
+            counterOfferIds: string[];
+            /** @description Another offer on this listing is accepted (P6-D4: this one stays recorded) */
+            otherOfferAccepted: boolean;
+            recordedBy: components["schemas"]["RefLabelDto"];
+            /** @description You may counter, reject or withdraw it */
+            canManage: boolean;
+            /** @description You may accept it (offer.accept, P6-D4) */
+            canAccept: boolean;
+            version: number;
+        };
+        OfferPageDto: {
+            data: components["schemas"]["OfferDto"][];
+            page: components["schemas"]["PageDto"];
+        };
+        RecordOfferBody: {
+            /**
+             * Format: uuid
+             * @description An open deal with a listing
+             */
+            dealId: string;
+            /**
+             * Format: uuid
+             * @description Who makes the offer: a buyer or tenant on the deal, or (from the seller) a current owner or a seller or landlord on the deal
+             */
+            offeredByContactId: string;
+            /**
+             * @default from_buyer
+             * @enum {string}
+             */
+            direction: "from_buyer" | "from_seller";
+            /** @description In the deal's currency */
+            amount: components["schemas"]["MoneyInput"];
+            /**
+             * @description Lettings only (required for them)
+             * @enum {string}
+             */
+            rentFrequency?: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual";
+            /** @description Never changes once recorded. Do not type identity or bank numbers */
+            conditions?: string | null;
+            /** @description Picklist "financing": cash, mortgage, part_exchange, developer_plan */
+            financingCode?: string;
+            /**
+             * Format: date-time
+             * @description When the offer lapses if not answered (the worker marks it expired)
+             */
+            expiresAt?: string;
+        };
+        CounterOfferBody: {
+            /**
+             * Format: uuid
+             * @description Who counters (the other side of the offer being answered)
+             */
+            offeredByContactId: string;
+            amount: components["schemas"]["MoneyInput"];
+            /** @enum {string} */
+            rentFrequency?: "weekly" | "monthly" | "quarterly" | "semi_annual" | "annual";
+            conditions?: string | null;
+            financingCode?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+        };
+        OfferReasonBody: {
+            /** @description Why (kept on the timeline). Required to withdraw an accepted offer */
+            reason?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -6459,6 +6665,13 @@ export type RecordOutcomeBody = components['schemas']['RecordOutcomeBody'];
 export type NoShowBody = components['schemas']['NoShowBody'];
 export type FeedbackSharingBody = components['schemas']['FeedbackSharingBody'];
 export type ViewingKeyCheckOutBody = components['schemas']['ViewingKeyCheckOutBody'];
+export type OfferRefDto = components['schemas']['OfferRefDto'];
+export type OfferListingDto = components['schemas']['OfferListingDto'];
+export type OfferDto = components['schemas']['OfferDto'];
+export type OfferPageDto = components['schemas']['OfferPageDto'];
+export type RecordOfferBody = components['schemas']['RecordOfferBody'];
+export type CounterOfferBody = components['schemas']['CounterOfferBody'];
+export type OfferReasonBody = components['schemas']['OfferReasonBody'];
 export type $defs = Record<string, never>;
 export interface operations {
     Health_health: {
@@ -11381,6 +11594,194 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KeySetDto"];
+                };
+            };
+        };
+    };
+    Offers_list: {
+        parameters: {
+            query?: {
+                /** @description Any of submitted, countered, accepted, rejected, withdrawn, expired */
+                "filter[status]"?: unknown;
+                /** @description Offers this contact made */
+                "filter[contactId]"?: unknown;
+                "filter[listingId]"?: unknown;
+                "filter[dealId]"?: unknown;
+                sort?: "submittedAt" | "-submittedAt";
+                cursor?: unknown;
+                limit?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferPageDto"];
+                };
+            };
+        };
+    };
+    Offers_record: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordOfferBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDto"];
+                };
+            };
+        };
+    };
+    Offers_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDto"];
+                };
+            };
+        };
+    };
+    Offers_counter: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                /** @description Version of the offer being countered */
+                "If-Match": string;
+            };
+            path: {
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CounterOfferBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDto"];
+                };
+            };
+        };
+    };
+    Offers_accept: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDto"];
+                };
+            };
+        };
+    };
+    Offers_reject: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfferReasonBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDto"];
+                };
+            };
+        };
+    };
+    Offers_withdraw: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Company-Id": string;
+                "If-Match": string;
+            };
+            path: {
+                offerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfferReasonBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDto"];
                 };
             };
         };
