@@ -36,23 +36,23 @@ These add to the offer rules of migrations 0007 (one accepted offer per listing)
 
 Other changes: worker job `offer.expire` (every 15 minutes); the listing status change refuses a manual change while an accepted offer exists (code `listing-has-accepted-offer`) and, when the listing is withdrawn, withdraws the accepted offer too; the access report (G3) gains `offers`. A shared helper moves deals between stages for viewings and offers (`src/deals/deal-stage.ts`).
 
-## 2. Decisions taken in S2 (for confirmation)
+## 2. Decisions taken in S2 (approved 14 November 2026)
 
-| # | Decision | Reason |
-|---|---|---|
-| S2-D1 | **Boundary with S3.** S2 records offers on existing deals and applies the offer effects the readiness report gives to offers (deal stage, listing status). Creating deals, lead conversion, parties and agents, milestones copied on acceptance and identity checks started on acceptance (§4.2 note, P6-D6, P6-D7) are built in S3. Until S3, deals exist only in tests | Approved milestone order (S2 offers, then S3 deals); avoids building deal features ahead of their milestone |
-| S2-D2 | Offer scope follows the deal: **all**; **office** = deals of the member's offices; **own** = deals the member owns or is an agent on (`deal_agents`) | ADR-008 §5 ("their own deals and the offers on them") |
-| S2-D3 | The offeror must be on the right side of the deal: buyer side = the deal's primary contact or a buyer or tenant party; seller side = a seller or landlord party or a current owner of the unit. Being on the deal links the contact to the member's deal; any other contact is refused | Prevents offers from unrelated people; agents record offers from their deal's buyer without needing the contact in their contact scope |
-| S2-D4 | Terms: in the deal's currency, at most its decimal places, more than zero; rent frequency required for lettings and refused for sales; financing from the "financing" picklist; expiry in the future; the deal must be open and have a listing | §4.2; closes S1 finding R6 (offers on a deal without a listing) |
-| S2-D5 | Only an open (submitted) offer can be countered; the counter comes from the other side; the answered offer becomes "countered"; the response is the counter-offer | §4.2 counter rule |
-| S2-D6 | Accepting needs `offer.accept` (company owner all, sales manager office) and a listing that is available or reserved. The deal moves to "offer accepted" (stage note "Offer accepted"); an available listing becomes reserved (a reserved one stays). Other open offers on the listing stay recorded, flagged `otherOfferAccepted`; accepting a second one is refused (409) | P6-D4, P6-D5 |
-| S2-D7 | Withdrawing an accepted offer needs a reason; the deal returns to negotiation and the listing to available ("Accepted offer withdrawn") | §4.3 (offer accepted → negotiation), P6-D5 |
-| S2-D8 | With an accepted offer, a manual listing status change is refused; **withdrawing the listing withdraws the accepted offer and returns the deal to negotiation** (stage note "Listing withdrawn"). P6-D5 says "the deal then falls through": closing a deal as lost is an S3 action, so in S2 the deal stays open at negotiation and S3 offers to close it | P6-D5; the deal-closing action belongs to S3 |
-| S2-D9 | Recording an offer moves a deal at lead, qualification or viewing to negotiation ("Offer recorded") | §4.3 |
-| S2-D10 | Open offers past their expiry time become expired (worker, every 15 minutes, audited as the system); an expiry never moves the deal or the listing | §4.2 |
-| S2-D11 | Free text (conditions, reasons) stays in the offer record and on the timeline (listing, offeror, the deal's lead), never in audit metadata; amounts and ids are in audit metadata | ADR-008 §5 |
-| S2-D12 | The transaction marker for offer actions (`app.pipeline_action`) guards against a manual listing change slipping past the pipeline; it is not a security control (the application sets it), as documented in migration 0032 | Keeps P6-D5 in the database without new roles |
-| S2-D13 | S2 delivers the API and database; offer screens follow the P6-W wireframes in S5; the landlord's reduced view of offers is S4 | Readiness §10, §6 |
+| # | Decision | Reason | Status |
+|---|---|---|---|
+| S2-D1 | **Boundary with S3.** S2 records offers on existing deals and applies the offer effects the readiness report gives to offers (deal stage, listing status). Creating deals, lead conversion, parties and agents, milestones copied on acceptance and identity checks started on acceptance (§4.2 note, P6-D6, P6-D7) are built in S3. Until S3, deals exist only in tests | Approved milestone order (S2 offers, then S3 deals); avoids building deal features ahead of their milestone | **Approved** |
+| S2-D2 | Offer scope follows the deal: **all**; **office** = deals of the member's offices; **own** = deals the member owns or is an agent on (`deal_agents`) | ADR-008 §5 ("their own deals and the offers on them") | **Approved** |
+| S2-D3 | The offeror must be on the right side of the deal: buyer side = the deal's primary contact or a buyer or tenant party; seller side = a seller or landlord party or a current owner of the unit. Being on the deal links the contact to the member's deal; any other contact is refused | Prevents offers from unrelated people; agents record offers from their deal's buyer without needing the contact in their contact scope | **Approved** |
+| S2-D4 | Terms: in the deal's currency, at most its decimal places, more than zero; rent frequency required for lettings and refused for sales; financing from the "financing" picklist; expiry in the future; the deal must be open and have a listing | §4.2; closes S1 finding R6 (offers on a deal without a listing) | **Approved** |
+| S2-D5 | Only an open (submitted) offer can be countered; the counter comes from the other side; the answered offer becomes "countered"; the response is the counter-offer | §4.2 counter rule | **Approved** |
+| S2-D6 | Accepting needs `offer.accept` (company owner all, sales manager office) and a listing that is available or reserved. The deal moves to "offer accepted" (stage note "Offer accepted"); an available listing becomes reserved (a reserved one stays). Other open offers on the listing stay recorded, flagged `otherOfferAccepted`; accepting a second one is refused (409) | P6-D4, P6-D5 | **Approved** |
+| S2-D7 | Withdrawing an accepted offer needs a reason; the deal returns to negotiation and the listing to available ("Accepted offer withdrawn") | §4.3 (offer accepted → negotiation), P6-D5 | **Approved** |
+| S2-D8 | With an accepted offer, a manual listing status change is refused; **withdrawing the listing withdraws the accepted offer and returns the deal to negotiation** (stage note "Listing withdrawn"). P6-D5 says "the deal then falls through": closing a deal as lost is an S3 action, so in S2 the deal stays open at negotiation and S3 offers to close it | P6-D5; the deal-closing action belongs to S3 | **Approved** |
+| S2-D9 | Recording an offer moves a deal at lead, qualification or viewing to negotiation ("Offer recorded") | §4.3 | **Approved** |
+| S2-D10 | Open offers past their expiry time become expired (worker, every 15 minutes, audited as the system); an expiry never moves the deal or the listing | §4.2 | **Approved** |
+| S2-D11 | Free text (conditions, reasons) stays in the offer record and on the timeline (listing, offeror, the deal's lead), never in audit metadata; amounts and ids are in audit metadata | ADR-008 §5 | **Approved** |
+| S2-D12 | The transaction marker for offer actions (`app.pipeline_action`) guards against a manual listing change slipping past the pipeline; it is not a security control (the application sets it), as documented in migration 0032 | Keeps P6-D5 in the database without new roles | **Approved** |
+| S2-D13 | S2 delivers the API and database; offer screens follow the P6-W wireframes in S5; the landlord's reduced view of offers is S4 | Readiness §10, §6 | **Approved** |
 
 ## 3. Tests
 
@@ -121,7 +121,7 @@ Re-run after S2, each on its own database: listings p95 263 ms; viewings (200,00
 
 S2 adds no screens (S2-D13). Every refusal carries a stable code (`currency-mismatch`, `precision`, `positive`, `not-buyer-side`, `not-seller-side`, `deal-without-listing`, `deal-closed`, `listing-not-available`, `listing-has-accepted-offer`, …) for the S5 screens to translate in English and Arabic; amounts are returned with their currency at its decimal places. Message files unchanged (2,572 keys in each language, checked).
 
-## 8. Risks and open items
+## 8. Risks and open items (reviewed and accepted 14 November 2026)
 
 | # | Item | Rating | Status |
 |---|---|---|---|
@@ -142,4 +142,10 @@ S2 adds no screens (S2-D13). Every refusal carries a stable code (`currency-mism
 
 ## Approval
 
-Awaiting product owner approval of S2 (S2-D1 to S2-D13) before S3 (deals) begins.
+| Item | Decision | Date |
+|---|---|---|
+| S2 (offers) | **Approved** | 14 November 2026 |
+| S2-D1 to S2-D13 | **Approved**, each individually | 14 November 2026 |
+| S2-R1 to S2-R4 | Reviewed and accepted | 14 November 2026 |
+
+Next: S3 (deals), per the approved Phase 6 roadmap.
