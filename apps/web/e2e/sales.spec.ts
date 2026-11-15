@@ -121,7 +121,7 @@ test.describe('Sales pipeline screens', () => {
     const dialog = page.getByRole('alertdialog', { name: 'How did the viewing go?' });
     await expect(dialog).toContainText('cannot be changed once saved');
     await pickRadio(dialog, 'Interested');
-    await dialog.getByLabel('Feedback').fill('Liked the garden; asked about the road noise.');
+    await dialog.getByRole('textbox', { name: 'Feedback' }).fill('Liked the garden; asked about the road noise.');
     await dialog.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(dialog).toBeHidden();
     await expect(page.getByRole('heading', { name: 'Nothing to follow up' })).toBeVisible();
