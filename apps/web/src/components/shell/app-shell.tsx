@@ -94,7 +94,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     enabled: hasCrm(grant),
     staleTime: 60_000,
   });
+  // Own viewings that are over with no outcome (SH-2): only the member's own, never the team's.
+  const viewingsToFollow = useQuery({
+    queryKey: ['shell', 'viewings-follow-up', session.membershipId],
+    queryFn: () => bff<{ data: unknown[] }>('viewings?filter[needsOutcome]=true&filter[agentMembershipId]=me&limit=100'),
+    enabled: grant('viewing.view') !== undefined,
+    staleTime: 60_000,
+  });
   const badges: Record<string, { text: string; label: string } | null> = {
+    'viewings-follow-up':
+      viewingsToFollow.data && viewingsToFollow.data.data.length > 0
+        ? { text: badgeText(viewingsToFollow.data.data.length, viewingsToFollow.data.data.length >= 100), label: t('viewingsToFollowUp', { count: viewingsToFollow.data.data.length }) }
+        : null,
     leads:
       newLeads.data && newLeads.data.data.length > 0
         ? { text: badgeText(newLeads.data.data.length, newLeads.data.data.length >= 100), label: t(canAssignLeads ? 'leadsUnassigned' : 'leadsNewMine', { count: newLeads.data.data.length }) }

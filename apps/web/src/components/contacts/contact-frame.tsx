@@ -112,6 +112,7 @@ export function ContactFrame({ id, children }: { id: string; children: ReactNode
     ...(can('lead.view') ? [{ href: `${base}/leads`, label: t('tabs.leads'), current: pathname.startsWith(`${base}/leads`) }] : []),
     { href: `${base}/requirements`, label: t('tabs.requirements'), current: pathname.startsWith(`${base}/requirements`) },
     ...(can('property.view') ? [{ href: `${base}/properties`, label: t('tabs.properties'), current: pathname.startsWith(`${base}/properties`) }] : []),
+    ...(can('deal.view') || can('offer.view') || can('viewing.view') ? [{ href: `${base}/sales`, label: t('tabs.sales'), current: pathname.startsWith(`${base}/sales`) }] : []),
     ...(can('kyc.view') ? [{ href: `${base}/identity`, label: t('tabs.identity'), current: pathname.startsWith(`${base}/identity`) }] : []),
     { href: `${base}/consent`, label: t('tabs.consent'), current: pathname.startsWith(`${base}/consent`) },
   ];

@@ -97,6 +97,9 @@ export function ListingFrame({ id, children }: { id: string; children: ReactNode
     { href: `${base}/gallery`, label: t('tabs.gallery'), count: record.media.photoCount + record.media.floorPlanCount, current: pathname.startsWith(`${base}/gallery`) },
     { href: `${base}/translations`, label: t('tabs.translations'), count: record.translations.length, current: pathname.startsWith(`${base}/translations`) },
     { href: `${base}/price-status`, label: t('tabs.priceStatus'), current: pathname.startsWith(`${base}/price-status`) },
+    ...(can('viewing.view') ? [{ href: `${base}/viewings`, label: t('tabs.viewings'), current: pathname.startsWith(`${base}/viewings`) }] : []),
+    ...(can('offer.view') ? [{ href: `${base}/offers`, label: t('tabs.offers'), current: pathname.startsWith(`${base}/offers`) }] : []),
+    ...(can('deal.view') ? [{ href: `${base}/deals`, label: t('tabs.deals'), current: pathname.startsWith(`${base}/deals`) }] : []),
     { href: `${base}/history`, label: t('tabs.history'), current: pathname.startsWith(`${base}/history`) },
   ];
 

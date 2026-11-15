@@ -39,7 +39,8 @@ const FILTERS = {
 type Filter = keyof typeof FILTERS;
 
 interface TimelineProps {
-  about: { entityType: 'contact' | 'lead'; entityId: string; label: string };
+  /** A deal's timeline is read only (W-A2): its entries are written by the deal's own actions. */
+  about: { entityType: 'contact' | 'lead' | 'deal'; entityId: string; label: string };
   /** Other records a new entry is linked to (a lead's contact). */
   extraLinks?: LinkedRecord[];
   /** May the member log here (write access to the record, C3-D4). */
@@ -71,7 +72,8 @@ export function ActivityTimeline({ about, extraLinks = [], canLog, limit, seeAll
   const query = new URLSearchParams();
   if (FILTERS[filter]) query.set('filter[activityType]', FILTERS[filter]);
   if (archived) query.set('filter[archived]', 'all');
-  const path = about.entityType === 'contact' ? `contacts/${about.entityId}/activities` : `leads/${about.entityId}/activities`;
+  const path = `${about.entityType === 'contact' ? 'contacts' : about.entityType === 'lead' ? 'leads' : 'deals'}/${about.entityId}/activities`;
+  const loggable = about.entityType !== 'deal';
   const result = usePagedList<ActivityDto>(path, query, { limit: limit ?? 25 });
   const rows = limit ? result.rows.slice(0, limit) : result.rows;
 
@@ -102,14 +104,14 @@ export function ActivityTimeline({ about, extraLinks = [], canLog, limit, seeAll
     return actions;
   };
 
-  const links: LinkedRecord[] = [{ entityType: about.entityType, entityId: about.entityId, label: about.label }, ...extraLinks];
+  const links: LinkedRecord[] = about.entityType === 'deal' ? extraLinks : [{ entityType: about.entityType, entityId: about.entityId, label: about.label }, ...extraLinks];
   let lastDay = '';
   return (
     <Panel
       title={limit ? t('recentTitle') : t('title')}
       actions={
         <>
-          {canLog ? (
+          {canLog && loggable ? (
             <Button variant="primary" onPress={() => setLogging(true)}>
               {t('log')}
             </Button>
@@ -220,7 +222,7 @@ export function ActivityTimeline({ about, extraLinks = [], canLog, limit, seeAll
         </>
       )}
       {logging ? <LogActivityDialog links={links} onClose={() => setLogging(false)} onScheduleFollowUp={() => setFollowUp(true)} /> : null}
-      {followUp ? <FollowUpDialog about={{ entityType: about.entityType, entityId: about.entityId, label: about.label }} onClose={() => setFollowUp(false)} /> : null}
+      {followUp && about.entityType !== 'deal' ? <FollowUpDialog about={{ entityType: about.entityType, entityId: about.entityId, label: about.label }} onClose={() => setFollowUp(false)} /> : null}
       {editing ? <LogActivityDialog links={links} activity={editing} onClose={() => setEditing(null)} /> : null}
       {dialog?.kind === 'archive' ? <ArchiveActivityDialog activity={dialog.activity} onClose={() => setDialog(null)} /> : null}
       {dialog?.kind === 'history' ? <HistoryDialog activity={dialog.activity} onClose={() => setDialog(null)} /> : null}

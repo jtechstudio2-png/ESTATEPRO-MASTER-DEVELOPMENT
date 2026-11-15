@@ -9,6 +9,7 @@ import { useSession } from '@/components/session';
 import { LinkButton } from '@/components/ui/button';
 import { EmptyState, ErrorNotice, Notice, Skeleton, StatusLabel } from '@/components/ui/feedback';
 import { Panel, Stack } from '@/components/ui/layout';
+import { LandlordListingPreview } from '@/components/sales/landlord-preview';
 import type { PortalPreviewDto } from '@/lib/api-schema';
 import { bff } from '@/lib/bff';
 import { useFormat } from '@/lib/hooks/format';
@@ -113,6 +114,7 @@ export function PropertiesTab({ id }: { id: string }) {
         {data.limitedToYourAccess ? <Notice tone="info">{t('limited')}</Notice> : null}
         <p className={styles.meta}>{t('auditNote')}</p>
       </Panel>
+      <LandlordListingPreview contactId={id} listings={data.properties.flatMap((property) => property.listings.map((listing) => ({ id: listing.id, reference: listing.reference })))} />
     </Stack>
   );
 }

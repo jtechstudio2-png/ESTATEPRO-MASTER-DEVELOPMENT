@@ -148,5 +148,9 @@
   "nameRequired": "أدخل الاسم.",
   "phoneOrEmail": "أدخل رقم جوال أو بريدًا إلكترونيًا.",
   "sourceRequired": "اختر مصدر العميل المحتمل.",
-  "createdLead": "تم إنشاء العميل المحتمل {reference}"
+  "createdLead": "تم إنشاء العميل المحتمل {reference}",
+  "convertToDeal": "تحويل إلى صفقة",
+  "bookViewing": "حجز معاينة",
+  "convertedTo": "تم تحويل هذا العميل المحتمل إلى صفقة.",
+  "openDeal": "فتح الصفقة"
 }

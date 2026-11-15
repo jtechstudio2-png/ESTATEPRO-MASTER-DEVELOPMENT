@@ -343,6 +343,62 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       receivedOn: new Date().toISOString().slice(0, 10),
       summary: 'طلب نسخة من البيانات',
     });
+    // Sales pipeline (Phase 6, S5): a live sale listing on Labone Villa (Ama is the owner), a buyer,
+    // a deal with an open offer, and viewings conducted by the agent: one over without an outcome,
+    // one tomorrow. Created through the API; only the listing's go-live and the past viewing's
+    // time are set directly, as the API tests do (publishing and booking in the past are refused).
+    const villaUnit = await db.query<{ id: string }>('SELECT id FROM units WHERE property_id = $1 LIMIT 1', [laboneVilla.id]);
+    const saleListing = await accraApi.call<{ id: string; reference: string }>('POST', 'listings', {
+      unitId: villaUnit.rows[0]!.id,
+      listingType: 'sale',
+      price: { amount: '1200000.00', currency: 'GHS' },
+      title: '4-bed villa, Labone',
+      description: 'Detached villa with a garden, two streets from the main road.',
+      agentMembershipId: agentMembership,
+    });
+    await db.query(`UPDATE listings SET status = 'available', listed_at = now() WHERE id = $1`, [saleListing.id]);
+    const buyer = await accraApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Kofi Mensah',
+      primaryPhone: '+233 24 555 7310',
+      officeId: accra.officeId,
+      ownerMembershipId: agentMembership,
+      relationships: ['buyer'],
+    });
+    const deal = await accraApi.call<{ id: string; reference: string }>('POST', 'deals', {
+      dealType: 'sale',
+      primaryContactId: buyer.id,
+      listingId: saleListing.id,
+      ownerMembershipId: agentMembership,
+      expectedValue: { amount: '1200000.00', currency: 'GHS' },
+    });
+    const offer = await accraApi.call<{ id: string }>('POST', 'offers', {
+      dealId: deal.id,
+      offeredByContactId: buyer.id,
+      direction: 'from_buyer',
+      amount: { amount: '1100000.00', currency: 'GHS' },
+      conditions: 'Subject to a survey',
+    });
+    const tomorrow = (hour: number) => {
+      const at = new Date(Date.now() + 86_400_000);
+      at.setUTCHours(hour, 0, 0, 0);
+      return at.toISOString();
+    };
+    const book = (start: string, end: string) =>
+      accraApi.call<{ id: string }>('POST', 'viewings', {
+        listingId: saleListing.id,
+        agentMembershipId: agentMembership,
+        viewingType: 'in_person',
+        scheduledStart: start,
+        scheduledEnd: end,
+        attendeeContactIds: [buyer.id],
+        dealId: deal.id,
+        confirmed: false,
+      });
+    const pastViewing = await book(tomorrow(9), tomorrow(10));
+    await db.query(`UPDATE viewings SET scheduled_start = now() - interval '26 hours', scheduled_end = now() - interval '25 hours' WHERE id = $1`, [pastViewing.id]);
+    const upcomingViewing = await book(tomorrow(11), tomorrow(12));
+
     await db.query('BEGIN');
     await db.query(`SELECT set_config('app.company_id', $1, true)`, [doha.companyId]);
     await db.query('SELECT app.erase_contact($1)', [dohaErased.id]);
@@ -364,6 +420,7 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
         keySet,
         crm: { ama, amaDuplicate, seller, erased, portalLead, agentLead, agentTask, dohaContact, dohaErased },
         privacy: { requester, overdueRequest, toErase, dohaRequest },
+        sales: { saleListing, buyer, deal, offer, pastViewing, upcomingViewing },
       },
     };
   } finally {

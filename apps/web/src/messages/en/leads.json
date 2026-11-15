@@ -148,5 +148,9 @@
   "nameRequired": "Enter the name.",
   "phoneOrEmail": "Enter a mobile number or an email address.",
   "sourceRequired": "Choose where the lead came from.",
-  "createdLead": "Lead {reference} created"
+  "createdLead": "Lead {reference} created",
+  "convertToDeal": "Convert to deal",
+  "bookViewing": "Book viewing",
+  "convertedTo": "This lead was converted to a deal.",
+  "openDeal": "Open the deal"
 }

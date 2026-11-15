@@ -110,7 +110,10 @@
     "gallery": "المعرض",
     "translations": "الترجمات",
     "priceStatus": "السعر والحالة",
-    "history": "السجل"
+    "history": "السجل",
+    "viewings": "المعاينات",
+    "offers": "العروض",
+    "deals": "الصفقات"
   },
   "keyFacts": "معلومات أساسية",
   "description": "الوصف ({language})",
@@ -268,5 +271,6 @@
     "readOnly": "يمكن لمسؤولي الشركة فقط تغيير هذه القواعد."
   },
   "noPermission": "يمكنك عرض هذا الإعلان دون تغييره.",
-  "unitLine": "{unit} · {property}"
+  "unitLine": "{unit} · {property}",
+  "openListingDeals": "افتح الصفقة على هذا الإعلان"
 }
