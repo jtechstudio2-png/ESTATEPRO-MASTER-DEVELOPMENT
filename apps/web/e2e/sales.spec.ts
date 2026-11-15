@@ -100,7 +100,7 @@ test.describe('Sales pipeline screens', () => {
     const now = new Date();
     if (!sameWeek(now, new Date(now.getTime() + 86_400_000))) await page.getByRole('button', { name: 'Next week' }).click();
     const grid = page.getByRole('table', { name: /^Viewings, / });
-    const event = grid.getByRole('button', { name: /4-bed villa, Labone/ }).last();
+    const event = grid.getByRole('button', { name: /3-bed flat for sale, Osu/ }).last();
     await expect(event).toContainText('Scheduled');
     await expectAccessible(page);
     await event.click();
@@ -115,7 +115,7 @@ test.describe('Sales pipeline screens', () => {
     await signIn(page, state.users.agent.email);
     await page.goto('/viewings/follow-up');
     const table = page.getByRole('table', { name: 'Viewings' });
-    await expect(table).toContainText('4-bed villa, Labone');
+    await expect(table).toContainText('3-bed flat for sale, Osu');
     await expectAccessible(page);
     await table.getByRole('button', { name: /^Outcome… · / }).click();
     const dialog = page.getByRole('alertdialog', { name: 'How did the viewing go?' });

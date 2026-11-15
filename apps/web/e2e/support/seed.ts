@@ -343,17 +343,30 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
       receivedOn: new Date().toISOString().slice(0, 10),
       summary: 'طلب نسخة من البيانات',
     });
-    // Sales pipeline (Phase 6, S5): a live sale listing on Labone Villa (Ama is the owner), a buyer,
+    // Sales pipeline (Phase 6, S5): a live sale listing on a new Osu Court unit that Ama owns, a buyer,
     // a deal with an open offer, and viewings conducted by the agent: one over without an outcome,
-    // one tomorrow. Created through the API; only the listing's go-live and the past viewing's
-    // time are set directly, as the API tests do (publishing and booking in the past are refused).
-    const villaUnit = await db.query<{ id: string }>('SELECT id FROM units WHERE property_id = $1 LIMIT 1', [laboneVilla.id]);
+    // one tomorrow. Created through the API; the listing's go-live, its place in the listing register
+    // (behind the existing records) and the past viewing's time are set directly, as the API tests do
+    // (publishing and booking in the past are refused). A unit of its own keeps Labone Villa and the
+    // property counts of the earlier specs as they were.
+    const saleUnit = await accraApi.call<{ id: string }>('POST', `properties/${osuCourt.id}/units`, {
+      unitLabel: 'Flat 2A',
+      isWholeProperty: false,
+      unitTypeId: typeId('apartment'),
+      bedrooms: 3,
+      bathrooms: 2,
+      floorArea: { value: 120, unit: 'sqm' },
+    });
+    await db.query(
+      `INSERT INTO property_ownerships (company_id, property_id, unit_id, owner_contact_id, effective_from) VALUES ($1, $2, $3, $4, current_date - 200)`,
+      [accra.companyId, osuCourt.id, saleUnit.id, ama.id],
+    );
     const saleListing = await accraApi.call<{ id: string; reference: string }>('POST', 'listings', {
-      unitId: villaUnit.rows[0]!.id,
+      unitId: saleUnit.id,
       listingType: 'sale',
       price: { amount: '1200000.00', currency: 'GHS' },
-      title: '4-bed villa, Labone',
-      description: 'Detached villa with a garden, two streets from the main road.',
+      title: '3-bed flat for sale, Osu',
+      description: 'Top-floor flat with a balcony, close to Oxford Street.',
       agentMembershipId: agentMembership,
     });
     await db.query(`UPDATE listings SET status = 'available', listed_at = now() WHERE id = $1`, [saleListing.id]);
@@ -398,6 +411,10 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
     const pastViewing = await book(tomorrow(9), tomorrow(10));
     await db.query(`UPDATE viewings SET scheduled_start = now() - interval '26 hours', scheduled_end = now() - interval '25 hours' WHERE id = $1`, [pastViewing.id]);
     const upcomingViewing = await book(tomorrow(11), tomorrow(12));
+    // Behind the seeded rent listing in the register's default order (last updated first).
+    await db.query(`SET session_replication_role = replica`);
+    await db.query(`UPDATE listings SET updated_at = now() - interval '2 days' WHERE id = $1`, [saleListing.id]);
+    await db.query(`SET session_replication_role = origin`);
 
     await db.query('BEGIN');
     await db.query(`SELECT set_config('app.company_id', $1, true)`, [doha.companyId]);
