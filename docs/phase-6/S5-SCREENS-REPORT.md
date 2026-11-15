@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Date | 15 November 2026 |
-| Branch | `phase-6/readiness`, commits `bbd7905` (W-A1, W-A2) to `3dc42dc` and the report commit; CI: see §9 |
+| Branch | `phase-6/readiness`, commits `bbd7905` (W-A1, W-A2) to `3dc42dc`, and the report at `4f7e90f`. CI run 146 on `4f7e90f`: all six checks green. Runs 136 to 145 were each cancelled when the next push started |
 | Approvals | P6-W approved with W-D1 to W-D5; W-A1 and W-A2 approved for inclusion in S5; WR-1 to WR-4 reviewed and accepted (15 November 2026). "Proceed to S5 (Screens) using the approved wireframes. Before implementing the screens: 1. Close W-A1 (global deal search). 2. Close W-A2 (deal timeline read endpoint)." |
 | Scope | The Phase 6 screens of the approved wireframes (`P6-W-WIREFRAMES.md`): Sales navigation (SH-2), viewings (V-1 to V-5), offers (O-1 to O-4), pipeline board, deals, lead conversion and forecast (PB-1, DL-1 to DL-8, CV-1, FC-1), the landlord preview (LP-1), panels on existing screens (X-C2, X-L2, X-L3, global search), and the phone and tablet scope (XV-1, XV-2, XD-1, TV-1, W-D4). The two API gaps W-A1 and W-A2 were closed first |
 | Not in scope | Dashboards (S6), landlord portal screens (Phase 7), leases (Phase 7), any business rule: every rule stays in the API and database of S1 to S4 |
-| Result | **S5 complete, awaiting approval.** Results in §3; CI in §9 |
+| Result | **S5 complete, awaiting approval.** Results in §3; CI run 146 green (§9) |
 
 ## 1. Deliverables
 
@@ -75,7 +75,7 @@ Code: `apps/web/src/components/sales/` (16 files), six routes, the record tabs a
 | Web: typecheck, lint, message check (3,090 keys in both languages) | — | ✅ |
 | Web unit tests, including `test/sales/sales-rules.test.ts` (board moves, split totals, calendar weeks and placement in a time zone, offer threads, forecast scale and month ends, Sales navigation by role) | 95 in 19 files | ✅ |
 | Browser: `e2e/sales.spec.ts`: SH-2 and the badge; PB-1 "Move to"; DL-1; DL-3 tabs and read-only timeline; O-1 and O-3 accept with milestones and the unverified buyer; V-1 and V-3 confirm; V-5 and V-4 outcome; FC-1; X-L3 and LP-1 (no phone numbers shown); CV-1; W-A1; Arabic at 320 px and desktop (axe, `dir="rtl"`, no sideways scroll); phones (XD-1, XV-1). axe on every screen | 13 | ✅ |
-| Browser: whole suite | 106 | ✅ (§9) |
+| Browser: whole suite | 106 | ✅ (locally and in CI run 146) |
 | Browser: performance | 1 (27 screens) | ✅ (§6) |
 
 Web logic coverage: 98.14 % statements, 91.41 % branches, 97.87 % functions, 99.40 % lines (thresholds 95/88/95/95).
@@ -157,7 +157,7 @@ Budget (readiness §10): a screen shows its data within 4,000 ms with at most 30
 |---|---|
 | P6-W wireframes and verification (approved) | `docs/phase-6/P6-W-WIREFRAMES.md`, `docs/phase-6/P6-W-VERIFICATION.md` |
 | S1 to S4 reports (approved) | `docs/phase-6/S1-VIEWINGS-REPORT.md`, `S2-OFFERS-REPORT.md`, `S3-DEALS-REPORT.md`, `S4-LANDLORD-VISIBILITY-REPORT.md` |
-| CI | CI_PENDING |
+| CI run 146 (`4f7e90f`, six checks green: database, secret scanning, web, API, dependency scanning, browser end-to-end) | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/43704730547 |
 
 ## Approval
 
