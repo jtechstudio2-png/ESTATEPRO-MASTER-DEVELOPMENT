@@ -97,7 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Own viewings that are over with no outcome (SH-2): only the member's own, never the team's.
   const viewingsToFollow = useQuery({
     queryKey: ['shell', 'viewings-follow-up', session.membershipId],
-    queryFn: () => bff<{ data: unknown[] }>('viewings?filter[needsOutcome]=true&filter[agentMembershipId]=me&limit=100'),
+    queryFn: () => bff<{ data: unknown[] }>(`viewings?filter[needsOutcome]=true&filter[agentMembershipId]=${session.membershipId}&limit=100`),
     enabled: grant('viewing.view') !== undefined,
     staleTime: 60_000,
   });

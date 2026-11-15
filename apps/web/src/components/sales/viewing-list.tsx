@@ -103,13 +103,13 @@ function ViewingTable({ rows, onOpen, action }: { rows: ViewingDto[]; onOpen: (i
 /** V-5 viewings to follow up: over, still scheduled or confirmed, no outcome. Mine or (managers) the team. */
 export function FollowUpViewings() {
   const t = useTranslations('sales');
-  const { grant, readOnly } = useSession();
+  const { grant, readOnly, session } = useSession();
   const scope = grant('viewing.view')?.scope;
   const [who, setWho] = useState<'mine' | 'team'>('mine');
   const [open, setOpen] = useState<string | null>(null);
   const [outcomeFor, setOutcomeFor] = useState<ViewingDto | null>(null);
   const query = new URLSearchParams({ 'filter[needsOutcome]': 'true', sort: '-scheduledStart' });
-  if (who === 'mine') query.set('filter[agentMembershipId]', 'me');
+  if (who === 'mine') query.set('filter[agentMembershipId]', session.membershipId);
   const result = usePagedList<ViewingDto>('viewings', query, { limit: 25 });
   return (
     <Page>

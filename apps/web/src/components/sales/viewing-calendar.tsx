@@ -61,7 +61,7 @@ export function ViewingCalendar() {
   const from = zonedToInstant(`${days[0]}T00:00`, zone) ?? new Date().toISOString();
   const to = zonedToInstant(`${addDays(days[days.length - 1]!, 1)}T00:00`, zone) ?? new Date().toISOString();
   const query = new URLSearchParams({ 'filter[scheduledStart][gte]': from, 'filter[scheduledStart][lte]': to, sort: 'scheduledStart' });
-  if (!team || narrow) query.set('filter[agentMembershipId]', 'me');
+  if (!team || narrow) query.set('filter[agentMembershipId]', session.membershipId);
   const result = usePagedList<ViewingDto>('viewings', query, { limit: 100 });
   const toLocal = (iso: string) => instantToZoned(iso, zone);
   const { cells, hours } = calendarCells(result.rows, days, toLocal, showCancelled);
