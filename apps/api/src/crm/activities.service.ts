@@ -7,6 +7,7 @@ import type { TenantContext } from '../common/request-context.js';
 import { contactWithinScope, scopeFor } from '../contacts/contact-access.js';
 import { ContactsService } from '../contacts/contacts.service.js';
 import type { Tx } from '../database/database.module.js';
+import { canOnDeal } from '../deals/deal-access.js';
 import { listingScopeSql } from '../listings/listing-access.js';
 import { propertyCovered } from '../properties/property-access.js';
 import { checkPicklistCode } from '../reference/picklists.js';
@@ -59,6 +60,14 @@ export class ActivitiesService {
     const lead = await this.leads.accessRow(tx, leadId);
     if (!lead || !canOnLead(ctx, 'lead.view', lead)) throw Problems.notFound();
     return this.timeline(tx, ctx, 'lead', leadId, query);
+  }
+
+  /** Deal timeline (S5, P6-W gap W-A2): entries linked to the deal, in deal scope (deals/deal-access.ts). */
+  async dealTimeline(tx: Tx, ctx: TenantContext, dealId: string, query: TimelineQuery) {
+    const deal = await tx.selectFrom('deals').select(['id', 'officeId', 'ownerMembershipId']).where('id', '=', dealId).executeTakeFirst();
+    const agents = deal ? (await tx.selectFrom('dealAgents').select('membershipId').where('dealId', '=', dealId).execute()).map((row) => row.membershipId) : [];
+    if (!deal || !canOnDeal(ctx, 'deal.view', { ...deal, agentIds: agents })) throw Problems.notFound();
+    return this.timeline(tx, ctx, 'deal', dealId, query);
   }
 
   async get(tx: Tx, ctx: TenantContext, id: string): Promise<ActivityDetailDto> {
@@ -236,7 +245,7 @@ export class ActivitiesService {
 
   // ----------------------------------------------------------------- helpers
 
-  private async timeline(tx: Tx, ctx: TenantContext, entityType: 'contact' | 'lead', entityId: string, query: TimelineQuery) {
+  private async timeline(tx: Tx, ctx: TenantContext, entityType: 'contact' | 'lead' | 'deal', entityId: string, query: TimelineQuery) {
     let qb = tx
       .selectFrom('activities as a')
       .select(['a.id', sql<string>`a.occurred_at::text`.as('t'), sql<string>`a.entry_no::text`.as('n')])
@@ -304,6 +313,7 @@ export class ActivitiesService {
                when 'lead'     then (select l.reference from leads l where l.id = k.entity_id)
                when 'listing'  then (select li.reference from listings li where li.id = k.entity_id)
                when 'property' then (select coalesce(p.name, p.reference) from properties p where p.id = k.entity_id)
+               when 'deal'     then (select d.reference from deals d where d.id = k.entity_id)
              end as label
         from activity_links k
        where k.activity_id = any(${ids}::uuid[])

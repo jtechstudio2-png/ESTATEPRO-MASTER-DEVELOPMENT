@@ -27,6 +27,8 @@ export const LOGGABLE_TYPES = ['call', 'email', 'sms', 'whatsapp', 'meeting', 'n
 export const ACTIVITY_TYPES = [...LOGGABLE_TYPES, 'viewing', 'offer', 'status_change', 'document', 'portal', 'system'] as const;
 export const DIRECTIONS = ['inbound', 'outbound', 'internal'] as const;
 export const LINK_TYPES = ['contact', 'lead', 'listing', 'property'] as const;
+/** Links an entry may show: system entries of deals (S3) also link the deal. */
+export const SHOWN_LINK_TYPES = [...LINK_TYPES, 'deal'] as const;
 /** Hours after logging during which the author may edit an activity (decision D5). */
 export const EDIT_WINDOW_HOURS = 24;
 
@@ -69,7 +71,7 @@ export class ArchiveActivityBody {
 }
 
 export class ActivityLinkDto {
-  @ApiProperty({ enum: LINK_TYPES }) entityType!: string;
+  @ApiProperty({ enum: SHOWN_LINK_TYPES }) entityType!: string;
   @ApiProperty({ format: 'uuid' }) entityId!: string;
   @ApiProperty({ description: 'Contact name, lead or listing reference' }) label!: string;
 }

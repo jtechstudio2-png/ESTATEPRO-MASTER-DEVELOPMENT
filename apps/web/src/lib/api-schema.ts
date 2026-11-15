@@ -1873,6 +1873,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/deals/{dealId}/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Deal timeline (S5, W-A2): entries linked to the deal, newest first */
+        get: operations["Activities_dealTimeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/activities": {
         parameters: {
             query?: never;
@@ -5264,6 +5281,8 @@ export interface components {
             units: components["schemas"]["SearchGroupDto"] | null;
             /** @description null without listing.view */
             listings: components["schemas"]["SearchGroupDto"] | null;
+            /** @description Deals by reference or primary contact name (S5, W-A1); null without deal.view */
+            deals: components["schemas"]["SearchGroupDto"] | null;
         };
         CountryDto: {
             /** @example GH */
@@ -5591,7 +5610,7 @@ export interface components {
         };
         ActivityLinkDto: {
             /** @enum {string} */
-            entityType: "contact" | "lead" | "listing" | "property";
+            entityType: "contact" | "lead" | "listing" | "property" | "deal";
             /** Format: uuid */
             entityId: string;
             /** @description Contact name, lead or listing reference */
@@ -11325,6 +11344,34 @@ export interface operations {
             };
             path: {
                 leadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityPageDto"];
+                };
+            };
+        };
+    };
+    Activities_dealTimeline: {
+        parameters: {
+            query?: {
+                "filter[archived]"?: "false" | "all";
+                "filter[activityType]"?: unknown;
+                cursor?: unknown;
+                limit?: unknown;
+            };
+            header: {
+                "X-Company-Id": string;
+            };
+            path: {
+                dealId: string;
             };
             cookie?: never;
         };

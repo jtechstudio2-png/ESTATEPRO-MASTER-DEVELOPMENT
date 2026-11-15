@@ -678,4 +678,37 @@ describe('S3: deals', () => {
       expect(await ids(`filter[contactId]=${partner.id}&filter[status]=lost`)).toEqual([deal.id]);
     });
   });
+
+  describe('S5 API gaps (P6-W W-A1, W-A2)', () => {
+    it('finds deals in global search by reference or contact name, in deal scope', async () => {
+      const buyer = await contact('owner', `Searchable Buyer ${randomUUID().slice(0, 6)}`);
+      const deal = await create('owner', { dealType: 'sale', primaryContactId: buyer.id, ownerMembershipId: members['agent'] });
+      const byRef = (await as('owner').get(`/api/v1/search?q=${encodeURIComponent(deal.reference)}`).expect(200)).body;
+      expect(byRef.deals.hits[0]).toMatchObject({ id: deal.id, reference: deal.reference, context: expect.stringContaining('Lead') });
+      const name = (await fx.db.selectFrom('contacts').select('displayName').where('id', '=', buyer.id).executeTakeFirstOrThrow()).displayName;
+      const byName = (await as('agent').get(`/api/v1/search?q=${encodeURIComponent(name)}`).expect(200)).body;
+      expect(byName.deals.hits.map((h: { id: string }) => h.id)).toContain(deal.id);
+      const outOfScope = (await as('agent2').get(`/api/v1/search?q=${encodeURIComponent(deal.reference)}`).expect(200)).body;
+      expect(outOfScope.deals.hits).toEqual([]);
+      const other = (await as('otherOwner').get(`/api/v1/search?q=${encodeURIComponent(deal.reference)}`).expect(200)).body;
+      expect(other.deals.hits).toEqual([]);
+    });
+
+    it('reads a deal\'s timeline in deal scope, newest first', async () => {
+      const buyer = await contact();
+      const deal = await create('owner', { dealType: 'sale', primaryContactId: buyer.id, ownerMembershipId: members['agent'] });
+      const qualification = deal.access.nextStages.find((s) => s.stageClass === 'qualification')!;
+      await act('owner', deal.id, 'stage', { stageId: qualification.id });
+      await act('manager', deal.id, 'lose', { lostReasonCode: 'no_response', notes: 'Stopped answering' });
+      const timeline = (await as('agent').get(`/api/v1/deals/${deal.id}/activities`).expect(200)).body;
+      expect(timeline.data[0]).toMatchObject({ subject: expect.stringContaining('lost'), body: 'Stopped answering' });
+      expect(timeline.data.at(-1)).toMatchObject({ subject: expect.stringContaining(`Deal ${deal.reference} created`) });
+      expect(timeline.data[0].links).toEqual(expect.arrayContaining([{ entityType: 'deal', entityId: deal.id, label: deal.reference }]));
+      const paged = (await as('agent').get(`/api/v1/deals/${deal.id}/activities?limit=1`).expect(200)).body;
+      expect(paged.page.nextCursor).not.toBeNull();
+      await as('accountant').get(`/api/v1/deals/${deal.id}/activities`).expect(200);
+      await as('agent2').get(`/api/v1/deals/${deal.id}/activities`).expect(404);
+      await as('otherOwner').get(`/api/v1/deals/${deal.id}/activities`).expect(404);
+    });
+  });
 });

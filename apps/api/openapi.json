@@ -8555,6 +8555,80 @@
         ]
       }
     },
+    "/api/v1/deals/{dealId}/activities": {
+      "get": {
+        "operationId": "Activities_dealTimeline",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[archived]",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "false",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[activityType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deal timeline (S5, W-A2): entries linked to the deal, newest first",
+        "tags": [
+          "Activities"
+        ]
+      }
+    },
     "/api/v1/activities": {
       "post": {
         "operationId": "Activities_log",
@@ -21472,12 +21546,24 @@
                 "type": "null"
               }
             ]
+          },
+          "deals": {
+            "description": "Deals by reference or primary contact name (S5, W-A1); null without deal.view",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchGroupDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "properties",
           "units",
-          "listings"
+          "listings",
+          "deals"
         ]
       },
       "CountryDto": {
@@ -22730,7 +22816,8 @@
               "contact",
               "lead",
               "listing",
-              "property"
+              "property",
+              "deal"
             ]
           },
           "entityId": {

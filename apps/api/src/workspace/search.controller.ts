@@ -6,6 +6,7 @@ import { Tenant } from '../auth/decorators.js';
 import { Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import { TenantDb, type Tx } from '../database/database.module.js';
+import { dealScopeSql } from '../deals/deal-access.js';
 import { listingScopeSql } from '../listings/listing-access.js';
 import { propertyScopeSql } from '../properties/property-access.js';
 
@@ -26,12 +27,14 @@ class SearchResultDto {
   @ApiProperty({ type: SearchGroupDto, nullable: true, description: 'null without property.view' }) properties!: SearchGroupDto | null;
   @ApiProperty({ type: SearchGroupDto, nullable: true }) units!: SearchGroupDto | null;
   @ApiProperty({ type: SearchGroupDto, nullable: true, description: 'null without listing.view' }) listings!: SearchGroupDto | null;
+  @ApiProperty({ type: SearchGroupDto, nullable: true, description: 'Deals by reference or primary contact name (S5, W-A1); null without deal.view' }) deals!: SearchGroupDto | null;
 }
 
 const PER_GROUP = 5;
 
 /**
- * Global search over properties, units and listings (M6 API gap A-6). Each
+ * Global search over properties, units, listings and deals (M6 API gap A-6;
+ * deals added in S5, P6-W gap W-A1). Each
  * group uses the caller's scope, so results and "more" flags never reveal
  * records they cannot open. Exact reference matches come first, then prefix
  * matches, then the most recently updated.
@@ -57,6 +60,7 @@ export class SearchController {
       sql<number>`case when lower(${sql.ref(column)}) = lower(${text}) then 0 when ${sql.ref(column)} ilike ${prefix} then 1 else 2 end`;
     const property = ctx.permissions.get('property.view');
     const listing = ctx.permissions.get('listing.view');
+    const deal = ctx.permissions.get('deal.view');
 
     return this.tenantDb.run(ctx, async (tx: Tx) => {
       const properties = property
@@ -97,6 +101,20 @@ export class SearchController {
             .limit(PER_GROUP + 1)
             .execute()
         : null;
+      const deals = deal
+        ? await tx
+            .selectFrom('deals as d')
+            .innerJoin('contacts as c', 'c.id', 'd.primaryContactId')
+            .innerJoin('pipelineStages as s', 's.id', 'd.stageId')
+            .select(['d.id', 'd.reference', 'c.displayName', 's.name as stageName', 'd.status'])
+            .where(dealScopeSql(deal.scope, ctx, 'd'))
+            .where('d.archivedAt', 'is', null)
+            .where((eb) => eb.or([eb('d.reference', 'ilike', contains), eb('c.displayName', 'ilike', contains)]))
+            .orderBy(rank('d.reference'))
+            .orderBy('d.updatedAt', 'desc')
+            .limit(PER_GROUP + 1)
+            .execute()
+        : null;
       const group = <R>(rows: R[] | null, map: (row: R) => SearchHitDto): SearchGroupDto | null =>
         rows === null ? null : { hits: rows.slice(0, PER_GROUP).map(map), hasMore: rows.length > PER_GROUP };
       return {
@@ -109,6 +127,7 @@ export class SearchController {
           propertyId: row.propertyId,
         })),
         listings: group(listings, (row) => ({ id: row.id, reference: row.reference, title: row.title, context: `${row.listingType} · ${row.status}`, propertyId: null })),
+        deals: group(deals, (row) => ({ id: row.id, reference: row.reference, title: row.displayName, context: `${row.stageName} · ${row.status}`, propertyId: null })),
       };
     });
   }

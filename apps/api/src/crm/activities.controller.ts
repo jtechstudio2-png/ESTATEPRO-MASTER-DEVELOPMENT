@@ -49,6 +49,19 @@ export class ActivitiesController {
     return this.tenantDb.run(ctx, (tx) => this.activities.leadTimeline(tx, ctx, id, parsed));
   }
 
+  @Get('deals/:dealId/activities')
+  @RequirePermission('deal.view')
+  @ApiOperation({ summary: 'Deal timeline (S5, W-A2): entries linked to the deal, newest first' })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'filter[activityType]', required: false })
+  @ApiQuery({ name: 'filter[archived]', required: false, enum: ['false', 'all'] })
+  @ApiOkResponse({ type: ActivityPageDto })
+  async dealTimeline(@Tenant() ctx: TenantContext, @Param('dealId', UUID_PARAM) id: string, @Query() query: Record<string, unknown>): Promise<ActivityPageDto> {
+    const parsed = parseTimeline(query);
+    return this.tenantDb.run(ctx, (tx) => this.activities.dealTimeline(tx, ctx, id, parsed));
+  }
+
   @Post('activities')
   @RequirePermission('contact.view')
   @ApiOperation({ summary: 'Log a call, message, meeting or note (recorded, not sent)' })
