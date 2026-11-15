@@ -36,7 +36,7 @@ test.describe('Sales pipeline screens', () => {
     await expect(card).toContainText('Kofi Mensah');
     await expect(card).toContainText('1,200,000');
     await expectAccessible(page);
-    await card.getByRole('button', { name: `Move ${state.records.sales.deal.reference} to` }).click();
+    await card.getByRole('button', { name: `Move to · ${state.records.sales.deal.reference}` }).click();
     await page.getByRole('menuitem', { name: 'Offer accepted' }).click();
     await expect(page.getByText('Accept an offer to reach Offer accepted.')).toBeVisible();
     // The card stayed where it was.
@@ -117,7 +117,7 @@ test.describe('Sales pipeline screens', () => {
     const table = page.getByRole('table', { name: 'Viewings' });
     await expect(table).toContainText('4-bed villa, Labone');
     await expectAccessible(page);
-    await table.getByRole('button', { name: /Record the outcome/ }).click();
+    await table.getByRole('button', { name: /^Outcome… · / }).click();
     const dialog = page.getByRole('alertdialog', { name: 'How did the viewing go?' });
     await expect(dialog).toContainText('cannot be changed once saved');
     await pickRadio(dialog, 'Interested');
