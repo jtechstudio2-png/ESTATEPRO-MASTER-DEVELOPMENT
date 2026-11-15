@@ -143,8 +143,9 @@ test.describe('Sales pipeline screens', () => {
     await page.goto(`/listings/${state.records.sales.saleListing.id}/deals`);
     await expect(page.getByRole('table', { name: 'Deals' })).toContainText(state.records.sales.deal.reference);
     await page.goto(`/contacts/${state.records.crm.ama.id}/properties`);
-    const preview = page.getByRole('region', { name: /What this landlord could see/ }).or(page.locator('section').filter({ hasText: 'What this landlord could see' })).first();
-    await preview.getByRole('button', { name: /Listing/ }).click();
+    await expect(page.getByRole('heading', { name: 'What this landlord could see: one listing' })).toBeVisible();
+    const preview = page.locator('#main');
+    await page.getByRole('button', { name: 'Choose a listing Listing' }).click();
     await page.getByRole('option', { name: state.records.sales.saleListing.reference }).click();
     await expect(preview).toContainText('Subject to a survey');
     await expect(preview).toContainText('Never shown to landlords');
