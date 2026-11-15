@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **For product-owner review**, together with the [wireframes](./P6-W-WIREFRAMES.md) |
+| Status | **Approved** (product owner, 15 November 2026), together with the [wireframes](./P6-W-WIREFRAMES.md) |
 | Scope | Checks the Phase 6 wireframes against the approved readiness report (§2.1, §4–§6, §9, §10), the approved S1–S4 decisions, the permission model (migrations 0014, 0030, 0034) and the S1–S4 API. Lists the API gaps and the decisions needed before S5 screen work starts |
 | Result | **Ready for approval**, subject to five decisions (§5). Every in-scope requirement has a screen; two small API gaps (§3); no schema change; no business rule re-decided |
 | Why now | The readiness report puts P6-W before S5 (§10) and risk R10 says "P6-W before any screen work". P6-W had not been produced, so S5 starts with it and stops for approval before any screen code |
@@ -60,10 +60,10 @@
 
 Every screen reads and writes through the approved S1–S4 endpoints, plus existing reference endpoints (`/me/context`, `/members?filter[permission]`, `/picklists/{key}`, `/properties/{id}/ownerships`). Two gaps:
 
-| # | Gap | Needed by | Proposed fix |
-|---|---|---|---|
-| W-A1 | Global search does not return deals | S-3 (global search) | Add a "Deals" group to `GET /search` (reference prefix and primary contact name), in deal scope |
-| W-A2 | The deal timeline is written (S3 links entries to the deal) but cannot be read | DL-3 Timeline tab | `GET /deals/{id}/activities`, same rules as the contact and lead timelines, in deal scope |
+| # | Gap | Needed by | Proposed fix | Status |
+|---|---|---|---|---|
+| W-A1 | Global search does not return deals | S-3 (global search) | Add a "Deals" group to `GET /search` (reference prefix and primary contact name), in deal scope | **Approved for S5** |
+| W-A2 | The deal timeline is written (S3 links entries to the deal) but cannot be read | DL-3 Timeline tab | `GET /deals/{id}/activities`, same rules as the contact and lead timelines, in deal scope | **Approved for S5** |
 
 Both are small, read-only, use existing data and indexes, and need no migration.
 
@@ -73,15 +73,15 @@ None. The screens need no new table or column.
 
 ## 5. Decisions needed before S5 screen work
 
-| # | Decision | Proposal |
-|---|---|---|
-| W-D1 | Board interaction | "Move to" menu on every card is the primary way; drag and drop is a shortcut to the same allowed stages; dropping on an action column explains which action reaches it |
-| W-D2 | Where offers live | No separate Offers section: offers are worked in the deal (O-1) and listed on the listing (O-4) and contact (X-C2) |
-| W-D3 | Calendar | Default: own week in the office time zone; Team and Agents views for office and company scope; cancelled viewings hidden by default |
-| W-D4 | Mobile scope | Phones get Today's viewings, outcome after a viewing, deal read with milestones; the board, forecast, splits and completion are tablet and desktop only (on a phone: "Open on a larger screen", read only) |
-| W-D5 | Gaps | Close W-A1 and W-A2 inside S5, before the screens that use them |
+| # | Decision | Proposal | Status |
+|---|---|---|---|
+| W-D1 | Board interaction | "Move to" menu on every card is the primary way; drag and drop is a shortcut to the same allowed stages; dropping on an action column explains which action reaches it | **Approved** |
+| W-D2 | Where offers live | No separate Offers section: offers are worked in the deal (O-1) and listed on the listing (O-4) and contact (X-C2) | **Approved** |
+| W-D3 | Calendar | Default: own week in the office time zone; Team and Agents views for office and company scope; cancelled viewings hidden by default | **Approved** |
+| W-D4 | Mobile scope | Phones get Today's viewings, outcome after a viewing, deal read with milestones; the board, forecast, splits and completion are tablet and desktop only (on a phone: "Open on a larger screen", read only) | **Approved** |
+| W-D5 | Gaps | Close W-A1 and W-A2 inside S5, before the screens that use them | **Approved** |
 
-## 6. Risks found
+## 6. Risks found (reviewed and accepted 15 November 2026)
 
 | # | Risk | Severity | Mitigation |
 |---|---|---|---|
@@ -105,3 +105,12 @@ None. The screens need no new table or column.
 4. Risks WR-1 to WR-4 reviewed.
 
 Then S5 screen implementation starts.
+
+## Approval
+
+| Item | Decision | Date |
+|---|---|---|
+| P6-W wireframes and this verification report | **Approved** | 15 November 2026 |
+| W-D1 to W-D5 | **Approved**, each individually | 15 November 2026 |
+| W-A1 (global deal search), W-A2 (deal timeline) | **Approved for inclusion in S5**, closed before the screens | 15 November 2026 |
+| WR-1 to WR-4 | Reviewed and accepted | 15 November 2026 |

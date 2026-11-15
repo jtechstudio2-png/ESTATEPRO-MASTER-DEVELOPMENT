@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **For product-owner review.** Design only: no screen code has been written. S5 builds these screens after approval (readiness report §10: "S5 · Screens to the approved wireframes · after P6-W, S1–S4") |
+| Status | **Approved** (product owner, 15 November 2026), with W-D1 to W-D5. S5 builds these screens, after closing W-A1 and W-A2 |
 | Builds on | Phase 3 design set (`docs/phase-3-ui-ux/`): shell, tokens, record page pattern (07 §1), tables, forms, filters, empty and error states, dashboards (06). Phase 4 and Phase 5 wireframe conventions (`docs/phase-4/M6-WIREFRAMES.md`, `docs/phase-5/P5-CRM-WIREFRAMES.md`). Those rules apply here and are not repeated |
 | Backed by | The approved S1–S4 API (`apps/api/openapi.json`): viewings, offers, deals, lead conversion, landlord views. Two small gaps are marked **W-A1**, **W-A2** (verification report §3) |
 | Companion | [P6-W Wireframe Verification Report](./P6-W-VERIFICATION.md) |
