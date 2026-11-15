@@ -7,7 +7,7 @@
 | Approvals | S3 approved with S3-D1 to S3-D16; S3 risks reviewed and accepted (14 November 2026). "Proceed to S4 (Landlord Visibility) according to the approved Phase 6 roadmap" |
 | Scope | Landlord visibility as approved in the readiness report (§2.1, §6; P6-D10; issue #5): reduced, read-only views of offers, deal progress and viewings on the landlord's own listings; the reduced API, its field-level tests, and the staff-side preview ("What this landlord could see", LL-1) |
 | Not in scope | Landlord portal screens and landlord sign-up (Phase 7), the staff preview screen (S5, to the P6-W wireframes), dashboards (S6) |
-| Result | **S4 complete**, for approval before S5. Results in §3; CI run 128 green (§9) |
+| Result | **S4 complete and approved** (15 November 2026). Results in §3; CI run 128 green (§9) |
 
 ## 1. Deliverables
 
@@ -36,19 +36,19 @@ What each view holds (readiness §6):
 
 Portal access: the auth guard keeps every endpoint for company staff only, as before; the two portal endpoints opt in with `@PortalEndpoint()` (new). Staff calling the portal endpoints get 403.
 
-## 2. Decisions taken in S4 (for confirmation)
+## 2. Decisions taken in S4 (approved 15 November 2026)
 
-| # | Decision | Reason |
-|---|---|---|
-| S4-D1 | **Boundary.** S4 delivers the reduced API, its tests and the staff preview API; the landlord portal screens and landlord accounts are Phase 7; the preview screen follows the P6-W wireframes in S5 | Readiness §6 "Phase 6 delivers / Phase 7 delivers"; §10 |
-| S4-D2 | **Who is a landlord** of a listing is the C4 resolver: a contact with a current ownership record, or an active management agreement, covering the unit, judged in the property's time zone. Joint owners each see the same view; visibility ends with the record | One rule for staff preview and portal (C4); readiness §6 joint owners and end of ownership |
-| S4-D3 | **From when.** A landlord sees activity from the day their current link to the unit began (the earliest current record): offers by submission day, viewings by scheduled day, deals by the day they were opened, in the property's time zone. A buyer who becomes the owner on completion sees nothing of the sale they bought through; a co-owner added later sees activity from their own start | Without it, a new owner would read other bidders' names and amounts |
-| S4-D4 | **Reduced views built for landlords**, never staff responses with fields hidden: the fields of §1.2 only. Beyond the readiness list they also hold the offer's direction and the offer it answers (to read the negotiation), the viewing's status (a cancelled or no-show viewing is not left looking live; superseded "rescheduled" ones are left out) and the deal's status and stage class code (for translation) | Readiness §6 "separate views" |
-| S4-D5 | **Portal accounts only.** The landlord views need a portal membership linked to a contact with the linked scope. Every other endpoint stays closed to portal accounts (the guard's existing rule); endpoints for portal accounts opt in explicitly with `@PortalEndpoint()` | Fail closed; no staff endpoint becomes reachable by accident |
-| S4-D6 | **Permissions.** Landlords gain `deal.view` and `viewing.view` with the linked scope (P6-D10) and change nothing; in staff endpoints the linked scope still matches nothing | P6-D10 |
-| S4-D7 | **Staff preview per listing.** It needs the contact (`contact.view`) and the property (`property.view`) in the staff member's scope; each section is limited to their own offer, deal and viewing scope, and `limitedToYourAccess` says when the landlord may see more. It is read-only and audited (`contact.portal_preview` with the listing and counts, no content) | Same rule as the C4 preview; a preview never shows staff more than they may see |
-| S4-D8 | **Limits.** One listing's view returns the newest 500 offers, 500 viewings and 100 deals; no paging in S4 | Enough for a listing; the portal (Phase 7) can add paging |
-| S4-D9 | **Audit.** A landlord's own reads are not audited (as staff reads are not); the staff preview is | ADR-008 §5; C4 practice |
+| # | Decision | Reason | Status |
+|---|---|---|---|
+| S4-D1 | **Boundary.** S4 delivers the reduced API, its tests and the staff preview API; the landlord portal screens and landlord accounts are Phase 7; the preview screen follows the P6-W wireframes in S5 | Readiness §6 "Phase 6 delivers / Phase 7 delivers"; §10 | **Approved** |
+| S4-D2 | **Who is a landlord** of a listing is the C4 resolver: a contact with a current ownership record, or an active management agreement, covering the unit, judged in the property's time zone. Joint owners each see the same view; visibility ends with the record | One rule for staff preview and portal (C4); readiness §6 joint owners and end of ownership | **Approved** |
+| S4-D3 | **From when.** A landlord sees activity from the day their current link to the unit began (the earliest current record): offers by submission day, viewings by scheduled day, deals by the day they were opened, in the property's time zone. A buyer who becomes the owner on completion sees nothing of the sale they bought through; a co-owner added later sees activity from their own start | Without it, a new owner would read other bidders' names and amounts | **Approved** |
+| S4-D4 | **Reduced views built for landlords**, never staff responses with fields hidden: the fields of §1.2 only. Beyond the readiness list they also hold the offer's direction and the offer it answers (to read the negotiation), the viewing's status (a cancelled or no-show viewing is not left looking live; superseded "rescheduled" ones are left out) and the deal's status and stage class code (for translation) | Readiness §6 "separate views" | **Approved** |
+| S4-D5 | **Portal accounts only.** The landlord views need a portal membership linked to a contact with the linked scope. Every other endpoint stays closed to portal accounts (the guard's existing rule); endpoints for portal accounts opt in explicitly with `@PortalEndpoint()` | Fail closed; no staff endpoint becomes reachable by accident | **Approved** |
+| S4-D6 | **Permissions.** Landlords gain `deal.view` and `viewing.view` with the linked scope (P6-D10) and change nothing; in staff endpoints the linked scope still matches nothing | P6-D10 | **Approved** |
+| S4-D7 | **Staff preview per listing.** It needs the contact (`contact.view`) and the property (`property.view`) in the staff member's scope; each section is limited to their own offer, deal and viewing scope, and `limitedToYourAccess` says when the landlord may see more. It is read-only and audited (`contact.portal_preview` with the listing and counts, no content) | Same rule as the C4 preview; a preview never shows staff more than they may see | **Approved** |
+| S4-D8 | **Limits.** One listing's view returns the newest 500 offers, 500 viewings and 100 deals; no paging in S4 | Enough for a listing; the portal (Phase 7) can add paging | **Approved** |
+| S4-D9 | **Audit.** A landlord's own reads are not audited (as staff reads are not); the staff preview is | ADR-008 §5; C4 practice | **Approved** |
 
 ## 3. Tests
 
@@ -108,7 +108,7 @@ Budget (readiness report §10): API p95 under 1,000 ms.
 
 S4 adds no screens (S4-D1). The views carry codes for translated screens (status, stage class, viewing type, outcome, `notShown` codes); amounts come with their currency at its decimal places; times come with the property's time zone. Message files unchanged (2,572 keys in each language, checked).
 
-## 8. Risks and open items
+## 8. Risks and open items (reviewed and accepted 15 November 2026)
 
 | # | Item | Rating | Status |
 |---|---|---|---|
@@ -130,4 +130,10 @@ S4 adds no screens (S4-D1). The views carry codes for translated screens (status
 
 ## Approval
 
-Awaiting product owner approval of S4 (S4-D1 to S4-D9) before S5 (screens) begins.
+| Item | Decision | Date |
+|---|---|---|
+| S4 (landlord visibility, #5) | **Approved** | 15 November 2026 |
+| S4-D1 to S4-D9 | **Approved**, each individually | 15 November 2026 |
+| S4-R1 to S4-R4 | Reviewed and accepted | 15 November 2026 |
+
+Next: S5 (screens), per the approved Phase 6 roadmap.
