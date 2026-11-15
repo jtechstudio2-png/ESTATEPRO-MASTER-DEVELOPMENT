@@ -1,4 +1,6 @@
 import { expect, expectAccessible, pickRadio, signIn, test } from './support/fixtures';
+import { createSalesData, type SalesData } from './support/sales-data';
+import { e2eState } from './support/state';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -19,6 +21,11 @@ function sameWeek(a: Date, b: Date): boolean {
  * are covered at the end.
  */
 test.describe('Sales pipeline screens', () => {
+  let sales: SalesData;
+  test.beforeAll(async () => {
+    sales = await createSalesData(e2eState());
+  });
+
   test('SH-2 Sales navigation and the agent\'s follow-up badge', async ({ page, state }) => {
     await signIn(page, state.users.agent.email);
     const nav = page.getByRole('navigation', { name: /main/i });
@@ -32,15 +39,15 @@ test.describe('Sales pipeline screens', () => {
     await page.goto('/pipeline');
     await expect(page.getByRole('heading', { level: 1, name: 'Pipeline' })).toBeVisible();
     const column = page.getByRole('region', { name: /^Negotiation/ });
-    const card = column.getByRole('listitem').filter({ hasText: state.records.sales.deal.reference });
+    const card = column.getByRole('listitem').filter({ hasText: sales.deal.reference });
     await expect(card).toContainText('Kofi Mensah');
     await expect(card).toContainText('1,200,000');
     await expectAccessible(page);
-    await card.getByRole('button', { name: `Move to · ${state.records.sales.deal.reference}` }).click();
+    await card.getByRole('button', { name: `Move to · ${sales.deal.reference}` }).click();
     await page.getByRole('menuitem', { name: 'Offer accepted' }).click();
     await expect(page.locator('#main').getByText('Accept an offer to reach Offer accepted.')).toBeVisible();
     // The card stayed where it was.
-    await expect(page.getByRole('region', { name: /^Negotiation/ })).toContainText(state.records.sales.deal.reference);
+    await expect(page.getByRole('region', { name: /^Negotiation/ })).toContainText(sales.deal.reference);
   });
 
   test('DL-1 deals list: search by contact, open the deal', async ({ page, state }) => {
@@ -51,13 +58,13 @@ test.describe('Sales pipeline screens', () => {
     await expectAccessible(page);
     await page.getByRole('searchbox', { name: 'Search reference or contact' }).fill('Kofi');
     await expect(page).toHaveURL(/q=Kofi/);
-    await table.getByRole('link', { name: new RegExp(state.records.sales.deal.reference) }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(state.records.sales.deal.reference);
+    await table.getByRole('link', { name: new RegExp(sales.deal.reference) }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(sales.deal.reference);
   });
 
   test('DL-3 deal record: stage path, next step, tabs and read-only timeline (W-A2)', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
-    await page.goto(`/deals/${state.records.sales.deal.id}`);
+    await page.goto(`/deals/${sales.deal.id}`);
     await expect(page.getByRole('navigation', { name: 'Deal stages' }).locator('[aria-current="step"]')).toHaveText('Negotiation');
     await expect(page.getByRole('heading', { name: 'Next step' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Parties' })).toBeVisible();
@@ -73,7 +80,7 @@ test.describe('Sales pipeline screens', () => {
 
   test('O-1 and O-3 offer chain: accept the offer; the deal moves on and its milestones appear (DL-5)', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
-    await page.goto(`/deals/${state.records.sales.deal.id}?tab=offers`);
+    await page.goto(`/deals/${sales.deal.id}?tab=offers`);
     const chain = page.getByRole('list', { name: 'Offers and counter-offers' });
     await expect(chain).toContainText('1,100,000');
     await expect(chain).toContainText('Subject to a survey');
@@ -100,7 +107,7 @@ test.describe('Sales pipeline screens', () => {
     const now = new Date();
     if (!sameWeek(now, new Date(now.getTime() + 86_400_000))) await page.getByRole('button', { name: 'Next week' }).click();
     const grid = page.getByRole('table', { name: /^Viewings, / });
-    const event = grid.getByRole('button', { name: /3-bed flat for sale, Osu/ }).last();
+    const event = grid.getByRole('button', { name: /4-bed villa, Airport Hills/ }).last();
     await expect(event).toContainText('Scheduled');
     await expectAccessible(page);
     await event.click();
@@ -115,7 +122,7 @@ test.describe('Sales pipeline screens', () => {
     await signIn(page, state.users.agent.email);
     await page.goto('/viewings/follow-up');
     const table = page.getByRole('table', { name: 'Viewings' });
-    await expect(table).toContainText('3-bed flat for sale, Osu');
+    await expect(table).toContainText('4-bed villa, Airport Hills');
     await expectAccessible(page);
     await table.getByRole('button', { name: /^Outcome… · / }).click();
     const dialog = page.getByRole('alertdialog', { name: 'How did the viewing go?' });
@@ -137,16 +144,16 @@ test.describe('Sales pipeline screens', () => {
 
   test('X-L3 listing tabs and LP-1 landlord preview for the sale listing', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
-    await page.goto(`/listings/${state.records.sales.saleListing.id}/offers`);
+    await page.goto(`/listings/${sales.saleListing.id}/offers`);
     await expect(page.getByRole('table', { name: 'Offers' })).toContainText('Kofi Mensah');
     await expectAccessible(page);
-    await page.goto(`/listings/${state.records.sales.saleListing.id}/deals`);
-    await expect(page.getByRole('table', { name: 'Deals' })).toContainText(state.records.sales.deal.reference);
+    await page.goto(`/listings/${sales.saleListing.id}/deals`);
+    await expect(page.getByRole('table', { name: 'Deals' })).toContainText(sales.deal.reference);
     await page.goto(`/contacts/${state.records.crm.ama.id}/properties`);
     await expect(page.getByRole('heading', { name: 'What this landlord could see: one listing' })).toBeVisible();
     const preview = page.locator('#main');
     await page.getByRole('button', { name: 'Choose a listing Listing' }).click();
-    await page.getByRole('option', { name: state.records.sales.saleListing.reference }).click();
+    await page.getByRole('option', { name: sales.saleListing.reference }).click();
     await expect(preview).toContainText('Subject to a survey');
     await expect(preview).toContainText('Never shown to landlords');
     await expect(preview).not.toContainText('+233');
@@ -171,8 +178,8 @@ test.describe('Sales pipeline screens', () => {
     await page.goto('/deals');
     await page.keyboard.press('Control+k');
     const box = page.getByRole('combobox', { name: /Search properties, units, listings and deals/ });
-    await box.fill(state.records.sales.deal.reference.slice(0, 12));
-    await expect(page.getByRole('group', { name: 'Deals' })).toContainText(state.records.sales.deal.reference);
+    await box.fill(sales.deal.reference.slice(0, 12));
+    await expect(page.getByRole('group', { name: 'Deals' })).toContainText(sales.deal.reference);
   });
 
   test('Arabic (RTL) at 320 px and desktop: board, deals, calendar and forecast pass axe', async ({ page, state }) => {
@@ -199,7 +206,7 @@ test.describe('Sales pipeline screens', () => {
     await page.goto('/calendar');
     await expect(page.getByRole('heading', { name: /^Tomorrow/ })).toBeVisible();
     await expectAccessible(page);
-    await page.goto(`/deals/${state.records.sales.deal.id}`);
+    await page.goto(`/deals/${sales.deal.id}`);
     await expect(page.getByRole('heading', { name: 'Milestones' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Agents and splits' })).toHaveCount(0);
     await expectAccessible(page);

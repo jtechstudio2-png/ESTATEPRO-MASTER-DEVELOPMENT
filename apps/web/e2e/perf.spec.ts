@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs';
 import type { Locator, Page } from '@playwright/test';
 
 import { expect, signIn, test } from './support/fixtures';
+import { createSalesData } from './support/sales-data';
 
 /**
  * Performance of the main screens on the production build: a full page load
@@ -54,6 +55,7 @@ async function measure(page: Page, screen: string, url: string, ready: (page: Pa
 test('main screens load within budget', { tag: '@performance' }, async ({ page, state }) => {
   test.setTimeout(180_000);
   await page.setViewportSize({ width: 1280, height: 900 });
+  const sales = await createSalesData(state);
   await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
   const property = `/properties/${state.records.osuCourt.id}`;
   const screens: Array<[string, string, (page: Page) => Locator, boolean?]> = [
@@ -78,9 +80,9 @@ test('main screens load within budget', { tag: '@performance' }, async ({ page, 
     ['Privacy request (G3)', `/privacy-requests/${state.records.privacy.overdueRequest.id}`, (p) => p.getByRole('heading', { name: 'History' })],
     ['Property Ownership tab (P5-H)', `/properties/${state.records.laboneVilla.id}/ownership`, (p) => p.getByRole('table', { name: 'Ownership records' }).getByRole('rowheader').first()],
     ['Add ownership (P5-H)', `/ownerships/new?propertyId=${state.records.laboneVilla.id}`, (p) => p.getByRole('heading', { level: 1, name: 'Add ownership' })],
-    ['Pipeline board (PB-1)', '/pipeline', (p) => p.getByRole('region', { name: 'Pipeline stages' }).getByRole('link', { name: state.records.sales.deal.reference })],
+    ['Pipeline board (PB-1)', '/pipeline', (p) => p.getByRole('region', { name: 'Pipeline stages' }).getByRole('link', { name: sales.deal.reference })],
     ['Deals list (DL-1)', '/deals', (p) => p.getByRole('table', { name: 'Deals' }).getByRole('rowheader').first()],
-    ['Deal record (DL-3)', `/deals/${state.records.sales.deal.id}`, (p) => p.getByRole('heading', { name: 'Next step' })],
+    ['Deal record (DL-3)', `/deals/${sales.deal.id}`, (p) => p.getByRole('heading', { name: 'Next step' })],
     ['Viewing calendar (V-1)', '/calendar?who=team', (p) => p.getByRole('table', { name: /^Viewings, / })],
     ['Viewings to follow up (V-5)', '/viewings/follow-up?who=team', (p) => p.getByRole('heading', { level: 1, name: 'Viewings to follow up' })],
     ['Forecast (FC-1)', '/forecast', (p) => p.getByRole('table', { name: 'Open deals by expected close month' })],

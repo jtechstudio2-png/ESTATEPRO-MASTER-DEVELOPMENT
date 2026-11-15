@@ -39,14 +39,6 @@ export interface E2eState {
       toErase: { id: string; reference: string };
       dohaRequest: { id: string; reference: string };
     };
-    sales: {
-      saleListing: { id: string; reference: string };
-      buyer: { id: string; reference: string };
-      deal: { id: string; reference: string };
-      offer: { id: string };
-      pastViewing: { id: string };
-      upcomingViewing: { id: string };
-    };
   };
 }
 
