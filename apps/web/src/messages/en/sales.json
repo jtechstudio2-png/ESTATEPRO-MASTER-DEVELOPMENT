@@ -529,5 +529,6 @@
     "in_person": "In person",
     "virtual": "Virtual",
     "open_house": "Open house"
-  }
+  },
+  "boardRegion": "Pipeline stages"
 }

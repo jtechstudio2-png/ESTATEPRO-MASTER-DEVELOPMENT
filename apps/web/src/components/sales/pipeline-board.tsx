@@ -182,7 +182,8 @@ export function PipelineBoard() {
           </ul>
         </section>
       ) : (
-        <div className={styles.board}>
+        // A labelled, focusable region: the board scrolls sideways and must be reachable by keyboard.
+        <div className={styles.board} role="region" aria-label={t('boardRegion')} tabIndex={0}>
           {columns.map((column) => (
             <Column
               key={column.stage.id}

@@ -201,7 +201,7 @@ export function ViewingCalendar() {
               {canBook ? t('noViewingsRangeBook') : null}
             </EmptyState>
           ) : null}
-          <div className={styles.calendarWrap}>
+          <div className={styles.calendarWrap} role="region" aria-label={t('calendarCaption', { range: rangeLabel })} tabIndex={0}>
             <table className={styles.calendar}>
               <caption className="ep-visually-hidden">{t('calendarCaption', { range: rangeLabel })}</caption>
               <thead>
