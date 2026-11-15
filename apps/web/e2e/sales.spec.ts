@@ -38,7 +38,7 @@ test.describe('Sales pipeline screens', () => {
     await expectAccessible(page);
     await card.getByRole('button', { name: `Move to · ${state.records.sales.deal.reference}` }).click();
     await page.getByRole('menuitem', { name: 'Offer accepted' }).click();
-    await expect(page.getByText('Accept an offer to reach Offer accepted.')).toBeVisible();
+    await expect(page.locator('#main').getByText('Accept an offer to reach Offer accepted.')).toBeVisible();
     // The card stayed where it was.
     await expect(page.getByRole('region', { name: /^Negotiation/ })).toContainText(state.records.sales.deal.reference);
   });
@@ -86,12 +86,12 @@ test.describe('Sales pipeline screens', () => {
     await expect(chain).toContainText('Accepted');
     await page.getByRole('navigation', { name: 'Deal sections' }).getByRole('link', { name: /^Milestones/ }).click();
     await expect(page.getByRole('heading', { name: 'Milestones' })).toBeVisible();
-    await expect(page.getByText('automatic').first()).toBeVisible();
+    await expect(page.locator('#main').getByText('automatic').first()).toBeVisible();
     await expectAccessible(page);
     await page.getByRole('navigation', { name: 'Deal sections' }).getByRole('link', { name: 'Overview' }).click();
     await expect(page.getByRole('navigation', { name: 'Deal stages' }).locator('[aria-current="step"]')).toHaveText('Offer accepted');
     // P6-D6: exchange waits for the buyer's identity check.
-    await expect(page.getByText(/1 buyer is not verified/)).toBeVisible();
+    await expect(page.locator('#main').getByText(/1 buyer is not verified/)).toBeVisible();
   });
 
   test('V-1 calendar: the agent\'s week shows tomorrow\'s viewing; V-3 drawer confirms it', async ({ page, state }) => {
@@ -162,7 +162,7 @@ test.describe('Sales pipeline screens', () => {
     await page.waitForURL(/\/deals\/[0-9a-f-]{36}$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Ama');
     await page.goto(`/leads/${state.records.crm.agentLead.id}`);
-    await expect(page.getByText('This lead was converted to a deal.')).toBeVisible();
+    await expect(page.locator('#main').getByText('This lead was converted to a deal.')).toBeVisible();
   });
 
   test('W-A1 global search finds the deal by reference', async ({ page, state }) => {
