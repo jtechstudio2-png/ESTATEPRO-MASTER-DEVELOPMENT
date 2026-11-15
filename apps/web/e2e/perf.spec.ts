@@ -78,6 +78,12 @@ test('main screens load within budget', { tag: '@performance' }, async ({ page, 
     ['Privacy request (G3)', `/privacy-requests/${state.records.privacy.overdueRequest.id}`, (p) => p.getByRole('heading', { name: 'History' })],
     ['Property Ownership tab (P5-H)', `/properties/${state.records.laboneVilla.id}/ownership`, (p) => p.getByRole('table', { name: 'Ownership records' }).getByRole('rowheader').first()],
     ['Add ownership (P5-H)', `/ownerships/new?propertyId=${state.records.laboneVilla.id}`, (p) => p.getByRole('heading', { level: 1, name: 'Add ownership' })],
+    ['Pipeline board (PB-1)', '/pipeline', (p) => p.getByRole('region', { name: 'Pipeline stages' }).getByRole('link', { name: state.records.sales.deal.reference })],
+    ['Deals list (DL-1)', '/deals', (p) => p.getByRole('table', { name: 'Deals' }).getByRole('rowheader').first()],
+    ['Deal record (DL-3)', `/deals/${state.records.sales.deal.id}`, (p) => p.getByRole('heading', { name: 'Next step' })],
+    ['Viewing calendar (V-1)', '/calendar?who=team', (p) => p.getByRole('table', { name: /^Viewings, / })],
+    ['Viewings to follow up (V-5)', '/viewings/follow-up?who=team', (p) => p.getByRole('heading', { level: 1, name: 'Viewings to follow up' })],
+    ['Forecast (FC-1)', '/forecast', (p) => p.getByRole('table', { name: 'Open deals by expected close month' })],
   ];
   const results: Array<Measure & { map: boolean }> = [];
   for (const [name, url, ready, map = false] of screens) results.push({ ...(await measure(page, name, url, ready)), map });
