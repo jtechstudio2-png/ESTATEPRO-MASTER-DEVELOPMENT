@@ -7,7 +7,7 @@
 | Approvals | P6-W approved with W-D1 to W-D5; W-A1 and W-A2 approved for inclusion in S5; WR-1 to WR-4 reviewed and accepted (15 November 2026). "Proceed to S5 (Screens) using the approved wireframes. Before implementing the screens: 1. Close W-A1 (global deal search). 2. Close W-A2 (deal timeline read endpoint)." |
 | Scope | The Phase 6 screens of the approved wireframes (`P6-W-WIREFRAMES.md`): Sales navigation (SH-2), viewings (V-1 to V-5), offers (O-1 to O-4), pipeline board, deals, lead conversion and forecast (PB-1, DL-1 to DL-8, CV-1, FC-1), the landlord preview (LP-1), panels on existing screens (X-C2, X-L2, X-L3, global search), and the phone and tablet scope (XV-1, XV-2, XD-1, TV-1, W-D4). The two API gaps W-A1 and W-A2 were closed first |
 | Not in scope | Dashboards (S6), landlord portal screens (Phase 7), leases (Phase 7), any business rule: every rule stays in the API and database of S1 to S4 |
-| Result | **S5 complete, awaiting approval.** Results in §3; CI run 146 green (§9) |
+| Result | **S5 complete and approved** (20 November 2026). Results in §3; CI run 146 green (§9) |
 
 ## 1. Deliverables
 
@@ -49,23 +49,23 @@ OpenAPI and the web API types were regenerated.
 
 Code: `apps/web/src/components/sales/` (16 files), six routes, the record tabs and panels above, the `sales` message namespace in English and Arabic.
 
-## 2. Decisions taken in S5 (for approval)
+## 2. Decisions taken in S5 (approved 20 November 2026)
 
 | # | Decision | Reason | Status |
 |---|---|---|---|
-| S5-D1 | **Own viewings are filtered by the member's id.** The viewings API (S1) takes membership ids; the wireframes wrote `agentMembershipId=me`. The badge, the calendar's Mine view and V-5 send the session's own id | Found by the browser suite; no API change needed | For approval |
-| S5-D2 | **One Sales tab on the contact record** holding the three X-C2 panels (Deals, Offers made, Viewings attended), not three tabs | Keeps the contact tab row short; each panel still follows its own permission | For approval |
-| S5-D3 | **"Move to" lists every open column; the API decides.** On a choice the deal is read fresh (current version and `access.nextStages`): an allowed stage is moved to; an action stage gets "Accept an offer to reach …" (and the like); any other refusal is said. Drag and drop uses the same path | A stale card never moves on old data (`If-Match`); the board and the record share one rule | For approval |
-| S5-D4 | **Times.** The calendar grid is drawn in the member's (office) time zone; a viewing of a property in another zone also shows its own local time in brackets. Booking and rescheduling take times in the member's zone, said on the form | The listing search does not carry the property's zone; an office and its properties normally share a zone | For approval |
-| S5-D5 | **DL-7 ownership preview** names the buyers who become owners; the end of the current owners' records is not drawn, because the deal response does not carry the property. The API still checks the transfer and refuses `ownership-shared` with the way forward | No new API in S5 beyond W-A1 and W-A2 | For approval |
-| S5-D6 | **XD-1 Call** for the primary contact only: the deal response carries no phone numbers for other parties | No new API; the parties link to their contact records | For approval |
-| S5-D7 | **Empty calendar slots** are click targets kept out of the tab order; keyboard users book with "Book viewing" | A week has about 90 empty slots; each one a tab stop would make the grid unusable by keyboard | For approval |
-| S5-D8 | **Scrolling regions** (the board, the calendar grid) are labelled regions that take keyboard focus | WCAG 2.1.1; found by axe on an empty board in Arabic | For approval |
-| S5-D9 | **Button names contain their visible text**: "Move to · DEA-…", "Done · …", "Outcome… · …" | WCAG 2.5.3; found by axe | For approval |
-| S5-D10 | **Phase 6 browser data is created by the Phase 6 specs** through the API (`e2e/support/sales-data.ts`): a villa owned by Ama, a live sale listing, a buyer, a deal with an offer, a past and an upcoming viewing. The shared seed is unchanged | The earlier specs check exact counts in the shared seed (properties, Osu Court's units, Ama's properties, the listing register); adding to it broke them | For approval |
-| S5-D11 | **Leads spec L-3** retypes the contact search until it has hydrated. The test typed before the page had hydrated and failed in 2 of 4 runs on its own; 10 of 10 after the change. The screen is unchanged | A race in the test, more likely now that each page carries the Sales messages (S5-R1) | For approval |
-| S5-D12 | **XV-1 agenda without Call and Directions.** The viewing response carries neither attendee phone numbers nor the property's coordinates; each row opens V-3, whose attendees link to their contact records (Call there) | No new API in S5; candidate for S6 if wanted | For approval |
-| S5-D13 | **TV-1:** on tablets the V-3 drawer opens over the day view rather than beside it | The shared drawer component; side-by-side needs a layout of its own | For approval |
+| S5-D1 | **Own viewings are filtered by the member's id.** The viewings API (S1) takes membership ids; the wireframes wrote `agentMembershipId=me`. The badge, the calendar's Mine view and V-5 send the session's own id | Found by the browser suite; no API change needed | **Approved** |
+| S5-D2 | **One Sales tab on the contact record** holding the three X-C2 panels (Deals, Offers made, Viewings attended), not three tabs | Keeps the contact tab row short; each panel still follows its own permission | **Approved** |
+| S5-D3 | **"Move to" lists every open column; the API decides.** On a choice the deal is read fresh (current version and `access.nextStages`): an allowed stage is moved to; an action stage gets "Accept an offer to reach …" (and the like); any other refusal is said. Drag and drop uses the same path | A stale card never moves on old data (`If-Match`); the board and the record share one rule | **Approved** |
+| S5-D4 | **Times.** The calendar grid is drawn in the member's (office) time zone; a viewing of a property in another zone also shows its own local time in brackets. Booking and rescheduling take times in the member's zone, said on the form | The listing search does not carry the property's zone; an office and its properties normally share a zone | **Approved** |
+| S5-D5 | **DL-7 ownership preview** names the buyers who become owners; the end of the current owners' records is not drawn, because the deal response does not carry the property. The API still checks the transfer and refuses `ownership-shared` with the way forward | No new API in S5 beyond W-A1 and W-A2 | **Approved** |
+| S5-D6 | **XD-1 Call** for the primary contact only: the deal response carries no phone numbers for other parties | No new API; the parties link to their contact records | **Approved** |
+| S5-D7 | **Empty calendar slots** are click targets kept out of the tab order; keyboard users book with "Book viewing" | A week has about 90 empty slots; each one a tab stop would make the grid unusable by keyboard | **Approved** |
+| S5-D8 | **Scrolling regions** (the board, the calendar grid) are labelled regions that take keyboard focus | WCAG 2.1.1; found by axe on an empty board in Arabic | **Approved** |
+| S5-D9 | **Button names contain their visible text**: "Move to · DEA-…", "Done · …", "Outcome… · …" | WCAG 2.5.3; found by axe | **Approved** |
+| S5-D10 | **Phase 6 browser data is created by the Phase 6 specs** through the API (`e2e/support/sales-data.ts`): a villa owned by Ama, a live sale listing, a buyer, a deal with an offer, a past and an upcoming viewing. The shared seed is unchanged | The earlier specs check exact counts in the shared seed (properties, Osu Court's units, Ama's properties, the listing register); adding to it broke them | **Approved** |
+| S5-D11 | **Leads spec L-3** retypes the contact search until it has hydrated. The test typed before the page had hydrated and failed in 2 of 4 runs on its own; 10 of 10 after the change. The screen is unchanged | A race in the test, more likely now that each page carries the Sales messages (S5-R1) | **Approved** |
+| S5-D12 | **XV-1 agenda without Call and Directions.** The viewing response carries neither attendee phone numbers nor the property's coordinates; each row opens V-3, whose attendees link to their contact records (Call there) | No new API in S5; candidate for S6 if wanted | **Approved** |
+| S5-D13 | **TV-1:** on tablets the V-3 drawer opens over the day view rather than beside it | The shared drawer component; side-by-side needs a layout of its own | **Approved** |
 
 ## 3. Tests
 
@@ -140,14 +140,14 @@ Budget (readiness §10): a screen shows its data within 4,000 ms with at most 30
 | Amounts in their own currency, totals per currency, never converted | PB-1, DL-1, DL-3, FC-1, O-1 |
 | Stage names are the company's own; stage classes, statuses and outcomes are translated | All |
 
-## 8. Risks and open items (for review)
+## 8. Risks and open items (reviewed and accepted 20 November 2026)
 
 | # | Item | Rating | Status |
 |---|---|---|---|
 | S5-R1 | Every page receives every message namespace (the existing design); the `sales` namespace adds about 21 KB in English and 29 KB in Arabic, about 7 KB compressed | Low | Within the script budget (§6); split messages per route if pages grow |
 | S5-R2 | Booking times are entered in the member's time zone (S5-D4); a company with offices in several zones books in the member's own | Low | Add the property's zone to the listing search if such companies appear |
 | S5-R3 | The calendar loads 100 viewings per page, with "Load more" for busier weeks (large offices, team view) | Low | Measured with the seeded data; S6 dashboards add no load here |
-| S5-R4 | Typing in a search field before the page has hydrated is not searched (S5-D11); a person who types within the first moment retypes | Low | Product fix (read the typed value on hydration) proposed for S6 |
+| S5-R4 | Typing in a search field before the page has hydrated is not searched (S5-D11); a person who types within the first moment retypes | Low | Accepted; **kept open for review in S6** (approval of 20 November 2026). Product fix (read the typed value on hydration) proposed for S6. The test-side race was already tracked as #43 (P6-0 R8a); S5-D11 fixes the test |
 | S5-R5 | One deal's offers load up to 100 at once (O-1) | Low | Deals with more offers are not expected; add paging if they appear |
 | — | #42 (before Phase 7), #44 (before Phase 6 closes), #43 (backlog) | — | Unchanged |
 
@@ -163,8 +163,9 @@ Budget (readiness §10): a screen shows its data within 4,000 ms with at most 30
 
 | Item | Decision | Date |
 |---|---|---|
-| S5 (screens) | Awaiting approval | |
-| S5-D1 to S5-D13 | Awaiting approval, each individually | |
-| S5-R1 to S5-R5 | Awaiting review | |
+| S5 (screens) | **Approved** | 20 November 2026 |
+| S5-D1 to S5-D13 | **Approved**, each individually | 20 November 2026 |
+| S5-R1 to S5-R5 | Reviewed and accepted | 20 November 2026 |
+| S5-R4 | Kept open for review in S6 | 20 November 2026 |
 
-Next, once approved: S6, per the approved Phase 6 roadmap.
+Next: S6 (pipeline board, dashboards, close-out), per the approved Phase 6 roadmap.
