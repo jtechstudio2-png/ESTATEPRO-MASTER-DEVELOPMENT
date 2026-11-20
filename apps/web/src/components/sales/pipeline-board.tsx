@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useTranslations } from 'next-intl';
 import { type DragEvent, useId, useState } from 'react';
@@ -13,8 +14,9 @@ import { SegmentedControl, SelectField } from '@/components/ui/fields';
 import { Page, PageHeader } from '@/components/ui/layout';
 import { LoadMore } from '@/components/ui/list-controls';
 import { ActionsMenu } from '@/components/ui/menu';
-import type { DealDto, DealSummaryDto, PipelineColumnDto, PipelineTotalDto } from '@/lib/api-schema';
-import { bff } from '@/lib/bff';
+import type { DealDto, DealSummaryDto, ForecastDto, PipelineColumnDto, PipelineTotalDto } from '@/lib/api-schema';
+import { bff, query as queryString } from '@/lib/bff';
+import { todayIn } from '@/lib/time';
 import { useListParams } from '@/lib/hooks/list-params';
 import { usePagedList } from '@/lib/hooks/paged-list';
 import { useOffices } from '@/lib/hooks/reference';
@@ -24,7 +26,7 @@ import { ApiError } from '@/lib/problem';
 import { NewDealDialog } from './deal-dialogs';
 import { MoneyText, StalledLabel } from './sales-labels';
 import styles from './sales.module.css';
-import { dropOutcome } from './sales-rules';
+import { dropOutcome, quarterStart, sumForecast } from './sales-rules';
 import { useNarrow, usePipeline } from './use-sales';
 
 const CLOSED = new Set(['closed_won', 'closed_lost']);
@@ -57,7 +59,7 @@ function Totals({ totals }: { totals: PipelineTotalDto[] }) {
  */
 export function PipelineBoard() {
   const t = useTranslations('sales');
-  const { can, readOnly, grant } = useSession();
+  const { can, readOnly, grant, session } = useSession();
   const params = useListParams();
   const narrow = useNarrow();
   const announce = useAnnounce();
@@ -72,6 +74,13 @@ export function PipelineBoard() {
   const officeId = params.get('officeId');
   const pipeline = usePipeline(dealType, { officeId, ownerMembershipId: owner });
   const columns = (pipeline.data?.columns ?? []).filter((column) => !CLOSED.has(column.stage.stageClass));
+  // Weighted forecast for this quarter (Phase 3 design 06 §5), per currency, never converted.
+  const quarter = quarterStart(todayIn(session.timezone));
+  const forecast = useQuery({
+    queryKey: ['list', 'forecast', 'board', dealType, quarter, officeId, owner],
+    queryFn: ({ signal }) => bff<ForecastDto>(`deals/forecast${queryString({ dealType, from: quarter, months: 3, officeId, ownerMembershipId: owner })}`, { signal }),
+  });
+  const quarterTotals = forecast.data ? sumForecast(forecast.data.months) : [];
   const canMove = can('deal.update') && !readOnly;
   const scope = grant('deal.view')?.scope;
 
@@ -201,6 +210,20 @@ export function PipelineBoard() {
           ))}
         </div>
       )}
+      {forecast.data ? (
+        <p className={styles.meta}>
+          {t('quarterForecast')}{' '}
+          {quarterTotals.length === 0
+            ? t('quarterForecastNone')
+            : quarterTotals.map((total, index) => (
+                <span key={total.currency}>
+                  {index > 0 ? ' · ' : null}
+                  <MoneyText money={{ amount: total.weighted, currency: total.currency }} /> ({t('dealCount', { count: total.count })})
+                </span>
+              ))}{' '}
+          <NextLink href={`/forecast${dealType === 'letting' ? '?dealType=letting' : ''}`}>{t('howCalculated')}</NextLink>
+        </p>
+      ) : null}
       {creating ? <NewDealDialog presetContact={null} onClose={() => setCreating(false)} /> : null}
     </Page>
   );

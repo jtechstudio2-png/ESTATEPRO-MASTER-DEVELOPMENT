@@ -127,3 +127,39 @@ export function forecastScale(totals: ReadonlyArray<{ currency: string; weighted
   for (const [currency, value] of scale) if (value <= 0) scale.delete(currency);
   return scale;
 }
+
+/** First month (YYYY-MM) of the calendar quarter containing a day (YYYY-MM-DD). */
+export function quarterStart(day: string): string {
+  const [year, month] = day.split('-').map(Number) as [number, number];
+  return `${year}-${String(Math.floor((month - 1) / 3) * 3 + 1).padStart(2, '0')}`;
+}
+
+/**
+ * Decimal amounts added exactly (scaled to four places, never floats), the
+ * result written with as many decimals as the widest input: money of one
+ * currency only, never across currencies (S3-D14).
+ */
+export function addAmounts(amounts: readonly string[]): string {
+  const places = Math.max(0, ...amounts.map((amount) => amount.split('.')[1]?.length ?? 0));
+  const scaled = amounts.reduce((sum, amount) => {
+    const [whole = '0', fraction = ''] = amount.split('.');
+    return sum + BigInt(whole) * 10_000n + BigInt((fraction + '0000').slice(0, 4));
+  }, 0n);
+  const whole = scaled / 10_000n;
+  const fraction = (scaled % 10_000n).toString().padStart(4, '0').slice(0, places);
+  return places > 0 ? `${whole}.${fraction}` : `${whole}`;
+}
+
+/** Forecast totals per currency over several months (the board's quarter line). */
+export function sumForecast(months: ReadonlyArray<{ totals: ReadonlyArray<{ currency: string; count: number; weightedValue: { amount: string } }> }>): Array<{ currency: string; count: number; weighted: string }> {
+  const byCurrency = new Map<string, { count: number; amounts: string[] }>();
+  for (const month of months) {
+    for (const total of month.totals) {
+      const entry = byCurrency.get(total.currency) ?? { count: 0, amounts: [] };
+      entry.count += total.count;
+      entry.amounts.push(total.weightedValue.amount);
+      byCurrency.set(total.currency, entry);
+    }
+  }
+  return [...byCurrency.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([currency, entry]) => ({ currency, count: entry.count, weighted: addAmounts(entry.amounts) }));
+}

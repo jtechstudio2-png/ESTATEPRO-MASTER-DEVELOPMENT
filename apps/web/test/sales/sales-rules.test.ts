@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildNavigation, buildQuickCreate } from '@/components/shell/navigation';
-import { addDays, calendarCells, dropOutcome, forecastScale, monthEnd, offerThreads, shownOnCalendar, splitsComplete, splitsTotal, weekDays } from '@/components/sales/sales-rules';
+import { addAmounts, addDays, calendarCells, quarterStart, sumForecast, dropOutcome, forecastScale, monthEnd, offerThreads, shownOnCalendar, splitsComplete, splitsTotal, weekDays } from '@/components/sales/sales-rules';
 import type { Grant } from '@/lib/session-types';
 import { instantToZoned } from '@/lib/time';
 
@@ -144,5 +144,33 @@ describe('Sales navigation (SH-2)', () => {
 
   it('renders no Sales section without any sales permission', () => {
     expect(buildNavigation(grants({ 'property.view': 'linked' })).some((section) => section.id === 'sales')).toBe(false);
+  });
+});
+
+describe('board forecast line (S6, Phase 3 design 06 §5)', () => {
+  it('starts the quarter at its first month', () => {
+    expect(quarterStart('2026-11-20')).toBe('2026-10');
+    expect(quarterStart('2026-01-01')).toBe('2026-01');
+    expect(quarterStart('2026-06-30')).toBe('2026-04');
+    expect(quarterStart('2026-09-15')).toBe('2026-07');
+  });
+
+  it('adds decimal amounts exactly, keeping the widest number of decimals', () => {
+    expect(addAmounts(['0.10', '0.20'])).toBe('0.30');
+    expect(addAmounts(['308000.00', '45000.50', '1.005'])).toBe('353001.505');
+    expect(addAmounts(['1200', '300'])).toBe('1500');
+    expect(addAmounts([])).toBe('0');
+  });
+
+  it('totals the quarter per currency, never across currencies', () => {
+    const totals = sumForecast([
+      { totals: [{ currency: 'GHS', count: 2, weightedValue: { amount: '100.00' } }, { currency: 'QAR', count: 1, weightedValue: { amount: '50.00' } }] },
+      { totals: [{ currency: 'GHS', count: 1, weightedValue: { amount: '0.50' } }] },
+      { totals: [] },
+    ]);
+    expect(totals).toEqual([
+      { currency: 'GHS', count: 3, weighted: '100.50' },
+      { currency: 'QAR', count: 1, weighted: '50.00' },
+    ]);
   });
 });

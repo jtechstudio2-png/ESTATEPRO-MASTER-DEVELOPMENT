@@ -48,5 +48,11 @@
   "sourceTitle": "العملاء المحتملون حسب المصدر، آخر {days} يومًا",
   "sourceCaption": "العملاء المحتملون حسب المصدر",
   "minutes": "{minutes} دقيقة",
-  "hoursMinutes": "{hours} س {minutes} د"
+  "hoursMinutes": "{hours} س {minutes} د",
+  "converted": "تحوَّل إلى صفقة",
+  "salesTitle": "أعمال المبيعات",
+  "viewingsNeedingOutcome": "معاينات بلا نتيجة",
+  "stalledDeals": "صفقات متوقفة",
+  "dealsOnClosedListings": "صفقات مفتوحة على إعلان مغلق",
+  "salesNote": "المعاينات المنتهية تحتاج إلى نتيجتها؛ والصفقات على إعلان مباع أو مؤجَّر أو مسحوب أو منتهٍ تحتاج إلى إغلاق."
 }

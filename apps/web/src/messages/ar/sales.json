@@ -530,5 +530,9 @@
     "virtual": "افتراضيًا",
     "open_house": "يوم مفتوح"
   },
-  "boardRegion": "مراحل المسار"
+  "boardRegion": "مراحل المسار",
+  "listingClosedOnly": "الإعلان مغلق",
+  "quarterForecast": "التوقعات المرجحة لهذا الربع:",
+  "quarterForecastNone": "لا صفقات مفتوحة متوقع إغلاقها هذا الربع.",
+  "howCalculated": "كيف يُحسب هذا؟"
 }

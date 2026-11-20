@@ -10,7 +10,9 @@
   "openLeads": "Open leads",
   "kind": {
     "follow_up": "Follow-up",
-    "new_lead": "New lead"
+    "new_lead": "New lead",
+    "viewing": "Viewing",
+    "offer": "Offer"
   },
   "done": "Done",
   "doneNamed": "Done: {title}",
@@ -30,5 +32,8 @@
   "quickTitle": "Quick actions",
   "newLead": "New lead",
   "newContact": "New contact",
-  "newFollowUp": "New follow-up"
+  "newFollowUp": "New follow-up",
+  "viewingsNeedingOutcome": "My viewings without an outcome",
+  "offersAwaitingResponse": "Offers awaiting a response",
+  "bookViewing": "Book viewing"
 }

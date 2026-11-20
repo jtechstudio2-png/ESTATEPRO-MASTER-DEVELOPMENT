@@ -34,8 +34,9 @@ export function useMinutesText() {
 /**
  * D-C CRM dashboard: are enquiries answered quickly, and is anyone's
  * follow-up slipping? Every number is computed in the viewer's scope and
- * links to the list that produced it. "Converted" stays hidden until Phase 6
- * deals exist; the response target reads "not set" until a company sets one.
+ * links to the list that produced it. Phase 6 (S6) adds conversions to deals
+ * and the sales work panel; the response target reads "not set" until a
+ * company sets one.
  */
 export function CrmDashboard() {
   const t = useTranslations('crmDashboard');
@@ -154,11 +155,49 @@ export function CrmDashboard() {
             <p className={styles.quiet}>{data!.followUps.view === 'team' ? t('followUpsTeam') : t('followUpsMine')}</p>
           </Panel>
 
+          {data!.sales.viewingsNeedingOutcome !== null || data!.sales.stalledDeals !== null ? (
+            <Panel title={t('salesTitle')}>
+              <ul className={styles.counts}>
+                {data!.sales.viewingsNeedingOutcome !== null ? (
+                  <li>
+                    <NextLink className={styles.countLink} href={own ? '/viewings/follow-up' : '/viewings/follow-up?who=team'}>
+                      <span>{t('viewingsNeedingOutcome')}</span>
+                      <span className={`${styles.count} ${data!.sales.viewingsNeedingOutcome > 0 ? styles.warn : ''}`}>
+                        {data!.sales.viewingsNeedingOutcome > 0 ? <span aria-hidden="true">⚠ </span> : null}
+                        {format.number(data!.sales.viewingsNeedingOutcome)}
+                      </span>
+                    </NextLink>
+                  </li>
+                ) : null}
+                {data!.sales.stalledDeals !== null ? (
+                  <li>
+                    <NextLink className={styles.countLink} href={`/deals?filter[attention]=stalled${officeFilter}`}>
+                      <span>{t('stalledDeals')}</span>
+                      <span className={`${styles.count} ${data!.sales.stalledDeals > 0 ? styles.warn : ''}`}>
+                        {data!.sales.stalledDeals > 0 ? <span aria-hidden="true">⚠ </span> : null}
+                        {format.number(data!.sales.stalledDeals)}
+                      </span>
+                    </NextLink>
+                  </li>
+                ) : null}
+                {data!.sales.openDealsOnClosedListings !== null ? (
+                  <li>
+                    <NextLink className={styles.countLink} href={`/deals?filter[attention]=listing_closed${officeFilter}`}>
+                      <span>{t('dealsOnClosedListings')}</span>
+                      <span className={styles.count}>{format.number(data!.sales.openDealsOnClosedListings)}</span>
+                    </NextLink>
+                  </li>
+                ) : null}
+              </ul>
+              <p className={styles.quiet}>{t('salesNote')}</p>
+            </Panel>
+          ) : null}
+
           <Panel title={t('statusTitle', { days: Number(days) })}>
             <ul className={styles.counts}>
-              {(['new', 'contacted', 'qualified', 'unqualified', 'lost'] as const).map((status) => (
+              {(['new', 'contacted', 'qualified', 'unqualified', 'lost', 'converted'] as const).map((status) => (
                 <li key={status}>
-                  <NextLink className={styles.countLink} href={`/leads?tab=${status === 'unqualified' || status === 'lost' ? 'closed' : 'open'}&filter[status]=${status}${officeFilter}${fromFilter}`}>
+                  <NextLink className={styles.countLink} href={`/leads?tab=${status === 'unqualified' || status === 'lost' || status === 'converted' ? 'closed' : 'open'}&filter[status]=${status}${officeFilter}${fromFilter}`}>
                     <span>{crm(`leadStatus.${status}`)}</span>
                     <span className={styles.count}>{format.number(data!.leadsByStatus[status])}</span>
                   </NextLink>
@@ -223,6 +262,7 @@ export function CrmDashboard() {
                         <th scope="col">{t('median')}</th>
                         {target !== null ? <th scope="col">{t('withinTarget')}</th> : null}
                         <th scope="col">{t('qualified')}</th>
+                        <th scope="col">{t('converted')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -242,6 +282,7 @@ export function CrmDashboard() {
                             </td>
                           ) : null}
                           <td className="ep-num">{format.number(row.qualified)}</td>
+                          <td className="ep-num">{format.number(row.converted)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -263,6 +304,7 @@ export function CrmDashboard() {
                       <th scope="col">{t('source')}</th>
                       <th scope="col">{t('leads')}</th>
                       <th scope="col">{t('qualified')}</th>
+                      <th scope="col">{t('converted')}</th>
                       <th scope="col">{t('median')}</th>
                     </tr>
                   </thead>
@@ -274,6 +316,7 @@ export function CrmDashboard() {
                         </th>
                         <td className="ep-num">{format.number(row.leads)}</td>
                         <td className="ep-num">{format.number(row.qualified)}</td>
+                        <td className="ep-num">{format.number(row.converted)}</td>
                         <td className="ep-num">{minutes(row.medianFirstResponseMinutes)}</td>
                       </tr>
                     ))}

@@ -62,7 +62,7 @@ export function DealList({ contactId, listingId }: { contactId?: string; listing
   named('filter[stageClass]', t('stage'), (raw) => raw.split(',').map((id) => t(`stageClass.${id as 'lead'}`)).join(', '));
   named('filter[officeId]', t('office'), (raw) => offices.find((office) => office.id === raw)?.name ?? raw);
   named('filter[ownerMembershipId]', t('owner'), (raw) => (raw === 'me' ? t('ownerMe') : raw));
-  named('filter[attention]', t('attentionLabel'), () => t('stalledOnly'));
+  named('filter[attention]', t('attentionLabel'), (raw) => raw.split(',').map((id) => (id === 'listing_closed' ? t('listingClosedOnly') : t('stalledOnly'))).join(', '));
   named('filter[expectedCloseDate][gte]', t('closeFrom'), (raw) => format.date(raw));
   named('filter[expectedCloseDate][lte]', t('closeTo'), (raw) => format.date(raw));
   const filtered = chips.length > 0;
@@ -175,7 +175,7 @@ export function DealList({ contactId, listingId }: { contactId?: string; listing
           {offices.length > 1 ? (
             <FilterSelect label={t('office')} value={params.get('filter[officeId]')} onChange={(value) => params.set({ 'filter[officeId]': value })} options={offices.map((office) => ({ id: office.id, label: office.name }))} />
           ) : null}
-          <FilterSelect label={t('attentionLabel')} value={params.get('filter[attention]')} onChange={(value) => params.set({ 'filter[attention]': value })} options={[{ id: 'stalled', label: t('stalledOnly') }]} />
+          <FilterSelect label={t('attentionLabel')} value={params.get('filter[attention]')} onChange={(value) => params.set({ 'filter[attention]': value })} options={[{ id: 'stalled', label: t('stalledOnly') }, { id: 'listing_closed', label: t('listingClosedOnly') }]} />
           <TextField label={t('closeFrom')} type="date" value={params.get('filter[expectedCloseDate][gte]') ?? ''} onChange={(value) => params.set({ 'filter[expectedCloseDate][gte]': value || null })} />
           <TextField label={t('closeTo')} type="date" value={params.get('filter[expectedCloseDate][lte]') ?? ''} onChange={(value) => params.set({ 'filter[expectedCloseDate][lte]': value || null })} />
         </MoreFilters>

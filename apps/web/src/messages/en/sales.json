@@ -530,5 +530,9 @@
     "virtual": "Virtual",
     "open_house": "Open house"
   },
-  "boardRegion": "Pipeline stages"
+  "boardRegion": "Pipeline stages",
+  "listingClosedOnly": "Listing closed",
+  "quarterForecast": "Weighted forecast, this quarter:",
+  "quarterForecastNone": "no open deals expected to close this quarter.",
+  "howCalculated": "How is this calculated?"
 }

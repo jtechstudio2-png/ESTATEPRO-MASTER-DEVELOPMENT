@@ -10,7 +10,9 @@
   "openLeads": "فتح العملاء المحتملين",
   "kind": {
     "follow_up": "متابعة",
-    "new_lead": "عميل محتمل جديد"
+    "new_lead": "عميل محتمل جديد",
+    "viewing": "معاينة",
+    "offer": "عرض"
   },
   "done": "تم",
   "doneNamed": "تم: {title}",
@@ -30,5 +32,8 @@
   "quickTitle": "إجراءات سريعة",
   "newLead": "عميل محتمل جديد",
   "newContact": "جهة اتصال جديدة",
-  "newFollowUp": "متابعة جديدة"
+  "newFollowUp": "متابعة جديدة",
+  "viewingsNeedingOutcome": "معايناتي بلا نتيجة",
+  "offersAwaitingResponse": "عروض تنتظر ردًا",
+  "bookViewing": "حجز معاينة"
 }

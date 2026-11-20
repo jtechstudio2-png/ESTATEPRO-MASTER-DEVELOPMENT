@@ -12,6 +12,7 @@ import { SegmentedControl } from '@/components/ui/fields';
 import { Page, PageHeader, Panel } from '@/components/ui/layout';
 import { LoadMore } from '@/components/ui/list-controls';
 import type { ViewingDto } from '@/lib/api-schema';
+import { useListParams } from '@/lib/hooks/list-params';
 import { usePagedList } from '@/lib/hooks/paged-list';
 
 import { ViewingStatusLabel, ZonedTime } from './sales-labels';
@@ -105,7 +106,9 @@ export function FollowUpViewings() {
   const t = useTranslations('sales');
   const { grant, readOnly, session } = useSession();
   const scope = grant('viewing.view')?.scope;
-  const [who, setWho] = useState<'mine' | 'team'>('mine');
+  const params = useListParams();
+  const who: 'mine' | 'team' = scope !== 'own' && params.get('who') === 'team' ? 'team' : 'mine';
+  const setWho = (value: 'mine' | 'team') => params.set({ who: value === 'team' ? 'team' : null });
   const [open, setOpen] = useState<string | null>(null);
   const [outcomeFor, setOutcomeFor] = useState<ViewingDto | null>(null);
   const query = new URLSearchParams({ 'filter[needsOutcome]': 'true', sort: '-scheduledStart' });

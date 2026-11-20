@@ -48,5 +48,11 @@
   "sourceTitle": "Leads by source, last {days} days",
   "sourceCaption": "Leads by source",
   "minutes": "{minutes} min",
-  "hoursMinutes": "{hours} h {minutes}"
+  "hoursMinutes": "{hours} h {minutes}",
+  "converted": "Converted to deal",
+  "salesTitle": "Sales work",
+  "viewingsNeedingOutcome": "Viewings without an outcome",
+  "stalledDeals": "Stalled deals",
+  "dealsOnClosedListings": "Open deals on a closed listing",
+  "salesNote": "Viewings that have ended need their outcome; deals on a sold, let, withdrawn or expired listing need closing."
 }

@@ -16,13 +16,17 @@ import { Cluster, Page, PageHeader, Panel } from '@/components/ui/layout';
 import { When } from '@/components/ui/when';
 import type { DayItemDto, MyDayDto, TaskDto } from '@/lib/api-schema';
 import { bff } from '@/lib/bff';
+import { MoneyText, ZonedTime } from '@/components/sales/sales-labels';
+import { ViewingDrawer } from '@/components/sales/viewing-dialogs';
 import { useFormat } from '@/lib/hooks/format';
 
 type Action = { kind: 'done' | 'reschedule'; task: TaskDto } | { kind: 'log'; item: DayItemDto } | null;
 
 /**
  * D-M My day (MD-3, agents): one list for today in the member's time zone,
- * overdue first, each row with one primary action. The list does not move
+ * overdue first, each row with one primary action. Phase 6 (S6) adds the
+ * viewings I conduct today (shown in the property's time zone; Open shows the
+ * viewing, where its outcome is recorded) and offers awaiting a response. The list does not move
  * while it is read: it changes only on Refresh (no auto-refresh, §10).
  */
 export function MyDay() {
@@ -40,6 +44,7 @@ export function MyDay() {
   const [action, setAction] = useState<Action>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const [viewing, setViewing] = useState<string | null>(null);
 
   /** Done and Reschedule act on the follow-up as it is now (its version), so it is fetched first. */
   const withTask = async (item: DayItemDto, kind: 'done' | 'reschedule') => {
@@ -92,10 +97,19 @@ export function MyDay() {
                   <li key={`${item.kind}-${item.id}`}>
                     <div className={styles.keyRow}>
                       <span>
-                        <time dateTime={item.at} className="ep-num">
-                          {format.dateTime(item.at)}
-                        </time>{' '}
-                        · {t(`kind.${item.kind}`)} ·{' '}
+                        {item.kind === 'viewing' && item.timezone ? (
+                          <ZonedTime iso={item.at} timeZone={item.timezone} {...(item.endsAt ? { end: item.endsAt } : {})} />
+                        ) : (
+                          <time dateTime={item.at} className="ep-num">
+                            {format.dateTime(item.at)}
+                          </time>
+                        )}{' '}
+                        · {t(`kind.${item.kind as 'follow_up'}`)} ·{' '}
+                        {item.amount ? (
+                          <>
+                            <MoneyText money={item.amount} />{' '}
+                          </>
+                        ) : null}
                         <bdi dir="auto">{item.title}</bdi>
                         {item.overdue ? (
                           <>
@@ -109,9 +123,13 @@ export function MyDay() {
                     </div>
                     {item.about && item.aboutId ? (
                       <p className={styles.quiet}>
-                        <NextLink href={`/${item.aboutType === 'lead' ? 'leads' : 'contacts'}/${item.aboutId}`}>
+                        {item.aboutType === 'viewing' ? (
                           <bdi dir="auto">{item.about}</bdi>
-                        </NextLink>
+                        ) : (
+                          <NextLink href={item.aboutType === 'deal' ? `/deals/${item.aboutId}?tab=offers` : `/${item.aboutType === 'lead' ? 'leads' : 'contacts'}/${item.aboutId}`}>
+                            <bdi dir="auto">{item.about}</bdi>
+                          </NextLink>
+                        )}
                       </p>
                     ) : null}
                     {!readOnly ? (
@@ -130,8 +148,12 @@ export function MyDay() {
                               {t('reschedule')}
                             </Button>
                           </>
+                        ) : item.kind === 'viewing' ? (
+                          <Button size="small" variant="primary" onPress={() => setViewing(item.id)} aria-label={t('openNamed', { title: item.title })}>
+                            {t('open')}
+                          </Button>
                         ) : (
-                          <LinkButton size="small" variant="primary" href={`/leads/${item.id}`} aria-label={t('openNamed', { title: item.title })}>
+                          <LinkButton size="small" variant="primary" href={item.kind === 'offer' && item.aboutId ? `/deals/${item.aboutId}?tab=offers` : `/leads/${item.id}`} aria-label={t('openNamed', { title: item.title })}>
                             {t('open')}
                           </LinkButton>
                         )}
@@ -172,11 +194,27 @@ export function MyDay() {
                   </NextLink>
                 )}
               </li>
+              {data!.waitingOnMe.viewingsNeedingOutcome !== null ? (
+                <li>
+                  <NextLink className={styles.countLink} href="/viewings/follow-up">
+                    <span>{t('viewingsNeedingOutcome')}</span>
+                    <span className={`${styles.count} ${data!.waitingOnMe.viewingsNeedingOutcome > 0 ? styles.warn : ''}`}>{format.number(data!.waitingOnMe.viewingsNeedingOutcome)}</span>
+                  </NextLink>
+                </li>
+              ) : null}
+              {data!.waitingOnMe.offersAwaitingResponse !== null ? (
+                <li>
+                  <NextLink className={styles.countLink} href="/deals?filter[ownerMembershipId]=me">
+                    <span>{t('offersAwaitingResponse')}</span>
+                    <span className={styles.count}>{format.number(data!.waitingOnMe.offersAwaitingResponse)}</span>
+                  </NextLink>
+                </li>
+              ) : null}
             </ul>
           </Panel>
           <Panel title={t('myLeadsTitle')}>
             <ul className={styles.counts}>
-              {(['new', 'contacted', 'qualified', 'unqualified', 'lost'] as const).map((status) => (
+              {(['new', 'contacted', 'qualified', 'unqualified', 'lost', 'converted'] as const).map((status) => (
                 <li key={status}>
                   <NextLink className={styles.countLink} href={`/leads?tab=mine&filter[status]=${status}`}>
                     <span>{crm(`leadStatus.${status}`)}</span>
@@ -192,11 +230,13 @@ export function MyDay() {
                 {can('lead.create') ? <LinkButton href="/leads/new">{t('newLead')}</LinkButton> : null}
                 {can('contact.create') ? <LinkButton href="/contacts/new">{t('newContact')}</LinkButton> : null}
                 <LinkButton href="/follow-ups?compose=1">{t('newFollowUp')}</LinkButton>
+                {can('viewing.manage') ? <LinkButton href="/calendar?book=1">{t('bookViewing')}</LinkButton> : null}
               </Cluster>
             </Panel>
           ) : null}
         </div>
       )}
+      {viewing ? <ViewingDrawer id={viewing} onClose={() => setViewing(null)} onOpenViewing={setViewing} /> : null}
       {action?.kind === 'done' ? <CompleteDialog task={action.task} onClose={() => setAction(null)} /> : null}
       {action?.kind === 'reschedule' ? <FollowUpDialog task={action.task} onClose={() => setAction(null)} /> : null}
       {action?.kind === 'log' && action.item.aboutId ? (

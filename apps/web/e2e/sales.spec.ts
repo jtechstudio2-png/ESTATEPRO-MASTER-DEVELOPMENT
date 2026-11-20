@@ -62,6 +62,29 @@ test.describe('Sales pipeline screens', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText(sales.deal.reference);
   });
 
+  test('S6 dashboards: sales work on D-C, offers and viewings on My day, the quarter forecast on the board', async ({ page, state }) => {
+    await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
+    await page.goto('/dashboards/crm');
+    const salesWork = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Sales work' }) });
+    await expect(salesWork.getByRole('link', { name: /Viewings without an outcome/ })).toHaveAttribute('href', '/viewings/follow-up?who=team');
+    await expect(salesWork.getByRole('link', { name: /Viewings without an outcome/ })).toContainText(/[1-9]/);
+    await expect(salesWork.getByRole('link', { name: /Open deals on a closed listing/ })).toHaveAttribute('href', '/deals?filter[attention]=listing_closed');
+    await expect(page.getByRole('columnheader', { name: 'Converted to deal' }).first()).toBeVisible();
+    await expectAccessible(page);
+    await page.goto('/pipeline');
+    await expect(page.locator('#main').getByText('Weighted forecast, this quarter:')).toBeVisible();
+
+    await page.context().clearCookies();
+    await signIn(page, state.users.agent.email);
+    await page.goto('/my-day');
+    const offer = page.getByRole('listitem').filter({ hasText: 'Kofi Mensah' }).filter({ hasText: 'Offer' });
+    await expect(offer).toContainText('1,100,000');
+    await expect(offer.getByRole('link', { name: /Open/ })).toHaveAttribute('href', `/deals/${sales.deal.id}?tab=offers`);
+    await expect(page.getByRole('link', { name: /Offers awaiting a response/ })).toContainText('1');
+    await expect(page.getByRole('link', { name: /My viewings without an outcome/ })).toContainText('1');
+    await expectAccessible(page);
+  });
+
   test('DL-3 deal record: stage path, next step, tabs and read-only timeline (W-A2)', async ({ page, state }) => {
     await signIn(page, state.users.owner.email, { company: state.companies.accra.name });
     await page.goto(`/deals/${sales.deal.id}`);
@@ -186,7 +209,7 @@ test.describe('Sales pipeline screens', () => {
     await signIn(page, state.users.arabic.email);
     for (const width of [320, 1280]) {
       await page.setViewportSize({ width, height: 800 });
-      for (const path of ['/pipeline', '/deals', '/calendar', '/forecast', '/viewings/follow-up']) {
+      for (const path of ['/pipeline', '/deals', '/calendar', '/forecast', '/viewings/follow-up', '/dashboards/crm']) {
         await page.goto(path);
         await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
