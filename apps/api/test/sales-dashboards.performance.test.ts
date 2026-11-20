@@ -85,7 +85,7 @@ describe('Phase 6 dashboards performance (S6)', () => {
                  ct.ids[1 + (n % ${CONTACTS})], ${company.officeId}::uuid, l.agent_membership_id, 'GHS', l.id, l.unit_id,
                  400000 + (n % 50) * 10000, current_date + (n % 300), now() - make_interval(days => n % 40),
                  now() - interval '100 days', now() - make_interval(mins => n)
-            from (select *, row_number() over (order by reference) as n from listings where company_id = ${c}::uuid and reference like 'S6L-%') l
+            from (select *, (row_number() over (order by reference))::int as n from listings where company_id = ${c}::uuid and reference like 'S6L-%') l
             cross join ct`.execute(tx);
         await sql`
           insert into deal_parties (company_id, deal_id, contact_id, party_role, is_primary)
@@ -98,17 +98,19 @@ describe('Phase 6 dashboards performance (S6)', () => {
                  d.owner_membership_id
             from deals d cross join generate_series(1, ${OFFERS_PER_DEAL}) k
            where d.company_id = ${c}::uuid`.execute(tx);
-        // Ten viewings per listing over the past 200 days and the next week, conducted by the listing's agent.
+        // Ten viewings per listing, conducted by the listing's agent, one hour apart per agent (agents cannot be double-booked),
+        // spread over the past 410 days and the coming days.
         await sql`
           with inserted as (
-            insert into viewings (company_id, listing_id, unit_id, agent_membership_id, scheduled_start, scheduled_end, timezone, status, outcome, created_by)
+            insert into viewings (company_id, listing_id, unit_id, agent_membership_id, scheduled_start, scheduled_end, timezone, status, outcome, cancelled_reason, created_by)
             select l.company_id, l.id, l.unit_id, l.agent_membership_id, s.start_at, s.start_at + interval '45 minutes', 'Africa/Accra',
                    case when s.start_at > now() then 'scheduled' when (l.n + k) % 40 = 0 then 'scheduled' when (l.n + k) % 10 = 0 then 'cancelled' else 'completed' end,
                    case when s.start_at <= now() and (l.n + k) % 40 <> 0 and (l.n + k) % 10 <> 0 then 'interested' end,
+                   case when s.start_at <= now() and (l.n + k) % 40 <> 0 and (l.n + k) % 10 = 0 then 'Buyer unavailable' end,
                    l.agent_membership_id
-              from (select *, row_number() over (order by reference) as n from listings where company_id = ${c}::uuid and reference like 'S6L-%') l
+              from (select *, (row_number() over (order by reference))::int as n from listings where company_id = ${c}::uuid and reference like 'S6L-%') l
               cross join generate_series(1, ${VIEWINGS_PER_LISTING}) k
-              cross join lateral (select date_trunc('hour', now()) - make_interval(days => 200 - ((l.n * 7 + k * 23) % 207)) as start_at) s
+              cross join lateral (select date_trunc('hour', now()) - interval '410 days' + make_interval(hours => (l.n / ${AGENTS}) * ${VIEWINGS_PER_LISTING} + k) as start_at) s
             returning id, listing_id)
           insert into viewing_attendees (company_id, viewing_id, contact_id, attendance)
           select ${c}::uuid, i.id, d.primary_contact_id, 'expected' from inserted i join deals d on d.listing_id = i.listing_id`.execute(tx);

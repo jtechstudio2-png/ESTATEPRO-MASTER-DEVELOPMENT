@@ -36,10 +36,19 @@ const AUTH_DB = Symbol('AUTH_DB');
 export type Db = Kysely<DB>;
 export type Tx = Transaction<DB>;
 
+/**
+ * Every connection runs with PostgreSQL's JIT compiler off (S6). The API's
+ * queries are short; JIT only pays for long analytical scans, and its
+ * compile step (about 0.4 s) was triggered by the planner's cost estimate for
+ * dashboard counts with correlated subqueries, which then took 0.45 s instead
+ * of 12 ms at 20,000 listings.
+ */
+const CONNECTION_OPTIONS = '-c jit=off';
+
 export function createKysely(connectionString: string, max: number, applicationName: string): Db {
   return new Kysely<DB>({
     dialect: new PostgresDialect({
-      pool: new pg.Pool({ connectionString, max, application_name: applicationName }),
+      pool: new pg.Pool({ connectionString, max, application_name: applicationName, options: CONNECTION_OPTIONS }),
     }),
     plugins: [new SchemaCasePlugin()],
   });
