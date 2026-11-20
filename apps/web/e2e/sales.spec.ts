@@ -130,7 +130,8 @@ test.describe('Sales pipeline screens', () => {
     const now = new Date();
     if (!sameWeek(now, new Date(now.getTime() + 86_400_000))) await page.getByRole('button', { name: 'Next week' }).click();
     const grid = page.getByRole('table', { name: /^Viewings, / });
-    const event = grid.getByRole('button', { name: /4-bed villa, Airport Hills/ }).last();
+    // Tomorrow's viewing is at 11:00 (Africa/Accra); the past one, also shown this week, needs an outcome instead.
+    const event = grid.getByRole('button', { name: /4-bed villa, Airport Hills/ }).filter({ hasText: '11:00–12:00' });
     await expect(event).toContainText('Scheduled');
     await expectAccessible(page);
     await event.click();
