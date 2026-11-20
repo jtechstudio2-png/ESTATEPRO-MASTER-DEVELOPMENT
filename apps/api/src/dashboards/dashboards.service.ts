@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { type RawBuilder, sql } from 'kysely';
 
+import { toMoney } from '../common/money.js';
 import { Problems } from '../common/problem.js';
 import type { PermissionScope, TenantContext } from '../common/request-context.js';
 import { contactScopeSql, scopeFor } from '../contacts/contact-access.js';
@@ -8,6 +9,9 @@ import { hasMatchSql } from '../contacts/requirement-matching.js';
 import { CrmSettingsService } from '../crm/crm-settings.service.js';
 import { leadScopeSql } from '../crm/lead-access.js';
 import type { Tx } from '../database/database.module.js';
+import { dealScopeSql } from '../deals/deal-access.js';
+import { CLOSED_LISTING_STATUSES } from '../deals/deals.service.js';
+import { viewingScopeSql } from '../viewings/viewing-access.js';
 import type { AdminDashboardDto, CrmDashboardDto, DashboardScopeDto, LeadStatusCountsDto, MyDayDto, ResponseRowDto } from './dto.js';
 
 export interface DashboardQuery {
@@ -67,7 +71,7 @@ export class DashboardsService {
     const agentsVisible = leadScope !== 'own';
     const breakdown = await sql<ResponseAggregate & { byAgent: number; assignedTo: string | null; name: string | null; sourceCode: string | null }>`
       with w as materialized (
-        select l.assigned_to, l.source_code, l.received_at, l.first_response_at, (q.lead_id is not null) as was_qualified
+        select l.assigned_to, l.source_code, l.received_at, l.first_response_at, l.converted_deal_id, (q.lead_id is not null) as was_qualified
           from leads l
           left join (select distinct h.lead_id from lead_status_history h
                       where h.company_id = ${ctx.companyId}::uuid and h.to_status = 'qualified') q on q.lead_id = l.id
@@ -113,6 +117,7 @@ export class DashboardsService {
       responseTimes: agentRows ? agentRows.map((row) => ({ assignee: { id: row.assignedTo, name: row.name }, ...responseRow(row, target) })) : null,
       leadsBySource: sourceRows.rows.map((row) => ({ sourceCode: row.sourceCode, ...responseRow(row, target) })),
       requirements: await this.requirementCounts(tx, ctx, query.officeId),
+      sales: await this.salesAttention(tx, ctx, query.officeId),
     };
   }
 
@@ -307,6 +312,7 @@ export class DashboardsService {
     const statusRows = await sql<{ status: string; n: string }>`
       select l.status, count(*) as n from leads l where l.assigned_to = ${ctx.membershipId}::uuid and l.archived_at is null group by l.status`.execute(tx);
 
+    const sales = await this.mySalesItems(tx, ctx, window);
     const now = window.now.getTime();
     const items = [
       ...tasks.rows.map((row) => ({
@@ -319,6 +325,9 @@ export class DashboardsService {
         aboutId: row.entityId,
         overdue: row.dueAt.getTime() < now,
         version: row.version,
+        endsAt: null,
+        timezone: null,
+        amount: null,
       })),
       ...leads.rows.map((row) => ({
         kind: 'new_lead',
@@ -330,7 +339,11 @@ export class DashboardsService {
         aboutId: row.id,
         overdue: target !== null && now > row.receivedAt.getTime() + target * 60_000,
         version: null,
+        endsAt: null,
+        timezone: null,
+        amount: null,
       })),
+      ...sales.items,
     ].sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.at.localeCompare(b.at) || a.id.localeCompare(b.id));
     return {
       timezone: window.timezone,
@@ -341,12 +354,138 @@ export class DashboardsService {
         newLeadsAssigned: Number(summary!.newLeads),
         overdueFollowUps: Number(summary!.overdue),
         leadsPastTarget: summary!.pastTarget === null ? null : Number(summary!.pastTarget),
+        viewingsNeedingOutcome: sales.viewingsNeedingOutcome,
+        offersAwaitingResponse: sales.offersAwaitingResponse,
       },
       myLeadsByStatus: statusCounts(statusRows.rows),
     };
   }
 
   // ----------------------------------------------------------------- helpers
+
+  /**
+   * Sales pipeline work for the CRM dashboard (Phase 3 design 06 §4; S3-R3):
+   * viewings that have ended without an outcome, open deals stalled in their
+   * stage, and open deals left on a listing that has closed. Each count is in
+   * the viewer's own viewing or deal scope and matches a list filter.
+   */
+  private async salesAttention(tx: Tx, ctx: TenantContext, officeId: string | null) {
+    const viewingScope = scopeFor(ctx, 'viewing.view');
+    const dealScope = scopeFor(ctx, 'deal.view');
+    let viewingsNeedingOutcome: number | null = null;
+    if (viewingScope !== null) {
+      const { rows: [row] } = await sql<{ n: string }>`
+        select count(*) as n
+          from viewings v
+          join listings l on l.id = v.listing_id
+          left join leads ld on ld.id = v.lead_id
+          left join deals d on d.id = v.deal_id
+         where v.status in ('scheduled', 'confirmed') and v.scheduled_end < now()
+           and ${viewingScopeSql(viewingScope, ctx)}
+           ${officeId ? sql`and l.office_id = ${officeId}::uuid` : sql``}`.execute(tx);
+      viewingsNeedingOutcome = Number(row!.n);
+    }
+    let stalledDeals: number | null = null;
+    let openDealsOnClosedListings: number | null = null;
+    if (dealScope !== null) {
+      const { rows: [row] } = await sql<{ stalled: string; closed: string }>`
+        select count(*) filter (where s.stall_after_days is not null and d.stage_entered_at < now() - make_interval(days => s.stall_after_days)) as stalled,
+               count(*) filter (where l.status = any(${[...CLOSED_LISTING_STATUSES]}::text[])) as closed
+          from deals d
+          join pipeline_stages s on s.id = d.stage_id
+          left join listings l on l.id = d.listing_id
+         where d.status = 'open' and d.archived_at is null
+           and ${dealScopeSql(dealScope, ctx)}
+           ${officeId ? sql`and d.office_id = ${officeId}::uuid` : sql``}`.execute(tx);
+      stalledDeals = Number(row!.stalled);
+      openDealsOnClosedListings = Number(row!.closed);
+    }
+    return { viewingsNeedingOutcome, openDealsOnClosedListings, stalledDeals };
+  }
+
+  /**
+   * My day's Phase 6 items (Phase 3 design 06 §10): the viewings I conduct
+   * today (in my time zone) and offers awaiting a response on deals I own or
+   * work on, or on listings I am the agent of, within my offer scope.
+   */
+  private async mySalesItems(tx: Tx, ctx: TenantContext, window: Window) {
+    const canViewings = scopeFor(ctx, 'viewing.view') !== null;
+    const offerScope = scopeFor(ctx, 'offer.view');
+    const me = sql`${ctx.membershipId}::uuid`;
+    const viewings = canViewings
+      ? (
+          await sql<{ id: string; title: string; reference: string; start: Date; end: Date; timezone: string; status: string; attendees: string | null }>`
+            select v.id, l.title, l.reference, v.scheduled_start as start, v.scheduled_end as "end", v.timezone, v.status,
+                   (select string_agg(c.display_name, ', ' order by c.display_name) from viewing_attendees va join contacts c on c.id = va.contact_id
+                     where va.company_id = v.company_id and va.viewing_id = v.id) as attendees
+              from viewings v join listings l on l.id = v.listing_id
+             where v.agent_membership_id = ${me} and v.status in ('scheduled', 'confirmed')
+               and v.scheduled_start >= ${window.tomorrow}::timestamptz - interval '1 day' and v.scheduled_start < ${window.tomorrow}
+             order by v.scheduled_start, v.id
+             limit 100`.execute(tx)
+        ).rows
+      : [];
+    const offers = offerScope !== null
+      ? (
+          await sql<{ id: string; dealId: string; dealReference: string; offeredBy: string; submittedAt: Date; expiresAt: Date | null; amount: string; currency: string; minorUnits: number }>`
+            select o.id, d.id as deal_id, d.reference as deal_reference, c.display_name as offered_by, o.submitted_at, o.expires_at,
+                   o.amount::text as amount, o.currency_code as currency, cur.minor_units
+              from offers o
+              join deals d on d.id = o.deal_id
+              join listings l on l.id = o.listing_id
+              join contacts c on c.id = o.offered_by_contact_id
+              join currencies cur on cur.code = o.currency_code
+             where o.status = 'submitted' and d.status = 'open'
+               and (d.owner_membership_id = ${me} or l.agent_membership_id = ${me}
+                    or exists (select 1 from deal_agents da where da.company_id = d.company_id and da.deal_id = d.id and da.membership_id = ${me}))
+               and ${dealScopeSql(offerScope, ctx)}
+             order by o.submitted_at, o.id
+             limit 100`.execute(tx)
+        ).rows
+      : [];
+    const { rows: [counts] } = await sql<{ viewings: string; offers: string }>`
+      select ${canViewings ? sql`(select count(*) from viewings v where v.agent_membership_id = ${me} and v.status in ('scheduled', 'confirmed') and v.scheduled_end < now())` : sql`null`} as viewings,
+             ${offerScope !== null ? sql`(select count(*) from offers o join deals d on d.id = o.deal_id join listings l on l.id = o.listing_id
+                 where o.status = 'submitted' and d.status = 'open'
+                   and (d.owner_membership_id = ${me} or l.agent_membership_id = ${me}
+                        or exists (select 1 from deal_agents da where da.company_id = d.company_id and da.deal_id = d.id and da.membership_id = ${me}))
+                   and ${dealScopeSql(offerScope, ctx)})` : sql`null`} as offers`.execute(tx);
+    const now = window.now.getTime();
+    return {
+      items: [
+        ...viewings.map((row) => ({
+          kind: 'viewing',
+          id: row.id,
+          at: row.start.toISOString(),
+          title: row.title,
+          about: row.attendees ? `${row.reference} · ${row.attendees}` : row.reference,
+          aboutType: 'viewing',
+          aboutId: row.id,
+          overdue: row.end.getTime() < now,
+          version: null,
+          endsAt: row.end.toISOString(),
+          timezone: row.timezone,
+          amount: null,
+        })),
+        ...offers.map((row) => ({
+          kind: 'offer',
+          id: row.id,
+          at: row.submittedAt.toISOString(),
+          title: row.offeredBy,
+          about: row.dealReference,
+          aboutType: 'deal',
+          aboutId: row.dealId,
+          overdue: row.expiresAt !== null && row.expiresAt.getTime() < now,
+          version: null,
+          endsAt: null,
+          timezone: null,
+          amount: toMoney(row.amount, row.currency, row.minorUnits),
+        })),
+      ],
+      viewingsNeedingOutcome: counts!.viewings === null ? null : Number(counts!.viewings),
+      offersAwaitingResponse: counts!.offers === null ? null : Number(counts!.offers),
+    };
+  }
 
   /** Follow-ups: managers see their team's (lead.assign scope), everyone else their own. */
   private async followUpCounts(tx: Tx, ctx: TenantContext, officeId: string | null, window: Window) {
@@ -399,7 +538,8 @@ export class DashboardsService {
       percentile_cont(0.5) within group (order by extract(epoch from (l.first_response_at - l.received_at)) / 60)
         filter (where l.first_response_at is not null) as median_minutes,
       ${target === null ? sql`null` : sql`count(*) filter (where l.first_response_at <= l.received_at + make_interval(mins => ${target}))`} as within_target,
-      count(*) filter (where l.was_qualified) as qualified`;
+      count(*) filter (where l.was_qualified) as qualified,
+      count(*) filter (where l.converted_deal_id is not null) as converted`;
   }
 
   /** The office filter must be an office of the company within the viewer's scope. */
@@ -435,6 +575,7 @@ interface ResponseAggregate {
   medianMinutes: number | null;
   withinTarget: string | null;
   qualified: string;
+  converted: string;
 }
 
 function memberInOffices(officeIds: string[]): RawBuilder<boolean> {
@@ -451,12 +592,13 @@ function responseRow(row: ResponseAggregate, target: number | null): ResponseRow
     withinTarget: within,
     withinTargetPercent: within === null || leads === 0 ? null : Math.round((within / leads) * 1000) / 10,
     qualified: Number(row.qualified),
+    converted: Number(row.converted),
   };
 }
 
 function statusCounts(rows: Array<{ status: string; n: string }>): LeadStatusCountsDto {
   const count = (status: string) => Number(rows.find((row) => row.status === status)?.n ?? 0);
-  return { new: count('new'), contacted: count('contacted'), qualified: count('qualified'), unqualified: count('unqualified'), lost: count('lost') };
+  return { new: count('new'), contacted: count('contacted'), qualified: count('qualified'), unqualified: count('unqualified'), lost: count('lost'), converted: count('converted') };
 }
 
 function scopeDto(query: DashboardQuery, window: Window): DashboardScopeDto {

@@ -5966,6 +5966,8 @@ export interface components {
             qualified: number;
             unqualified: number;
             lost: number;
+            /** @description Converted to a deal (Phase 6) */
+            converted: number;
         };
         AgentResponseRowDto: {
             leads: number;
@@ -5976,6 +5978,8 @@ export interface components {
             /** @description Percentage of `leads`, one decimal */
             withinTargetPercent: number | null;
             qualified: number;
+            /** @description Leads of the period converted to a deal (Phase 6, `convertedDealId`) */
+            converted: number;
             assignee: components["schemas"]["RefLabelDto"];
         };
         SourceRowDto: {
@@ -5987,6 +5991,8 @@ export interface components {
             /** @description Percentage of `leads`, one decimal */
             withinTargetPercent: number | null;
             qualified: number;
+            /** @description Leads of the period converted to a deal (Phase 6, `convertedDealId`) */
+            converted: number;
             sourceCode: string;
         };
         RequirementCountsDto: {
@@ -6002,6 +6008,14 @@ export interface components {
              */
             noMatchCheckedAt: string | null;
         };
+        SalesAttentionDto: {
+            /** @description Viewings that have ended, still scheduled or confirmed, with no outcome, in the viewer's viewing scope (null without viewing.view); the list is GET /viewings?filter[needsOutcome]=true */
+            viewingsNeedingOutcome: number | null;
+            /** @description Open deals whose listing is sold, rented, withdrawn or expired, in the viewer's deal scope (null without deal.view); the list is GET /deals?filter[attention]=listing_closed */
+            openDealsOnClosedListings: number | null;
+            /** @description Open deals longer in their stage than the stage allows (null without deal.view); GET /deals?filter[attention]=stalled */
+            stalledDeals: number | null;
+        };
         CrmDashboardDto: {
             scope: components["schemas"]["DashboardScopeDto"];
             /** @description Company response target in minutes; null shows "SLA not set" */
@@ -6015,6 +6029,8 @@ export interface components {
             leadsBySource: components["schemas"]["SourceRowDto"][];
             /** @description null without contact.view */
             requirements: components["schemas"]["RequirementCountsDto"] | null;
+            /** @description Sales pipeline work (Phase 6, S6) */
+            sales: components["schemas"]["SalesAttentionDto"];
         };
         AttentionItemDto: {
             /** @example unassigned_leads */
@@ -6105,8 +6121,11 @@ export interface components {
             account: components["schemas"]["AccountDto"];
         };
         DayItemDto: {
-            /** @enum {string} */
-            kind: "follow_up" | "new_lead";
+            /**
+             * @description viewing: one I conduct today; offer: an offer awaiting a response on a deal or listing of mine (Phase 6)
+             * @enum {string}
+             */
+            kind: "follow_up" | "new_lead" | "viewing" | "offer";
             /** Format: uuid */
             id: string;
             /**
@@ -6118,18 +6137,32 @@ export interface components {
             /** @description Contact name, or lead reference and contact name */
             about: string | null;
             /** @enum {string|null} */
-            aboutType: "contact" | "lead" | null;
+            aboutType: "contact" | "lead" | "viewing" | "deal" | null;
             /** Format: uuid */
             aboutId: string | null;
+            /** @description Follow-ups and leads: past due or past the response target; viewings: ended without an outcome; offers: past their expiry */
             overdue: boolean;
             /** @description Follow-ups: the version for If-Match (Done, Reschedule) */
             version: number | null;
+            /**
+             * Format: date-time
+             * @description Viewings: when it ends
+             */
+            endsAt: string | null;
+            /** @description Viewings: the property's time zone */
+            timezone: string | null;
+            /** @description Offers: the amount offered, in the deal's currency */
+            amount: components["schemas"]["MoneyDto"] | null;
         };
         WaitingOnMeDto: {
             newLeadsAssigned: number;
             overdueFollowUps: number;
             /** @description Past the response target without a reply (null when none is set) */
             leadsPastTarget: number | null;
+            /** @description Viewings I conduct that have ended without an outcome (null without viewing.view) */
+            viewingsNeedingOutcome: number | null;
+            /** @description Offers awaiting a response on my deals or listings (null without offer.view) */
+            offersAwaitingResponse: number | null;
         };
         MyDayDto: {
             timezone: string;
@@ -7419,6 +7452,7 @@ export type LeadStatusCountsDto = components['schemas']['LeadStatusCountsDto'];
 export type AgentResponseRowDto = components['schemas']['AgentResponseRowDto'];
 export type SourceRowDto = components['schemas']['SourceRowDto'];
 export type RequirementCountsDto = components['schemas']['RequirementCountsDto'];
+export type SalesAttentionDto = components['schemas']['SalesAttentionDto'];
 export type CrmDashboardDto = components['schemas']['CrmDashboardDto'];
 export type AttentionItemDto = components['schemas']['AttentionItemDto'];
 export type UsersAccessDto = components['schemas']['UsersAccessDto'];
@@ -12661,7 +12695,7 @@ export interface operations {
             query?: {
                 "filter[expectedCloseDate][lte]"?: unknown;
                 "filter[expectedCloseDate][gte]"?: unknown;
-                /** @description stalled: longer in its stage than the stage allows */
+                /** @description stalled: longer in its stage than the stage allows; listing_closed: its listing is sold, rented, withdrawn or expired (S6, S3-R3) */
                 "filter[attention]"?: unknown;
                 "filter[leadId]"?: unknown;
                 /** @description Primary contact or any party */

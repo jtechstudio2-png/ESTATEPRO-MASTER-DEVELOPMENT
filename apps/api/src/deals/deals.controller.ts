@@ -49,7 +49,7 @@ const DEAL_FILTERS: FilterSpec = {
   listingId: { type: 'uuid', multi: true },
   contactId: { type: 'uuid', multi: true },
   leadId: { type: 'uuid', multi: true },
-  attention: { type: 'enum', values: ['stalled'], multi: true },
+  attention: { type: 'enum', values: ['stalled', 'listing_closed'], multi: true },
   expectedCloseDate: { type: 'range', pattern: /^\d{4}-\d{2}-\d{2}$/ },
 };
 
@@ -81,7 +81,7 @@ export class DealsController {
   @ApiQuery({ name: 'filter[listingId]', required: false })
   @ApiQuery({ name: 'filter[contactId]', required: false, description: 'Primary contact or any party' })
   @ApiQuery({ name: 'filter[leadId]', required: false })
-  @ApiQuery({ name: 'filter[attention]', required: false, description: 'stalled: longer in its stage than the stage allows' })
+  @ApiQuery({ name: 'filter[attention]', required: false, description: 'stalled: longer in its stage than the stage allows; listing_closed: its listing is sold, rented, withdrawn or expired (S6, S3-R3)' })
   @ApiQuery({ name: 'filter[expectedCloseDate][gte]', required: false })
   @ApiQuery({ name: 'filter[expectedCloseDate][lte]', required: false })
   @ApiOkResponse({ type: DealSummaryPageDto })

@@ -151,6 +151,9 @@ interface NewDeal {
  * checks first to answer with field-level codes, and adds scope, the
  * timeline, audit and outbox events.
  */
+/** Listing statuses after which an open deal on the listing can no longer complete (S6, S3-R3). */
+export const CLOSED_LISTING_STATUSES = ['sold', 'rented', 'withdrawn', 'expired'] as const;
+
 @Injectable()
 export class DealsService {
   constructor(
@@ -196,6 +199,8 @@ export class DealsService {
     if (Array.isArray(attention) && attention.includes('stalled')) {
       qb = qb.where(sql<boolean>`s.stall_after_days is not null and d.stage_entered_at < now() - make_interval(days => s.stall_after_days)`);
     }
+    // Open deals left behind when their listing closed (another buyer's sale, a withdrawal): S3-R3.
+    if (Array.isArray(attention) && attention.includes('listing_closed')) qb = qb.where('l.status', 'in', [...CLOSED_LISTING_STATUSES]);
     const close = f['expectedCloseDate'] as RangeValue | undefined;
     if (close?.gte) qb = qb.where('d.expectedCloseDate', '>=', close.gte);
     if (close?.lte) qb = qb.where('d.expectedCloseDate', '<=', close.lte);

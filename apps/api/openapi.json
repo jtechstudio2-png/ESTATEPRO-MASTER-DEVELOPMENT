@@ -11438,7 +11438,7 @@
             "name": "filter[attention]",
             "required": false,
             "in": "query",
-            "description": "stalled: longer in its stage than the stage allows",
+            "description": "stalled: longer in its stage than the stage allows; listing_closed: its listing is sold, rented, withdrawn or expired (S6, S3-R3)",
             "schema": {}
           },
           {
@@ -24148,6 +24148,10 @@
           },
           "lost": {
             "type": "number"
+          },
+          "converted": {
+            "type": "number",
+            "description": "Converted to a deal (Phase 6)"
           }
         },
         "required": [
@@ -24155,7 +24159,8 @@
           "contacted",
           "qualified",
           "unqualified",
-          "lost"
+          "lost",
+          "converted"
         ]
       },
       "AgentResponseRowDto": {
@@ -24188,6 +24193,10 @@
           "qualified": {
             "type": "number"
           },
+          "converted": {
+            "type": "number",
+            "description": "Leads of the period converted to a deal (Phase 6, `convertedDealId`)"
+          },
           "assignee": {
             "$ref": "#/components/schemas/RefLabelDto"
           }
@@ -24198,6 +24207,7 @@
           "withinTarget",
           "withinTargetPercent",
           "qualified",
+          "converted",
           "assignee"
         ]
       },
@@ -24231,6 +24241,10 @@
           "qualified": {
             "type": "number"
           },
+          "converted": {
+            "type": "number",
+            "description": "Leads of the period converted to a deal (Phase 6, `convertedDealId`)"
+          },
           "sourceCode": {
             "type": "string"
           }
@@ -24241,6 +24255,7 @@
           "withinTarget",
           "withinTargetPercent",
           "qualified",
+          "converted",
           "sourceCode"
         ]
       },
@@ -24282,6 +24297,37 @@
           "noMatch",
           "noMatchPending",
           "noMatchCheckedAt"
+        ]
+      },
+      "SalesAttentionDto": {
+        "type": "object",
+        "properties": {
+          "viewingsNeedingOutcome": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Viewings that have ended, still scheduled or confirmed, with no outcome, in the viewer's viewing scope (null without viewing.view); the list is GET /viewings?filter[needsOutcome]=true"
+          },
+          "openDealsOnClosedListings": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Open deals whose listing is sold, rented, withdrawn or expired, in the viewer's deal scope (null without deal.view); the list is GET /deals?filter[attention]=listing_closed"
+          },
+          "stalledDeals": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Open deals longer in their stage than the stage allows (null without deal.view); GET /deals?filter[attention]=stalled"
+          }
+        },
+        "required": [
+          "viewingsNeedingOutcome",
+          "openDealsOnClosedListings",
+          "stalledDeals"
         ]
       },
       "CrmDashboardDto": {
@@ -24337,6 +24383,14 @@
                 "type": "null"
               }
             ]
+          },
+          "sales": {
+            "description": "Sales pipeline work (Phase 6, S6)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SalesAttentionDto"
+              }
+            ]
           }
         },
         "required": [
@@ -24347,7 +24401,8 @@
           "leadsByStatus",
           "responseTimes",
           "leadsBySource",
-          "requirements"
+          "requirements",
+          "sales"
         ]
       },
       "AttentionItemDto": {
@@ -24683,8 +24738,11 @@
             "type": "string",
             "enum": [
               "follow_up",
-              "new_lead"
-            ]
+              "new_lead",
+              "viewing",
+              "offer"
+            ],
+            "description": "viewing: one I conduct today; offer: an offer awaiting a response on a deal or listing of mine (Phase 6)"
           },
           "id": {
             "type": "string",
@@ -24713,6 +24771,8 @@
             "enum": [
               "contact",
               "lead",
+              "viewing",
+              "deal",
               null
             ]
           },
@@ -24724,7 +24784,8 @@
             "format": "uuid"
           },
           "overdue": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Follow-ups and leads: past due or past the response target; viewings: ended without an outcome; offers: past their expiry"
           },
           "version": {
             "type": [
@@ -24732,6 +24793,32 @@
               "null"
             ],
             "description": "Follow-ups: the version for If-Match (Done, Reschedule)"
+          },
+          "endsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Viewings: when it ends"
+          },
+          "timezone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Viewings: the property's time zone"
+          },
+          "amount": {
+            "description": "Offers: the amount offered, in the deal's currency",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -24743,7 +24830,10 @@
           "aboutType",
           "aboutId",
           "overdue",
-          "version"
+          "version",
+          "endsAt",
+          "timezone",
+          "amount"
         ]
       },
       "WaitingOnMeDto": {
@@ -24761,12 +24851,28 @@
               "null"
             ],
             "description": "Past the response target without a reply (null when none is set)"
+          },
+          "viewingsNeedingOutcome": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Viewings I conduct that have ended without an outcome (null without viewing.view)"
+          },
+          "offersAwaitingResponse": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Offers awaiting a response on my deals or listings (null without offer.view)"
           }
         },
         "required": [
           "newLeadsAssigned",
           "overdueFollowUps",
-          "leadsPastTarget"
+          "leadsPastTarget",
+          "viewingsNeedingOutcome",
+          "offersAwaitingResponse"
         ]
       },
       "MyDayDto": {
