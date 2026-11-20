@@ -151,16 +151,19 @@ export class ActivitiesService {
       .execute();
 
     // The first outbound contact or meeting answers a lead (response target, D3).
+    // Times are entered to the minute while a lead's receipt has seconds, so a
+    // call logged in the same minute as the lead arrived answers it (#44); the
+    // response is then recorded at the receipt time, never before it.
     const leadIds = links.filter((link) => link.entityType === 'lead').map((link) => link.entityId);
     const answers = body.activityType === 'meeting' || (RESPONSE_TYPES.includes(body.activityType) && direction === 'outbound');
     const answered: string[] = [];
     if (answers && leadIds.length > 0) {
       const updated = await tx
         .updateTable('leads')
-        .set({ firstResponseAt: occurredAt })
+        .set({ firstResponseAt: sql<Date>`greatest(${occurredAt}::timestamptz, received_at)` })
         .where('id', 'in', leadIds)
         .where('firstResponseAt', 'is', null)
-        .where('receivedAt', '<=', occurredAt)
+        .where(sql<boolean>`date_trunc('minute', received_at) <= ${occurredAt}::timestamptz`)
         .returning('id')
         .execute();
       answered.push(...updated.map((row) => row.id));

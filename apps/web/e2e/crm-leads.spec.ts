@@ -104,12 +104,7 @@ test.describe('CRM leads, activity and follow-ups', () => {
   test('L-3 captures a lead for an existing contact found by phone', async ({ page }) => {
     await signIn(page, 'kofi.owner@accra.test', { company: 'Accra Homes Ltd' });
     await page.goto('/leads/new');
-    // Typing before the page has hydrated leaves the text without a search: type again until the matches show.
-    await expect(async () => {
-      await page.getByRole('combobox', { name: 'Find contact' }).fill('');
-      await page.getByRole('combobox', { name: 'Find contact' }).fill('Esi');
-      await expect(page.getByRole('option', { name: /Esi Sarpong/ })).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 20_000 });
+    await page.getByRole('combobox', { name: 'Find contact' }).fill('Esi');
     await page.getByRole('option', { name: /Esi Sarpong/ }).click();
     await choose(page, 'Type', 'Valuation');
     await choose(page, 'Source', 'Referral');

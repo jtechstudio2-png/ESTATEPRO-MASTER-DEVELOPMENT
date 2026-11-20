@@ -8,6 +8,7 @@ import { ComboBox, FieldError, Input, Label, ListBox, ListBoxItem, Popover, Text
 import { Ltr } from '@/components/crm/labels';
 import fieldStyles from '@/components/ui/field.module.css';
 import type { DealSummaryPageDto, ListingListItemDto, ListingPageDto } from '@/lib/api-schema';
+import { useHydrated } from '@/lib/hooks/hydrated';
 import { bff, query } from '@/lib/bff';
 
 interface Picked {
@@ -34,6 +35,8 @@ interface SearchProps<T extends { id: string }> {
 function RecordSearch<T extends { id: string }>({ label, help, value, onChange, error, labelId, isRequired, isDisabled, queryKey, fetch, textOf, render }: SearchProps<T>) {
   const form = useTranslations('form');
   const [text, setText] = useState(value?.label ?? '');
+  // Not typed into until it can search (S5-R4).
+  const hydrated = useHydrated();
   const [term, setTerm] = useState('');
   useEffect(() => {
     const trimmed = text.trim();
@@ -54,7 +57,7 @@ function RecordSearch<T extends { id: string }>({ label, help, value, onChange, 
       allowsEmptyCollection
       isInvalid={error !== undefined}
       isRequired={isRequired ?? false}
-      isDisabled={isDisabled ?? false}
+      isDisabled={(isDisabled ?? false) || !hydrated}
       validationBehavior="aria"
     >
       <Label className={fieldStyles.label} {...(labelId ? { id: labelId } : {})}>

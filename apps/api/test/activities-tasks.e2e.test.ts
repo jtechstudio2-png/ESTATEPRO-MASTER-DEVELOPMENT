@@ -128,6 +128,23 @@ describe('activity timeline and follow-ups (Phase 5 milestone C3; A-1, A-2, F-1,
       expect((await as('agent').get(`/api/v1/leads/${second.id}`).expect(200)).body.firstResponseAt).toBeNull();
     });
 
+    it('counts a call logged in the same minute as the lead arrived as its first response, never before it (#44)', async () => {
+      const person = await contact('agent');
+      // The lead arrived at hh:mm:40; the call is logged to the minute, hh:mm:00.
+      const minute = new Date(Date.now() - 20 * 60_000);
+      minute.setUTCSeconds(0, 0);
+      const received = new Date(minute.getTime() + 40_000);
+      const sameMinute = await lead('agent', person.id, { receivedAt: received.toISOString() });
+      await log('agent', { activityType: 'call', direction: 'outbound', occurredAt: minute.toISOString(), links: [{ entityType: 'lead', entityId: sameMinute.id }] });
+      const answered = await as('agent').get(`/api/v1/leads/${sameMinute.id}`).expect(200);
+      // Recorded at the receipt time, so the response time is never negative.
+      expect(answered.body.firstResponseAt).toBe(received.toISOString());
+      // A call logged in the minute before the lead arrived does not answer it.
+      const later = await lead('agent', person.id, { receivedAt: received.toISOString() });
+      await log('agent', { activityType: 'call', direction: 'outbound', occurredAt: new Date(minute.getTime() - 60_000).toISOString(), links: [{ entityType: 'lead', entityId: later.id }] });
+      expect((await as('agent').get(`/api/v1/leads/${later.id}`).expect(200)).body.firstResponseAt).toBeNull();
+    });
+
     it('validates type, direction, timing, outcome and links', async () => {
       const person = await contact('owner');
       const link = [{ entityType: 'contact', entityId: person.id }];

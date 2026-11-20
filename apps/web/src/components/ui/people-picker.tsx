@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Button as AriaButton, ComboBox, FieldError, Input, Label, ListBox, ListBoxItem, Popover, Text } from 'react-aria-components';
 
+import { useHydrated } from '@/lib/hooks/hydrated';
 import { bff, query } from '@/lib/bff';
 import type { MemberListDto } from '@/lib/api-schema';
 
@@ -34,6 +35,8 @@ interface PeoplePickerProps {
 export function PeoplePicker({ label, value, onChange, permission, officeId, error, description, isRequired }: PeoplePickerProps) {
   const t = useTranslations('form');
   const [text, setText] = useState(value?.displayName ?? '');
+  // Not typed into until it can search (S5-R4).
+  const hydrated = useHydrated();
   const [term, setTerm] = useState('');
   useEffect(() => {
     const trimmed = text.trim();
@@ -61,6 +64,7 @@ export function PeoplePicker({ label, value, onChange, permission, officeId, err
       }}
       items={items}
       allowsEmptyCollection
+      isDisabled={!hydrated}
       isRequired={isRequired}
       isInvalid={error !== undefined}
       validationBehavior="aria"
