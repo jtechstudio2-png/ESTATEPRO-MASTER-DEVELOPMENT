@@ -4,8 +4,10 @@ import { sql } from 'kysely';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
 import { systemContext } from '../src/common/request-context.js';
+import { hasMatchSql } from '../src/contacts/requirement-matching.js';
 import { SensitiveDataService } from '../src/crypto/sensitive-data.service.js';
 import { createKysely, TenantDb } from '../src/database/database.module.js';
+import { createWorker } from '../src/worker/create-worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
 
@@ -20,6 +22,7 @@ import { Fixtures } from './support/fixtures.js';
 const PROPERTIES = 2_000;
 const CONTACTS = 50_000;
 const TARGET_P95_MS = 1_000;
+const REFRESH_TARGET_MS = 60_000;
 const ACCRA = { latitude: 5.6037, longitude: -0.187 };
 
 describe('requirements, matching and KYC performance', () => {
@@ -223,5 +226,44 @@ describe('requirements, matching and KYC performance', () => {
         `p95 ${p95.toFixed(0)} ms, slowest ${slowest.ms.toFixed(0)} ms (${slowest.label}); ${kinds}`,
     );
     expect(p95).toBeLessThan(TARGET_P95_MS);
+  }, 600_000);
+
+  // #42: the "no match" refresh of a dense company (every requirement has matches in its area),
+  // measured per kind of area and as the worker runs it (batches of 2,000).
+  it(`refreshes the "no match" status of all ${CONTACTS} requirements in under ${REFRESH_TARGET_MS / 1000} s`, async () => {
+    const appDb = createKysely(inject('databaseUrls').app, 2, 'estatepro-c2-perf-refresh');
+    const tenantDb = new TenantDb(appDb);
+    const ctx = systemContext(company.companyId, 'c2-perf-refresh');
+    const byKind: string[] = [];
+    try {
+      for (const [kind, where] of [
+        ['named areas', sql`cardinality(r.area_localities) > 0`],
+        ['drawn areas and circles', sql`r.area_west is not null`],
+        ['anywhere', sql`r.area_anywhere`],
+      ] as const) {
+        const started = performance.now();
+        const { rows } = await tenantDb.run({ companyId: company.companyId, userId: '' }, (tx) =>
+          sql<{ total: string; matched: string }>`
+            select count(*) as total, count(*) filter (where ${hasMatchSql(ctx, 'all')}) as matched
+              from requirements r where r.status = 'active' and ${where}`.execute(tx),
+        );
+        byKind.push(`${kind}: ${rows[0]!.matched} of ${rows[0]!.total} matched in ${(performance.now() - started).toFixed(0)} ms`);
+      }
+    } finally {
+      await appDb.destroy();
+    }
+    const silent = { info: () => undefined, warn: () => undefined, error: () => undefined };
+    const { worker, close } = createWorker(t.config, silent, { scheduleEveryMs: 0 });
+    const started = performance.now();
+    let refreshed = 0;
+    try {
+      refreshed = await worker.refreshRequirementMatches(company.companyId);
+    } finally {
+      await close();
+    }
+    const refreshMs = performance.now() - started;
+    console.info(`match refresh (#42): ${refreshed} requirements in ${refreshMs.toFixed(0)} ms; ${byKind.join('; ')}`);
+    expect(refreshed).toBe(CONTACTS);
+    expect(refreshMs).toBeLessThan(REFRESH_TARGET_MS);
   }, 600_000);
 });

@@ -71,6 +71,14 @@ describe('key rotation and erasure performance', () => {
     field.key.fill(0);
     lookup.key.fill(0);
     keys.clear();
+    // Fresh statistics after the bulk insert, as in production after autovacuum: in one
+    // performance run the contacts table also holds other test files' companies (#42).
+    const admin = createKysely(inject('databaseUrls').admin, 1, 'estatepro-dp-perf-analyze');
+    try {
+      await sql`vacuum (analyze) contacts`.execute(admin);
+    } finally {
+      await admin.destroy();
+    }
   }, 300_000);
 
   afterAll(async () => {

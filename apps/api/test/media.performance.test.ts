@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { createWorker } from '../src/worker/create-worker.js';
-import type { Worker } from '../src/worker/worker.js';
+import { JOBS, type Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
 import { sha256Hex } from './support/media-files.js';
@@ -28,7 +28,13 @@ describe('media performance', () => {
   beforeAll(async () => {
     t = await createTestApp();
     fx = new Fixtures();
-    ({ worker, close: closeWorker } = createWorker(t.config, { info: () => undefined, warn: () => undefined, error: () => undefined }, { scheduleEveryMs: 60_000 }));
+    // Media jobs only: other test files' companies may share the database, and their scheduled jobs
+    // (for example the match refresh) must not count towards the photo timing (#42).
+    ({ worker, close: closeWorker } = createWorker(
+      t.config,
+      { info: () => undefined, warn: () => undefined, error: () => undefined },
+      { scheduleEveryMs: 60_000, jobTypes: [JOBS.mediaProcess] },
+    ));
     const company = await fx.company();
     companyId = company.companyId;
     await fx.linkIdentity(company.ownerUserId, `media-perf-${companyId}`);
@@ -70,8 +76,7 @@ describe('media performance', () => {
     const started = performance.now();
     const result = await worker.runOnce();
     const seconds = (performance.now() - started) / 1000;
-    // The first pass also runs scheduled jobs (for example storage reconciliation).
-    expect(result.processed).toBeGreaterThanOrEqual(PHOTOS);
+    expect(result.processed).toBe(PHOTOS);
     const done = await fx.db.selectFrom('propertyMedia').select('id').where('propertyId', '=', propertyId).where('processingStatus', '=', 'ready').execute();
     expect(done).toHaveLength(PHOTOS);
     const perPhoto = seconds / PHOTOS;

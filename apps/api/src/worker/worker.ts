@@ -4,14 +4,14 @@ import type { AuditService } from '../audit/audit.service.js';
 import type { KeyRotationService } from '../crypto/key-rotation.service.js';
 import { systemContext } from '../common/request-context.js';
 import type { Db, TenantDb } from '../database/database.module.js';
-import { refreshRequirementMatches } from '../dashboards/dashboards.service.js';
+import { MATCH_REFRESH_BATCH, refreshRequirementMatchBatch, removeInactiveMatchStatus } from '../dashboards/dashboards.service.js';
 import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { expireOffers } from '../offers/offers.service.js';
 import { ARCHIVE_RETENTION_DAYS, MEDIA_PROCESS_JOB, purgeMedia } from '../media/media.service.js';
 import type { StoragePort } from '../media/storage.js';
-import type { ClaimedJob, JobQueue } from './queue.js';
+import { LockLostError, type ClaimedJob, type JobQueue } from './queue.js';
 
 export const JOBS = {
   mediaProcess: MEDIA_PROCESS_JOB,
@@ -67,7 +67,7 @@ export class Worker {
 
   constructor(
     private readonly deps: WorkerDeps,
-    private readonly options: { batchSize?: number; scheduleEveryMs?: number; now?: () => Date } = {},
+    private readonly options: { batchSize?: number; scheduleEveryMs?: number; now?: () => Date; jobTypes?: readonly string[] } = {},
   ) {}
 
   async start(idleMs = 2_000): Promise<void> {
@@ -99,7 +99,7 @@ export class Worker {
     let processed = 0;
     let failed = 0;
     for (;;) {
-      const jobs = await this.deps.queue.claim(Object.values(JOBS), this.options.batchSize ?? 10);
+      const jobs = await this.deps.queue.claim(this.options.jobTypes ?? Object.values(JOBS), this.options.batchSize ?? 10);
       if (jobs.length === 0) break;
       for (const job of jobs) {
         if (await this.execute(job)) processed += 1;
@@ -188,6 +188,29 @@ export class Worker {
     return enqueued;
   }
 
+  /**
+   * Refreshes one company's "no match" status (decision D4) in batches of
+   * MATCH_REFRESH_BATCH requirements, one short tenant transaction each (#42).
+   * Run as a job, it renews the job's lock after every batch and stops if
+   * another worker has taken the job over, so a refresh never runs twice at
+   * once. Returns the number of requirements refreshed.
+   */
+  async refreshRequirementMatches(companyId: string, requestId = `match-refresh:${companyId}`, job?: ClaimedJob): Promise<number> {
+    const scope = { companyId, userId: '' };
+    const ctx = systemContext(companyId, requestId);
+    let afterId: string | null = null;
+    let total = 0;
+    for (;;) {
+      const batch = await this.deps.tenantDb.run(scope, (tx) => refreshRequirementMatchBatch(tx, ctx, afterId));
+      total += batch.count;
+      if (job && !(await this.deps.queue.renewLock(job))) throw new LockLostError(job.id);
+      if (batch.count < MATCH_REFRESH_BATCH || batch.lastId === null) break;
+      afterId = batch.lastId;
+    }
+    await this.deps.tenantDb.run(scope, (tx) => removeInactiveMatchStatus(tx));
+    return total;
+  }
+
   private async execute(job: ClaimedJob): Promise<boolean> {
     const requestId = `job:${job.id}`;
     try {
@@ -195,6 +218,11 @@ export class Worker {
       await this.deps.queue.complete(job.id);
       return true;
     } catch (error) {
+      if (error instanceof LockLostError) {
+        // Another worker owns the job now: leave its row to that worker.
+        this.deps.logger.warn('job lock lost; stopped', { jobId: job.id, jobType: job.jobType, companyId: job.companyId });
+        return false;
+      }
       const outcome = await this.deps.queue.retryOrFail(job, errorMessage(error));
       this.deps.logger.warn('job failed', { jobId: job.id, jobType: job.jobType, companyId: job.companyId, attempt: job.attempts, outcome, error: errorMessage(error) });
       if (outcome === 'failed' && job.jobType === JOBS.mediaProcess) {
@@ -321,9 +349,7 @@ export class Worker {
         return;
 
       case JOBS.requirementMatchRefresh:
-        await tenantDb.run(scope, async (tx) => {
-          await refreshRequirementMatches(tx, ctx);
-        });
+        await this.refreshRequirementMatches(job.companyId, requestId, job);
         return;
 
       case JOBS.offerExpire:

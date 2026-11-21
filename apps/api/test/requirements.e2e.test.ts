@@ -1,8 +1,14 @@
 import { randomUUID } from 'node:crypto';
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { sql } from 'kysely';
+import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
+import { systemContext } from '../src/common/request-context.js';
+import { hasMatchSql } from '../src/contacts/requirement-matching.js';
+import { refreshRequirementMatchBatch } from '../src/dashboards/dashboards.service.js';
+import { createKysely, TenantDb } from '../src/database/database.module.js';
 import { createWorker } from '../src/worker/create-worker.js';
+import { legacyHasMatchSql } from './support/legacy-match.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
 
@@ -498,6 +504,128 @@ describe('requirements and matching (Phase 5 milestone C2, decision D4)', () => 
       expect(dashboard.body.requirements.noMatchPending).toBe(0);
       expect(dashboard.body.requirements.noMatch).toBe(expected);
       expect(expected).toBeGreaterThan(0);
+    });
+
+    // #42: the address-first rewrite must not change a single answer.
+    it('gives the same answer as the C4 match test for every requirement and kind of area (#42)', async () => {
+      const appDb = createKysely(inject('databaseUrls').app, 2, 'estatepro-tests-42');
+      const tenantDb = new TenantDb(appDb);
+      try {
+        for (const target of [company, other]) {
+          const ctx = systemContext(target.companyId, 'test-42');
+          const rows = await tenantDb.run({ companyId: target.companyId, userId: '' }, async (tx) =>
+            (
+              await sql<{ id: string; kind: string; status: string; legacy: boolean; current: boolean }>`
+                select r.id, r.status,
+                       case when r.area_anywhere then 'anywhere' when cardinality(r.area_localities) > 0 then 'locality'
+                            when r.area_west is not null then 'drawn' else 'none' end as kind,
+                       ${legacyHasMatchSql(ctx, 'all')} as legacy, ${hasMatchSql(ctx, 'all')} as current
+                  from requirements r`.execute(tx)
+            ).rows,
+          );
+          expect(rows.filter((row) => row.legacy !== row.current)).toEqual([]);
+          if (target === company) {
+            expect(new Set(rows.map((row) => row.kind))).toEqual(new Set(['anywhere', 'locality', 'drawn']));
+            expect(rows.some((row) => row.current)).toBe(true);
+            expect(rows.some((row) => !row.current)).toBe(true);
+            for (const kind of ['locality', 'drawn']) expect(rows.some((row) => row.kind === kind && row.current)).toBe(true);
+          }
+        }
+      } finally {
+        await appDb.destroy();
+      }
+    });
+
+    it('never joins listings to addresses in the match test: each address is checked on its own (#42)', async () => {
+      type PlanNode = { 'Node Type': string; 'Relation Name'?: string; 'Parent Relationship'?: string; Plans?: PlanNode[] };
+      // Relations a node reads itself, not counting its subqueries (SubPlan, InitPlan).
+      const relations = (node: PlanNode): Set<string> => {
+        const found = new Set<string>(node['Relation Name'] ? [node['Relation Name']] : []);
+        for (const child of node.Plans ?? []) {
+          if (child['Parent Relationship'] === 'SubPlan' || child['Parent Relationship'] === 'InitPlan') continue;
+          for (const name of relations(child)) found.add(name);
+        }
+        return found;
+      };
+      const joinsBoth = (node: PlanNode): boolean => {
+        const rels = relations(node);
+        const here = /Join|Nested Loop/.test(node['Node Type']) && rels.has('addresses') && rels.has('listings');
+        return here || (node.Plans ?? []).some(joinsBoth);
+      };
+      const appDb = createKysely(inject('databaseUrls').app, 2, 'estatepro-tests-42');
+      const tenantDb = new TenantDb(appDb);
+      const ctx = systemContext(company.companyId, 'test-42');
+      try {
+        const plan = await tenantDb.run({ companyId: company.companyId, userId: '' }, async (tx) => {
+          const { rows } = await sql<{ 'QUERY PLAN': [{ Plan: PlanNode }] }>`
+            explain (format json) select r.id, ${hasMatchSql(ctx, 'all')} from requirements r where r.status = 'active'`.execute(tx);
+          return rows[0]!['QUERY PLAN'][0].Plan;
+        });
+        const all = (node: PlanNode): PlanNode[] => [node, ...(node.Plans ?? []).flatMap(all)];
+        expect(all(plan).some((node) => node['Relation Name'] === 'addresses')).toBe(true);
+        expect(joinsBoth(plan)).toBe(false);
+      } finally {
+        await appDb.destroy();
+      }
+    });
+
+    it('refreshes in batches, drops inactive requirements and never touches another company (#42)', async () => {
+      const otherBefore = await fx.db
+        .selectFrom('requirementMatchStatus')
+        .select(['requirementId', 'hasMatch', 'checkedAt'])
+        .where('companyId', '=', other.companyId)
+        .orderBy('requirementId')
+        .execute();
+      const appDb = createKysely(inject('databaseUrls').app, 2, 'estatepro-tests-42');
+      const tenantDb = new TenantDb(appDb);
+      const scope = { companyId: company.companyId, userId: '' };
+      const ctx = systemContext(company.companyId, 'test-42');
+      try {
+        // Batches of one: every active requirement is refreshed exactly once, in id order.
+        let afterId: string | null = null;
+        const seen: string[] = [];
+        for (;;) {
+          const batch: { count: number; lastId: string | null } = await tenantDb.run(scope, (tx) => refreshRequirementMatchBatch(tx, ctx, afterId, 1));
+          if (batch.count === 0) {
+            expect(batch.lastId).toBeNull();
+            break;
+          }
+          expect(batch.count).toBe(1);
+          seen.push(batch.lastId!);
+          afterId = batch.lastId;
+        }
+        const active = await fx.db.selectFrom('requirements').select('id').where('companyId', '=', company.companyId).where('status', '=', 'active').orderBy('id').execute();
+        expect(seen).toEqual(active.map((row) => row.id));
+        const expected = await tenantDb.run(scope, async (tx) =>
+          (await sql<{ id: string; legacy: boolean }>`select r.id, ${legacyHasMatchSql(ctx, 'all')} as legacy from requirements r where r.status = 'active'`.execute(tx)).rows,
+        );
+        const stored = await fx.db.selectFrom('requirementMatchStatus').select(['requirementId', 'hasMatch']).where('companyId', '=', company.companyId).execute();
+        const byId = new Map(stored.map((row) => [row.requirementId, row.hasMatch]));
+        for (const row of expected) expect(byId.get(row.id), row.id).toBe(row.legacy);
+      } finally {
+        await appDb.destroy();
+      }
+
+      // The worker's refresh for one company: a requirement paused since its last check loses its status row.
+      const paused = await fx.db.selectFrom('requirements').select('id').where('companyId', '=', company.companyId).where('status', '=', 'paused').executeTakeFirstOrThrow();
+      await fx.db.insertInto('requirementMatchStatus').values({ companyId: company.companyId, requirementId: paused.id, hasMatch: true }).onConflict((oc) => oc.doNothing()).execute();
+      const silent = { info: () => undefined, warn: () => undefined, error: () => undefined };
+      const { worker, close } = createWorker(t.config, silent, { scheduleEveryMs: 0 });
+      try {
+        const activeCount = await fx.db.selectFrom('requirements').select((eb) => eb.fn.countAll<string>().as('n')).where('companyId', '=', company.companyId).where('status', '=', 'active').executeTakeFirstOrThrow();
+        expect(await worker.refreshRequirementMatches(company.companyId)).toBe(Number(activeCount.n));
+      } finally {
+        await close();
+      }
+      const pausedRow = await fx.db.selectFrom('requirementMatchStatus').select('requirementId').where('companyId', '=', company.companyId).where('requirementId', '=', paused.id).execute();
+      expect(pausedRow).toEqual([]);
+      const otherAfter = await fx.db
+        .selectFrom('requirementMatchStatus')
+        .select(['requirementId', 'hasMatch', 'checkedAt'])
+        .where('companyId', '=', other.companyId)
+        .orderBy('requirementId')
+        .execute();
+      expect(otherAfter).toEqual(otherBefore);
     });
   });
 });

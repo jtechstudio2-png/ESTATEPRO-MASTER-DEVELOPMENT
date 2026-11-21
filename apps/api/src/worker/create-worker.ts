@@ -17,7 +17,7 @@ export class WorkerConfigError extends Error {}
 export function createWorker(
   config: AppConfig,
   logger: WorkerLogger,
-  overrides: { scanner?: MalwareScanner; now?: () => Date; scheduleEveryMs?: number } = {},
+  overrides: { scanner?: MalwareScanner; now?: () => Date; scheduleEveryMs?: number; jobTypes?: readonly string[] } = {},
 ): { worker: Worker; close: () => Promise<void> } {
   if (!config.PLATFORM_DATABASE_URL) throw new WorkerConfigError('PLATFORM_DATABASE_URL is required by the worker.');
   if (!config.CLAMAV_HOST && !overrides.scanner) throw new WorkerConfigError('CLAMAV_HOST is required by the worker.');
@@ -41,7 +41,11 @@ export function createWorker(
       rotation,
       logger,
     },
-    { ...(overrides.now ? { now: overrides.now } : {}), ...(overrides.scheduleEveryMs !== undefined ? { scheduleEveryMs: overrides.scheduleEveryMs } : {}) },
+    {
+      ...(overrides.now ? { now: overrides.now } : {}),
+      ...(overrides.scheduleEveryMs !== undefined ? { scheduleEveryMs: overrides.scheduleEveryMs } : {}),
+      ...(overrides.jobTypes ? { jobTypes: overrides.jobTypes } : {}),
+    },
   );
   return {
     worker,
