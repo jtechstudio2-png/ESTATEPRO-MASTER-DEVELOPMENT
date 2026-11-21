@@ -40,7 +40,7 @@
 
 | # | Risk | Rating | Owner / when |
 |---|---|---|---|
-| #42 (S6-R2) | Requirement match refresh at multi-tenant volume | **High, open** | First after the Phase 6 merge, before Phase 7 (21 November 2026) |
+| #42 (S6-R2) | Requirement match refresh at multi-tenant volume | **Resolved**: remediation approved and merged through PR #49 (`7e5e9ab`); #42 closed | 21 November 2026 |
 | Readiness R3 / #20 | Buyers and sellers of completed sales cannot be erased until a retention period is set | Medium (by design) | Legal review #20 |
 | Readiness R5, S3-R5 | No commission records (splits and forecast only) | Medium | Finance phase |
 | Readiness R4, S3-R4 | Letting deals stop at "terms agreed" | Low | Phase 7 |
@@ -75,7 +75,7 @@ Migrations 0029 to 0034; SQL suites 13 to 16; API end-to-end tests for every Pha
 |---|---|
 | All milestones approved | Yes (21 November 2026) |
 | CI green on the final commit | Run 158 green on `60fb926` (S6 report §10); this report commit re-runs CI |
-| Open High issues introduced by Phase 6 | #42 (approved for remediation before Phase 7) |
+| Open High issues introduced by Phase 6 | None: #42 resolved (PR #49, `7e5e9ab`) |
 | Pull request | [#47](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/pull/47) `phase-6/readiness` → `main`, reviewed and approved; all 12 checks green on `d88d79d` (runs 161, 162); **merged 21 November 2026** as `a551ee7` |
 
 ## Approval
@@ -86,4 +86,5 @@ Migrations 0029 to 0034; SQL suites 13 to 16; API end-to-end tests for every Pha
 | Closing #5, #15, #43, #44 | **Approved**; closed | 21 November 2026 |
 | One reviewed pull request `phase-6/readiness` → `main` | **Approved** | 21 November 2026 |
 | Merge of PR #47 into `main` | **Merged** (`a551ee7`); `main` green after the merge (CI run 163, all jobs); tag `phase-6-complete` pending | 21 November 2026 |
+| #42 remediation merged (Phase 6 blocker) | **Merged** through PR #49 as `7e5e9ab`; all 6 checks green on `b2189c1` (CI run 170); #42 closed. The Phase 6 blocker is resolved (`docs/phase-7/ISSUE-42-REPORT.md`) | 21 November 2026 |
 | Phase 7 | Not started until the Phase 6 branch is merged. After the merge: #42 first, then the standard readiness process, with the Phase 7 readiness report before implementation | 21 November 2026 |
