@@ -141,7 +141,7 @@ New panels follow the dashboard rules (design 06 §1): every number is a link wi
 | S6-R4 | Search fields are disabled for a fraction of a second after a page appears (S6-D4) | Low | Shown as disabled (not hidden); the alternative lost what people typed |
 | S6-R5 | `next` 15.5.28 had three new advisories published during S6 (GHSA-7qx7-33qx-rqx2, GHSA-f3mh-rxg3-f5g2, GHSA-pc58-hwjq-p385), failing the dependency scan | — | **Closed:** upgraded to 15.5.29 (patch release); `pnpm audit` reports none; full checks and browser suite re-run (§3) |
 
-Earlier risks closed in S6: **S5-R4** (fixed, S6-D4); **S1-R3** (measured; the outlier fixed, S6-D6); **S3-R3** remains accepted as designed, now with its count and list (S6-D2). Issues **#43** and **#44** are fixed by S6 and proposed for closing on your approval; **#5** (S4) and **#15** (P6-0) were delivered and are still open on GitHub, also proposed for closing. No issue has been closed.
+Earlier risks closed in S6: **S5-R4** (fixed, S6-D4); **S1-R3** (measured; the outlier fixed, S6-D6); **S3-R3** remains accepted as designed, now with its count and list (S6-D2). Issues **#43** and **#44** (fixed by S6), **#5** (S4) and **#15** (P6-0) were closed on approval, 21 November 2026.
 
 ## 9. Next
 
