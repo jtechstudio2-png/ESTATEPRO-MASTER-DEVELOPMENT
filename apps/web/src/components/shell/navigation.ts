@@ -81,11 +81,23 @@ export function buildNavigation(can: Can): NavSection[] {
     if (can('contact.export') || can('lead.export') || can('user.manage') || can('privacy.fulfil')) contacts.push({ id: 'exports', href: '/exports', label: 'exports', match: ['/exports'] });
     sections.push({ id: 'contacts', label: 'contactsSection', items: contacts });
 
-    const sales: NavItem[] = [];
-    if (leads !== undefined) sales.push({ id: 'leads', href: '/leads', label: 'leads', match: ['/leads'] });
-    sales.push({ id: 'follow-ups', href: '/follow-ups', label: 'followUps', match: ['/follow-ups'] });
-    sections.push({ id: 'sales', label: 'salesSection', items: sales });
   }
+
+  // Sales (SH-2): leads and follow-ups for CRM staff; pipeline, deals and forecast with deal.view;
+  // calendar and viewings to follow up with viewing.view (accountants read these without the CRM).
+  const sales: NavItem[] = [];
+  if (crm && leads !== undefined) sales.push({ id: 'leads', href: '/leads', label: 'leads', match: ['/leads'] });
+  if (crm) sales.push({ id: 'follow-ups', href: '/follow-ups', label: 'followUps', match: ['/follow-ups'] });
+  if (can('deal.view')) {
+    sales.push({ id: 'pipeline', href: '/pipeline', label: 'pipeline', match: ['/pipeline'] });
+    sales.push({ id: 'deals', href: '/deals', label: 'deals', match: ['/deals'] });
+  }
+  if (can('viewing.view')) {
+    sales.push({ id: 'calendar', href: '/calendar', label: 'calendar', match: ['/calendar'] });
+    sales.push({ id: 'viewings-follow-up', href: '/viewings/follow-up', label: 'viewingsFollowUp', match: ['/viewings/follow-up'] });
+  }
+  if (can('deal.view')) sales.push({ id: 'forecast', href: '/forecast', label: 'forecast', match: ['/forecast'] });
+  if (sales.length > 0) sections.push({ id: 'sales', label: 'salesSection', items: sales });
 
   const properties: NavItem[] = [];
   if (can('property.view')) properties.push({ id: 'properties', href: '/properties', label: 'properties', match: ['/properties'] });
@@ -117,6 +129,8 @@ export function buildQuickCreate(can: Can): QuickCreateItem[] {
   if (can('lead.create')) items.push({ id: 'lead', href: '/leads/new', label: 'createLead' });
   if (hasCrm(can) && can('contact.create')) items.push({ id: 'contact', href: '/contacts/new', label: 'createContact' });
   if (hasCrm(can)) items.push({ id: 'follow-up', href: '/follow-ups?compose=1', label: 'createFollowUp' });
+  if (can('deal.create')) items.push({ id: 'deal', href: '/deals?compose=1', label: 'createDeal' });
+  if (can('viewing.manage')) items.push({ id: 'viewing', href: '/calendar?book=1', label: 'createViewing' });
   if (can('property.create')) items.push({ id: 'property', href: '/properties/new', label: 'createProperty' });
   if (can('listing.create')) items.push({ id: 'listing', href: '/listings/new', label: 'createListing' });
   if (can('key.manage')) items.push({ id: 'key-set', href: '/keys/new', label: 'createKeySet' });

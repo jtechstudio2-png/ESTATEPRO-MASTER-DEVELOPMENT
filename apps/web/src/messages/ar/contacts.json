@@ -61,7 +61,8 @@
     "requirements": "المتطلبات",
     "properties": "العقارات",
     "identity": "الهوية",
-    "consent": "الموافقات"
+    "consent": "الموافقات",
+    "sales": "المبيعات"
   },
   "ownerLine": "المسؤول: {name}",
   "call": "اتصال",

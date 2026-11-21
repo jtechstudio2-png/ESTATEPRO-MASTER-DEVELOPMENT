@@ -106,6 +106,7 @@ export class KeyMovementDto {
   @ApiProperty({ type: KeyHolderDto, nullable: true }) holder!: KeyHolderDto | null;
   @ApiProperty({ type: String, nullable: true, format: 'date-time' }) dueBackAt!: string | null;
   @ApiProperty({ type: String, nullable: true }) note!: string | null;
+  @ApiProperty({ type: String, nullable: true, format: 'uuid', description: 'The viewing a check-out was for' }) viewingId!: string | null;
   @ApiProperty({ format: 'date-time' }) occurredAt!: string;
   @ApiProperty({ type: KeyHolderDto }) recordedBy!: KeyHolderDto;
 }

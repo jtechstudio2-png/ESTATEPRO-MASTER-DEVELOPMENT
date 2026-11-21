@@ -1,0 +1,337 @@
+/* Phase 6 sales screens (P6-W). Logical properties only, so the layout mirrors in Arabic (§10). */
+
+.inline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+  align-items: center;
+}
+
+.meta {
+  color: var(--ep-color-text-secondary);
+  font-size: var(--ep-font-size-200);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list > li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2) var(--ep-space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--ep-space-3);
+}
+
+.list > li + li {
+  border-block-start: var(--ep-border-width) solid var(--ep-color-border);
+}
+
+.itemMain {
+  display: grid;
+  gap: var(--ep-space-1);
+  min-inline-size: 0;
+  flex: 1 1 16rem;
+}
+
+.body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* A row's identifier that opens a drawer rather than a page (V-3). */
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ep-color-brand);
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  text-decoration: underline;
+  cursor: pointer;
+  min-block-size: 24px;
+}
+
+.linkButton:focus-visible {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: 2px;
+}
+
+/* PB-1 board: columns follow the reading direction (first stage at the start side). */
+.board {
+  display: grid;
+  grid-auto-columns: minmax(15rem, 1fr);
+  grid-auto-flow: column;
+  gap: var(--ep-space-3);
+  overflow-x: auto;
+  padding-block-end: var(--ep-space-2);
+}
+
+.column {
+  display: grid;
+  align-content: start;
+  gap: var(--ep-space-2);
+  padding: var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-panel);
+  background: var(--ep-color-surface-subtle);
+  min-block-size: 12rem;
+}
+
+.column[data-drop-target='true'] {
+  outline: 2px dashed var(--ep-color-brand);
+  outline-offset: 2px;
+}
+
+.columnHeading {
+  margin: 0;
+  font-size: var(--ep-font-size-300);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ep-space-2);
+}
+
+.totals {
+  margin: 0;
+  display: grid;
+  gap: var(--ep-space-1);
+  font-size: var(--ep-font-size-200);
+  color: var(--ep-color-text-secondary);
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--ep-space-2);
+}
+
+.card {
+  display: grid;
+  gap: var(--ep-space-1);
+  padding: var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface);
+}
+
+.card[draggable='true'] {
+  cursor: grab;
+}
+
+.cardLink {
+  font-weight: 600;
+}
+
+/* DL-3 stage path: an ordered list, mirrored in Arabic by the logical flow. */
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-1) var(--ep-space-2);
+}
+
+.path > li {
+  padding: var(--ep-space-1) var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: 999px;
+  color: var(--ep-color-text-secondary);
+}
+
+.path > li[data-state='done'] {
+  color: var(--ep-color-text-primary);
+}
+
+.path > li[aria-current='step'] {
+  border-color: var(--ep-color-brand);
+  background: var(--ep-color-brand);
+  color: var(--ep-color-on-brand);
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ep-space-2);
+  margin-block: var(--ep-space-3);
+}
+
+.tabLink {
+  padding: var(--ep-space-1) var(--ep-space-3);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-radius: 999px;
+  color: var(--ep-color-text-primary);
+  text-decoration: none;
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tabLink[aria-current='page'] {
+  border-color: var(--ep-color-brand);
+  background: var(--ep-color-brand);
+  color: var(--ep-color-on-brand);
+  font-weight: 600;
+}
+
+/* O-1 offer chain: counters indented under the offer they answer. */
+.thread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.thread > li {
+  display: grid;
+  gap: var(--ep-space-1);
+  padding-block: var(--ep-space-3);
+  padding-inline-start: calc(var(--depth, 0) * var(--ep-space-6));
+}
+
+.thread > li + li {
+  border-block-start: var(--ep-border-width) solid var(--ep-color-border);
+}
+
+/* V-1 calendar: a grid with row (time) and column (day) headers. */
+.calendarWrap {
+  overflow-x: auto;
+}
+
+.calendar {
+  inline-size: 100%;
+  min-inline-size: 48rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.calendar th,
+.calendar td {
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  padding: var(--ep-space-1);
+  vertical-align: top;
+  text-align: start;
+}
+
+.calendar thead th {
+  background: var(--ep-color-surface-subtle);
+  font-weight: 600;
+}
+
+.calendar tbody th {
+  inline-size: 5rem;
+  font-weight: 400;
+  color: var(--ep-color-text-secondary);
+}
+
+.calendar td[aria-current='date'],
+.calendar th[aria-current='date'] {
+  background: var(--ep-color-surface-subtle);
+}
+
+.slot {
+  display: grid;
+  gap: var(--ep-space-1);
+  min-block-size: 3rem;
+}
+
+.event {
+  display: grid;
+  gap: 2px;
+  inline-size: 100%;
+  padding: var(--ep-space-1) var(--ep-space-2);
+  border: var(--ep-border-width) solid var(--ep-color-border);
+  border-inline-start: 4px solid var(--ep-color-info);
+  border-radius: var(--ep-radius-control);
+  background: var(--ep-color-surface);
+  color: var(--ep-color-text-primary);
+  font: inherit;
+  font-size: var(--ep-font-size-200);
+  text-align: start;
+  cursor: pointer;
+  min-block-size: 24px;
+}
+
+.event[data-status='confirmed'] {
+  border-inline-start-color: var(--ep-color-success);
+}
+
+.event[data-status='completed'],
+.event[data-status='cancelled'],
+.event[data-status='no_show'] {
+  border-inline-start-color: var(--ep-color-border-control);
+  color: var(--ep-color-text-secondary);
+}
+
+.event:focus-visible {
+  outline: 2px solid var(--ep-color-focus);
+  outline-offset: 2px;
+}
+
+.emptySlot {
+  inline-size: 100%;
+  min-block-size: 24px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.emptySlot:focus-visible {
+  outline: 2px solid var(--ep-color-focus);
+}
+
+/* Agenda (phones, XV-1). */
+.agenda {
+  display: grid;
+  gap: var(--ep-space-4);
+}
+
+.agendaDay {
+  margin: 0 0 var(--ep-space-2);
+  font-size: var(--ep-font-size-300);
+}
+
+.bigTarget {
+  min-block-size: 44px;
+}
+
+/* FC-1 forecast: bars are decorative, the table carries the values. */
+.bar {
+  display: block;
+  block-size: 0.75rem;
+  background: var(--ep-color-brand);
+  border-radius: var(--ep-radius-control);
+  max-inline-size: 100%;
+}
+
+.splitRow {
+  display: grid;
+  grid-template-columns: minmax(10rem, 2fr) minmax(8rem, 1fr) minmax(6rem, 1fr) auto;
+  gap: var(--ep-space-2);
+  align-items: end;
+}
+
+@media (width <= 767px) {
+  .splitRow {
+    grid-template-columns: 1fr;
+  }
+
+  .board {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+  }
+}

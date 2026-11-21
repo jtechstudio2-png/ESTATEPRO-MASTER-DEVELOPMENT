@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { MoneyDto } from '../common/money.js';
 import { RefLabelDto } from '../contacts/dto.js';
 
 export class DashboardScopeDto {
@@ -38,6 +39,7 @@ export class LeadStatusCountsDto {
   @ApiProperty() qualified!: number;
   @ApiProperty() unqualified!: number;
   @ApiProperty() lost!: number;
+  @ApiProperty({ description: 'Converted to a deal (Phase 6)' }) converted!: number;
 }
 
 export class ResponseRowDto {
@@ -46,6 +48,7 @@ export class ResponseRowDto {
   @ApiProperty({ type: Number, nullable: true, description: 'Leads answered within the target (null when none is set); base is `leads`' }) withinTarget!: number | null;
   @ApiProperty({ type: Number, nullable: true, description: 'Percentage of `leads`, one decimal' }) withinTargetPercent!: number | null;
   @ApiProperty() qualified!: number;
+  @ApiProperty({ description: 'Leads of the period converted to a deal (Phase 6, `convertedDealId`)' }) converted!: number;
 }
 
 export class AgentResponseRowDto extends ResponseRowDto {
@@ -65,6 +68,15 @@ export class RequirementCountsDto {
   @ApiProperty({ type: String, nullable: true, format: 'date-time', description: 'Oldest check in this count' }) noMatchCheckedAt!: string | null;
 }
 
+export class SalesAttentionDto {
+  @ApiProperty({ type: Number, nullable: true, description: 'Viewings that have ended, still scheduled or confirmed, with no outcome, in the viewer\'s viewing scope (null without viewing.view); the list is GET /viewings?filter[needsOutcome]=true' })
+  viewingsNeedingOutcome!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Open deals whose listing is sold, rented, withdrawn or expired, in the viewer\'s deal scope (null without deal.view); the list is GET /deals?filter[attention]=listing_closed' })
+  openDealsOnClosedListings!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Open deals longer in their stage than the stage allows (null without deal.view); GET /deals?filter[attention]=stalled' })
+  stalledDeals!: number | null;
+}
+
 export class CrmDashboardDto {
   @ApiProperty({ type: DashboardScopeDto }) scope!: DashboardScopeDto;
   @ApiProperty({ type: Number, nullable: true, description: 'Company response target in minutes; null shows "SLA not set"' }) responseTargetMinutes!: number | null;
@@ -74,6 +86,7 @@ export class CrmDashboardDto {
   @ApiProperty({ type: [AgentResponseRowDto], nullable: true, description: 'Per assignee; null for members who only see their own leads' }) responseTimes!: AgentResponseRowDto[] | null;
   @ApiProperty({ type: [SourceRowDto] }) leadsBySource!: SourceRowDto[];
   @ApiProperty({ type: RequirementCountsDto, nullable: true, description: 'null without contact.view' }) requirements!: RequirementCountsDto | null;
+  @ApiProperty({ type: SalesAttentionDto, description: 'Sales pipeline work (Phase 6, S6)' }) sales!: SalesAttentionDto;
 }
 
 export class AttentionItemDto {
@@ -156,21 +169,26 @@ export class AdminDashboardDto {
 }
 
 export class DayItemDto {
-  @ApiProperty({ enum: ['follow_up', 'new_lead'] }) kind!: string;
+  @ApiProperty({ enum: ['follow_up', 'new_lead', 'viewing', 'offer'], description: 'viewing: one I conduct today; offer: an offer awaiting a response on a deal or listing of mine (Phase 6)' }) kind!: string;
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'date-time', description: 'Due time, or when the lead arrived' }) at!: string;
   @ApiProperty() title!: string;
   @ApiProperty({ type: String, nullable: true, description: 'Contact name, or lead reference and contact name' }) about!: string | null;
-  @ApiProperty({ type: String, nullable: true, enum: ['contact', 'lead'] }) aboutType!: string | null;
+  @ApiProperty({ type: String, nullable: true, enum: ['contact', 'lead', 'viewing', 'deal'] }) aboutType!: string | null;
   @ApiProperty({ type: String, nullable: true, format: 'uuid' }) aboutId!: string | null;
-  @ApiProperty() overdue!: boolean;
+  @ApiProperty({ description: 'Follow-ups and leads: past due or past the response target; viewings: ended without an outcome; offers: past their expiry' }) overdue!: boolean;
   @ApiProperty({ type: Number, nullable: true, description: 'Follow-ups: the version for If-Match (Done, Reschedule)' }) version!: number | null;
+  @ApiProperty({ type: String, nullable: true, format: 'date-time', description: 'Viewings: when it ends' }) endsAt!: string | null;
+  @ApiProperty({ type: String, nullable: true, description: 'Viewings: the property\'s time zone' }) timezone!: string | null;
+  @ApiProperty({ type: MoneyDto, nullable: true, description: 'Offers: the amount offered, in the deal\'s currency' }) amount!: MoneyDto | null;
 }
 
 export class WaitingOnMeDto {
   @ApiProperty() newLeadsAssigned!: number;
   @ApiProperty() overdueFollowUps!: number;
   @ApiProperty({ type: Number, nullable: true, description: 'Past the response target without a reply (null when none is set)' }) leadsPastTarget!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Viewings I conduct that have ended without an outcome (null without viewing.view)' }) viewingsNeedingOutcome!: number | null;
+  @ApiProperty({ type: Number, nullable: true, description: 'Offers awaiting a response on my deals or listings (null without offer.view)' }) offersAwaitingResponse!: number | null;
 }
 
 export class MyDayDto {

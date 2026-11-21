@@ -1,7 +1,7 @@
 import type { TenantContext } from '../common/request-context.js';
 import type { Tx } from '../database/database.module.js';
 
-export type ActivityEntityType = 'contact' | 'lead' | 'listing' | 'property';
+export type ActivityEntityType = 'contact' | 'lead' | 'listing' | 'property' | 'deal';
 
 export interface ActivityLink {
   entityType: ActivityEntityType;

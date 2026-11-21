@@ -160,7 +160,9 @@
   "blockedHelp": "Refuse the request with the reason, or resolve the records first.",
   "blocker": {
     "organisation": "Organisations are not erased; archive the organisation instead.",
-    "records": "Records the law requires us to keep refer to this person: {records}."
+    "records": "Records the law requires us to keep refer to this person: {records}.",
+    "openDeal": "This person is a party to a deal that is still open. Close the deal first.",
+    "saleRecord": "This person is a party to a recorded sale that is still in progress or within the period its records must be kept."
   },
   "contactPanelTitle": "Privacy requests",
   "contactNone": "No privacy requests.",

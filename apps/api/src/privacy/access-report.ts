@@ -30,6 +30,12 @@ export interface AccessReport {
   leads: Record<string, unknown>[];
   activities: Record<string, unknown>[];
   followUps: Record<string, unknown>[];
+  /** Viewings the person attends, and viewings of their leads (S1). */
+  viewings: Record<string, unknown>[];
+  /** Offers the person made (S2). */
+  offers: Record<string, unknown>[];
+  /** Deals the person is the primary contact or a party of, with their role and any sale (S3). */
+  deals: Record<string, unknown>[];
   privacyRequests: Record<string, unknown>[];
 }
 
@@ -115,6 +121,7 @@ export async function buildAccessReport(
     .select(['purpose', 'channel', 'status', 'lawfulBasis', 'capturedAt', 'capturedVia', 'evidence'])
     .where('contactId', 'in', subjects)
     .orderBy('capturedAt')
+    .orderBy('entryNo')
     .execute();
 
   const documentRows = await tx
@@ -146,6 +153,7 @@ export async function buildAccessReport(
     .select(['checkType', 'status', 'riskRating', 'provider', 'reviewedAt', 'expiresOn', 'notes', 'decisionReason', 'createdAt'])
     .where('contactId', 'in', subjects)
     .orderBy('createdAt')
+    .orderBy('entryNo')
     .execute();
   const requirements = await tx
     .selectFrom('requirements')
@@ -179,6 +187,35 @@ export async function buildAccessReport(
     )
     .orderBy('dueAt')
     .execute();
+  const { rows: viewings } = await sql<Record<string, unknown>>`
+    select l.reference as "listingReference", l.title as "listingTitle", v.viewing_type as "viewingType", v.status,
+           v.scheduled_start as "scheduledStart", v.scheduled_end as "scheduledEnd", v.timezone, v.meeting_point as "meetingPoint",
+           v.outcome, v.feedback, v.cancelled_reason as "cancelledReason",
+           (select a.attendance from viewing_attendees a where a.viewing_id = v.id and a.contact_id = any(${subjects}::uuid[]) limit 1) as "attendance"
+      from viewings v join listings l on l.id = v.listing_id
+     where exists (select 1 from viewing_attendees a where a.viewing_id = v.id and a.contact_id = any(${subjects}::uuid[]))
+        or v.lead_id = any(${leadIds.length > 0 ? leadIds : [contactId]}::uuid[])
+     order by v.scheduled_start, v.id`.execute(tx);
+  const { rows: offers } = await sql<Record<string, unknown>>`
+    select l.reference as "listingReference", l.title as "listingTitle", o.direction, o.status, o.currency_code as "currency",
+           o.amount::text as "amount", o.rent_frequency as "rentFrequency", o.conditions, o.financing_code as "financing",
+           o.submitted_at as "submittedAt", o.expires_at as "expiresAt", o.responded_at as "respondedAt"
+      from offers o join listings l on l.id = o.listing_id
+     where o.offered_by_contact_id = any(${subjects}::uuid[])
+     order by o.submitted_at, o.entry_no`.execute(tx);
+  const { rows: deals } = await sql<Record<string, unknown>>`
+    select d.reference, d.deal_type as "dealType", s.name as "stage", d.status, l.reference as "listingReference", l.title as "listingTitle",
+           (select array_agg(distinct p.party_role order by p.party_role) from deal_parties p where p.deal_id = d.id and p.contact_id = any(${subjects}::uuid[])) as "roles",
+           d.created_at as "createdAt", d.closed_at as "closedAt", d.lost_reason_code as "lostReasonCode", d.lost_notes as "lostNotes",
+           t.reference as "saleReference", t.status as "saleStatus", t.currency_code as "saleCurrency", t.agreed_price::text as "agreedPrice",
+           t.contract_signed_on as "contractSignedOn", t.completed_on as "completedOn"
+      from deals d
+      join pipeline_stages s on s.id = d.stage_id
+      left join listings l on l.id = d.listing_id
+      left join sales_transactions t on t.deal_id = d.id
+     where d.primary_contact_id = any(${subjects}::uuid[])
+        or exists (select 1 from deal_parties p where p.deal_id = d.id and p.contact_id = any(${subjects}::uuid[]))
+     order by d.created_at, d.id`.execute(tx);
   const privacyRequests = await tx
     .selectFrom('dataSubjectRequests')
     .select(['reference', 'requestType', 'status', 'receivedOn', 'closedAt'])
@@ -208,11 +245,14 @@ export async function buildAccessReport(
     leads,
     activities: activities.map(stamp),
     followUps: followUps.map(stamp),
+    viewings: viewings.map(stamp),
+    offers: offers.map(stamp),
+    deals: deals.map(stamp),
     privacyRequests: privacyRequests.map(stamp),
   };
   const rowCount =
     contacts.length + contactMethods.length + roles.length + consents.length + identityDocuments.length + identityChecks.length + requirements.length +
-    leads.length + activities.length + followUps.length + privacyRequests.length;
+    leads.length + activities.length + followUps.length + viewings.length + offers.length + deals.length + privacyRequests.length;
   return { report, rowCount, protectedFields: [...new Set(protectedFields)] };
 }
 

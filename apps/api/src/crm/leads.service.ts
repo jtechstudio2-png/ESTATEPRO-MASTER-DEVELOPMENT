@@ -135,7 +135,7 @@ export class LeadsService {
 
   async get(tx: Tx, ctx: TenantContext, id: string): Promise<LeadDto> {
     const row = await this.summaryQuery(tx)
-      .select(['l.campaign', 'l.requirementId', 'l.message', 'l.lostReasonCode', 'l.archivedReason', 'l.scoreBreakdown', 'l.createdAt', 'l.version'])
+      .select(['l.campaign', 'l.requirementId', 'l.message', 'l.lostReasonCode', 'l.convertedDealId', 'l.archivedReason', 'l.scoreBreakdown', 'l.createdAt', 'l.version'])
       .where('l.id', '=', id)
       .executeTakeFirst();
     if (!row || !canOnLead(ctx, 'lead.view', row)) throw Problems.notFound();
@@ -148,7 +148,7 @@ export class LeadsService {
         .select(['h.fromStatus', 'h.toStatus', 'h.changedAt', 'h.changedBy', 'u.displayName as changedByName', 'h.note'])
         .where('h.leadId', '=', id)
         .orderBy('h.changedAt')
-        .orderBy('h.id')
+        .orderBy('h.entryNo')
         .execute(),
       tx
         .selectFrom('leadAssignments as a')
@@ -159,7 +159,7 @@ export class LeadsService {
         .select(['a.assignedTo', 'tu.displayName as assignedToName', 'a.assignedBy', 'bu.displayName as assignedByName', 'a.assignedAt', 'a.note'])
         .where('a.leadId', '=', id)
         .orderBy('a.assignedAt')
-        .orderBy('a.id')
+        .orderBy('a.entryNo')
         .execute(),
     ]);
     const canEdit = canOnLead(ctx, 'lead.update', row) && row.archivedAt === null;
@@ -170,6 +170,7 @@ export class LeadsService {
       requirementId: row.requirementId,
       message: row.message,
       lostReasonCode: row.lostReasonCode,
+      convertedDealId: row.convertedDealId,
       archivedReason: row.archivedReason,
       scoreBreakdown: row.score === null ? [] : scoreRules(row.scoreBreakdown),
       statusHistory: history.map((h) => ({
@@ -363,6 +364,31 @@ export class LeadsService {
       payload: { leadId: id, fromStatus: current.status, toStatus: body.status },
     });
     return this.get(tx, ctx, id);
+  }
+
+  /**
+   * A viewing booked from a new lead moves it to contacted (readiness report
+   * §4.1, S1). The caller has checked that the member can see the lead; other
+   * statuses are left as they are.
+   */
+  async markContactedByViewing(tx: Tx, ctx: TenantContext, id: string, listingReference: string): Promise<boolean> {
+    const current = await tx.selectFrom('leads').selectAll().where('id', '=', id).forUpdate().executeTakeFirst();
+    if (!current || current.status !== 'new' || current.archivedAt !== null) return false;
+    const note = `Viewing booked for ${listingReference}`;
+    await tx.updateTable('leads').set({ status: 'contacted' }).where('id', '=', id).execute();
+    await tx.insertInto('leadStatusHistory').values({ companyId: ctx.companyId, leadId: id, fromStatus: 'new', toStatus: 'contacted', changedBy: ctx.membershipId, note }).execute();
+    await recordSystemActivity(tx, ctx, {
+      activityType: 'status_change',
+      subject: `${current.reference}: ${STATUS_LABELS['new']} → ${STATUS_LABELS['contacted']}`,
+      body: note,
+      links: [
+        { entityType: 'lead', entityId: id },
+        { entityType: 'contact', entityId: current.contactId },
+      ],
+    });
+    await this.audit.record(tx, ctx, { action: 'lead.status_changed', entityType: 'lead', entityId: id, changes: { status: { old: 'new', new: 'contacted' } }, metadata: { by: 'viewing' } });
+    await this.audit.emit(tx, ctx, { eventType: 'lead.status_changed', aggregateType: 'lead', aggregateId: id, payload: { leadId: id, fromStatus: 'new', toStatus: 'contacted' } });
+    return true;
   }
 
   async assign(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: AssignLeadBody): Promise<LeadDto> {

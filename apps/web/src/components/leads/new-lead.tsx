@@ -19,6 +19,7 @@ import { formClass, Page, PageHeader, Panel } from '@/components/ui/layout';
 import { PeoplePicker, type PickedMember } from '@/components/ui/people-picker';
 import { UnsavedChangesGuard } from '@/components/ui/unsaved-guard';
 import type { ContactPageDto, ContactSummaryDto, CreateLeadBody, LeadDto, ListingListItemDto } from '@/lib/api-schema';
+import { useHydrated } from '@/lib/hooks/hydrated';
 import { bff, newIdempotencyKey, query } from '@/lib/bff';
 import { useOffices, usePicklist } from '@/lib/hooks/reference';
 import { useRefreshAll } from '@/lib/mutations';
@@ -62,6 +63,8 @@ export function ContactSearch({
   const t = useTranslations('leads');
   const form = useTranslations('form');
   const [text, setText] = useState(value?.displayName ?? '');
+  // Not typed into until it can search (S5-R4).
+  const hydrated = useHydrated();
   const [term, setTerm] = useState('');
   useEffect(() => {
     const trimmed = text.trim();
@@ -80,6 +83,7 @@ export function ContactSearch({
       onSelectionChange={(key) => onChange(items.find((item) => item.id === key) ?? null)}
       items={items}
       allowsEmptyCollection
+      isDisabled={!hydrated}
       isInvalid={error !== undefined}
       validationBehavior="aria"
     >

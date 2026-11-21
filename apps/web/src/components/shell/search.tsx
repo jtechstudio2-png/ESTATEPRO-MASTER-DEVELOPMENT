@@ -31,6 +31,8 @@ interface SearchResult {
   properties: SearchGroup | null;
   units: SearchGroup | null;
   listings: SearchGroup | null;
+  /** Deals by reference or primary contact (W-A1); null without deal.view. */
+  deals?: SearchGroup | null;
 }
 
 type GroupKey = keyof SearchResult;
@@ -46,6 +48,7 @@ const RECENT_MAX = 8;
 export function hitHref(group: GroupKey, hit: SearchHit): string {
   if (group === 'properties') return `/properties/${hit.id}`;
   if (group === 'listings') return `/listings/${hit.id}`;
+  if (group === 'deals') return `/deals/${hit.id}`;
   return `/properties/${hit.propertyId ?? ''}/units?unit=${hit.id}`;
 }
 
@@ -110,8 +113,8 @@ export function GlobalSearch({ isOpen, onOpenChange }: { isOpen: boolean; onOpen
   const groups = useMemo(() => {
     const data = result.data;
     if (term.length < 2 || !data) return [] as Array<{ key: GroupKey; group: SearchGroup }>;
-    return (['properties', 'units', 'listings'] as const)
-      .map((key) => ({ key, group: data[key] }))
+    return (['properties', 'units', 'listings', 'deals'] as const)
+      .map((key) => ({ key, group: data[key] ?? null }))
       .filter((entry): entry is { key: GroupKey; group: SearchGroup } => entry.group !== null && entry.group.hits.length > 0);
   }, [result.data, term]);
 

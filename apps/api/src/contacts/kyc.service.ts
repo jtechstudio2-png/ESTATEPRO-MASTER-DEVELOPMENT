@@ -7,6 +7,7 @@ import { type FieldError, Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import { SensitiveDataService } from '../crypto/sensitive-data.service.js';
 import type { Tx } from '../database/database.module.js';
+import { dealsAwaitingIdentity, syncIdentityMilestones } from '../deals/deal-effects.js';
 import { checkPicklistCode } from '../reference/picklists.js';
 import { contactScopeSql, contactWithinScope, scopeFor } from './contact-access.js';
 import { assertEditable, ContactsService, effectiveKycStatusSql, newId } from './contacts.service.js';
@@ -214,7 +215,7 @@ export class KycService {
 
   async listChecks(tx: Tx, ctx: TenantContext, contactId: string): Promise<KycCheckDto[]> {
     const contact = await this.contactFor(tx, ctx, contactId, 'kyc.view');
-    const rows = await this.checkQuery(tx).where('k.contactId', '=', contactId).orderBy('k.createdAt', 'desc').orderBy('k.id', 'desc').execute();
+    const rows = await this.checkQuery(tx).where('k.contactId', '=', contactId).orderBy('k.createdAt', 'desc').orderBy('k.entryNo', 'desc').execute();
     return rows.map((row) => this.toCheckDto(ctx, contact, row));
   }
 
@@ -342,6 +343,8 @@ export class KycService {
       .where('id', '=', checkId)
       .execute();
     await this.recordDecision(tx, ctx, contactId, current, 'verified', body.riskRating, body.reason ?? null);
+    // P6-D7: due-diligence milestones on this person's open deals complete once their side is verified.
+    await syncIdentityMilestones(tx, ctx, this.audit, await dealsAwaitingIdentity(tx, ctx.companyId, contactId));
     return this.check(tx, ctx, contact, checkId);
   }
 

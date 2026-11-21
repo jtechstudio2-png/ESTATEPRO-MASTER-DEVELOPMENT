@@ -27,9 +27,19 @@ export interface ParsedSort<F extends string> {
 export interface Cursor {
   /** Sort value of the last row (ISO string for timestamps). */
   v: string;
-  /** Id of the last row (tie-breaker). */
+  /** Id of the last row (tie-breaker for record lists). */
   id: string;
+  /** Insertion number of the last row (tie-breaker for histories, #15). */
+  n?: string;
 }
+
+/**
+ * How rows with the same sort value are ordered. Record lists break ties by id;
+ * histories by their insertion number (`entry_no`, #15), so rows written in
+ * one transaction keep the order they were written in.
+ */
+export type TieBreak = 'id' | 'entry';
+const ENTRY_NO = /^\d{1,19}$/;
 
 export interface Page<T> {
   data: T[];
@@ -73,6 +83,7 @@ export function parseListQuery<F extends string>(
   input: ListQueryInput,
   sortSpec: SortSpec<F>,
   filterSpec: FilterSpec,
+  tieBreak: TieBreak = 'id',
 ): ParsedListQuery<F> {
   const errors: FieldError[] = [];
 
@@ -104,8 +115,10 @@ export function parseListQuery<F extends string>(
 
   let cursor: Cursor | null = null;
   if (input.cursor !== undefined) {
-    cursor = decodeCursor(input.cursor, sort.kind);
-    if (cursor === null) errors.push({ field: 'cursor', code: 'invalid', message: 'The cursor is not valid for this list.' });
+    cursor = decodeCursor(input.cursor, sort.kind, tieBreak);
+    if (cursor === null) {
+      errors.push({ field: 'cursor', code: 'invalid', message: 'The cursor is not valid for this list. Load the first page again.' });
+    }
   }
 
   let q: string | null = null;
@@ -201,15 +214,24 @@ export function encodeCursor(sortValue: string | Date, id: string): string {
   return Buffer.from(JSON.stringify({ v, id } satisfies Cursor)).toString('base64url');
 }
 
-function decodeCursor(raw: unknown, kind: SortValueKind): Cursor | null {
+/** A history cursor (#15): the sort value and the insertion number of the last row. */
+export function encodeEntryCursor(sortValue: string | Date, entryNo: string): string {
+  const v = sortValue instanceof Date ? sortValue.toISOString() : sortValue;
+  return Buffer.from(JSON.stringify({ v, n: entryNo })).toString('base64url');
+}
+
+function decodeCursor(raw: unknown, kind: SortValueKind, tieBreak: TieBreak): Cursor | null {
   if (typeof raw !== 'string' || raw.length === 0 || raw.length > 1000) return null;
   try {
     const decoded: unknown = JSON.parse(Buffer.from(raw, 'base64url').toString('utf8'));
     if (typeof decoded !== 'object' || decoded === null) return null;
-    const { v, id } = decoded as Record<string, unknown>;
-    if (typeof v !== 'string' || typeof id !== 'string' || !UUID.test(id)) return null;
+    const { v, id, n } = decoded as Record<string, unknown>;
+    if (typeof v !== 'string') return null;
     if (kind === 'timestamp' && Number.isNaN(Date.parse(v))) return null;
     if (kind === 'numeric' && !/^-?\d{1,20}(\.\d{1,10})?$/.test(v)) return null;
+    // A history cursor needs the insertion number; cursors issued before #15 carried an id and are refused.
+    if (tieBreak === 'entry') return typeof n === 'string' && ENTRY_NO.test(n) ? { v, id: '', n } : null;
+    if (typeof id !== 'string' || !UUID.test(id)) return null;
     return { v, id };
   } catch {
     return null;
@@ -234,6 +256,30 @@ export function toPage<R, T>(
       nextCursor: hasMore && last !== undefined ? encodeCursor(sortValue(last), id(last)) : null,
     },
   };
+}
+
+/** Page envelope for histories: the cursor carries the insertion number (#15). */
+export function toEntryPage<R, T>(
+  rows: R[],
+  limit: number,
+  sortValue: (row: R) => string | Date,
+  entryNo: (row: R) => string,
+  map: (row: R) => T,
+): Page<T> {
+  const hasMore = rows.length > limit;
+  const pageRows = hasMore ? rows.slice(0, limit) : rows;
+  const last = pageRows[pageRows.length - 1];
+  return {
+    data: pageRows.map(map),
+    page: { limit, nextCursor: hasMore && last !== undefined ? encodeEntryCursor(sortValue(last), entryNo(last)) : null },
+  };
+}
+
+/** Keyset condition for histories: (time, entry_no) beyond the cursor (#15). */
+export function keysetEntryCondition(column: string, entryColumn: string, sort: ParsedSort<string>, cursor: Cursor): RawBuilder<boolean> {
+  const operator = sort.direction === 'asc' ? sql.raw('>') : sql.raw('<');
+  const value = sort.kind === 'timestamp' ? sql`${cursor.v}::timestamptz` : sort.kind === 'numeric' ? sql`${cursor.v}::numeric` : sql`${cursor.v}`;
+  return sql<boolean>`(${sql.ref(column)}, ${sql.ref(entryColumn)}) ${operator} (${value}, ${cursor.n ?? '0'}::bigint)`;
 }
 
 /**

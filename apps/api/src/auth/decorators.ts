@@ -11,6 +11,7 @@ import type {
 export const IS_PUBLIC = 'estatepro:isPublic';
 export const NO_COMPANY_CONTEXT = 'estatepro:noCompanyContext';
 export const REQUIRED_PERMISSION = 'estatepro:requiredPermission';
+export const PORTAL_ENDPOINT = 'estatepro:portalEndpoint';
 
 /** No authentication (health checks only). */
 export const Public = (): MethodDecorator & ClassDecorator => SetMetadata(IS_PUBLIC, true);
@@ -21,6 +22,13 @@ export const NoCompanyContext = (): MethodDecorator & ClassDecorator => SetMetad
 /** The caller's role must grant this permission; the granted scope is available via @Scope(). */
 export const RequirePermission = (permission: string): MethodDecorator & ClassDecorator =>
   SetMetadata(REQUIRED_PERMISSION, permission);
+
+/**
+ * A landlord or tenant portal endpoint: portal memberships may call it (every
+ * other endpoint is for company staff only). The endpoint itself decides what
+ * a portal member sees (S4: the reduced landlord views).
+ */
+export const PortalEndpoint = (): MethodDecorator & ClassDecorator => SetMetadata(PORTAL_ENDPOINT, true);
 
 export const Tenant = createParamDecorator((_data: unknown, context: ExecutionContext): TenantContext => {
   const req = context.switchToHttp().getRequest<EstateProRequest>();

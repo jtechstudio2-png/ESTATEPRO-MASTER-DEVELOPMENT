@@ -13,6 +13,8 @@ import contactStyles from '@/components/contacts/contacts.module.css';
 import { LeadStatusLabel, Ltr, ResponseLabel } from '@/components/crm/labels';
 import { useContact, useLead } from '@/components/crm/use-crm';
 import { telHref } from '@/components/crm/use-crm';
+import { ConvertLeadDialog } from '@/components/sales/deal-dialogs';
+import { BookViewingDialog } from '@/components/sales/viewing-dialogs';
 import { useSession } from '@/components/session';
 import { Button, buttonClass, LinkButton } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/dialog';
@@ -31,7 +33,11 @@ import { usePicklist } from '@/lib/hooks/reference';
 import { useRefreshAll } from '@/lib/mutations';
 import { ApiError } from '@/lib/problem';
 
-type Dialog = 'status' | 'assign' | 'archive' | 'restore' | 'followUp' | 'log' | null;
+/** Buy and rent leads convert to a deal (CV-1); other types and closed leads do not. */
+const CONVERTIBLE = new Set(['buy', 'rent']);
+const OPEN_STATUSES = new Set(['new', 'contacted', 'qualified']);
+
+type Dialog = 'status' | 'assign' | 'archive' | 'restore' | 'followUp' | 'log' | 'convert' | 'book' | null;
 
 /**
  * L-2 lead record: the enquiry, the contact, the score with its breakdown
@@ -45,7 +51,7 @@ export function LeadRecord({ id }: { id: string }) {
   const errors = useTranslations('errors');
   const announce = useAnnounce();
   const format = useFormat();
-  const { readOnly } = useSession();
+  const { readOnly, can } = useSession();
   const lead = useLead(id);
   const sources = usePicklist('lead_source');
   const lostReasons = usePicklist('lost_reason');
@@ -146,10 +152,17 @@ export function LeadRecord({ id }: { id: string }) {
               </Button>
             ) : null}
             {record.access.canAssign && !readOnly && record.archivedAt === null ? <Button onPress={() => setDialog('assign')}>{t('assign')}</Button> : null}
+            {writable && can('deal.create') && CONVERTIBLE.has(record.leadType) && OPEN_STATUSES.has(record.status) && record.convertedDealId === null ? (
+              <Button onPress={() => setDialog('convert')}>{t('convertToDeal')}</Button>
+            ) : null}
+            {writable && can('viewing.manage') && OPEN_STATUSES.has(record.status) ? <Button onPress={() => setDialog('book')}>{t('bookViewing')}</Button> : null}
             <ActionsMenu label={common('moreActions', { name: record.reference })} actions={menu} />
           </>
         }
       />
+      {record.convertedDealId ? (
+        <Notice tone="info" title={t('convertedTo')} action={<LinkButton href={`/deals/${record.convertedDealId}`}>{t('openDeal')}</LinkButton>} />
+      ) : null}
       {record.archivedAt ? <Notice tone="warning" title={t('archivedBanner', { date: format.date(record.archivedAt), reason: record.archivedReason ?? '' })} /> : null}
       {afterCall ? (
         <Notice
@@ -289,6 +302,17 @@ export function LeadRecord({ id }: { id: string }) {
       {dialog === 'status' ? <StatusDialog lead={record} onClose={() => setDialog(null)} /> : null}
       {dialog === 'assign' ? <AssignDialog lead={record} onClose={() => setDialog(null)} /> : null}
       {dialog === 'archive' || dialog === 'restore' ? <ArchiveLeadDialog lead={record} mode={dialog} onClose={() => setDialog(null)} /> : null}
+      {dialog === 'convert' ? <ConvertLeadDialog lead={record} onClose={() => setDialog(null)} /> : null}
+      {dialog === 'book' ? (
+        <BookViewingDialog
+          preset={{
+            lead: { id: record.id, label: record.reference },
+            ...(record.listing ? { listing: { id: record.listing.id, label: `${record.listing.reference} ${record.listing.title}` } } : {}),
+            attendees: [{ id: record.contact.id, name: record.contact.name }],
+          }}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
       {dialog === 'followUp' ? <FollowUpDialog about={{ entityType: 'lead', entityId: id, label: record.reference }} onClose={() => setDialog(null)} /> : null}
       {dialog === 'log' ? (
         <LogActivityDialog

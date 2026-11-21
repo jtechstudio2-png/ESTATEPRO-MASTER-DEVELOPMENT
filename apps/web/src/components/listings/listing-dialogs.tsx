@@ -202,6 +202,11 @@ function StatusDialog({ listing, onClose }: { listing: ListingDto; onClose: () =
     >
       <Conflict error={error} />
       {error && !(error instanceof ApiError && error.status === 412) ? <FormProblem error={error} fields={{ reason: { label: t('reason'), id: reasonId } }} /> : null}
+      {error instanceof ApiError && error.fieldErrors.some((item) => item.code === 'listing-has-accepted-offer' || item.code === 'listing-sale-exchanged') ? (
+        <p>
+          <NextLink href={`/listings/${listing.id}/deals`}>{t('openListingDeals')}</NextLink>
+        </p>
+      ) : null}
       {options.length > 0 ? (
         <>
           <RadioGroupField label={t('newStatus')} value={to ?? ''} onChange={(value) => setTo(value as ListingStatus)} options={options.map((id) => ({ id, label: t(`statusValue.${id}`) }))} />

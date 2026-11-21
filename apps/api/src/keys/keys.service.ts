@@ -3,9 +3,10 @@ import { type Selectable, sql } from 'kysely';
 
 import { AuditService } from '../audit/audit.service.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
-import { keysetCondition, type Page, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
+import { keysetCondition, keysetEntryCondition, type Page, type ParsedListQuery, sortValueSql, toEntryPage, toPage } from '../common/list-query.js';
 import { type FieldError, Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
+import { ContactsService } from '../contacts/contacts.service.js';
 import type { Tx } from '../database/database.module.js';
 import type { KeySets } from '../database/schema.js';
 import { assertPropertyRecordAccess, propertyCovered, propertyScopeSql } from '../properties/property-access.js';
@@ -47,7 +48,10 @@ const STATUS_LABEL: Record<string, string> = {
  */
 @Injectable()
 export class KeysService {
-  constructor(private readonly audit: AuditService) {}
+  constructor(
+    private readonly audit: AuditService,
+    private readonly contacts: ContactsService,
+  ) {}
 
   async list(tx: Tx, ctx: TenantContext, query: ParsedListQuery<KeySetSortField>, propertyId: string | null): Promise<Page<KeySetDto>> {
     if (propertyId !== null) await assertPropertyRecordAccess(tx, ctx, propertyId, 'key.view');
@@ -128,7 +132,12 @@ export class KeysService {
     return this.load(tx, id);
   }
 
-  async checkOut(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: CheckOutBody): Promise<KeySetDto> {
+  /**
+   * Check-out to a staff member or a contact. A contact holder must be one the
+   * member can see (contact scope, readiness report R7). `viewingId` records the
+   * viewing the keys are for (S1); the caller has checked the viewing.
+   */
+  async checkOut(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: CheckOutBody, viewingId: string | null = null): Promise<KeySetDto> {
     const current = await this.lockForAction(tx, ctx, id, 'key.issue', expectedVersion);
     this.assertTransition(current, 'check_out');
     const errors: FieldError[] = [];
@@ -146,13 +155,8 @@ export class KeysService {
       if (!member) errors.push({ field: 'holderMembershipId', code: 'not-found', message: 'This person is not an active member of staff.' });
     }
     if (body.holderContactId !== undefined) {
-      const contact = await tx
-        .selectFrom('contacts')
-        .select('id')
-        .where('id', '=', body.holderContactId)
-        .where('archivedAt', 'is', null)
-        .executeTakeFirst();
-      if (!contact) errors.push({ field: 'holderContactId', code: 'not-found', message: 'This contact does not exist or is archived.' });
+      const contact = await this.contacts.loadRow(tx, body.holderContactId);
+      if (!contact || contact.archivedAt !== null || !(await this.contacts.canRead(tx, ctx, contact))) errors.push({ field: 'holderContactId', code: 'not-found', message: 'This contact does not exist or is archived.' });
     }
     const dueBackAt = body.dueBackAt === undefined ? null : new Date(body.dueBackAt);
     if (dueBackAt !== null && dueBackAt.getTime() <= Date.now()) {
@@ -178,6 +182,7 @@ export class KeysService {
       dueBackAt,
       note: body.note ?? null,
       occurredAt: now,
+      viewingId,
     });
     return this.load(tx, id);
   }
@@ -235,24 +240,27 @@ export class KeysService {
         'hc.displayName as holderContactName',
         'km.dueBackAt',
         'km.note',
+        'km.viewingId',
         'km.occurredAt',
         'km.recordedBy',
         'ru.displayName as recorderName',
         sortValueSql('km.occurredAt', 'timestamp').as('cursorValue'),
+        sql<string>`km.entry_no::text`.as('entryNoText'),
       ])
       .where('km.keySetId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('km.occurredAt', 'km.id', query.sort, query.cursor));
+    if (query.cursor) qb = qb.where(keysetEntryCondition('km.occurredAt', 'km.entryNo', query.sort, query.cursor));
     const rows = await qb
       .orderBy('km.occurredAt', query.sort.direction)
-      .orderBy('km.id', query.sort.direction)
+      .orderBy('km.entryNo', query.sort.direction)
       .limit(query.limit + 1)
       .execute();
-    return toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => ({
+    return toEntryPage(rows, query.limit, (row) => row.cursorValue, (row) => row.entryNoText, (row) => ({
       id: row.id,
       movement: row.movement,
       holder: holderOf(row.holderMembershipId, row.holderMemberName, row.holderContactId, row.holderContactName),
       dueBackAt: row.dueBackAt?.toISOString() ?? null,
       note: row.note,
+      viewingId: row.viewingId,
       occurredAt: row.occurredAt.toISOString(),
       recordedBy: { type: 'member' as const, id: row.recordedBy, displayName: row.recorderName },
     }));
@@ -295,7 +303,7 @@ export class KeysService {
     ctx: TenantContext,
     keySet: KeySetRow,
     movement: Movement,
-    details: { holderMembershipId: string | null; holderContactId: string | null; dueBackAt: Date | null; note: string | null; occurredAt: Date },
+    details: { holderMembershipId: string | null; holderContactId: string | null; dueBackAt: Date | null; note: string | null; occurredAt: Date; viewingId?: string | null },
   ): Promise<void> {
     await tx
       .insertInto('keyMovements')
@@ -311,6 +319,7 @@ export class KeysService {
         holderMembershipId: details.holderMembershipId,
         holderContactId: details.holderContactId,
         dueBackAt: details.dueBackAt?.toISOString() ?? null,
+        ...(details.viewingId ? { viewingId: details.viewingId } : {}),
       },
     });
   }

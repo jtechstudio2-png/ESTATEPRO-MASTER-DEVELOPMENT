@@ -16,6 +16,7 @@ class ListingAttentionDto {
   @ApiProperty() mandateExpiring!: number;
   @ApiProperty() coverAlt!: number;
   @ApiProperty() priceStale!: number;
+  @ApiProperty({ description: 'Available for 21 days with no viewing in the last 21 days (S1)' }) noViewing!: number;
 }
 
 class MaintenanceUnitDto {
@@ -112,6 +113,7 @@ export class PropertyDashboardController {
       mandateExpiring: counts['mandate-expiring'],
       coverAlt: counts['cover-alt'],
       priceStale: counts['price-stale'],
+      noViewing: counts['no-viewing'],
     };
   }
 

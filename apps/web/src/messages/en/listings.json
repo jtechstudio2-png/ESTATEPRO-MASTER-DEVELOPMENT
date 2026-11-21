@@ -110,7 +110,10 @@
     "gallery": "Gallery",
     "translations": "Translations",
     "priceStatus": "Price & status",
-    "history": "History"
+    "history": "History",
+    "viewings": "Viewings",
+    "offers": "Offers",
+    "deals": "Deals"
   },
   "keyFacts": "Key facts",
   "description": "Description ({language})",
@@ -268,5 +271,6 @@
     "readOnly": "Only company administrators can change these rules."
   },
   "noPermission": "You can view this listing but not change it.",
-  "unitLine": "{unit} · {property}"
+  "unitLine": "{unit} · {property}",
+  "openListingDeals": "Open the deal on this listing"
 }

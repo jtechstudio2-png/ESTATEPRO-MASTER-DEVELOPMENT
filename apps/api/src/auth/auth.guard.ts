@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 
 import { Problems } from '../common/problem.js';
 import type { EstateProRequest } from '../common/request-context.js';
-import { IS_PUBLIC, NO_COMPANY_CONTEXT, REQUIRED_PERMISSION } from './decorators.js';
+import { IS_PUBLIC, NO_COMPANY_CONTEXT, PORTAL_ENDPOINT, REQUIRED_PERMISSION } from './decorators.js';
 import { IdentityService } from './identity.service.js';
 import { TokenVerifier } from './token-verifier.service.js';
 
@@ -56,8 +56,8 @@ export class AuthGuard implements CanActivate {
     if (membership.companyStatus === 'read_only' && !READ_METHODS.has(req.method)) {
       throw Problems.companyInactive('This company account is read-only. Changes cannot be saved.');
     }
-    if (membership.membershipType !== 'staff') {
-      // Portal users have their own endpoints (Phase 7); staff endpoints are closed to them.
+    if (membership.membershipType !== 'staff' && !this.reflector.getAllAndOverride<boolean>(PORTAL_ENDPOINT, targets)) {
+      // Portal users have their own endpoints (@PortalEndpoint, S4 onwards); staff endpoints are closed to them.
       throw Problems.forbidden('This area is for company staff only.');
     }
     if ((membership.mfaRequired || MFA_ROLES.has(membership.roleKey)) && !this.verifier.hasMfa(token)) {

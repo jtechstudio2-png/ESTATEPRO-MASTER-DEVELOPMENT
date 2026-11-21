@@ -134,7 +134,7 @@ describe('dashboards (Phase 5 milestone C4; D-A, D-C, D-M)', () => {
       expect(body.newNotContacted.items.map((item: { id: string }) => item.id)).toEqual([ids['unassigned'], ids['agentNew'], ids['kumasi']]);
       expect(body.newNotContacted.items[0]).toMatchObject({ assignedTo: null, overdue: true });
       expect(body.newNotContacted.items[2]).toMatchObject({ overdue: false });
-      expect(body.leadsByStatus).toEqual({ new: 3, contacted: 1, qualified: 1, unqualified: 0, lost: 0 });
+      expect(body.leadsByStatus).toEqual({ new: 3, contacted: 1, qualified: 1, unqualified: 0, lost: 0, converted: 0 });
       const agentRow = body.responseTimes.find((row: { assignee: { id: string } }) => row.assignee.id === members['agent']);
       expect(agentRow).toMatchObject({ leads: 2, medianFirstResponseMinutes: 30, withinTarget: 1, withinTargetPercent: 50, qualified: 0 });
       const agent2Row = body.responseTimes.find((row: { assignee: { id: string } }) => row.assignee.id === members['agent2']);
@@ -172,7 +172,7 @@ describe('dashboards (Phase 5 milestone C4; D-A, D-C, D-M)', () => {
       await get('accountant', '/api/v1/dashboards/crm').expect(403);
       const isolated = await get('otherOwner', '/api/v1/dashboards/crm').expect(200);
       expect(isolated.body.newNotContacted.total).toBe(0);
-      expect(isolated.body.leadsByStatus).toEqual({ new: 0, contacted: 0, qualified: 0, unqualified: 0, lost: 0 });
+      expect(isolated.body.leadsByStatus).toEqual({ new: 0, contacted: 0, qualified: 0, unqualified: 0, lost: 0, converted: 0 });
     });
   });
 
@@ -229,12 +229,134 @@ describe('dashboards (Phase 5 milestone C4; D-A, D-C, D-M)', () => {
       expect(body.today[1]).toMatchObject({ kind: 'follow_up', overdue: true, version: 1 });
       expect(body.today[0]).toMatchObject({ kind: 'new_lead', overdue: true, aboutType: 'lead', version: null });
       expect(body.laterThisWeek).toBeGreaterThanOrEqual(0);
-      expect(body.waitingOnMe).toEqual({ newLeadsAssigned: 1, overdueFollowUps: 1, leadsPastTarget: 1 });
+      expect(body.waitingOnMe).toEqual({ newLeadsAssigned: 1, overdueFollowUps: 1, leadsPastTarget: 1, viewingsNeedingOutcome: 0, offersAwaitingResponse: 0 });
       expect(body.myLeadsByStatus).toMatchObject({ new: 1, contacted: 1 });
       const other = await get('agent2', '/api/v1/dashboards/my-day').expect(200);
       expect(other.body.today.map((item: { title: string }) => item.title)).not.toContain('Overdue call');
       await get('agent', '/api/v1/dashboards/my-day?officeId=x').expect(422);
       await get('accountant', '/api/v1/dashboards/my-day').expect(403);
+    });
+  });
+
+  describe('sales work on the dashboards (Phase 6, S6)', () => {
+    const ghs = (amount: string) => ({ amount, currency: 'GHS' });
+    let counter = 1;
+
+    async function liveListing(agent: string, officeId = company.officeId) {
+      const typeId = (await fx.db.selectFrom('propertyTypes').select('id').where('companyId', 'is', null).where('code', '=', 'villa').executeTakeFirstOrThrow()).id;
+      const property = await post('owner', '/api/v1/properties', {
+        name: `Dash Villa ${counter}`,
+        propertyTypeId: typeId,
+        officeId,
+        address: { countryCode: 'GH', addressLine1: `${counter++} Dash Road`, locality: 'Accra', adminArea1: 'Greater Accra' },
+        createWholePropertyUnit: true,
+      }).expect(201);
+      const unitId = (await fx.db.selectFrom('units').select('id').where('propertyId', '=', property.body.id).executeTakeFirstOrThrow()).id;
+      return (await fx.listing(company.companyId, unitId, agent, officeId)).id;
+    }
+
+    async function deal(listingId: string, owner: string, buyer: string, officeId = company.officeId) {
+      const res = await post('owner', '/api/v1/deals', { dealType: 'sale', primaryContactId: buyer, listingId, ownerMembershipId: owner, officeId });
+      expect(res.status, JSON.stringify(res.body)).toBe(201);
+      return res.body as { id: string; reference: string };
+    }
+
+    async function viewing(listingId: string, agent: string, attendee: string, startMinutes: number, endMinutes: number) {
+      const future = (minutes: number) => new Date(Date.now() + (24 * 60 + minutes) * 60_000).toISOString();
+      const res = await post('owner', '/api/v1/viewings', { listingId, agentMembershipId: agent, viewingType: 'in_person', scheduledStart: future(0), scheduledEnd: future(30), attendeeContactIds: [attendee], confirmed: false });
+      expect(res.status, JSON.stringify(res.body)).toBe(201);
+      // Booking in the past is refused; move it to the time the test needs.
+      await fx.db
+        .updateTable('viewings')
+        .set({ scheduledStart: new Date(Date.now() + startMinutes * 60_000), scheduledEnd: new Date(Date.now() + endMinutes * 60_000) })
+        .where('id', '=', res.body.id)
+        .execute();
+      return res.body.id as string;
+    }
+
+    beforeAll(async () => {
+      const buyer = await contact('owner');
+      const listingA = await liveListing(members['agent']!);
+      const dealA = await deal(listingA, members['agent']!, buyer);
+      ids['dealA'] = dealA.id;
+      const offer = await post('owner', '/api/v1/offers', { dealId: dealA.id, offeredByContactId: buyer, amount: ghs('440000.00') });
+      expect(offer.status, JSON.stringify(offer.body)).toBe(201);
+      ids['offerA'] = offer.body.id;
+      ids['viewingNow'] = await viewing(listingA, members['agent']!, buyer, -1, 30);
+      ids['viewingEnded'] = await viewing(listingA, members['agent']!, buyer, -180, -150);
+      // An open deal whose listing has since been sold to someone else (S3-R3).
+      const listingB = await liveListing(members['agent2']!);
+      ids['dealOnSold'] = (await deal(listingB, members['agent2']!, buyer)).id;
+      await fx.db.updateTable('listings').set({ status: 'sold' }).where('id', '=', listingB).execute();
+      // A Kumasi deal and viewing, outside the HQ managers' scope.
+      const listingK = await liveListing(members['salesKsi']!, kumasiOfficeId);
+      await deal(listingK, members['salesKsi']!, buyer, kumasiOfficeId);
+      await viewing(listingK, members['salesKsi']!, buyer, -120, -90);
+      // agent2's qualified buy lead converts to a deal.
+      const current = await get('owner', `/api/v1/leads/${ids['agent2Qualified']}`).expect(200);
+      const converted = await t.http
+        .post(`/api/v1/leads/${ids['agent2Qualified']}/convert`)
+        .auth(tokens['owner']!, { type: 'bearer' })
+        .set('X-Company-Id', company.companyId)
+        .set('If-Match', `"${current.body.version}"`)
+        .send({});
+      expect(converted.status, JSON.stringify(converted.body)).toBe(201);
+    });
+
+    it('counts viewings without an outcome, stalled deals and open deals on closed listings, in the viewer\'s scope', async () => {
+      const owner = (await get('owner', '/api/v1/dashboards/crm').expect(200)).body;
+      expect(owner.sales).toEqual({ viewingsNeedingOutcome: 2, openDealsOnClosedListings: 1, stalledDeals: 0 });
+      const hq = (await get('sales', '/api/v1/dashboards/crm').expect(200)).body;
+      expect(hq.sales).toEqual({ viewingsNeedingOutcome: 1, openDealsOnClosedListings: 1, stalledDeals: 0 });
+      const ksi = (await get('salesKsi', '/api/v1/dashboards/crm').expect(200)).body;
+      expect(ksi.sales).toEqual({ viewingsNeedingOutcome: 1, openDealsOnClosedListings: 0, stalledDeals: 0 });
+      const filtered = (await get('owner', `/api/v1/dashboards/crm?officeId=${kumasiOfficeId}`).expect(200)).body;
+      expect(filtered.sales).toMatchObject({ viewingsNeedingOutcome: 1, openDealsOnClosedListings: 0 });
+      // An agent counts only their own: agent2's deal on the sold listing, not agent's.
+      const agent2 = (await get('agent2', '/api/v1/dashboards/crm').expect(200)).body;
+      expect(agent2.sales).toEqual({ viewingsNeedingOutcome: 0, openDealsOnClosedListings: 1, stalledDeals: 0 });
+      // Each count matches its list.
+      const list = await get('sales', '/api/v1/deals?filter[attention]=listing_closed').expect(200);
+      expect(list.body.data.map((row: { id: string }) => row.id)).toEqual([ids['dealOnSold']]);
+      // Stalled: a deal past its stage's limit.
+      await fx.db.updateTable('deals').set({ stageEnteredAt: new Date(Date.now() - 40 * 86_400_000) }).where('id', '=', ids['dealA']!).execute();
+      expect((await get('owner', '/api/v1/dashboards/crm').expect(200)).body.sales.stalledDeals).toBe(1);
+      // Another company sees none of it.
+      const otherBody = (await get('otherOwner', '/api/v1/dashboards/crm').expect(200)).body;
+      expect(otherBody.sales).toEqual({ viewingsNeedingOutcome: 0, openDealsOnClosedListings: 0, stalledDeals: 0 });
+    });
+
+    it('counts conversions per agent, per source and by status', async () => {
+      const body = (await get('owner', '/api/v1/dashboards/crm').expect(200)).body;
+      expect(body.leadsByStatus.converted).toBe(1);
+      const agent2Row = body.responseTimes.find((row: { assignee: { id: string } }) => row.assignee.id === members['agent2']);
+      expect(agent2Row).toMatchObject({ leads: 1, qualified: 1, converted: 1 });
+      expect(body.leadsBySource.find((row: { sourceCode: string }) => row.sourceCode === 'referral')).toMatchObject({ converted: 1 });
+      expect(body.leadsBySource.find((row: { sourceCode: string }) => row.sourceCode === 'website')).toMatchObject({ converted: 0 });
+    });
+
+    it('puts my viewings today and offers awaiting my response on My day; nothing of it for others', async () => {
+      const body = (await get('agent', '/api/v1/dashboards/my-day').expect(200)).body;
+      const viewingItem = body.today.find((item: { kind: string; id: string }) => item.kind === 'viewing' && item.id === ids['viewingNow']);
+      expect(viewingItem).toMatchObject({ aboutType: 'viewing', aboutId: ids['viewingNow'], overdue: false, timezone: expect.any(String), endsAt: expect.any(String), amount: null });
+      const offerItem = body.today.find((item: { kind: string }) => item.kind === 'offer');
+      expect(offerItem).toMatchObject({ id: ids['offerA'], aboutType: 'deal', aboutId: ids['dealA'], amount: { amount: '440000.00', currency: 'GHS' }, overdue: false });
+      expect(body.waitingOnMe).toMatchObject({ viewingsNeedingOutcome: 1, offersAwaitingResponse: 1 });
+      const agent2 = (await get('agent2', '/api/v1/dashboards/my-day').expect(200)).body;
+      expect(agent2.today.filter((item: { kind: string }) => item.kind === 'viewing' || item.kind === 'offer')).toEqual([]);
+      expect(agent2.waitingOnMe).toMatchObject({ viewingsNeedingOutcome: 0, offersAwaitingResponse: 0 });
+      // Once answered, the offer leaves My day.
+      const offer = await get('owner', `/api/v1/offers/${ids['offerA']}`).expect(200);
+      await t.http
+        .post(`/api/v1/offers/${ids['offerA']}/reject`)
+        .auth(tokens['owner']!, { type: 'bearer' })
+        .set('X-Company-Id', company.companyId)
+        .set('If-Match', `"${offer.body.version}"`)
+        .send({})
+        .expect(200);
+      const after = (await get('agent', '/api/v1/dashboards/my-day').expect(200)).body;
+      expect(after.today.some((item: { kind: string }) => item.kind === 'offer')).toBe(false);
+      expect(after.waitingOnMe.offersAwaitingResponse).toBe(0);
     });
   });
 });

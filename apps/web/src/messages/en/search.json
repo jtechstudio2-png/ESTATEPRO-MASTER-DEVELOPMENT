@@ -1,6 +1,6 @@
 {
   "title": "Search",
-  "label": "Search properties, units and listings",
+  "label": "Search properties, units, listings and deals",
   "hint": "Reference, name or address. Use the arrow keys to move and Enter to open; Ctrl+Enter opens in a new tab.",
   "start": "Type at least 2 characters.",
   "searching": "Searching…",
@@ -11,5 +11,6 @@
   "properties": "Properties",
   "units": "Units",
   "listings": "Listings",
-  "seeAll": "See all matching {group}"
+  "seeAll": "See all matching {group}",
+  "deals": "Deals"
 }

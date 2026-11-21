@@ -48,5 +48,13 @@
   "leadsNewMine": "{count, plural, one {عميل محتمل جديد مكلّف بك} other {# عملاء محتملين جدد مكلّف بهم}}",
   "followUpsOverdue": "{count, plural, one {متابعة متأخرة واحدة} other {# متابعات متأخرة}}",
   "identityChecks": "عمليات التحقق من الهوية",
-  "privacyRequests": "طلبات الخصوصية"
+  "privacyRequests": "طلبات الخصوصية",
+  "pipeline": "مسار المبيعات",
+  "deals": "الصفقات",
+  "calendar": "التقويم",
+  "viewingsFollowUp": "للمتابعة",
+  "forecast": "التوقعات",
+  "createDeal": "صفقة",
+  "createViewing": "معاينة",
+  "viewingsToFollowUp": "{count, plural, zero {لا توجد معاينات تحتاج إلى نتيجة} one {معاينة واحدة تحتاج إلى نتيجة} two {معاينتان تحتاجان إلى نتيجة} few {# معاينات تحتاج إلى نتيجة} many {# معاينة تحتاج إلى نتيجة} other {# معاينة تحتاج إلى نتيجة}}"
 }

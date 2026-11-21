@@ -153,6 +153,7 @@ export class LeadDto extends LeadSummaryDto {
   @ApiProperty({ type: String, nullable: true, format: 'uuid' }) requirementId!: string | null;
   @ApiProperty({ type: String, nullable: true, description: 'The enquiry as received' }) message!: string | null;
   @ApiProperty({ type: String, nullable: true }) lostReasonCode!: string | null;
+  @ApiProperty({ type: String, nullable: true, format: 'uuid', description: 'The deal this lead was converted to (S3)' }) convertedDealId!: string | null;
   @ApiProperty({ type: String, nullable: true }) archivedReason!: string | null;
   @ApiProperty({ type: [ScoreRuleDto], description: 'Rule → points; empty when there is no score (CRM-07)' }) scoreBreakdown!: ScoreRuleDto[];
   @ApiProperty({ type: [LeadStatusChangeDto] }) statusHistory!: LeadStatusChangeDto[];

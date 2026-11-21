@@ -43,7 +43,7 @@ export function useOutcomeLabel(): (code: string | null) => string | null {
   return (code) => (code === null ? null : (outcomes.data?.data.find((value) => value.code === code)?.label ?? code));
 }
 
-const LINK_PATH: Record<ActivityLinkDto['entityType'], string> = { contact: '/contacts', lead: '/leads', listing: '/listings', property: '/properties' };
+const LINK_PATH: Record<ActivityLinkDto['entityType'], string> = { contact: '/contacts', lead: '/leads', listing: '/listings', property: '/properties', deal: '/deals' };
 
 /** "Linked: Ama Owusu, LEA-…0412" with a link to each record (A-1). */
 export function ActivityLinks({ links, exclude }: { links: ActivityLinkDto[]; exclude?: string }) {

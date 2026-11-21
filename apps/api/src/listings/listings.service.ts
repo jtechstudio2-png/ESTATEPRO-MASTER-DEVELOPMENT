@@ -4,11 +4,13 @@ import { type Selectable, sql } from 'kysely';
 import { AuditService, diffForAudit } from '../audit/audit.service.js';
 import { todayIn } from '../common/dates.js';
 import { registerConstraintMessages } from '../common/db-errors.js';
-import { keysetCondition, type Page, type ParsedFilters, type ParsedListQuery, sortValueSql, toPage } from '../common/list-query.js';
+import { keysetCondition, keysetEntryCondition, type Page, type ParsedFilters, type ParsedListQuery, sortValueSql, toEntryPage, toPage } from '../common/list-query.js';
 import { decimalPlaces, type MoneyInput, toMoney, toScaled } from '../common/money.js';
 import { type FieldError, ProblemError, Problems } from '../common/problem.js';
 import { actingMembership, type PermissionScope, type TenantContext } from '../common/request-context.js';
 import { APP_CONFIG, type AppConfig } from '../config/config.js';
+import { asPipelineAction } from '../deals/deal-stage.js';
+import { releaseAcceptedOffer } from '../offers/offer-effects.js';
 import type { Tx } from '../database/database.module.js';
 import type { Listings } from '../database/schema.js';
 import {
@@ -410,10 +412,11 @@ export class ListingsService {
       .leftJoin('users as cu', 'cu.id', 'cm.userId')
       .select(['h.id', 'h.fromStatus', 'h.toStatus', 'h.changedAt', 'h.changedBy', 'h.reason', 'cu.displayName as changedByName'])
       .select(sortValueSql('h.changedAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`h.entry_no::text`.as('entryNoText'))
       .where('h.listingId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('h.changedAt', 'h.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({
+    if (query.cursor) qb = qb.where(keysetEntryCondition('h.changedAt', 'h.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => ({
       id: r.id,
       fromStatus: r.fromStatus,
       toStatus: r.toStatus,
@@ -436,10 +439,11 @@ export class ListingsService {
       .select(['h.id', 'h.oldPrice', 'h.newPrice', 'h.currencyCode', 'cur.minorUnits', 'h.changedAt', 'h.changedBy', 'h.approvedBy', 'h.reason'])
       .select(['cu.displayName as changedByName', 'au.displayName as approvedByName'])
       .select(sortValueSql('h.changedAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`h.entry_no::text`.as('entryNoText'))
       .where('h.listingId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('h.changedAt', 'h.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => ({
+    if (query.cursor) qb = qb.where(keysetEntryCondition('h.changedAt', 'h.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('h.changedAt', query.sort.direction).orderBy('h.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => ({
       id: r.id,
       oldPrice: r.oldPrice === null ? null : toMoney(r.oldPrice, r.currencyCode, r.minorUnits),
       newPrice: toMoney(r.newPrice, r.currencyCode, r.minorUnits),
@@ -462,11 +466,12 @@ export class ListingsService {
       .leftJoin('users as us', 'us.id', 'm.userId')
       .select(['a.id', 'a.occurredAt', 'a.action', 'a.actorMembershipId', 'us.displayName', 'a.changes', 'a.metadata'])
       .select(sortValueSql('a.occurredAt', 'timestamp').as('cursorValue'))
+      .select(sql<string>`a.entry_no::text`.as('entryNoText'))
       .where('a.entityType', '=', 'listing')
       .where('a.entityId', '=', id);
-    if (query.cursor) qb = qb.where(keysetCondition('a.occurredAt', 'a.id', query.sort, query.cursor));
-    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.id', query.sort.direction).limit(query.limit + 1).execute();
-    return toPage(rows, query.limit, (r) => r.cursorValue, (r) => r.id, (r) => {
+    if (query.cursor) qb = qb.where(keysetEntryCondition('a.occurredAt', 'a.entryNo', query.sort, query.cursor));
+    const rows = await qb.orderBy('a.occurredAt', query.sort.direction).orderBy('a.entryNo', query.sort.direction).limit(query.limit + 1).execute();
+    return toEntryPage(rows, query.limit, (r) => r.cursorValue, (r) => r.entryNoText, (r) => {
       const changes = (r.changes ?? null) as Record<string, unknown> | null;
       if (changes && !showFees && 'feeTerms' in changes) changes['feeTerms'] = { old: '(hidden)', new: '(hidden)' };
       return {
@@ -825,6 +830,21 @@ export class ListingsService {
     if (reasonRequired(from, to) && reason === undefined) {
       throw Problems.validation([{ field: 'reason', code: 'required', message: 'Give a reason for this change.' }]);
     }
+    // P6-D5: with exchanged contracts the sale falls through on its deal first (S3).
+    const exchanged = await tx.selectFrom('salesTransactions').select('dealId').where('listingId', '=', id).where('status', '=', 'exchanged').executeTakeFirst();
+    if (exchanged) {
+      throw Problems.validation([
+        { field: 'status', code: 'listing-sale-exchanged', message: 'Contracts are exchanged on this listing: its status follows the deal. Record the fall-through on the deal first.' },
+      ]);
+    }
+    // P6-D5: with an accepted offer the status follows the deal; withdrawing the listing withdraws the offer too.
+    const accepted = await tx.selectFrom('offers').select(['id', 'dealId', 'listingId', 'status']).where('listingId', '=', id).where('status', '=', 'accepted').executeTakeFirst();
+    if (accepted && to !== 'withdrawn') {
+      throw Problems.validation([
+        { field: 'status', code: 'listing-has-accepted-offer', message: 'This listing has an accepted offer: its status follows the deal. Withdraw the accepted offer first, or withdraw the listing.' },
+      ]);
+    }
+    if (accepted) await releaseAcceptedOffer(tx, ctx, this.audit, accepted, 'Listing withdrawn', 'listing');
 
     const unit = await tx
       .selectFrom('units as u')
@@ -848,6 +868,29 @@ export class ListingsService {
       .execute();
     await this.recordStatus(tx, ctx, id, from, to, reason ?? null);
     return this.get(tx, ctx, id);
+  }
+
+  /**
+   * Status change made by an offer or deal action (P6-D5): accepting reserves
+   * an available listing; withdrawing the accepted offer or losing the deal
+   * makes it available again; exchanging contracts puts it under contract;
+   * completing the sale sells it (final: unpublished and closed). The caller
+   * has checked access to the deal.
+   */
+  async pipelineStatus(tx: Tx, ctx: TenantContext, id: string, to: 'reserved' | 'available' | 'under_contract' | 'sold', reason: string): Promise<void> {
+    const current = await this.lockListing(tx, id);
+    const from = current.status as ListingStatus;
+    if (from === to) return;
+    const invalid = transitionError(current.listingType, from, to);
+    if (invalid) throw Problems.businessRule(invalid);
+    await asPipelineAction(tx);
+    const closing = isTerminal(to);
+    await tx
+      .updateTable('listings')
+      .set({ status: to, ...(closing ? { isPublished: false, closedAt: new Date() } : {}) })
+      .where('id', '=', id)
+      .execute();
+    await this.recordStatus(tx, ctx, id, from, to, reason);
   }
 
   async assign(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: AssignAgentBody): Promise<ListingDto> {
@@ -1457,7 +1500,7 @@ interface SummaryRow {
   updatedAt: Date;
 }
 
-export const ATTENTION_KINDS = ['not-ready', 'photos', 'floor-plan', 'mandate-expiring', 'cover-alt', 'price-stale'] as const;
+export const ATTENTION_KINDS = ['not-ready', 'photos', 'floor-plan', 'mandate-expiring', 'cover-alt', 'price-stale', 'no-viewing'] as const;
 export type AttentionKind = (typeof ATTENTION_KINDS)[number];
 interface AttentionRules {
   minPhotos: number | null;
@@ -1465,6 +1508,7 @@ interface AttentionRules {
 }
 const PRICE_STALE_DAYS = 60;
 const MANDATE_WARNING_DAYS = 14;
+const NO_VIEWING_DAYS = 21;
 
 /**
  * "Needs attention" conditions on alias l, shared by filter[attention] on the
@@ -1477,6 +1521,8 @@ const MANDATE_WARNING_DAYS = 14;
  *   mandate-expiring  live listings whose mandate ends within 14 days (property's date)
  *   cover-alt         open listings whose cover photo has no alt text
  *   price-stale       available listings whose price has not changed for 60 days
+ *   no-viewing        available listings on the market for 21 days with no viewing booked or held in
+ *                     the last 21 days (cancelled, no-show and rescheduled viewings do not count; S1)
  */
 function attentionSql(kind: AttentionKind, rules: AttentionRules) {
   const open = sql`l.status in ('draft', 'available', 'reserved', 'under_contract')`;
@@ -1500,6 +1546,10 @@ function attentionSql(kind: AttentionKind, rules: AttentionRules) {
       return sql<boolean>`(l.status = 'available' and coalesce(
         (select max(h.changed_at) from listing_price_history h where h.listing_id = l.id), l.listed_at, l.created_at)
         < now() - make_interval(days => ${PRICE_STALE_DAYS}))`;
+    case 'no-viewing':
+      return sql<boolean>`(l.status = 'available' and coalesce(l.listed_at, l.published_at, l.created_at) < now() - make_interval(days => ${NO_VIEWING_DAYS})
+        and not exists (select 1 from viewings v where v.company_id = l.company_id and v.listing_id = l.id
+                         and v.status in ('scheduled', 'confirmed', 'completed') and v.scheduled_start > now() - make_interval(days => ${NO_VIEWING_DAYS})))`;
     case 'not-ready':
       return sql<boolean>`(l.status = 'draft' and (${photosShort} or ${planMissing}
         or (l.mandate_expires_on is not null and l.mandate_expires_on < ${propertyToday})

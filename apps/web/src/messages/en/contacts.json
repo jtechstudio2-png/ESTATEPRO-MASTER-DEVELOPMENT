@@ -61,7 +61,8 @@
     "requirements": "Requirements",
     "properties": "Properties",
     "identity": "Identity",
-    "consent": "Consent"
+    "consent": "Consent",
+    "sales": "Sales"
   },
   "ownerLine": "Owner: {name}",
   "call": "Call",

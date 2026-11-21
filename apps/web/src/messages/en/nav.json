@@ -48,5 +48,13 @@
   "leadsNewMine": "{count, plural, one {# new lead assigned to you} other {# new leads assigned to you}}",
   "followUpsOverdue": "{count, plural, one {# follow-up overdue} other {# follow-ups overdue}}",
   "identityChecks": "Identity checks",
-  "privacyRequests": "Privacy requests"
+  "privacyRequests": "Privacy requests",
+  "pipeline": "Pipeline",
+  "deals": "Deals",
+  "calendar": "Calendar",
+  "viewingsFollowUp": "To follow up",
+  "forecast": "Forecast",
+  "createDeal": "Deal",
+  "createViewing": "Viewing",
+  "viewingsToFollowUp": "{count, plural, one {# viewing needs an outcome} other {# viewings need an outcome}}"
 }

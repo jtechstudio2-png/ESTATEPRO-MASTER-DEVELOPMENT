@@ -206,7 +206,7 @@ export class KeysController {
   @ApiQuery({ name: 'cursor', required: false })
   @ApiOkResponse({ type: KeyMovementPageDto })
   async movements(@Tenant() ctx: TenantContext, @Param('keySetId', UUID_PARAM) id: string, @Query() query: ListQueryInput): Promise<KeyMovementPageDto> {
-    const parsed = parseListQuery<'occurredAt'>(query, { allowed: { occurredAt: 'timestamp' }, default: { field: 'occurredAt', direction: 'desc' } }, {});
+    const parsed = parseListQuery<'occurredAt'>(query, { allowed: { occurredAt: 'timestamp' }, default: { field: 'occurredAt', direction: 'desc' } }, {}, 'entry');
     return this.tenantDb.run(ctx, (tx) => this.keys.movements(tx, ctx, id, parsed));
   }
 
