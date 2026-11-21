@@ -5,7 +5,7 @@
 | Date | 21 November 2026 |
 | Issue | [#42](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42), High; S6-R2 |
 | Plan | `docs/phase-7/ISSUE-42-REMEDIATION-PLAN.md`, **approved 21 November 2026** |
-| Branch | `issue-42/match-refresh`, from `main` at `a551ee7`; CI: see §9 |
+| Branch | `issue-42/match-refresh`, from `main` at `a551ee7`; CI run 169 green (§9) |
 | Result | **#42 remediated; all acceptance criteria met** (§2). Awaiting review and approval |
 
 ## 1. What changed
@@ -31,7 +31,7 @@ There are no migrations, new indexes, API changes or web changes.
 | No duplicate worker execution | **Met.** The lock is renewed after every batch (each under 2 s), well inside the 300 s lock, so the job is never released while it runs. If it ever were, the replaced holder's renewal fails and it stops (worker test) |
 | Full performance suite in one run and in alternate orders | **Met.** `test:performance` (13 files, 17 tests) passed 17 of 17 in one shared database, three times: the default order (requirements before C4, the order that used to hang) and two shuffled file orders (seeds 1042 and 7, C4 before requirements). Every budget was met in all three (§5.3) |
 | Drawn-area measurements in the report | **Met** (§5.2) |
-| CI green | CI_RESULT |
+| CI green | **Met.** CI run 169 on `e992d2c`, all jobs green (started by hand; this branch has no pull request yet) |
 
 ## 3. Decisions taken during implementation (for approval)
 
@@ -138,7 +138,7 @@ Code only: revert the #42 merge commit and deploy. `requirement_match_status` ne
 |---|---|
 | Issue | #42 |
 | Plan | `docs/phase-7/ISSUE-42-REMEDIATION-PLAN.md` |
-| CI | CI_RESULT |
+| CI | Run 169 on `e992d2c`, all jobs green: https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/44951423622 |
 
 ## Approval
 
