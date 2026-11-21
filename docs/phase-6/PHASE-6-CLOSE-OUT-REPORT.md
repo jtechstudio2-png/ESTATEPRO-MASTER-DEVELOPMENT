@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 21 November 2026 |
-| Branch | `phase-6/readiness` (not merged; `main` unchanged since PR #39) |
+| Branch | `phase-6/readiness`, **merged into `main`** through PR #47: merge commit `a551ee768f4981eeb35d230c2e9664b591c451ff` (21 November 2026); tag `phase-6-complete` on that commit (pending: to be pushed by the repository owner) |
 | Scope | The approved Phase 6 roadmap (readiness report §10): P6-0, P6-W, S1 to S6 |
 | Result | **All Phase 6 milestones delivered and approved; Phase 6 close-out approved (21 November 2026).** Merge to `main` through a reviewed pull request once Phase 6 is approved (§6) |
 
@@ -76,7 +76,7 @@ Migrations 0029 to 0034; SQL suites 13 to 16; API end-to-end tests for every Pha
 | All milestones approved | Yes (21 November 2026) |
 | CI green on the final commit | Run 158 green on `60fb926` (S6 report §10); this report commit re-runs CI |
 | Open High issues introduced by Phase 6 | #42 (approved for remediation before Phase 7) |
-| Pull request | One reviewed pull request `phase-6/readiness` → `main` (approved 21 November 2026) |
+| Pull request | [#47](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/pull/47) `phase-6/readiness` → `main`, reviewed and approved; all 12 checks green on `d88d79d` (runs 161, 162); **merged 21 November 2026** as `a551ee7` |
 
 ## Approval
 
@@ -85,4 +85,5 @@ Migrations 0029 to 0034; SQL suites 13 to 16; API end-to-end tests for every Pha
 | Phase 6 close-out | **Approved** | 21 November 2026 |
 | Closing #5, #15, #43, #44 | **Approved**; closed | 21 November 2026 |
 | One reviewed pull request `phase-6/readiness` → `main` | **Approved** | 21 November 2026 |
+| Merge of PR #47 into `main` | **Merged** (`a551ee7`); `main` green after the merge (CI run 163, all jobs); tag `phase-6-complete` pending | 21 November 2026 |
 | Phase 7 | Not started until the Phase 6 branch is merged. After the merge: #42 first, then the standard readiness process, with the Phase 7 readiness report before implementation | 21 November 2026 |
