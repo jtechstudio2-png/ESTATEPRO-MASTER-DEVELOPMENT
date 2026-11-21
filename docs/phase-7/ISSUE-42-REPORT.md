@@ -29,7 +29,7 @@ There are no migrations, new indexes, API changes or web changes.
 | C4 refresh under 60 s | **Met: 0.68 s** for 20,000 requirements with the dense company present (was about 10 minutes) |
 | Dense-company refresh under 60 s | **Met: 7.1 s** for 50,000 requirements |
 | No duplicate worker execution | **Met.** The lock is renewed after every batch (each under 2 s), well inside the 300 s lock, so the job is never released while it runs. If it ever were, the replaced holder's renewal fails and it stops (worker test) |
-| Full performance suite in one run and in alternate orders | SUITE_RESULT |
+| Full performance suite in one run and in alternate orders | **Met.** `test:performance` (13 files, 17 tests) passed 17 of 17 in one shared database, three times: the default order (requirements before C4, the order that used to hang) and two shuffled file orders (seeds 1042 and 7, C4 before requirements). Every budget was met in all three (§5.3) |
 | Drawn-area measurements in the report | **Met** (§5.2) |
 | CI green | CI_RESULT |
 
@@ -49,7 +49,7 @@ There are no migrations, new indexes, API changes or web changes.
 | Suite | Result | Added for #42 |
 |---|---|---|
 | API (`test:ci`) | **565 of 565 pass** (45 files); coverage 96.17% statements, 98.31% lines; lint, typecheck and build pass | Equivalence against the C4 query (kept in `test/support/legacy-match.ts` as the reference); a plan check that no join in the match test combines addresses and listings, which fails on the old query; batches of one in id order, results equal to the reference, inactive rows removed, and another company's rows untouched; lock renewal only for the current claim, with a stale holder stopping |
-| API performance | SUITE_TABLE_REF | Dense-company refresh measured per kind of area; C4 refresh scoped to its company |
+| API performance | **17 of 17 pass in one run**, three orders (§5.3) | Dense-company refresh measured per kind of area; C4 refresh scoped to its company |
 | Web | Not affected (no web change); runs in CI | — |
 
 ## 5. Performance
@@ -82,7 +82,34 @@ The same run, by kind:
 
 ### 5.3 Full API performance suite
 
-SUITE_TABLE
+All 13 files ran in one Vitest run against one shared database (`npm run test:performance`). Files run one at a time, so the order below is the run order.
+
+| Run | File order | Result |
+|---|---|---|
+| Default | sales-dashboards, location, listings, leads, **requirements**, data-protection, **dashboards (C4)**, contacts, media, viewings, landlord-visibility, offers, deals | 17 of 17 |
+| Shuffled, seed 1042 | offers, listings, leads, viewings, data-protection, media, **dashboards (C4)**, sales-dashboards, location, **requirements**, contacts, landlord-visibility, deals | 17 of 17 |
+| Shuffled, seed 7 | **dashboards (C4)**, offers, leads, deals, viewings, media, landlord-visibility, **requirements**, contacts, location, data-protection, listings, sales-dashboards | 17 of 17 |
+
+p95 for each test across the three runs (lowest to highest):
+
+| Test | p95 | Budget |
+|---|---|---|
+| Listings (100,000) | 188 to 208 ms | 1,000 ms |
+| Location: radius, pages, city map, clustered map, polygon | 127–194, 83–179, 179–230, 396–443, 39–76 ms | 1,000 / 500 / 500 / 800 / 1,000 ms |
+| Media | 1.74 s per 12 MP photo; gallery 109 to 126 ms | as Phase 4 |
+| Contacts (100,000) | 226 to 251 ms | 1,000 ms |
+| Requirements and KYC | 281 to 614 ms | 1,000 ms |
+| Dense match refresh (new, #42) | 50,000 in 6.6 to 6.9 s; drawn areas and circles 3.8 to 4.3 s | 60 s |
+| Leads, timeline, follow-ups | 245 to 256 ms | 1,000 ms |
+| CRM, admin, My day (C4) | 385 to 444 ms; C4 refresh 20,000 in 0.65 to 1.65 s | 1,000 ms; 60 s |
+| Key rotation and erasure | 3 of 3 pass in every run (field rotation 1,033 values a second in the last run; budget 500) | as Phase 5 |
+| Viewings (200,000) | 308 to 826 ms | 1,000 ms |
+| Offers (100,000) | 60 to 71 ms | 1,000 ms |
+| Deals (20,000) | 191 to 271 ms | 1,000 ms |
+| Landlord views | 161 to 192 ms | 1,000 ms |
+| Phase 6 dashboards | 138 to 188 ms | 1,000 ms |
+
+Viewings reached 826 ms in the seed-7 run, where it followed six other files in the shared database; it is 308 ms in the default run. It stays within budget and is unchanged by #42. Noted under 42-R4.
 
 ## 6. Security, compliance and data
 
@@ -99,7 +126,7 @@ SUITE_TABLE
 | 42-R1 | The stale-holder check runs after each batch. If a lock were lost between the last renewal and completion (a window of milliseconds), the stale holder could still mark the job done | Low | Batches are under 2 s and the lock is 300 s, so the lock is never released while a refresh runs. Making every job's completion owner-checked is a change to all jobs, left out of this scope |
 | 42-R2 | 42-D2 relies on the CHECK constraint `listings_check4` (published only when available, reserved or under contract) | Low | The equivalence tests would fail if the constraint and the condition ever diverged; the condition is commented in the code |
 | 42-R3 | Listings still have no plain index by unit for published rows | Low | Not needed now (per-unit lookup through the existing partial index). Proposed only if a future query needs it |
-| 42-R4 | Performance tests share one database in a full run; a future test that bulk-inserts and measures straight away without refreshing statistics can be order-sensitive | Low | Each large test now refreshes statistics after seeding; noted for Phase 7 tests |
+| 42-R4 | Performance tests share one database in a full run; a future test that bulk-inserts and measures straight away without refreshing statistics can be order-sensitive | Low | Each large test now refreshes statistics after seeding; noted for Phase 7 tests. Viewings p95 ranged 308 to 826 ms across the three orders (budget 1,000 ms) |
 
 ## 8. Rollback
 
