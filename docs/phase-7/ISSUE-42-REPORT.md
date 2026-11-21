@@ -6,7 +6,7 @@
 | Issue | [#42](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42), High; S6-R2 |
 | Plan | `docs/phase-7/ISSUE-42-REMEDIATION-PLAN.md`, **approved 21 November 2026** |
 | Branch | `issue-42/match-refresh`, from `main` at `a551ee7`; CI run 169 green (§9) |
-| Result | **#42 remediated; all acceptance criteria met** (§2). Awaiting review and approval |
+| Result | **#42 remediated; all acceptance criteria met** (§2). **Approved 21 November 2026** |
 
 ## 1. What changed
 
@@ -37,12 +37,12 @@ There are no migrations, new indexes, API changes or web changes.
 
 | # | Decision | Reason | Status |
 |---|---|---|---|
-| 42-D1 | **Nested scalar subqueries define the reading order:** requirement → address → unit → listing | Measured: a fence (`OFFSET 0`), set-based joins and materialised pairs all still let the planner start from listings or blow up on dense areas (plan §3) | For approval |
-| 42-D2 | **The listing lookup states the published statuses explicitly** so the existing per-unit index is used, instead of adding an index | The first measurement of drawn areas was 94.5 s for 25,000 (§5.2): inside each address the planner again read the price index (about 1,450 listings per address) because listings have no plain index by unit. The CHECK constraint makes the added condition redundant, and the approved scope excluded migrations | For approval |
-| 42-D3 | **Batch size 2,000, in requirement id order;** inactive rows are removed once at the end | As planned. Measured batches take under 2 s (0.7 s per 2,000 in the C4 company) | For approval |
-| 42-D4 | **Lock ownership by `attempts`:** a claim increments it, so a stale holder can tell it was replaced | No new column needed; the claim already does this | For approval |
-| 42-D5 | **`jobTypes` worker option** limits which job types a worker claims | Needed so the media performance test times only media work in a shared database; the production worker passes no option and claims every type, as before | For approval |
-| 42-D6 | **The rotation performance test refreshes table statistics after seeding** | It measured 492 values a second in a full run (budget 500) and 1,168 alone: the same code, stale statistics after inserting 25,000 rows into a table shared with other files. The C4 and requirements tests already do this | For approval |
+| 42-D1 | **Nested scalar subqueries define the reading order:** requirement → address → unit → listing | Measured: a fence (`OFFSET 0`), set-based joins and materialised pairs all still let the planner start from listings or blow up on dense areas (plan §3) | **Approved** |
+| 42-D2 | **The listing lookup states the published statuses explicitly** so the existing per-unit index is used, instead of adding an index | The first measurement of drawn areas was 94.5 s for 25,000 (§5.2): inside each address the planner again read the price index (about 1,450 listings per address) because listings have no plain index by unit. The CHECK constraint makes the added condition redundant, and the approved scope excluded migrations | **Approved** |
+| 42-D3 | **Batch size 2,000, in requirement id order;** inactive rows are removed once at the end | As planned. Measured batches take under 2 s (0.7 s per 2,000 in the C4 company) | **Approved** |
+| 42-D4 | **Lock ownership by `attempts`:** a claim increments it, so a stale holder can tell it was replaced | No new column needed; the claim already does this | **Approved** |
+| 42-D5 | **`jobTypes` worker option** limits which job types a worker claims | Needed so the media performance test times only media work in a shared database; the production worker passes no option and claims every type, as before | **Approved** |
+| 42-D6 | **The rotation performance test refreshes table statistics after seeding** | It measured 492 values a second in a full run (budget 500) and 1,168 alone: the same code, stale statistics after inserting 25,000 rows into a table shared with other files. The C4 and requirements tests already do this | **Approved** |
 
 ## 4. Tests
 
@@ -144,7 +144,11 @@ Code only: revert the #42 merge commit and deploy. `requirement_match_status` ne
 
 | Item | Decision | Date |
 |---|---|---|
-| #42 remediation | Awaiting approval | |
-| 42-D1 to 42-D6 | Awaiting approval, each individually | |
-| 42-R1 to 42-R4 | Awaiting review | |
-| Pull request `issue-42/match-refresh` → `main`, and closing #42 | Awaiting approval | |
+| #42 remediation | **Approved** | 21 November 2026 |
+| 42-D1 to 42-D6 | **Approved**, each individually | 21 November 2026 |
+| 42-R1 to 42-R4 | Reviewed and accepted | 21 November 2026 |
+| Pull request `issue-42/match-refresh` → `main` | **Approved**: merge once CI is green, then close #42 and record the merge in the Phase 6 close-out | 21 November 2026 |
+| Phase 6 blocker (#42) | Resolved upon merge | 21 November 2026 |
+| `phase-6-complete` tag | Pushed separately; does not block the merge | 21 November 2026 |
+
+Next: after the merge, the Phase 7 readiness process and the Phase 7 readiness report for review. No Phase 7 implementation before that report is approved.
