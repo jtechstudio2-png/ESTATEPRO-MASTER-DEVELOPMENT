@@ -60,12 +60,14 @@ export function matchConditions(ctx: TenantContext, listingScope: PermissionScop
 /**
  * Whether requirement `r` has at least one match (decision D4), for counting
  * requirements with no match across a whole register. The same rules as
- * matchConditions, but each kind of area drives the search from its own
- * index: requirements without areas from the listings price index, named
- * localities from the address locality index, circles and drawn areas from
- * the coordinate index. The address lookup sits behind an optimisation fence
- * (OFFSET 0) so the planner reads the few addresses in the area first rather
- * than every price-eligible listing. The exact area test still decides.
+ * matchConditions. Requirements without areas are searched from the listings
+ * price index. For named localities, circles and drawn areas the search reads
+ * the area's addresses first (locality index or coordinate columns), and each
+ * address is checked for a matching listing by a scalar `LIMIT 1` subquery.
+ * PostgreSQL never pulls such a subquery up or reorders it, so the plan does
+ * not depend on table statistics, which in a shared database include other
+ * companies' rows (#42), and it stops at the first match. The exact area test
+ * still decides.
  */
 export function hasMatchSql(ctx: TenantContext, listingScope: PermissionScope): RawBuilder<boolean> {
   const listing = sql`l.company_id = r.company_id and l.is_published and l.archived_at is null
@@ -78,21 +80,31 @@ export function hasMatchSql(ctx: TenantContext, listingScope: PermissionScope): 
     and not exists (select 1 from requirement_exclusions x
                      where x.company_id = r.company_id and x.requirement_id = r.id and x.listing_id = l.id)
     and ${listingScopeSql(listingScope, ctx, 'l')}`;
-  const fromAddress = sql`join properties p on p.company_id = a.company_id and p.address_id = a.id
-    join units u on u.company_id = p.company_id and u.property_id = p.id
-    join listings l on l.company_id = u.company_id and l.unit_id = u.id`;
+  // Address → its units → each unit's listing, every step a scalar LIMIT 1 subquery. The status
+  // condition repeats what the listings table already guarantees for published listings
+  // (CHECK: published only when available, reserved or under contract), so it changes no answer;
+  // it lets the per-unit index listings_one_open_per_unit_idx find the unit's listing directly.
+  const listingAtAddress = sql`(select 1 from properties p
+      join units u on u.company_id = p.company_id and u.property_id = p.id
+     where p.company_id = a.company_id and p.address_id = a.id
+       and (select 1 from listings l
+             where l.company_id = u.company_id and l.unit_id = u.id
+               and l.status in ('available', 'reserved', 'under_contract')
+               and ${listing}
+             limit 1) is not null
+     limit 1) is not null`;
   const exact = sql`app.requirement_area_covers(r.locations, a.locality, a.admin_area_1, a.location)`;
   return sql<boolean>`(
     (r.area_anywhere and exists (select 1 from listings l join units u on u.company_id = l.company_id and u.id = l.unit_id where ${listing}))
     or (cardinality(r.area_localities) > 0 and exists (
-          select 1 from (select * from addresses a0
-                           where a0.company_id = r.company_id and a0.locality_key = any(r.area_localities) offset 0) a ${fromAddress}
-           where ${listing} and ${exact}))
+          select 1 from addresses a
+           where a.company_id = r.company_id and a.locality_key = any(r.area_localities)
+             and ${exact} and ${listingAtAddress}))
     or (r.area_west is not null and exists (
-          select 1 from (select * from addresses a0
-                           where a0.company_id = r.company_id and a0.latitude_f between r.area_south and r.area_north
-                             and a0.longitude_f between r.area_west and r.area_east offset 0) a ${fromAddress}
-           where ${listing} and ${exact})))`;
+          select 1 from addresses a
+           where a.company_id = r.company_id and a.latitude_f between r.area_south and r.area_north
+             and a.longitude_f between r.area_west and r.area_east
+             and ${exact} and ${listingAtAddress})))`;
 }
 
 /** Wanted features the unit has. */

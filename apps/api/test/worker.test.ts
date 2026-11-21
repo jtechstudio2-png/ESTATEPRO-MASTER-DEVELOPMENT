@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { createKysely, type Db } from '../src/database/database.module.js';
 import { S3Storage } from '../src/media/storage.js';
 import { createWorker, WorkerConfigError } from '../src/worker/create-worker.js';
-import { JobQueue } from '../src/worker/queue.js';
+import { JobQueue, LockLostError } from '../src/worker/queue.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
 
@@ -54,6 +54,37 @@ describe('worker infrastructure', () => {
     expect(again!.attempts).toBe(2);
     await queue.complete(again!.id);
     expect((await fx.db.selectFrom('scheduledJobs').select('status').where('id', '=', job!.id).executeTakeFirstOrThrow()).status).toBe('done');
+  });
+
+  it('renews a running job\'s lock only for its current claim, so a long refresh never runs twice (#42)', async () => {
+    const queue = new JobQueue(platform);
+    await queue.enqueue(companyId, 'requirement.match_refresh', 'renew-test');
+    const [job] = await queue.claim(['requirement.match_refresh'], 5);
+    expect(job).toBeDefined();
+    await fx.db.updateTable('scheduledJobs').set({ lockedUntil: new Date(Date.now() + 1_000) }).where('id', '=', job!.id).execute();
+    expect(await queue.renewLock(job!)).toBe(true);
+    const renewed = await fx.db.selectFrom('scheduledJobs').select('lockedUntil').where('id', '=', job!.id).executeTakeFirstOrThrow();
+    expect(renewed.lockedUntil!.getTime()).toBeGreaterThan(Date.now() + 250_000);
+
+    // The lock expires and another worker claims the job: the first claim can no longer renew it.
+    await fx.db.updateTable('scheduledJobs').set({ lockedUntil: new Date(Date.now() - 1_000) }).where('id', '=', job!.id).execute();
+    expect(await queue.releaseExpiredLocks()).toBe(1);
+    const [again] = await queue.claim(['requirement.match_refresh'], 5);
+    expect(again).toMatchObject({ id: job!.id, attempts: 2 });
+    expect(await queue.renewLock(job!)).toBe(false);
+    expect(await queue.renewLock(again!)).toBe(true);
+
+    // The stale holder's refresh stops at its first renewal and leaves the job to the new claim.
+    const { worker, close } = createWorker(t.config, silent, { scheduleEveryMs: 60_000 });
+    try {
+      await expect(worker.refreshRequirementMatches(companyId, 'stale', job)).rejects.toBeInstanceOf(LockLostError);
+      expect(await worker.refreshRequirementMatches(companyId, 'current', again)).toBe(0);
+    } finally {
+      await close();
+    }
+    const row = await fx.db.selectFrom('scheduledJobs').select(['status', 'attempts']).where('id', '=', job!.id).executeTakeFirstOrThrow();
+    expect(row).toEqual({ status: 'running', attempts: 2 });
+    await queue.complete(again!.id);
   });
 
   it('retries a failing job, then fails it for good, and keeps running after a failed pass', async () => {

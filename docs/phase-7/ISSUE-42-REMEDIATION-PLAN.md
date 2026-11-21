@@ -5,7 +5,7 @@
 | Date | 21 November 2026 |
 | Issue | [#42](https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42), High; S6-R2. Approved 13 and 21 November 2026 for remediation before Phase 7 |
 | Branch | `issue-42/match-refresh`, from `main` at `a551ee7` (Phase 6 merge; `main` green, CI run 163) |
-| Status | **Plan for approval.** No code is changed until this plan is approved |
+| Status | **Approved 21 November 2026**; implemented on this branch (see `ISSUE-42-REPORT.md`) |
 
 ## 1. Root cause analysis
 
@@ -163,4 +163,7 @@ The live screens are unaffected: the requirement record's own matching (`matchCo
 
 | Item | Decision | Date |
 |---|---|---|
-| #42 remediation plan | Awaiting approval | |
+| #42 remediation plan | **Approved** | 21 November 2026 |
+| Approved scope | Requirement-address-first matching; batches of 2,000; lock renewal after each batch; company-scoped refresh execution; equivalence testing against today's matching; performance validation with several companies present | 21 November 2026 |
+| Added before merge | Measure the drawn-area branch and include the results in the final #42 report | 21 November 2026 |
+| Acceptance | Identical matching results; C4 refresh under 60 s; dense-company refresh under 60 s; no duplicate worker execution; full performance suite in one run and in alternate orders; drawn-area figures in the report; CI green | 21 November 2026 |

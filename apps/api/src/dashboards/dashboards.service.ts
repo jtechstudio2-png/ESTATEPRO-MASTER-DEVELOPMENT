@@ -611,23 +611,43 @@ function scopeDto(query: DashboardQuery, window: Window): DashboardScopeDto {
   };
 }
 
+/** Active requirements refreshed per transaction by the match refresh (#42). */
+export const MATCH_REFRESH_BATCH = 2_000;
+
 /**
- * Refreshes requirement_match_status for every active requirement of the
- * company (worker job requirement.match_refresh). Uses the decision D4 rules
- * against all of the company's published listings.
+ * Refreshes requirement_match_status for one batch of the company's active
+ * requirements (worker job requirement.match_refresh), in id order after
+ * `afterId`, using the decision D4 rules against all of the company's
+ * published listings. Returns how many were refreshed and the last id, from
+ * which the next batch continues.
  */
-export async function refreshRequirementMatches(tx: Tx, ctx: TenantContext): Promise<number> {
-  const { rows } = await sql<{ n: string }>`
-    with fresh as (
+export async function refreshRequirementMatchBatch(
+  tx: Tx,
+  ctx: TenantContext,
+  afterId: string | null,
+  limit: number = MATCH_REFRESH_BATCH,
+): Promise<{ count: number; lastId: string | null }> {
+  const { rows } = await sql<{ n: string; lastId: string | null }>`
+    with batch as (
+      select r.id from requirements r
+       where r.status = 'active' ${afterId === null ? sql`` : sql`and r.id > ${afterId}::uuid`}
+       order by r.id
+       limit ${limit}
+    ), fresh as (
       insert into requirement_match_status (company_id, requirement_id, has_match, checked_at)
       select r.company_id, r.id, ${hasMatchSql(ctx, 'all')}, now()
-        from requirements r where r.status = 'active'
+        from requirements r join batch b on b.id = r.id
       on conflict (company_id, requirement_id) do update set has_match = excluded.has_match, checked_at = excluded.checked_at
       returning 1
-    ), stale as (
-      delete from requirement_match_status m using requirements r
-       where r.company_id = m.company_id and r.id = m.requirement_id and r.status <> 'active'
     )
-    select count(*) as n from fresh`.execute(tx);
-  return Number(rows[0]!.n);
+    select (select count(*) from fresh) as n, (select max(id::text) from batch) as "lastId"`.execute(tx);
+  return { count: Number(rows[0]!.n), lastId: rows[0]!.lastId };
+}
+
+/** Removes the match status of requirements that are no longer active (end of a refresh). */
+export async function removeInactiveMatchStatus(tx: Tx): Promise<number> {
+  const result = await sql`
+    delete from requirement_match_status m using requirements r
+     where r.company_id = m.company_id and r.id = m.requirement_id and r.status <> 'active'`.execute(tx);
+  return Number(result.numAffectedRows ?? 0);
 }

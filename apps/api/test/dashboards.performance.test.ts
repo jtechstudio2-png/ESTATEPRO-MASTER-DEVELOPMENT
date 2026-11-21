@@ -123,21 +123,23 @@ describe('dashboards, exports and preview performance', () => {
   });
 
   it(`answers dashboards and the preview at p95 under ${TARGET_P95_MS} ms, and exports 20,000 contacts within ${EXPORT_TARGET_MS} ms`, async () => {
-    // Tokens are issued after the (long) seeding so they are fresh.
-    const authTime = Math.floor(Date.now() / 1000);
-    for (const name of ['owner', 'agent', 'sales']) {
-      tokens[name] = await t.idp.token({ sub: `c4-perf-${name}-${company.companyId}`, amr: ['pwd', 'mfa'], authTime });
-    }
-    // Background refresh of the "no match" status (worker job, every 15 minutes).
+    // Background refresh of the "no match" status (worker job requirement.match_refresh, every
+    // 15 minutes), for this company only: other test files' companies may share the database (#42).
     const silent = { info: () => undefined, warn: () => undefined, error: () => undefined };
     const { worker, close } = createWorker(t.config, silent, { scheduleEveryMs: 0 });
     const refreshStarted = performance.now();
+    let refreshed = 0;
     try {
-      await worker.runOnce();
+      refreshed = await worker.refreshRequirementMatches(company.companyId);
     } finally {
       await close();
     }
     const refreshMs = performance.now() - refreshStarted;
+    // Tokens are issued after the seeding and the refresh, so they are fresh.
+    const authTime = Math.floor(Date.now() / 1000);
+    for (const name of ['owner', 'agent', 'sales']) {
+      tokens[name] = await t.idp.token({ sub: `c4-perf-${name}-${company.companyId}`, amr: ['pwd', 'mfa'], authTime });
+    }
     const samples: number[] = [];
     const byKind = new Map<string, number>();
     const time = async (label: string, run: () => Promise<unknown>) => {
@@ -187,9 +189,10 @@ describe('dashboards, exports and preview performance', () => {
     const p95 = sorted[Math.ceil(sorted.length * 0.95) - 1]!;
     console.info(
       `dashboards/preview: ${samples.length} requests, median ${sorted[Math.floor(sorted.length / 2)]!.toFixed(0)} ms, p95 ${p95.toFixed(0)} ms; ` +
-        `max by kind: ${[...byKind.entries()].map(([kind, ms]) => `${kind} ${ms.toFixed(0)}`).join(', ')}; contact export ${exportRows} rows; match refresh (worker) ${refreshMs.toFixed(0)} ms`,
+        `max by kind: ${[...byKind.entries()].map(([kind, ms]) => `${kind} ${ms.toFixed(0)}`).join(', ')}; contact export ${exportRows} rows; match refresh (worker) ${refreshed} requirements in ${refreshMs.toFixed(0)} ms`,
     );
     expect(exportRows).toBeGreaterThan(15_000);
+    expect(refreshed).toBe(REQUIREMENTS);
     expect(refreshMs).toBeLessThan(60_000);
     expect(p95).toBeLessThan(TARGET_P95_MS);
     expect(exportMs).toBeLessThan(EXPORT_TARGET_MS);

@@ -19,6 +19,13 @@ export interface ClaimedJob {
 
 export const LOCK_SECONDS = 300;
 
+/** The job was claimed again by another worker after its lock expired. */
+export class LockLostError extends Error {
+  constructor(readonly jobId: string) {
+    super(`The lock on job ${jobId} was lost to another worker.`);
+  }
+}
+
 export class JobQueue {
   constructor(private readonly db: Db) {}
 
@@ -42,6 +49,18 @@ export class JobQueue {
 
   async complete(id: string): Promise<void> {
     await sql`update scheduled_jobs set status = 'done', completed_at = now(), locked_until = null, last_error = null where id = ${id}`.execute(this.db);
+  }
+
+  /**
+   * Extends a running job's lock for another LOCK_SECONDS. Returns false when
+   * the job is no longer this claim's: a later claim (after the lock expired)
+   * increments `attempts`, so a stale holder can tell it has been replaced.
+   */
+  async renewLock(job: ClaimedJob): Promise<boolean> {
+    const result = await sql`
+      update scheduled_jobs set locked_until = now() + make_interval(secs => ${LOCK_SECONDS})
+       where id = ${job.id} and status = 'running' and attempts = ${job.attempts}`.execute(this.db);
+    return Number(result.numAffectedRows ?? 0) > 0;
   }
 
   /** Retries with exponential back-off (30 s, 1 min, 2 min, … capped at 1 h) or fails for good. */
