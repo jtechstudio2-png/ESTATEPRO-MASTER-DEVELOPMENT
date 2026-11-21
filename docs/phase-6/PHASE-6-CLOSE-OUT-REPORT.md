@@ -74,7 +74,7 @@ Migrations 0029 to 0034; SQL suites 13 to 16; API end-to-end tests for every Pha
 | Check | State |
 |---|---|
 | All milestones approved | S6 awaiting approval |
-| CI green on the final commit | See S6 report §10 |
+| CI green on the final commit | Run 158 green on `60fb926` (S6 report §10); this report commit re-runs CI |
 | Open High issues introduced by Phase 6 | #42 (approved for remediation before Phase 7) |
 | Pull request | Not opened. When Phase 6 is approved: one pull request `phase-6/readiness` → `main`, reviewed, merged on your approval |
 

@@ -154,7 +154,7 @@ Phase 6 close-out: `PHASE-6-CLOSE-OUT-REPORT.md`. Proposed next, before Phase 7:
 | Phase 6 close-out report | `docs/phase-6/PHASE-6-CLOSE-OUT-REPORT.md` |
 | S5 report (approved) | `docs/phase-6/S5-SCREENS-REPORT.md` |
 | Issues #42, #43, #44 | https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/issues/42 · /43 · /44 |
-| CI | CI_PENDING |
+| CI | Run 158 on `60fb926`, all jobs green: https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/44848059915 (run 156 failed only on the dependency scan, fixed by S6-R5; run 157 failed on the same scan before the upgrade) |
 
 ## Approval
 
