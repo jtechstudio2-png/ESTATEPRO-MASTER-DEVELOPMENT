@@ -7,7 +7,7 @@
 | Approvals | S5 approved with S5-D1 to S5-D13; S5-R1 to S5-R5 reviewed and accepted; S5-R4 kept open for review in S6 (20 November 2026). "Proceed with S6 according to the approved Phase 6 roadmap" |
 | Scope | Readiness report §10, S6 "Pipeline board, dashboards, close-out": the Phase 6 parts of the approved role dashboards (Phase 3 design `06-role-dashboards.md` §4 CRM, §5 pipeline board, §10 My day), and the items left for Phase 6 to close: #44 (P6-0 R8b, before Phase 6 closes), S5-R4 (kept open for S6), S1-R3 (dashboard counts at scale, "to be measured in the S6 performance pass"), S3-R3 ("S6 dashboards can list them"). The Phase 6 close-out is in `PHASE-6-CLOSE-OUT-REPORT.md` |
 | Not in scope | New dashboards beyond the approved design (rent, maintenance and finance dashboards follow their phases), landlord portal (Phase 7), commission records (finance phase) |
-| Result | **S6 complete, awaiting approval.** Results in §3; CI in §10 |
+| Result | **S6 complete and approved (21 November 2026).** Results in §3; CI in §10 |
 
 ## 1. Deliverables
 
@@ -41,13 +41,13 @@ Messages: 15 new keys in English and Arabic (3,105 in each language, checked).
 
 | # | Decision | Reason | Status |
 |---|---|---|---|
-| S6-D1 | **Dashboard scope.** S6 adds the Phase 6 panels of the approved Phase 3 dashboard design (06 §4, §5, §10) to the existing CRM dashboard, My day and pipeline board. No new dashboard and no new wireframe: the panels follow the approved layouts and rules (every number links to its list, counts in the viewer's scope, money per currency) | Readiness §10 S6; the board itself was delivered in S5 | For approval |
-| S6-D2 | **"Sales work" counts.** Viewings needing an outcome, stalled deals and open deals on a closed listing ("closed" = sold, rented, withdrawn or expired). Open deals on a closed listing are listed for a person to close; they are not closed automatically | S3-R3 (approved: "S6 dashboards can list them"); P6-D4 keeps other buyers' deals open | For approval |
-| S6-D3 | **Offers on My day** are offers awaiting a response (`submitted`) on deals I own or work on, or on listings I am the agent of, and only within my offer scope: a listing agent who is not on the deal sees nothing they could not open | Design 06 §10 "offers awaiting response on their listings", without widening offer scope (S2-D2) | For approval |
-| S6-D4 | **S5-R4 fix: search fields accept typing once they can search.** The contact search, record search and people picker are disabled until the page has hydrated (in practice a fraction of a second after it appears). Investigation showed the field could take focus before the page was ready, so the combobox never knew it was focused and never opened its results, and React could clear text typed in that moment. Replaying the typed text and focus was tried and did not make it reliable (5 of 10 runs still failed), so it was not kept. The original L-3 test from before S5 is restored and passes 10 of 10 unchanged | S5-R4 kept open for S6; a fix that can be shown to work | For approval |
-| S6-D5 | **#44: first response to the minute.** A call or meeting logged in the same minute as the lead's receipt answers the lead, recorded at the receipt time; one logged in an earlier minute still does not | P6-0 R8b, Medium, "fix before Phase 6 closes" (approved 13 November) | For approval |
-| S6-D6 | **PostgreSQL JIT off for the API's connections** (`-c jit=off` on the pool). At 20,000 listings the planner's cost estimate for the property dashboard's correlated counts started the JIT compiler, adding about 0.4 s to a 12 ms query (§6). The API runs short queries only; JIT helps long analytical scans, which the API does not run | Found by the S6 performance pass (S1-R3); one setting in one place | For approval |
-| S6-D7 | **Quarter forecast on the board** sums the forecast's months of the current calendar quarter, per currency, with exact decimal arithmetic. Deals whose close date in the quarter has already passed count as overdue in the forecast (FC-1), not in the quarter line | Design 06 §5; FC-1 rules (S3) unchanged | For approval |
+| S6-D1 | **Dashboard scope.** S6 adds the Phase 6 panels of the approved Phase 3 dashboard design (06 §4, §5, §10) to the existing CRM dashboard, My day and pipeline board. No new dashboard and no new wireframe: the panels follow the approved layouts and rules (every number links to its list, counts in the viewer's scope, money per currency) | Readiness §10 S6; the board itself was delivered in S5 | **Approved** |
+| S6-D2 | **"Sales work" counts.** Viewings needing an outcome, stalled deals and open deals on a closed listing ("closed" = sold, rented, withdrawn or expired). Open deals on a closed listing are listed for a person to close; they are not closed automatically | S3-R3 (approved: "S6 dashboards can list them"); P6-D4 keeps other buyers' deals open | **Approved** |
+| S6-D3 | **Offers on My day** are offers awaiting a response (`submitted`) on deals I own or work on, or on listings I am the agent of, and only within my offer scope: a listing agent who is not on the deal sees nothing they could not open | Design 06 §10 "offers awaiting response on their listings", without widening offer scope (S2-D2) | **Approved** |
+| S6-D4 | **S5-R4 fix: search fields accept typing once they can search.** The contact search, record search and people picker are disabled until the page has hydrated (in practice a fraction of a second after it appears). Investigation showed the field could take focus before the page was ready, so the combobox never knew it was focused and never opened its results, and React could clear text typed in that moment. Replaying the typed text and focus was tried and did not make it reliable (5 of 10 runs still failed), so it was not kept. The original L-3 test from before S5 is restored and passes 10 of 10 unchanged | S5-R4 kept open for S6; a fix that can be shown to work | **Approved** |
+| S6-D5 | **#44: first response to the minute.** A call or meeting logged in the same minute as the lead's receipt answers the lead, recorded at the receipt time; one logged in an earlier minute still does not | P6-0 R8b, Medium, "fix before Phase 6 closes" (approved 13 November) | **Approved** |
+| S6-D6 | **PostgreSQL JIT off for the API's connections** (`-c jit=off` on the pool). At 20,000 listings the planner's cost estimate for the property dashboard's correlated counts started the JIT compiler, adding about 0.4 s to a 12 ms query (§6). The API runs short queries only; JIT helps long analytical scans, which the API does not run | Found by the S6 performance pass (S1-R3); one setting in one place | **Approved** |
+| S6-D7 | **Quarter forecast on the board** sums the forecast's months of the current calendar quarter, per currency, with exact decimal arithmetic. Deals whose close date in the quarter has already passed count as overdue in the forecast (FC-1), not in the quarter line | Design 06 §5; FC-1 rules (S3) unchanged | **Approved** |
 
 ## 3. Tests
 
@@ -160,6 +160,10 @@ Phase 6 close-out: `PHASE-6-CLOSE-OUT-REPORT.md`. Proposed next, before Phase 7:
 
 | Item | Decision | Date |
 |---|---|---|
-| S6 (pipeline board, dashboards, close-out) | Awaiting approval | |
-| S6-D1 to S6-D7 | Awaiting approval, each individually | |
-| S6 risks | Awaiting review | |
+| S6 (pipeline board, dashboards, close-out) | **Approved** | 21 November 2026 |
+| S6-D1 to S6-D7 | **Approved** | 21 November 2026 |
+| S6-R1 to S6-R5 | Reviewed | 21 November 2026 |
+| S6-R2 (#42) | **Remains High priority and open**; prioritised immediately after the Phase 6 merge | 21 November 2026 |
+| Close #5, #15, #43, #44 | **Approved**; closed | 21 November 2026 |
+
+Next: one reviewed pull request `phase-6/readiness` → `main`. Phase 7 does not begin until it is merged. After the merge: #42 first, then the standard readiness process for Phase 7, with the Phase 7 readiness report presented before any implementation.
