@@ -306,7 +306,8 @@ SELECT test_assert(NOT ('open_balance' = ANY (app.contact_erasure_blockers('a500
 
 -- Close out the lease: charges settled or waived, deposit returned, tenancy closed.
 UPDATE rent_charges SET status = 'cancelled' WHERE id = 'ac000000-0000-0000-0000-000000000003';
-UPDATE leases SET status = 'closed', move_out_date = '2026-10-31' WHERE id = 'ab000000-0000-0000-0000-000000000001';
+UPDATE leases SET status = 'ended', move_out_date = '2026-10-31' WHERE id = 'ab000000-0000-0000-0000-000000000001';
+UPDATE leases SET status = 'closed' WHERE id = 'ab000000-0000-0000-0000-000000000001';
 UPDATE deposits SET status = 'returned', returned_amount = 12000, returned_at = now() WHERE id = 'b3000000-0000-0000-0000-000000000001';
 -- The January adjustment left GHS 500 of RCP-T-1 unallocated: the tenant's credit still has to be accounted for.
 SELECT test_assert(app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000002') @> ARRAY['open_balance'],
@@ -319,7 +320,7 @@ INSERT INTO payment_allocations (company_id, payment_id, rent_charge_id, amount,
 UPDATE deposits SET status = 'returned', returned_amount = 12000, returned_at = now() WHERE id = 'b3000000-0000-0000-0000-000000000001';
 INSERT INTO deposit_deductions (company_id, deposit_id, reason_code, description, amount, status) VALUES
   ('a0000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000001', 'cleaning', 'Cleaning after Ama moved out', 200, 'withdrawn');
-UPDATE leases SET status = 'closed', move_out_date = '2026-10-31', ended_reason = 'Tenant Ama relocated to Kumasi',
+UPDATE leases SET ended_reason = 'Tenant Ama relocated to Kumasi',
                   custom_fields = '{"guarantor": "Kofi"}'::jsonb
  WHERE id = 'ab000000-0000-0000-0000-000000000001';
 SELECT test_assert(

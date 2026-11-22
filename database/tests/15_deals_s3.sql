@@ -240,7 +240,7 @@ SELECT set_config('app.pipeline_action', '', true);
 SELECT test_expect_error(
   $$UPDATE deals SET stage_id = (SELECT id FROM pipeline_stages WHERE company_id IS NULL AND deal_type = 'letting' AND code = 'contract')
      WHERE id = 'ac300000-0000-0000-0000-000000000002'$$,
-  '23514', 'a letting deal stops at "terms agreed" until leases (Phase 7)');
+  '23514', 'a letting deal moves to lease signing only once a lease is drawn up from it (P7-D4)');
 SELECT test_assert(NOT app.deal_identity_required('a0000000-0000-0000-0000-000000000001', 'ac300000-0000-0000-0000-000000000002'),
   'the sales identity rule does not apply to lettings');
 
