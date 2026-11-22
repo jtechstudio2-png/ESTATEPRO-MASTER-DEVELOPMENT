@@ -10,7 +10,10 @@ type Company = Awaited<ReturnType<Fixtures['company']>>;
 
 let phoneCounter = 2000;
 const nextPhone = () => `024${String(9500000 + phoneCounter++).padStart(7, '0')}`;
-const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000);
+// One clock reading for every offset: two separate Date.now() calls can differ by a millisecond,
+// which pushes a response set exactly on the 60-minute target just outside it.
+const NOW = Date.now();
+const hoursAgo = (hours: number) => new Date(NOW - hours * 3_600_000);
 
 describe('dashboards (Phase 5 milestone C4; D-A, D-C, D-M)', () => {
   let t: TestApp;
