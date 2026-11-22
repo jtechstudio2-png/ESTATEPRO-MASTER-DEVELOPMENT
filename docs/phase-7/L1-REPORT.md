@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 22 November 2026 |
-| Branch | `phase-7/readiness`. Commits: `f83555f` (migration 0036, SQL suite 19), `2db5514` and `d00a548` (documents, agreements, leases, letting deals, tests), `__FINAL__` (performance test, report). CI run __CI__ |
+| Branch | `phase-7/readiness`. Commits: `f83555f` (migration 0036, SQL suite 19), `2db5514` and `d00a548` (documents, agreements, leases, letting deals, tests), `71bc2e4` and `5aec8c6` (performance test, report), `5c079b6` (dashboards test clock fix). CI run 188 green on `5c079b6` |
 | Approvals | P7-0 and ADR-009 approved, with P70-D1 to P70-D9 and risks R1 to R6 (22 November 2026). P7-W approved, with W7-D1 to W7-D8, W7-A1 (approved for L1), W7-A2, W7-S1 and risks W7-R1 to W7-R5 (22 November 2026) |
 | Scope | Readiness report §11, L1: management agreements and leases (life cycle, parties, letting deal to lease, activation, listing `rented`). Also W7-A1: the documents upload API that activation needs |
 | Not in scope | Rent schedule, charges, adjustments and rent reviews (L2). Receipts and arrears (L3). Deposits, inspections, notice, ending, closing and renewal (L4, see L1-D1). Portals (L5). Screens (L6) |
@@ -97,6 +97,7 @@ The migration, services and tests were re-read adversarially before this report.
 | Suite 15 (S3), letting-deal assertion | Label only: "stops until leases (Phase 7)" becomes "moves to lease signing only once a lease is drawn up (P7-D4)" | Same refusal, new reason |
 | `deals.e2e.test.ts` (S3), letting test | Title and the expected refusal text | Exchange is still refused for lettings. The message now points to `POST /deals/{id}/lease` |
 | Suite 17 (P7-0) | The fixture lease is ended, then closed, in two steps | The lease life cycle (migration 0036) has no active → closed step |
+| `dashboards.e2e.test.ts` (C4), CRM dashboard | Lead times are computed from one clock reading instead of a `Date.now()` per call | A response set exactly on the 60-minute target fell 1 ms outside it when the clock ticked between calls (CI run 187). Test-only; the dashboard code is unchanged |
 
 ## 5. Security impact
 
@@ -172,7 +173,7 @@ Measured through the full API at the readiness volume for one company: 2,000 pro
 
 | Item | Reference |
 |---|---|
-| CI | __CI__ |
+| CI | Run 188 (`5c079b6`): all 6 jobs green: API lint, typecheck, build and tests with coverage thresholds; database migrations and SQL suites; web lint, typecheck, messages, unit tests and build; web end-to-end (Playwright, axe, English and Arabic, 320 px to desktop); secret scanning; dependency scanning. Run 187 (`5aec8c6`) failed on one Phase 5 dashboards test, a timing bug in the test, fixed in `5c079b6` (§4.3) |
 
 ## Approval
 
