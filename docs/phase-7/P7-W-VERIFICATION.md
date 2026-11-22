@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Proposed**, for approval together with the [wireframes](./P7-W-WIREFRAMES.md) |
+| Status | **Approved** (product owner, 22 November 2026), together with the [wireframes](./P7-W-WIREFRAMES.md) |
 | Scope | Checks the Phase 7 wireframes against the approved readiness report (§2.1, §5 to §7, §9, §10), the seeded permission model (migration 0014), the schema (migrations 0003, 0004, 0008, 0010, 0011, 0035) and the P7-0 controls. Lists the endpoints L1 to L5 must provide, the schema gaps, and the decisions needed before L6 screen work starts |
 | Result | **Ready for approval**, subject to eight decisions (§5). Every in-scope requirement has a screen. One schema gap (inspection item photos, §4) and one API gap that L1 needs first (documents upload, §3.2). No business or legal rule is re-decided |
 | Order | The readiness report puts P7-W after P7-0 and before L1 (§11). The wireframes come before the API, so each screen names the endpoint its milestone must build. L1 to L5 build those endpoints to these screens; L6 builds the screens |
@@ -126,9 +126,9 @@ Then L1 starts, after approval of the P7-0 report.
 
 | Item | Decision | Date |
 |---|---|---|
-| P7-W wireframes and this verification report | Review positive in principle. Final approval pending the decision table (W7-D1 to W7-D8) | 22 November 2026 |
+| P7-W wireframes and this verification report | **Approved** | 22 November 2026 |
+| W7-D1 to W7-D8 | **Approved**, each individually | 22 November 2026 |
 | W7-A1 (documents upload API) | **Approved for L1** | 22 November 2026 |
 | W7-A2 (tenant payment instructions setting) | **Approved** (L5) | 22 November 2026 |
 | W7-S1 (inspection item photo link) | **Approved for L4** | 22 November 2026 |
-| W7-D1 to W7-D8 | Presented for decision review | 22 November 2026 |
-| W7-R1 to W7-R5 | Pending review | |
+| W7-R1 to W7-R5 | Reviewed and accepted | 22 November 2026 |

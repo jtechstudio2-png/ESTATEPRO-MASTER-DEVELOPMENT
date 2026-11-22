@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Proposed** (with P7-0, for approval with the P7-0 report) |
+| Status | **Accepted** (approved 22 November 2026 with P7-0, decisions P70-D1 to P70-D9) |
 | Date | 22 November 2026 |
 | Context | Phase 7 builds lettings: leases, rent, receipts, arrears, deposits, statements and portals (readiness report, approved 22 November 2026). The lettings and finance tables have existed since migrations 0008 and 0010 and hold no data yet. The readiness audit found five money-integrity gaps (#1, #2, #3, #13, #22). It also found that a tenancy party could only be refused erasure as a generic "referenced record". P7-0 closes all of these before any lettings screen or job writes data |
 | Builds on | ADR-003 (API conventions), ADR-007 (field encryption, erasure §8), ADR-008 (sales records: the same retention and erasure pattern), Phase 1 specification §5.5 (LET), §5.7 (FIN), §12.3 (lease life cycle) |

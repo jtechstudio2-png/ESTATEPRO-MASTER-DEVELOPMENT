@@ -184,8 +184,9 @@ Measured on a copy of the database seeded at the readiness volumes for one compa
 
 | Item | Decision | Date |
 |---|---|---|
-| P7-0 | Review positive in principle; money-integrity remediation direction accepted. Final approval pending the decision table (P70-D1 to P70-D9) | 22 November 2026 |
-| ADR-009 | Approach accepted | 22 November 2026 |
-| P70-D2 (API action for #3 in L3) | **Approved** | 22 November 2026 |
-| P70-D6 (row-level security enabled and checked, not forced) | **Approved** | 22 November 2026 |
-| P70-D1, P70-D3 to P70-D5, P70-D7 to P70-D9 | Presented for decision review | 22 November 2026 |
+| P7-0 | **Approved** | 22 November 2026 |
+| ADR-009 | **Approved** (status Accepted) | 22 November 2026 |
+| P70-D1, P70-D3, P70-D4, P70-D5, P70-D7, P70-D8, P70-D9 | **Approved**, each individually | 22 November 2026 |
+| P70-D2 (API action for #3 in L3), P70-D6 (row-level security enabled and checked, not forced) | **Approved** (earlier the same day) | 22 November 2026 |
+| Risks R1 to R6 | Reviewed and accepted | 22 November 2026 |
+| Next | L1 (management agreements and leases, with W7-A1 document upload) | 22 November 2026 |

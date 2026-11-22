@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Proposed**, for approval with the [verification report](./P7-W-VERIFICATION.md). L6 builds these screens |
+| Status | **Approved** (product owner, 22 November 2026), with W7-D1 to W7-D8. L6 builds these screens; L1 to L5 build their endpoints |
 | Builds on | Phase 3 design set (`docs/phase-3-ui-ux/`): shell, tokens, record page pattern (07 §1), tables, forms, filters, empty and error states. Specific Phase 3 drawings: receipt allocation (07 §2.1), tablet inspection (07 §2.5), rent dashboard (06 §6), portal home screens (06 §11), information architecture (02: Lettings and Rent sections). Phase 4 to 6 wireframe conventions (`docs/phase-6/P6-W-WIREFRAMES.md`). Those rules apply here and are not repeated |
 | Backed by | The schema (migrations 0008, 0010, 0011, 0035) and the approved Phase 7 readiness report (workflows §5, portals §6, legal rules §7, decisions P7-D1 to P7-D16). The lettings API does not exist yet: each screen names the endpoint L1 to L5 must provide (verification report §3) |
 | Companion | [P7-W Wireframe Verification Report](./P7-W-VERIFICATION.md) |
