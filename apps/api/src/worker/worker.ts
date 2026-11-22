@@ -7,6 +7,8 @@ import type { Db, TenantDb } from '../database/database.module.js';
 import { MATCH_REFRESH_BATCH, refreshRequirementMatchBatch, removeInactiveMatchStatus } from '../dashboards/dashboards.service.js';
 import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
+import type { DocumentScanner } from '../documents/document-scanner.js';
+import { DOCUMENT_SCAN_JOB } from '../documents/documents.service.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { expireOffers } from '../offers/offers.service.js';
 import { ARCHIVE_RETENTION_DAYS, MEDIA_PROCESS_JOB, purgeMedia } from '../media/media.service.js';
@@ -24,6 +26,7 @@ export const JOBS = {
   requirementMatchRefresh: 'requirement.match_refresh',
   keyRotate: 'key.rotate',
   offerExpire: 'offer.expire',
+  documentScan: DOCUMENT_SCAN_JOB,
 } as const;
 
 /** Batches (of 200 rows) one key-rotation job handles before handing over to a follow-up job. */
@@ -45,6 +48,7 @@ export interface WorkerDeps {
   queue: JobQueue;
   storage: StoragePort;
   processor: MediaProcessor;
+  documentScanner: DocumentScanner;
   listings: ListingsService;
   audit: AuditService;
   rotation: KeyRotationService;
@@ -139,7 +143,8 @@ export class Worker {
     enqueued += await discover(
       JOBS.uploadCleanup,
       quarter,
-      sql<{ companyId: string }>`select distinct company_id as "companyId" from upload_sessions where status = 'pending' and expires_at < ${now}::timestamptz`,
+      sql<{ companyId: string }>`select company_id as "companyId" from upload_sessions where status = 'pending' and expires_at < ${now}::timestamptz
+        union select company_id from document_upload_sessions where status = 'pending' and expires_at < ${now}::timestamptz`,
     );
     enqueued += await discover(
       JOBS.mediaTimeout,
@@ -225,6 +230,11 @@ export class Worker {
       }
       const outcome = await this.deps.queue.retryOrFail(job, errorMessage(error));
       this.deps.logger.warn('job failed', { jobId: job.id, jobType: job.jobType, companyId: job.companyId, attempt: job.attempts, outcome, error: errorMessage(error) });
+      if (outcome === 'failed' && job.jobType === JOBS.documentScan) {
+        await this.deps.documentScanner
+          .fail(job.companyId, String(job.payload['versionId']), requestId)
+          .catch((failure: unknown) => this.deps.logger.error('could not mark document as failed', { jobId: job.id, error: errorMessage(failure) }));
+      }
       if (outcome === 'failed' && job.jobType === JOBS.mediaProcess) {
         // One bad job must never stop the pass: a failure here is logged and left to the timeout sweep.
         await this.deps.processor
@@ -242,6 +252,10 @@ export class Worker {
     switch (job.jobType) {
       case JOBS.mediaProcess:
         await processor.process(job.companyId, String(job.payload['mediaId']), requestId);
+        return;
+
+      case JOBS.documentScan:
+        await this.deps.documentScanner.scan(job.companyId, String(job.payload['versionId']), requestId);
         return;
 
       case JOBS.listingExpire:
@@ -268,7 +282,23 @@ export class Worker {
               .where('companyId', '=', job.companyId)
               .execute();
           }
-          return expired.map((row) => row.quarantineKey);
+          // Document uploads never confirmed (W7-A1) release their reservation the same way.
+          const documents = await tx
+            .updateTable('documentUploadSessions')
+            .set({ status: 'expired' })
+            .where('status', '=', 'pending')
+            .where('expiresAt', '<', this.now())
+            .returning(['storageKey', 'declaredSize'])
+            .execute();
+          const documentBytes = documents.reduce((sum, row) => sum + Number(row.declaredSize), 0);
+          if (documentBytes > 0) {
+            await tx
+              .updateTable('storageUsage')
+              .set({ bytesReserved: sql`greatest(bytes_reserved - ${documentBytes}, 0)`, updatedAt: sql`now()` })
+              .where('companyId', '=', job.companyId)
+              .execute();
+          }
+          return [...expired.map((row) => row.quarantineKey), ...documents.map((row) => row.storageKey)];
         });
         // Anything uploaded but never confirmed (the storage lifecycle rule is the backstop).
         await storage.remove(keys);

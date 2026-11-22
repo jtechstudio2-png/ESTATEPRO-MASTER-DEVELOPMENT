@@ -877,7 +877,7 @@ export class ListingsService {
    * completing the sale sells it (final: unpublished and closed). The caller
    * has checked access to the deal.
    */
-  async pipelineStatus(tx: Tx, ctx: TenantContext, id: string, to: 'reserved' | 'available' | 'under_contract' | 'sold', reason: string): Promise<void> {
+  async pipelineStatus(tx: Tx, ctx: TenantContext, id: string, to: 'reserved' | 'available' | 'under_contract' | 'sold' | 'rented', reason: string): Promise<void> {
     const current = await this.lockListing(tx, id);
     const from = current.status as ListingStatus;
     if (from === to) return;

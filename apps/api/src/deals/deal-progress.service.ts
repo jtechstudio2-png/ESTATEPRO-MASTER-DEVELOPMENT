@@ -49,7 +49,7 @@ export class DealProgressService {
    */
   async exchange(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: ExchangeBody): Promise<string> {
     const deal = await lockDeal(tx, ctx, id, expectedVersion, 'deal.update');
-    if (deal.dealType !== 'sale') throw Problems.businessRule('Letting deals stop at "terms agreed" until leases are available (Phase 7).');
+    if (deal.dealType !== 'sale') throw Problems.businessRule('A letting deal moves to lease signing when its lease is drawn up (POST /deals/{id}/lease).');
     if (deal.stageClass !== 'offer_accepted') throw Problems.businessRule('Contracts are exchanged once an offer is accepted.');
     const offer = await tx.selectFrom('offers').selectAll().where('dealId', '=', id).where('status', '=', 'accepted').executeTakeFirstOrThrow();
     const place = await this.place(tx, deal);
@@ -124,7 +124,7 @@ export class DealProgressService {
    */
   async complete(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, body: CompleteBody): Promise<string> {
     const deal = await lockDeal(tx, ctx, id, expectedVersion, 'deal.close');
-    if (deal.dealType !== 'sale') throw Problems.businessRule('Letting deals stop at "terms agreed" until leases are available (Phase 7).');
+    if (deal.dealType === 'letting') return this.completeLetting(tx, ctx, deal, body.completedOn);
     if (deal.stageClass !== 'contract') throw Problems.businessRule('A sale completes once contracts are exchanged.');
     const sale = await tx.selectFrom('salesTransactions').selectAll().where('dealId', '=', id).forUpdate().executeTakeFirstOrThrow();
     const place = await this.place(tx, deal);
@@ -189,6 +189,14 @@ export class DealProgressService {
       await this.audit.record(tx, ctx, { action: 'sale.fallen_through', entityType: 'sale', entityId: sale.id, changes: { status: { old: 'exchanged', new: 'fallen_through' } }, metadata: { dealId: id, lostReasonCode: body.lostReasonCode } });
       await this.audit.emit(tx, ctx, { eventType: 'sale.fallen_through', aggregateType: 'sale', aggregateId: sale.id, payload: { saleId: sale.id, dealId: id } });
     }
+    // Lettings (L1): a lease awaiting signature or in force keeps the deal; a draft lease is cancelled with it.
+    const lease = await tx.selectFrom('leases').select(['id', 'reference', 'status']).where('dealId', '=', id).where('status', '<>', 'cancelled').forUpdate().executeTakeFirst();
+    if (lease && lease.status !== 'draft') throw Problems.businessRule(`Lease ${lease.reference} is ${lease.status.replace('_', ' ')}. Cancel or end the lease before losing the deal.`);
+    if (lease) {
+      await tx.updateTable('leases').set({ status: 'cancelled', endedReason: notes ?? label?.label ?? body.lostReasonCode, version: sql`version + 1` }).where('id', '=', lease.id).execute();
+      await this.audit.record(tx, ctx, { action: 'lease.cancelled', entityType: 'lease', entityId: lease.id, changes: { status: { old: 'draft', new: 'cancelled' } }, metadata: { dealId: id, cause: 'deal-lost' } });
+      await this.audit.emit(tx, ctx, { eventType: 'lease.cancelled', aggregateType: 'lease', aggregateId: lease.id, payload: { leaseId: lease.id, dealId: id } });
+    }
     const accepted = await tx.selectFrom('offers').select(['id', 'dealId', 'listingId']).where('dealId', '=', id).where('status', '=', 'accepted').executeTakeFirst();
     if (accepted) await releaseAcceptedOffer(tx, ctx, this.audit, accepted, null, 'deal-lost');
     const pending = await tx.updateTable('offers').set({ status: 'withdrawn', respondedAt: new Date() }).where('dealId', '=', id).where('status', '=', 'submitted').returning(['id', 'listingId']).execute();
@@ -209,6 +217,31 @@ export class DealProgressService {
     });
     await this.audit.emit(tx, ctx, { eventType: 'deal.lost', aggregateType: 'deal', aggregateId: id, payload: { dealId: id, lostReasonCode: body.lostReasonCode } });
     return id;
+  }
+
+  /**
+   * A letting deal is won ("let agreed", deal.close) once its lease is active
+   * and the deal's required milestones are done (P7-D4, L1-D2).
+   */
+  private async completeLetting(tx: Tx, ctx: TenantContext, deal: DealRow, completedOn: string): Promise<string> {
+    if (deal.stageClass !== 'contract') throw Problems.businessRule('A letting deal is completed once its lease has been drawn up and activated.');
+    const lease = await tx.selectFrom('leases').select(['id', 'reference', 'status']).where('dealId', '=', deal.id).where('status', '<>', 'cancelled').executeTakeFirst();
+    if (!lease || !['active', 'periodic', 'notice_given', 'ended', 'closed'].includes(lease.status)) {
+      throw Problems.businessRule(lease ? `Lease ${lease.reference} is not active yet. Activate it first.` : 'Draw up and activate the lease first.');
+    }
+    const place = await this.place(tx, deal);
+    const errors: FieldError[] = [];
+    if (!isRealDate(completedOn)) errors.push({ field: 'completedOn', code: 'invalid', message: 'Use a real date such as 2027-01-31.' });
+    else if (completedOn > todayIn(place.timezone)) errors.push({ field: 'completedOn', code: 'future', message: 'Record the completion once it has happened.' });
+    const open = await tx.selectFrom('dealMilestones').select(['code', 'name']).where('dealId', '=', deal.id).where('isRequired', '=', true).where('completedAt', 'is', null).orderBy('sortOrder').execute();
+    for (const milestone of open) errors.push({ field: `milestones.${milestone.code}`, code: 'incomplete', message: `${milestone.name} is not done yet.` });
+    if (errors.length > 0) throw Problems.validation(errors);
+    await asPipelineAction(tx);
+    await this.close(tx, deal, 'closed_won', `Let agreed: ${lease.reference}`, {});
+    await dealTimeline(tx, ctx, deal, `Let agreed: ${lease.reference}`, null);
+    await this.audit.record(tx, ctx, { action: 'deal.won', entityType: 'deal', entityId: deal.id, metadata: { leaseId: lease.id, completedOn, fromStageClass: 'contract' } });
+    await this.audit.emit(tx, ctx, { eventType: 'deal.won', aggregateType: 'deal', aggregateId: deal.id, payload: { dealId: deal.id, leaseId: lease.id } });
+    return deal.id;
   }
 
   // ----------------------------------------------------------------- helpers

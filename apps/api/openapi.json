@@ -12676,6 +12676,1465 @@
           "Contacts: portal preview"
         ]
       }
+    },
+    "/api/v1/documents/uploads": {
+      "post": {
+        "operationId": "Documents_createUpload",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDocumentUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentUploadTicketDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start a document upload for a lease or agreement; PUT the file to uploadUrl, then confirm",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/v1/documents/uploads/{uploadId}/confirm": {
+      "post": {
+        "operationId": "Documents_confirmUpload",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm the uploaded file: the document is recorded and its security scan queued (scanStatus \"pending\")",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{documentId}": {
+      "get": {
+        "operationId": "Documents_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{documentId}/download": {
+      "post": {
+        "operationId": "Documents_download",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDownloadDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A short-lived link to a clean document (the download is audited)",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/documents": {
+      "get": {
+        "operationId": "Documents_forLease",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Documents",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/management-agreements/{agreementId}/documents": {
+      "get": {
+        "operationId": "Documents_forAgreement",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agreementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Documents",
+          "Management agreements"
+        ]
+      }
+    },
+    "/api/v1/management-agreements": {
+      "get": {
+        "operationId": "Agreements_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[landlordContactId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[serviceLevel]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Reference prefix, landlord or property name",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "createdAt",
+                "-createdAt",
+                "startDate",
+                "-startDate"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Agreements in your scope, newest first",
+        "tags": [
+          "Management agreements"
+        ]
+      },
+      "post": {
+        "operationId": "Agreements_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgreementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a landlord's instruction as a draft agreement",
+        "tags": [
+          "Management agreements"
+        ]
+      }
+    },
+    "/api/v1/management-agreements/{agreementId}": {
+      "get": {
+        "operationId": "Agreements_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agreementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Management agreements"
+        ]
+      },
+      "patch": {
+        "operationId": "Agreements_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agreementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAgreementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a draft; once active only the approval limit, float, payouts, end date and notice change",
+        "tags": [
+          "Management agreements"
+        ]
+      }
+    },
+    "/api/v1/management-agreements/{agreementId}/activate": {
+      "post": {
+        "operationId": "Agreements_activate",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agreementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateAgreementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activate (or reactivate) with the signed agreement scanned clean; one live agreement per unit",
+        "tags": [
+          "Management agreements"
+        ]
+      }
+    },
+    "/api/v1/management-agreements/{agreementId}/suspend": {
+      "post": {
+        "operationId": "Agreements_suspend",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agreementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Management agreements"
+        ]
+      }
+    },
+    "/api/v1/management-agreements/{agreementId}/end": {
+      "post": {
+        "operationId": "Agreements_end",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agreementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndAgreementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End the agreement (refused while leases under it are live)",
+        "tags": [
+          "Management agreements"
+        ]
+      }
+    },
+    "/api/v1/leases": {
+      "get": {
+        "operationId": "Leases_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[endDate][lte]",
+            "required": false,
+            "in": "query",
+            "description": "Leases ending by this day",
+            "schema": {}
+          },
+          {
+            "name": "filter[endDate][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[contactId]",
+            "required": false,
+            "in": "query",
+            "description": "Any party",
+            "schema": {}
+          },
+          {
+            "name": "filter[managementAgreementId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[unitId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leaseType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Reference prefix, unit, property or tenant name",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "updatedAt",
+                "-updatedAt",
+                "startDate",
+                "-startDate",
+                "endDate",
+                "-endDate"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeasePageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leases in your scope; open ones (not closed or cancelled) by default",
+        "tags": [
+          "Leases"
+        ]
+      },
+      "post": {
+        "operationId": "Leases_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeaseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Draw up a draft lease for a unit",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/deals/{dealId}/lease": {
+      "post": {
+        "operationId": "Leases_fromDeal",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the deal",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaseFromDealBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Draw up the draft lease of a letting deal at \"terms agreed\" (needs lease.create too); the deal moves to lease signing (P7-D4)",
+        "tags": [
+          "Leases",
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}": {
+      "get": {
+        "operationId": "Leases_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leases"
+        ]
+      },
+      "patch": {
+        "operationId": "Leases_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeaseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit the terms of a draft or a lease awaiting signature",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/parties": {
+      "post": {
+        "operationId": "Leases_addParty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeasePartyInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a party (before activation)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/parties/{contactId}/{partyRole}": {
+      "patch": {
+        "operationId": "Leases_updateParty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partyRole",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeasePartyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a party's share or primary flag (before activation) or portal access (any time)",
+        "tags": [
+          "Leases"
+        ]
+      },
+      "delete": {
+        "operationId": "Leases_removeParty",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partyRole",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a party (before activation; not the primary tenant)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/send-for-signature": {
+      "post": {
+        "operationId": "Leases_sendForSignature",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Draft → pending signature (needs a primary tenant and a landlord; holds the unit for the dates)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/return-to-draft": {
+      "post": {
+        "operationId": "Leases_returnToDraft",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/activate": {
+      "post": {
+        "operationId": "Leases_activate",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateLeaseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activate with the signed lease (P7-D5); the rent listing becomes rented (P7-D4)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/cancel": {
+      "post": {
+        "operationId": "Leases_cancel",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelLeaseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a lease that is not yet active, with the reason",
+        "tags": [
+          "Leases"
+        ]
+      }
     }
   },
   "info": {
@@ -28431,6 +29890,1499 @@
           "notShown",
           "contactId",
           "limitedToYourAccess"
+        ]
+      },
+      "CreateDocumentUploadBody": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "lease",
+              "management_agreement"
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Shown in lists. Do not type identity or bank numbers"
+          },
+          "documentTypeCode": {
+            "type": "string",
+            "description": "Picklist \"document_type\" (lease, management_agreement, notice, …)"
+          },
+          "isSigned": {
+            "type": "boolean",
+            "default": false,
+            "description": "The signed copy (a lease or agreement is activated only with a signed, clean document)"
+          },
+          "fileName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          },
+          "size": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Exact size in bytes"
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA-256 of the file, hex"
+          }
+        },
+        "required": [
+          "entityType",
+          "entityId",
+          "title",
+          "documentTypeCode",
+          "fileName",
+          "contentType",
+          "size",
+          "sha256"
+        ]
+      },
+      "DocumentUploadTicketDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "description": "Signed URL; send the file with PUT and exactly the given headers"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "uploadUrl",
+          "method",
+          "headers",
+          "expiresAt"
+        ]
+      },
+      "DocumentLinkDto": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "lease",
+              "management_agreement"
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "entityType",
+          "entityId"
+        ]
+      },
+      "DocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "scanStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "clean",
+              "infected",
+              "failed"
+            ],
+            "description": "Only clean documents can be downloaded or used to activate a record"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "isSigned": {
+            "type": "boolean"
+          },
+          "versionNo": {
+            "type": "number"
+          },
+          "uploadedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentLinkDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "documentTypeCode",
+          "category",
+          "scanStatus",
+          "fileName",
+          "mimeType",
+          "sizeBytes",
+          "isSigned",
+          "versionNo",
+          "uploadedBy",
+          "uploadedAt",
+          "links"
+        ]
+      },
+      "DocumentDownloadDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Short-lived signed URL"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "url",
+          "expiresAt"
+        ]
+      },
+      "DocumentListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FeeDto": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string",
+            "enum": [
+              "percent_of_rent_collected",
+              "percent_of_rent_due",
+              "fixed_per_period",
+              "one_off"
+            ]
+          },
+          "percent": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "fixed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "basis",
+          "percent",
+          "fixed"
+        ]
+      },
+      "AgreementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "suspended",
+              "ended"
+            ]
+          },
+          "landlord": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "property": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "unit": {
+            "description": "Null: the whole property",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceLevel": {
+            "type": "string",
+            "enum": [
+              "let_only",
+              "rent_collection",
+              "fully_managed"
+            ]
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "fee": {
+            "description": "Recorded only; fees are charged with Finance (Phase 9, P7-D2)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeeDto"
+              }
+            ]
+          },
+          "expenseApprovalLimit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "floatAmount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "payoutFrequency": {
+            "type": "string",
+            "enum": [
+              "on_receipt",
+              "weekly",
+              "monthly",
+              "quarterly"
+            ]
+          },
+          "payoutDay": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "noticePeriodDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "document": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "liveLeases": {
+            "type": "number",
+            "description": "Leases under this agreement that are not closed or cancelled"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "landlord",
+          "property",
+          "unit",
+          "serviceLevel",
+          "currencyCode",
+          "fee",
+          "expenseApprovalLimit",
+          "floatAmount",
+          "payoutFrequency",
+          "payoutDay",
+          "startDate",
+          "endDate",
+          "noticePeriodDays",
+          "document",
+          "liveLeases",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "AgreementPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgreementDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "CreateAgreementBody": {
+        "type": "object",
+        "properties": {
+          "landlordContactId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The landlord (a contact)"
+          },
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "One unit; omit for the whole property"
+          },
+          "serviceLevel": {
+            "type": "string",
+            "enum": [
+              "let_only",
+              "rent_collection",
+              "fully_managed"
+            ]
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "GHS",
+            "description": "Currency of the fee, limits and float"
+          },
+          "feeBasis": {
+            "type": "string",
+            "enum": [
+              "percent_of_rent_collected",
+              "percent_of_rent_due",
+              "fixed_per_period",
+              "one_off"
+            ]
+          },
+          "feePercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Required for percentage fees"
+          },
+          "feeFixed": {
+            "description": "Required for fixed and one-off fees",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "expenseApprovalLimit": {
+            "description": "Repairs above this need the landlord's approval",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "floatAmount": {
+            "description": "Kept back for repairs (default 0)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "payoutFrequency": {
+            "type": "string",
+            "enum": [
+              "on_receipt",
+              "weekly",
+              "monthly",
+              "quarterly"
+            ],
+            "default": "monthly"
+          },
+          "payoutDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-12-01"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2027-11-30"
+          },
+          "noticePeriodDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3650
+          }
+        },
+        "required": [
+          "landlordContactId",
+          "propertyId",
+          "serviceLevel",
+          "currencyCode",
+          "feeBasis",
+          "startDate"
+        ]
+      },
+      "UpdateAgreementBody": {
+        "type": "object",
+        "properties": {
+          "landlordContactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "serviceLevel": {
+            "type": "string",
+            "enum": [
+              "let_only",
+              "rent_collection",
+              "fully_managed"
+            ]
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "GHS"
+          },
+          "feeBasis": {
+            "type": "string",
+            "enum": [
+              "percent_of_rent_collected",
+              "percent_of_rent_due",
+              "fixed_per_period",
+              "one_off"
+            ]
+          },
+          "feePercent": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "feeFixed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expenseApprovalLimit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "floatAmount": {
+            "$ref": "#/components/schemas/MoneyInput"
+          },
+          "payoutFrequency": {
+            "type": "string",
+            "enum": [
+              "on_receipt",
+              "weekly",
+              "monthly",
+              "quarterly"
+            ]
+          },
+          "payoutDay": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 31
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-12-01"
+          },
+          "endDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "2027-11-30"
+          },
+          "noticePeriodDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      },
+      "ActivateAgreementBody": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The signed agreement, uploaded to this agreement and scanned clean"
+          }
+        },
+        "required": [
+          "documentId"
+        ]
+      },
+      "EndAgreementBody": {
+        "type": "object",
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "example": "2027-11-30",
+            "description": "The last day of the instruction"
+          }
+        },
+        "required": [
+          "endDate"
+        ]
+      },
+      "LeaseSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "pending_signature",
+              "active",
+              "periodic",
+              "notice_given",
+              "ended",
+              "closed",
+              "cancelled"
+            ]
+          },
+          "unit": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "property": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "primaryTenant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rent": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ]
+          },
+          "leaseType": {
+            "type": "string",
+            "enum": [
+              "fixed_term",
+              "periodic"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "renewalStatus": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "unit",
+          "property",
+          "primaryTenant",
+          "rent",
+          "rentFrequency",
+          "leaseType",
+          "startDate",
+          "endDate",
+          "renewalStatus",
+          "updatedAt"
+        ]
+      },
+      "LeasePageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeaseSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "LeasePartyInput": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyRole": {
+            "type": "string",
+            "enum": [
+              "tenant",
+              "co_tenant",
+              "occupant",
+              "guarantor",
+              "landlord",
+              "landlord_agent"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "default": false,
+            "description": "One primary tenant per lease"
+          },
+          "liabilityShare": {
+            "type": "number",
+            "minimum": 0.0001,
+            "maximum": 100,
+            "description": "Share of the rent (tenants and co-tenants); not required to total 100 % (W7-D5)"
+          },
+          "portalAccess": {
+            "type": "boolean",
+            "default": true,
+            "description": "Grants nothing until the contact accepts a portal invitation (L5)"
+          }
+        },
+        "required": [
+          "contactId",
+          "partyRole"
+        ]
+      },
+      "CreateLeaseBody": {
+        "type": "object",
+        "properties": {
+          "managementAgreementId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The agreement that covers the unit (required to collect rent for a collected service level)"
+          },
+          "leaseType": {
+            "type": "string",
+            "enum": [
+              "fixed_term",
+              "periodic"
+            ]
+          },
+          "usage": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "commercial",
+              "mixed"
+            ],
+            "default": "residential"
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-12-01"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2027-11-30",
+            "description": "Required for fixed-term leases"
+          },
+          "rentDueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31
+          },
+          "advancePeriods": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120,
+            "default": 1,
+            "description": "Periods paid at signing (charged by the rent schedule, L2)"
+          },
+          "prorateFirstPeriod": {
+            "type": "boolean",
+            "default": true
+          },
+          "deposit": {
+            "description": "In the rent currency; recorded when received (L4)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "noticePeriodDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3650
+          },
+          "breakClauseDate": {
+            "type": "string",
+            "example": "2027-05-31"
+          },
+          "breakNoticeDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3650
+          },
+          "nextRentReviewDate": {
+            "type": "string",
+            "example": "2027-12-01"
+          },
+          "governingLocaleCode": {
+            "type": "string",
+            "example": "en-GH"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The rent listing of the unit; it becomes rented on activation (P7-D4)"
+          },
+          "rent": {
+            "description": "Rent per period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ]
+          },
+          "parties": {
+            "description": "One primary tenant. Without a landlord party, the unit's current legal owners are added as landlords",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeasePartyInput"
+            }
+          }
+        },
+        "required": [
+          "leaseType",
+          "startDate",
+          "unitId",
+          "rent",
+          "rentFrequency",
+          "parties"
+        ]
+      },
+      "LeasePartyDto": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "partyRole": {
+            "type": "string",
+            "enum": [
+              "tenant",
+              "co_tenant",
+              "occupant",
+              "guarantor",
+              "landlord",
+              "landlord_agent"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "liabilityShare": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "portalAccess": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "contact",
+          "partyRole",
+          "isPrimary",
+          "liabilityShare",
+          "portalAccess"
+        ]
+      },
+      "LeaseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "pending_signature",
+              "active",
+              "periodic",
+              "notice_given",
+              "ended",
+              "closed",
+              "cancelled"
+            ]
+          },
+          "unit": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "property": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "primaryTenant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rent": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ]
+          },
+          "leaseType": {
+            "type": "string",
+            "enum": [
+              "fixed_term",
+              "periodic"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "renewalStatus": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "jurisdictionCode": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "commercial",
+              "mixed"
+            ]
+          },
+          "rentDueDay": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "advancePeriods": {
+            "type": "number"
+          },
+          "prorateFirstPeriod": {
+            "type": "boolean"
+          },
+          "deposit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "noticePeriodDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "breakClauseDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "breakNoticeDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "nextRentReviewDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "governingLocaleCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "moveInDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "signedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "endedReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the lease was cancelled or ended"
+          },
+          "managementAgreement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "previousLease": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "document": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeasePartyDto"
+            }
+          },
+          "rulesNotReviewed": {
+            "type": "boolean",
+            "description": "No reviewed legal rules exist for this jurisdiction: limits are not enforced (P7-D3)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "unit",
+          "property",
+          "primaryTenant",
+          "rent",
+          "rentFrequency",
+          "leaseType",
+          "startDate",
+          "endDate",
+          "renewalStatus",
+          "updatedAt",
+          "jurisdictionCode",
+          "usage",
+          "rentDueDay",
+          "advancePeriods",
+          "prorateFirstPeriod",
+          "deposit",
+          "noticePeriodDays",
+          "breakClauseDate",
+          "breakNoticeDays",
+          "nextRentReviewDate",
+          "governingLocaleCode",
+          "moveInDate",
+          "signedAt",
+          "endedReason",
+          "managementAgreement",
+          "listing",
+          "deal",
+          "previousLease",
+          "document",
+          "parties",
+          "rulesNotReviewed",
+          "createdAt",
+          "version"
+        ]
+      },
+      "LeaseFromDealBody": {
+        "type": "object",
+        "properties": {
+          "managementAgreementId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The agreement that covers the unit (required to collect rent for a collected service level)"
+          },
+          "leaseType": {
+            "type": "string",
+            "enum": [
+              "fixed_term",
+              "periodic"
+            ]
+          },
+          "usage": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "commercial",
+              "mixed"
+            ],
+            "default": "residential"
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-12-01"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2027-11-30",
+            "description": "Required for fixed-term leases"
+          },
+          "rentDueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31
+          },
+          "advancePeriods": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120,
+            "default": 1,
+            "description": "Periods paid at signing (charged by the rent schedule, L2)"
+          },
+          "prorateFirstPeriod": {
+            "type": "boolean",
+            "default": true
+          },
+          "deposit": {
+            "description": "In the rent currency; recorded when received (L4)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "noticePeriodDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3650
+          },
+          "breakClauseDate": {
+            "type": "string",
+            "example": "2027-05-31"
+          },
+          "breakNoticeDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3650
+          },
+          "nextRentReviewDate": {
+            "type": "string",
+            "example": "2027-12-01"
+          },
+          "governingLocaleCode": {
+            "type": "string",
+            "example": "en-GH"
+          },
+          "extraParties": {
+            "description": "Added to the deal's tenants (co-tenants, occupants, guarantors, landlords)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeasePartyInput"
+            }
+          }
+        },
+        "required": [
+          "leaseType",
+          "startDate"
+        ]
+      },
+      "UpdateLeaseBody": {
+        "type": "object",
+        "properties": {
+          "managementAgreementId": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "leaseType": {
+            "type": "string",
+            "enum": [
+              "fixed_term",
+              "periodic"
+            ]
+          },
+          "usage": {
+            "type": "string",
+            "enum": [
+              "residential",
+              "commercial",
+              "mixed"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rent": {
+            "$ref": "#/components/schemas/MoneyInput"
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ]
+          },
+          "rentDueDay": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "advancePeriods": {
+            "type": "number"
+          },
+          "prorateFirstPeriod": {
+            "type": "boolean"
+          },
+          "deposit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "noticePeriodDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "breakClauseDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "breakNoticeDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "nextRentReviewDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "governingLocaleCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateLeasePartyBody": {
+        "type": "object",
+        "properties": {
+          "liabilityShare": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "portalAccess": {
+            "type": "boolean",
+            "description": "The only change allowed once the lease is active"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ActivateLeaseBody": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The signed lease, uploaded to this lease and scanned clean (required unless the company turned the rule off, P7-D5)"
+          },
+          "signedOn": {
+            "type": "string",
+            "example": "2026-11-28",
+            "description": "The day the lease was signed (not in the future)"
+          },
+          "moveInDate": {
+            "type": "string",
+            "example": "2026-12-01",
+            "description": "Default: the start date"
+          }
+        },
+        "required": [
+          "signedOn"
+        ]
+      },
+      "CancelLeaseBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "description": "Kept on the record. Do not type identity or bank numbers"
+          }
+        },
+        "required": [
+          "reason"
         ]
       }
     }

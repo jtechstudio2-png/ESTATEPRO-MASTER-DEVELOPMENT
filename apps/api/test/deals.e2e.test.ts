@@ -446,7 +446,7 @@ describe('S3: deals', () => {
       expect(owners).toEqual([expect.objectContaining({ owner: expect.objectContaining({ id: seller.id }), current: true })]);
     });
 
-    it('stops letting deals at "terms agreed" (P6-D2)', async () => {
+    it('takes letting deals from "terms agreed" to a lease, not to an exchange (P7-D4)', async () => {
       const tenant = await contact();
       const place = await newListing('rent');
       const deal = await create('owner', { dealType: 'letting', primaryContactId: tenant.id, listingId: place.listingId });
@@ -456,7 +456,7 @@ describe('S3: deals', () => {
       expect(agreed).toMatchObject({ stage: { stageClass: 'offer_accepted' }, identity: { required: false }, access: { canExchange: false, canComplete: false } });
       expect(agreed.milestones.map((m) => m.code)).toEqual(['references_checked', 'holding_deposit', 'lease_signed', 'advance_received', 'move_in_inspection']);
       const refused = await act('owner', deal.id, 'exchange', { contractSignedOn: today() }, 422);
-      expect(refused).toMatchObject({ detail: expect.stringContaining('Phase 7') });
+      expect(refused).toMatchObject({ detail: expect.stringContaining('lease signing') });
     });
   });
 

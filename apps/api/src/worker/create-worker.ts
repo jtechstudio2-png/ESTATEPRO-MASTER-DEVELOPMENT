@@ -5,6 +5,7 @@ import { KeyRotationService } from '../crypto/key-rotation.service.js';
 import { createKysely, TenantDb } from '../database/database.module.js';
 import { ListingSettingsService } from '../listings/listing-settings.service.js';
 import { ListingsService } from '../listings/listings.service.js';
+import { DocumentScanner } from '../documents/document-scanner.js';
 import { MediaProcessor } from '../media/media-processor.js';
 import { ClamAvScanner, type MalwareScanner } from '../media/scanner.js';
 import { S3Storage } from '../media/storage.js';
@@ -36,6 +37,7 @@ export function createWorker(
       queue: new JobQueue(platformDb),
       storage,
       processor: new MediaProcessor(tenantDb, storage, scanner, audit),
+      documentScanner: new DocumentScanner(tenantDb, storage, scanner, audit),
       listings: new ListingsService(audit, new ListingSettingsService(audit), config),
       audit,
       rotation,
