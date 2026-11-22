@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 22 November 2026 |
-| Branch | `phase-7/readiness` (from `main` at `7e5e9ab`, after PR #49), commits `1550860` (migration 0035, SQL suites 17 and 18, blocker messages), `d84c1ce` (ADR-009, API test, blocker performance), `__REVIEW__` (review fixes, browser tests), then this report; CI run __CI__ |
+| Branch | `phase-7/readiness` (from `main` at `7e5e9ab`, after PR #49), commits `1550860` (migration 0035, SQL suites 17 and 18, blocker messages), `d84c1ce` (ADR-009, API test, blocker performance), `bfbf7bd` (review fixes, browser tests), then this report; CI run 179 (`bfbf7bd`, all 6 jobs green) |
 | Approvals | Phase 7 Readiness Report approved 22 November 2026, with P7-D1 to P7-D16 and the tenant-access decision (12 months read-only after the lease ends, then automatic removal) |
 | Scope | Readiness report §4: P7-0.1 (#1 posted charges), P7-0.2 (#2 payment amounts), P7-0.3 (#3 void, bounce, refund), P7-0.4 (#13 statement lines), P7-0.5 (#22 tests), P7-0.6 (tenancy records, ADR-009) |
 | Not in scope | Lease, rent, receipt, arrears and deposit features and screens (L1 to L7). No API endpoint for lettings is added. Statements, fees and payouts stay in Phase 9 (P7-D2) |
@@ -78,9 +78,9 @@ Also checked and found correct:
 |---|---|
 | SQL, `verify.sh` | **35 migrations, 19 files passed.** New: `17_money_integrity_p7_0.sql` (91 assertions) and `18_concurrency_p7_0.sql` (14 assertions, two live sessions over dblink) |
 | API (`test:ci`) | **All passed**, coverage 96.2 % statements, 90.6 % branches. New: "gives the lettings reasons a tenant cannot be erased (ADR-009)" |
-| API performance (`test:performance`) | __PERF__ |
+| API performance (`test:performance`) | **13 files, 17 tests passed** in one run (all earlier budgets unchanged) |
 | Web unit | 20 files, 100 tests passed; message check 3,110 keys × 2 languages |
-| Browser (Playwright) | __BROWSER__ |
+| Browser (Playwright) | **All passed in CI** (run 179). New: the lettings erasure reasons in English, and in Arabic at 320 px, both right to left where Arabic, with axe. The privacy spec passed 6 of 6 locally |
 | Lint and typecheck | API and web clean |
 
 ### 4.1 What suite 18 races
@@ -178,7 +178,7 @@ Measured on a copy of the database seeded at the readiness volumes for one compa
 |---|---|
 | Issues closed by P7-0 once approved | #1, #2, #3, #13, #22 |
 | Legal review (retention period) | #20 |
-| CI | __CI__ |
+| CI | Run 179 on `bfbf7bd`: all 6 jobs green (database, API, web, browser, secret and dependency scanning) |
 
 ## Approval
 
