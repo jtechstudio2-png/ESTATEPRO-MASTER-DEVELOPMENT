@@ -6,7 +6,7 @@
 | Branch | `phase-7/readiness`, from `main` at `7e5e9ab` (PR #49, #42 remediation) |
 | Scope | Readiness for Phase 7: management agreements, leases, rent schedule and charges, receipts and allocations, arrears, deposits, inspections, renewals and rent reviews, and the tenant and landlord portals (specification LET-01 to LET-11), with a preparatory milestone P7-0 for the money-integrity issues (#1, #2, #3, #13, #22) |
 | **Recommendation** | **GO for Phase 7 once the decisions in §9 (P7-D1 to P7-D16) are approved**, starting with P7-0. No lease, rent or payment feature is built before P7-0 is approved. No screen is built before the P7-W wireframes are approved |
-| **Approval** | Awaiting review |
+| **Approval** | **Approved** by the product owner on 22 November 2026, with P7-D1 to P7-D16 (see Approval at the end) |
 | Code | None. This report changes no code; Phase 7 implementation has not started |
 
 ## Contents
@@ -296,7 +296,7 @@ Each milestone ends with its report in the standard format and your approval bef
 
 | Item | Decision | Date |
 |---|---|---|
-| Phase 7 readiness report | Awaiting review | |
-| P7-D1 to P7-D16 | Awaiting approval, each individually | |
+| Phase 7 readiness report | **Approved** | 22 November 2026 |
+| P7-D1 to P7-D16 | **Approved** | 22 November 2026 |
 | Tenant read-only access after lease end (P7-D13 detail) | **Approved**: 12 months, then automatic removal of portal access | 22 November 2026 |
-| Start of P7-0 | Not started; waits for approval of P7-D1 to P7-D16 | |
+| Next | P7-0 (#1, #2, #3, #13, #22, ADR-009), then P7-W (wireframes and verification), then L1 to L7 in the approved order; each milestone reported for approval | 22 November 2026 |
