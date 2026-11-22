@@ -126,7 +126,9 @@ Then L1 starts, after approval of the P7-0 report.
 
 | Item | Decision | Date |
 |---|---|---|
-| P7-W wireframes and this verification report | Pending | |
-| W7-D1 to W7-D8 | Pending | |
-| W7-A1, W7-A2, W7-S1 | Pending | |
-| W7-R1 to W7-R5 | Pending | |
+| P7-W wireframes and this verification report | Review positive in principle. Final approval pending the decision table (W7-D1 to W7-D8) | 22 November 2026 |
+| W7-A1 (documents upload API) | **Approved for L1** | 22 November 2026 |
+| W7-A2 (tenant payment instructions setting) | **Approved** (L5) | 22 November 2026 |
+| W7-S1 (inspection item photo link) | **Approved for L4** | 22 November 2026 |
+| W7-D1 to W7-D8 | Presented for decision review | 22 November 2026 |
+| W7-R1 to W7-R5 | Pending review | |
