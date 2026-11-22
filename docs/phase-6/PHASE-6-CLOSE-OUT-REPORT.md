@@ -86,5 +86,5 @@ Migrations 0029 to 0034; SQL suites 13 to 16; API end-to-end tests for every Pha
 | Closing #5, #15, #43, #44 | **Approved**; closed | 21 November 2026 |
 | One reviewed pull request `phase-6/readiness` → `main` | **Approved** | 21 November 2026 |
 | Merge of PR #47 into `main` | **Merged** (`a551ee7`); `main` green after the merge (CI run 163, all jobs); tag `phase-6-complete` pending | 21 November 2026 |
-| #42 remediation merged (Phase 6 blocker) | **Merged** through PR #49 as `7e5e9ab`; all 6 checks green on `b2189c1` (CI run 170); #42 closed. The Phase 6 blocker is resolved (`docs/phase-7/ISSUE-42-REPORT.md`) | 21 November 2026 |
+| #42 remediation merged (Phase 6 blocker) | **Merged** through PR #49 as `7e5e9ab`; all 6 checks green on `b2189c1` (CI run 170); #42 closed; `main` green after the merge (CI run 171, all jobs). The Phase 6 blocker is resolved (`docs/phase-7/ISSUE-42-REPORT.md`) | 21 November 2026 |
 | Phase 7 | Not started until the Phase 6 branch is merged. After the merge: #42 first, then the standard readiness process, with the Phase 7 readiness report before implementation | 21 November 2026 |

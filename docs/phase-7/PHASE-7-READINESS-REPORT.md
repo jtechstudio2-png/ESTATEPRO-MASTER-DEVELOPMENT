@@ -30,7 +30,7 @@
 | G1 | Phase 6 merged to `main` through a reviewed pull request, CI green | ✅ Met | PR #47 merged as `a551ee7`; `main` green in CI run 163 (21 November 2026) |
 | G2 | Phase 6 approved as complete | ✅ Met | Phase 6 close-out approved 21 November 2026 (`docs/phase-6/PHASE-6-CLOSE-OUT-REPORT.md`) |
 | G3 | Phase 6 blocker #42 resolved | ✅ Met | Remediation approved and merged through PR #49 as `7e5e9ab`; #42 closed (`docs/phase-7/ISSUE-42-REPORT.md`) |
-| G4 | `main` green after the #42 merge | Pending | CI run 171 on `7e5e9ab` in progress at the time of writing (five of six jobs green) |
+| G4 | `main` green after the #42 merge | ✅ Met | CI run 171 on `7e5e9ab`, all six jobs green (22 November 2026) |
 | G5 | Existing leasing schema reviewed against the specification | ✅ Met | §3: migration 0008 covers LET-01 to LET-09; gaps listed in §3.3 and §4 |
 | G6 | Money-integrity findings assessed (#1, #2, #3, #13, #22) | ✅ Met | §4: all five belong in P7-0, before any rent feature |
 | G7 | Legal reference data reviewed per market (#23) | ❌ Not met | No reviewed values or lease templates exist. Phase 7 can proceed without them under P7-D3 (§7); market launch cannot |
