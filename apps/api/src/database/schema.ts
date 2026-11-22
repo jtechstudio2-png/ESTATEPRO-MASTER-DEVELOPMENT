@@ -858,6 +858,27 @@ export interface DocumentTemplates {
   versionNo: Generated<number>;
 }
 
+export interface DocumentUploadSessions {
+  category: string;
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string;
+  declaredMime: string;
+  declaredSize: Int8;
+  documentId: string | null;
+  documentTypeCode: string;
+  entityId: string;
+  entityType: string;
+  expiresAt: Timestamp;
+  fileName: string;
+  id: Generated<string>;
+  isSigned: Generated<boolean>;
+  sha256: Buffer;
+  status: Generated<string>;
+  storageKey: string;
+  title: string;
+}
+
 export interface DocumentVersions {
   changeNote: string | null;
   checksumSha256: Buffer;
@@ -1263,6 +1284,10 @@ export interface Leases {
   createdBy: string | null;
   currencyCode: string;
   customFields: Generated<Json>;
+  /**
+   * The letting deal the lease was drawn up from (P7-D4)
+   */
+  dealId: string | null;
   depositAmount: Numeric | null;
   documentId: string | null;
   endDate: string | null;
@@ -2085,7 +2110,22 @@ export interface PublicHolidays {
   name: string;
 }
 
+export interface RentChargeAdjustments {
+  adjustedOn: Generated<string>;
+  amount: Numeric;
+  approvedBy: string;
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  entryNo: Generated<Int8>;
+  id: Generated<string>;
+  reason: string;
+  rentChargeId: string;
+}
+
 export interface RentChargeBalances {
+  adjustedTotalAmount: Numeric | null;
+  adjustmentAmount: Numeric | null;
   chargeType: string | null;
   companyId: string | null;
   currencyCode: string | null;
@@ -2316,6 +2356,10 @@ export interface Statements {
   periodStart: string;
   reference: string;
   status: Generated<string>;
+  /**
+   * The voided statement this one corrects (#13): same landlord, currency and period
+   */
+  supersedesStatementId: string | null;
   totalExpenses: Numeric;
   totalFees: Numeric;
   totalIncome: Numeric;
@@ -2700,6 +2744,7 @@ export interface DB {
   documents: Documents;
   documentShares: DocumentShares;
   documentTemplates: DocumentTemplates;
+  documentUploadSessions: DocumentUploadSessions;
   documentVersions: DocumentVersions;
   exportJobs: ExportJobs;
   externalIdentities: ExternalIdentities;
@@ -2772,6 +2817,7 @@ export interface DB {
   propertyTypes: PropertyTypes;
   propertyTypeTranslations: PropertyTypeTranslations;
   publicHolidays: PublicHolidays;
+  rentChargeAdjustments: RentChargeAdjustments;
   rentChargeBalances: RentChargeBalances;
   rentCharges: RentCharges;
   rentReviews: RentReviews;

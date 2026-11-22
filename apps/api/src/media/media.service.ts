@@ -467,23 +467,7 @@ export class MediaService {
   }
 
   private async reserve(tx: Tx, ctx: TenantContext, bytes: number): Promise<void> {
-    const plan = await planLimit(tx);
-    if (!plan) throw new ProblemError(403, 'quota-exceeded', 'Storage not available', 'Your company has no active plan with media storage.');
-    await tx.insertInto('storageUsage').values({ companyId: ctx.companyId }).onConflict((oc) => oc.column('companyId').doNothing()).execute();
-    const usage = await tx.selectFrom('storageUsage').select(['bytesUsed', 'bytesReserved']).where('companyId', '=', ctx.companyId).forUpdate().executeTakeFirstOrThrow();
-    if (Number(usage.bytesUsed) + Number(usage.bytesReserved) + bytes > plan.limitBytes) {
-      throw new ProblemError(
-        403,
-        'quota-exceeded',
-        'Storage quota exceeded',
-        `This upload would exceed your plan’s ${formatGb(plan.limitBytes)} of media storage. Archive unused media or upgrade your plan.`,
-      );
-    }
-    await tx
-      .updateTable('storageUsage')
-      .set({ bytesReserved: sql`bytes_reserved + ${bytes}`, updatedAt: sql`now()` })
-      .where('companyId', '=', ctx.companyId)
-      .execute();
+    await reserveStorage(tx, ctx.companyId, bytes);
   }
 
   private async loadProperty(tx: Tx, id: string) {
@@ -580,6 +564,27 @@ export async function planLimit(tx: Tx): Promise<{ planCode: string; limitBytes:
     .executeTakeFirst();
   if (!row || !row.isEnabled || row.limitValue === null) return null;
   return { planCode: row.planCode, limitBytes: Number(row.limitValue) };
+}
+
+/** Reserves bytes of the plan's storage for an upload (media and documents share the entitlement). */
+export async function reserveStorage(tx: Tx, companyId: string, bytes: number): Promise<void> {
+  const plan = await planLimit(tx);
+  if (!plan) throw new ProblemError(403, 'quota-exceeded', 'Storage not available', 'Your company has no active plan with media storage.');
+  await tx.insertInto('storageUsage').values({ companyId }).onConflict((oc) => oc.column('companyId').doNothing()).execute();
+  const usage = await tx.selectFrom('storageUsage').select(['bytesUsed', 'bytesReserved']).where('companyId', '=', companyId).forUpdate().executeTakeFirstOrThrow();
+  if (Number(usage.bytesUsed) + Number(usage.bytesReserved) + bytes > plan.limitBytes) {
+    throw new ProblemError(
+      403,
+      'quota-exceeded',
+      'Storage quota exceeded',
+      `This upload would exceed your plan’s ${formatGb(plan.limitBytes)} of media storage. Archive unused media or upgrade your plan.`,
+    );
+  }
+  await tx
+    .updateTable('storageUsage')
+    .set({ bytesReserved: sql`bytes_reserved + ${bytes}`, updatedAt: sql`now()` })
+    .where('companyId', '=', companyId)
+    .execute();
 }
 
 export async function releaseReservation(tx: Tx, companyId: string, bytes: number): Promise<void> {
