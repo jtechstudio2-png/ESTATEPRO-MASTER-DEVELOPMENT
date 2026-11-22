@@ -474,9 +474,15 @@ const BLOCKER_MESSAGES: Record<string, string> = {
   // ADR-008: the sales pipeline.
   open_deal: 'This person is a party to a deal that is still open. Close the deal first.',
   sale_record: 'This person is a party to a recorded sale that is still in progress or within its retention period.',
+  // ADR-009: lettings.
+  live_lease: 'This person is a party to a lease that has not closed. Close or cancel the lease first.',
+  open_balance: 'Money is still owed on a lease of this person, or a payment from them is not fully allocated.',
+  deposit_held: 'A deposit on a lease of this person has not been returned or forfeited.',
+  management_agreement: 'This person is the landlord on a management agreement that has not ended.',
+  tenancy_record: 'This person is a party to tenancy records (rent, receipts, deposits, agreements) within the period they must be kept.',
 };
 
-/** One error per blocker code (organisation, open_deal, sale_record, lease_parties, …) so screens can explain each. */
+/** One error per blocker code (organisation, open_deal, sale_record, live_lease, tenancy_record, …) so screens can explain each. */
 function blockedProblem(blockers: string[]): ProblemError {
   return Problems.validation(
     blockers.map((code) => ({

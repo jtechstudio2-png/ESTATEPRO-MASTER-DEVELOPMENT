@@ -30,6 +30,17 @@ import { DueLabel, PrivacyStatusLabel } from './labels';
 type Dialog = 'verify' | 'status' | 'assign' | 'extend' | 'evidence' | 'report' | 'erase' | null;
 const METHODS = ['documents_seen', 'known_contact_details', 'email_confirmation', 'other'] as const;
 const KINDS = ['request', 'identity', 'correspondence', 'response', 'other'] as const;
+/** Erasure blockers with their own explanation (ADR-008, ADR-009); others name the records kept. */
+const BLOCKER_KEYS: Record<string, 'organisation' | 'openDeal' | 'saleRecord' | 'liveLease' | 'openBalance' | 'depositHeld' | 'managementAgreement' | 'tenancyRecord'> = {
+  organisation: 'organisation',
+  open_deal: 'openDeal',
+  sale_record: 'saleRecord',
+  live_lease: 'liveLease',
+  open_balance: 'openBalance',
+  deposit_held: 'depositHeld',
+  management_agreement: 'managementAgreement',
+  tenancy_record: 'tenancyRecord',
+};
 
 export function usePrivacyRequest(id: string) {
   return useQuery({ queryKey: ['record', 'privacy-request', id], queryFn: () => bff<PrivacyRequestDto>(`privacy-requests/${id}`) });
@@ -133,7 +144,7 @@ export function PrivacyRequestRecord({ id }: { id: string }) {
                     <Notice tone="warning" title={t('blockedTitle')}>
                       <ul>
                         {record.erasureBlockers.map((code) => (
-                          <li key={code}>{code === 'organisation' ? t('blocker.organisation') : code === 'open_deal' ? t('blocker.openDeal') : code === 'sale_record' ? t('blocker.saleRecord') : t('blocker.records', { records: code.replace(/_/g, ' ') })}</li>
+                          <li key={code}>{BLOCKER_KEYS[code] ? t(`blocker.${BLOCKER_KEYS[code]}`) : t('blocker.records', { records: code.replace(/_/g, ' ') })}</li>
                         ))}
                       </ul>
                       <p>{t('blockedHelp')}</p>

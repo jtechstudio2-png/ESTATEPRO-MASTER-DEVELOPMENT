@@ -79,8 +79,8 @@ SELECT test_expect_error(
   '42501', 'the runtime role cannot start a rotation');
 
 -- -------------------------------------------------------------------- blockers
-SELECT test_assert(app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000002') @> ARRAY['lease_parties'],
-  'a party to a lease cannot be erased (contractual records are kept)');
+SELECT test_assert(app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000002') @> ARRAY['live_lease'],
+  'a party to a live lease cannot be erased (ADR-009; contractual records are kept)');
 SELECT test_expect_error(
   $$SELECT app.erase_contact('a5000000-0000-0000-0000-000000000002')$$,
   '23514', 'erasure refuses a blocked contact');
