@@ -144,8 +144,9 @@ describe('lettings performance (20,000 leases)', () => {
       await time('agreement pm', () => http('pm').get(`/api/v1/management-agreements/${row.agreementId}`));
     }
     // Writes: draw up leases for units whose leases closed, edit, send for signature, cancel.
-    const free = await sql<{ unitId: string; tenantId: string }>`
-      select l.unit_id as "unitId", lp.contact_id as "tenantId" from leases l join lease_parties lp on lp.lease_id = l.id and lp.is_primary
+    const free = await sql<{ unitId: string; tenantId: string; landlordId: string }>`
+      select l.unit_id as "unitId", lp.contact_id as "tenantId", m.landlord_contact_id as "landlordId"
+        from leases l join lease_parties lp on lp.lease_id = l.id and lp.is_primary join management_agreements m on m.id = l.management_agreement_id
        where l.company_id = ${company.companyId}::uuid and l.status = 'closed' order by l.reference limit 3`.execute(fx.db);
     for (const unit of free.rows) {
       const body = {
@@ -155,7 +156,7 @@ describe('lettings performance (20,000 leases)', () => {
         endDate: '2030-12-31',
         rent: { amount: '4000.00', currency: 'GHS' },
         rentFrequency: 'monthly',
-        parties: [{ contactId: unit.tenantId, partyRole: 'tenant', isPrimary: true }],
+        parties: [{ contactId: unit.tenantId, partyRole: 'tenant', isPrimary: true }, { contactId: unit.landlordId, partyRole: 'landlord' }],
       };
       const created = await time('create pm', () => http('pm').send('post', '/api/v1/leases', body, 201));
       const edited = await time('edit pm', () => http('pm').send('patch', `/api/v1/leases/${created.body.id}`, { rent: { amount: '4100.00', currency: 'GHS' } }, 200, created.body.version as number));

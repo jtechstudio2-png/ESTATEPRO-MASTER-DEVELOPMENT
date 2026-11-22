@@ -58,14 +58,16 @@ The migration, services and tests were re-read adversarially before this report.
 | 3 | An imported ended agreement may have no end date | The end date is required only when an agreement is ended through the workflow |
 | 4 | The deal record would have offered the sale completion screen (with ownership transfer) on letting deals | `canComplete` stays sale-only until the letting screens (L6). The completion action itself accepts letting deals |
 | 5 | Unit scope for agents ("own"): the first rule let an agent with no office let any unit | Agents draw up leases only for units of their offices |
+| 6 | The refusal tests found two defects: an end date before the start reached the overlap query and answered 500; an agreement edit that changed nothing still raised the version and wrote an audit row (amounts compared as text) | The overlap check runs only on a valid date range (the 422 names the dates); amounts compare as numbers |
+| 7 | The platform role (support and tests) could not maintain document uploads, unlike media uploads | Same grants as `upload_sessions` (migration 0018) |
 
 ## 4. Tests
 
 | Suite | Result |
 |---|---|
 | SQL, `verify.sh` | **36 migrations, 20 files passed.** New: `19_agreements_leases_l1.sql` (54 assertions) |
-| API (`test:ci`) | __API__ |
-| API performance (`test:performance`) | __PERF__ |
+| API (`test:ci`) | **48 files, 581 tests passed**; coverage 95.95 % statements, 90.39 % branches (thresholds 95 % and 90 %). New: `lettings.e2e.test.ts` (10 tests), `lettings-rules.e2e.test.ts` (3 tests of every refusal and scan outcome), `lettings-access.test.ts` (2 unit tests) |
+| API performance (`test:performance`) | **14 files, 18 tests passed** (13 earlier files unchanged in one run; the new lettings test re-run after a fix to its own setup, §3 finding 6) |
 | Web unit and message check | Unchanged by L1 (no web change); run in CI |
 | Browser | Unchanged by L1; run in CI |
 | Lint and typecheck | API clean |
@@ -129,7 +131,19 @@ Free text (cancellation reasons) stays on the record, not in audit metadata. The
 
 ## 8. Performance impact
 
-__PERFTABLE__
+Measured through the full API at the readiness volume for one company: 2,000 properties of 10 units, 20,000 leases (18,000 active, 1,000 closed, 1,000 drafts) each with a tenant and a landlord, 2,000 management agreements. Owner (all) and property manager (office) scope; 42 requests:
+
+| Request | Slowest |
+|---|---|
+| Lease list (default, active, owner and PM) | 157 ms |
+| Leases ending by a date, sorted by end | 79 ms |
+| Lease search (tenant name) | 117 ms |
+| Leases of a contact / of a property | 17 ms / 13 ms |
+| One lease | 24 ms |
+| Agreement list and search / one agreement | 45 ms / 15 ms |
+| Draw up / edit / send for signature / cancel a lease | 46 / 28 / 26 / 25 ms |
+
+**p95 116 ms, median 26 ms** against the 1,000 ms budget. The 13 earlier performance files pass unchanged.
 
 ## 9. Decisions taken in L1 (for confirmation)
 
