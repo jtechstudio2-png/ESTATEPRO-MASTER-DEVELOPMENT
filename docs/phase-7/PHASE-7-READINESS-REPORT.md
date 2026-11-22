@@ -200,7 +200,7 @@ P7-0 changes no screen and adds no feature. It ends with a milestone report and 
 - **Defence in depth:** portal reads also go through row-level-security policies keyed on a transaction-local `app.contact_id`, so an API mistake cannot widen access (P7-D13).
 - **Ending access:**
   - landlord access ends the day after ownership ends, in the property's time zone (#12);
-  - tenant access to a lease continues read-only for a set period after the lease closes (P7-D13).
+  - tenant access to a lease continues read-only for 12 months after the lease ends, then is removed automatically (P7-D13; period approved 22 November 2026).
 
 ### 6.4 Sign-in and exposure
 
@@ -252,7 +252,7 @@ Lease documents are uploaded, not generated. Legal review (#23) stays open and i
 | P7-D10 | **Arrears** | Ageing buckets of 0–30, 31–60, 61–90 and over 90 days; workflow steps and their days as company settings; reminders to the outbox |
 | P7-D11 | **Deposits** | Holder and scheme recorded; deadlines from reviewed jurisdiction values or entered by the person (P7-D3); itemised, evidenced deductions; never returned above the amount held |
 | P7-D12 | **Portal sign-in (IS-9)** | Same identity design as staff; invitation by staff; multi-factor authentication required for landlords and offered to tenants; local only until #6, #21 and #28 |
-| P7-D13 | **Portal visibility (#12)** | Tenant resolver through `lease_parties`; guarantors see guaranteed leases' balance only; contact-keyed row-level-security policies as defence in depth; read-only tenant access for 12 months after a lease closes (period to confirm) |
+| P7-D13 | **Portal visibility (#12)** | Tenant resolver through `lease_parties`; guarantors see guaranteed leases' balance only; contact-keyed row-level-security policies as defence in depth; read-only tenant access for 12 months after the lease ends, then portal access removed automatically (period **approved 22 November 2026**) |
 | P7-D14 | **Tenancy records protection** | ADR-009 in P7-0. Leases, charges, receipts, allocations and deposits are financial records: kept, with personal details erased on request, and erasure blocked while a lease is live, a balance is open or a deposit is held. Retention period from #20 |
 | P7-D15 | **Repair requests and work orders** | Phase 8 Maintenance; no placeholder in the Phase 7 portals |
 | P7-D16 | **Milestone order** | As §11, with P7-0 and P7-W first |
@@ -298,4 +298,5 @@ Each milestone ends with its report in the standard format and your approval bef
 |---|---|---|
 | Phase 7 readiness report | Awaiting review | |
 | P7-D1 to P7-D16 | Awaiting approval, each individually | |
-| Start of P7-0 | Not started; waits for approval | |
+| Tenant read-only access after lease end (P7-D13 detail) | **Approved**: 12 months, then automatic removal of portal access | 22 November 2026 |
+| Start of P7-0 | Not started; waits for approval of P7-D1 to P7-D16 | |
