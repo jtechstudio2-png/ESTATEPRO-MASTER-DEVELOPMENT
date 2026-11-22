@@ -38,6 +38,7 @@ export interface E2eState {
       overdueRequest: { id: string; reference: string };
       toErase: { id: string; reference: string };
       dohaRequest: { id: string; reference: string };
+      dohaTenantRequest: { id: string; reference: string };
     };
   };
 }

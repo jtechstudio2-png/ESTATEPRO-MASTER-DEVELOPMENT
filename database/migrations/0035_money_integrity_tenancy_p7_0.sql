@@ -244,7 +244,7 @@ DECLARE
   col text;
   fixed text[] := ARRAY['reference', 'payer_contact_id', 'lease_id', 'bank_account_id', 'method_code', 'currency_code', 'amount',
                         'received_on', 'instrument_number', 'instrument_date', 'instrument_bank', 'provider', 'provider_reference',
-                        'idempotency_key', 'recorded_by', 'created_at'];
+                        'idempotency_key', 'recorded_by', 'created_at', 'value_date'];
 BEGIN
   IF TG_OP = 'DELETE' THEN
     IF OLD.status <> 'pending'
@@ -259,6 +259,8 @@ BEGIN
       IF to_jsonb(OLD) -> col IS DISTINCT FROM to_jsonb(NEW) -> col THEN
         -- An erasure (ADR-009) may blank the cheque details; nothing else changes.
         CONTINUE WHEN app.erasure_in_progress() AND col IN ('instrument_number', 'instrument_bank') AND to_jsonb(NEW) ->> col IS NULL;
+        -- A payment cleared before 0035 without a value date may still have it recorded once.
+        CONTINUE WHEN col = 'value_date' AND OLD.value_date IS NULL;
         RAISE EXCEPTION 'payment % is %: % cannot change; void it and record a new payment', OLD.reference, OLD.status, col
           USING ERRCODE = 'insufficient_privilege';
       END IF;
@@ -296,6 +298,8 @@ DECLARE
   p payments%ROWTYPE;
   n integer := 0;
   a record;
+  -- The member acting (allocations record memberships); none for a system job.
+  member uuid := (SELECT m.id FROM company_memberships m WHERE m.company_id = app.current_company_id() AND m.user_id = app.current_user_id());
 BEGIN
   IF p_status NOT IN ('bounced', 'refunded', 'voided') THEN
     RAISE EXCEPTION 'status must be bounced, refunded or voided' USING ERRCODE = 'check_violation';
@@ -314,7 +318,7 @@ BEGIN
      ORDER BY o.id
   LOOP
     INSERT INTO payment_allocations (company_id, payment_id, rent_charge_id, amount, reversal_of_id, allocated_on, allocated_by)
-    VALUES (company, p_payment, a.rent_charge_id, -a.amount, a.id, p_on, nullif(current_setting('app.user_id', true), '')::uuid);
+    VALUES (company, p_payment, a.rent_charge_id, -a.amount, a.id, p_on, member);
     n := n + 1;
   END LOOP;
   UPDATE payments SET status = p_status, status_reason = p_reason, updated_at = now(), version = version + 1

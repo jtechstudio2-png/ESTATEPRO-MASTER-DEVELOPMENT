@@ -125,6 +125,8 @@ SELECT test_expect_error($$UPDATE payments SET payer_contact_id = 'a5000000-0000
   '42501', '#2: a cleared payment keeps its payer');
 SELECT test_expect_error($$UPDATE payments SET received_on = '2026-01-05' WHERE id = 'ad000000-0000-0000-0000-000000000001'$$,
   '42501', '#2: a cleared payment keeps its date');
+SELECT test_expect_error($$UPDATE payments SET value_date = '2026-01-09' WHERE id = 'ad000000-0000-0000-0000-000000000001'$$,
+  '42501', '#2: a cleared payment keeps its value date');
 SELECT test_expect_error($$DELETE FROM payments WHERE id = 'ad000000-0000-0000-0000-000000000001'$$,
   '42501', '#2: a cleared payment cannot be deleted');
 SELECT test_expect_error($$UPDATE payments SET status = 'pending' WHERE id = 'ad000000-0000-0000-0000-000000000001'$$,
@@ -160,6 +162,9 @@ SELECT test_assert((SELECT outstanding_amount = 6000 FROM rent_charge_balances W
 SELECT test_assert(
   (SELECT count(*) = 2 AND sum(amount) = 0 FROM payment_allocations WHERE payment_id = 'ad000000-0000-0000-0000-000000000002'),
   '#3: the reversal is a new row; the original allocation is kept');
+SELECT test_assert(
+  (SELECT allocated_by = 'a4000000-0000-0000-0000-000000000001' FROM payment_allocations WHERE payment_id = 'ad000000-0000-0000-0000-000000000002' AND amount < 0),
+  '#3: the reversal records the member who made it');
 SELECT test_assert(
   EXISTS (SELECT 1 FROM app.lease_arrears(current_date) WHERE lease_id = 'ab000000-0000-0000-0000-000000000001'),
   '#3: the lease is in arrears again');
@@ -321,7 +326,7 @@ SELECT test_assert(
   app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000002') = ARRAY['tenancy_record'],
   'ADR-009: once closed and settled, only the retention period blocks');
 SELECT test_assert(app.jurisdiction_rule('GH', 'tenancy_records_retention_years', current_date) IS NULL,
-  'ADR-009: no jurisdiction has a tenancy retention period before the legal review (#23)');
+  'ADR-009: no jurisdiction has a tenancy retention period before the legal review (#20)');
 SELECT test_expect_error($$SELECT app.erase_contact('a5000000-0000-0000-0000-000000000002')$$, '23514',
   'ADR-009: with no retention rule, tenancy records are kept and erasure is refused');
 RESET ROLE;

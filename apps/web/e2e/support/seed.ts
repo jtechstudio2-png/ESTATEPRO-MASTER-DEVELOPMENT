@@ -348,6 +348,39 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
     await db.query('SELECT app.erase_contact($1)', [dohaErased.id]);
     await db.query('COMMIT');
 
+    // ADR-009 (P7-0): a tenant with a live lease, rent owed and a deposit held, whose erasure request is
+    // in progress, so the register shows the lettings reasons the erasure is refused.
+    const dohaTenant = await dohaApi.call<{ id: string; reference: string }>('POST', 'contacts', {
+      contactType: 'person',
+      displayName: 'Khalid Tenant',
+      displayNameLocal: 'خالد المستأجر',
+      primaryPhone: '+974 5512 0888',
+      relationships: ['tenant'],
+    });
+    const dohaFlat = await dohaApi.call<{ id: string }>('POST', `properties/${dohaTower.id}/units`, { unitLabel: 'شقة 101', isWholeProperty: false, bedrooms: 2, bathrooms: 2 });
+    const tenancy = await db.query<{ id: string }>(
+      `INSERT INTO leases (company_id, reference, unit_id, jurisdiction_code, lease_type, status, start_date, end_date, currency_code, rent_amount, rent_frequency, signed_at)
+       VALUES ($1, 'LSE-E2E-0001', $2, 'QA', 'fixed_term', 'active', current_date - 60, current_date + 300, 'QAR', 8000, 'monthly', now() - interval '70 days') RETURNING id`,
+      [doha.companyId, dohaFlat.id],
+    );
+    const leaseId = tenancy.rows[0]!.id;
+    await db.query(`INSERT INTO lease_parties (company_id, lease_id, contact_id, party_role, is_primary) VALUES ($1, $2, $3, 'tenant', true)`, [doha.companyId, leaseId, dohaTenant.id]);
+    await db.query(
+      `INSERT INTO rent_charges (company_id, lease_id, charge_type, description, due_date, currency_code, amount) VALUES ($1, $2, 'rent', 'Rent', current_date - 30, 'QAR', 8000)`,
+      [doha.companyId, leaseId],
+    );
+    await db.query(`INSERT INTO deposits (company_id, lease_id, currency_code, amount, holder_type, status) VALUES ($1, $2, 'QAR', 8000, 'agent', 'held')`, [doha.companyId, leaseId]);
+    const tenantRequest = await dohaApi.call<{ id: string; reference: string; version: number }>('POST', 'privacy-requests', {
+      contactId: dohaTenant.id,
+      requestType: 'erasure',
+      channel: 'email',
+      receivedOn: new Date().toISOString().slice(0, 10),
+      summary: 'طلب حذف البيانات',
+    });
+    const verified = await dohaApi.call<{ version: number }>('POST', `privacy-requests/${tenantRequest.id}/verify-identity`, { method: 'documents_seen' }, tenantRequest.version);
+    await dohaApi.call('POST', `privacy-requests/${tenantRequest.id}/status`, { status: 'in_progress' }, verified.version);
+    const dohaTenantRequest = { id: tenantRequest.id, reference: tenantRequest.reference };
+
     return {
       users,
       companies: {
@@ -363,7 +396,7 @@ export async function seed(options: SeedOptions): Promise<Seeded> {
         listing,
         keySet,
         crm: { ama, amaDuplicate, seller, erased, portalLead, agentLead, agentTask, dohaContact, dohaErased },
-        privacy: { requester, overdueRequest, toErase, dohaRequest },
+        privacy: { requester, overdueRequest, toErase, dohaRequest, dohaTenantRequest },
       },
     };
   } finally {

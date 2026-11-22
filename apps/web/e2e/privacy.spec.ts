@@ -102,6 +102,32 @@ test.describe('Privacy requests (gap G3)', () => {
     await expect(page.locator('main')).not.toContainText('Afua');
   });
 
+  test('a tenant with a live lease cannot be erased, and the register gives the lettings reasons (ADR-009)', async ({ page, state }) => {
+    await signIn(page, state.users.owner.email, { company: state.companies.doha.name });
+    await page.goto(`/privacy-requests/${state.records.privacy.dohaTenantRequest.id}`);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(state.records.privacy.dohaTenantRequest.reference);
+    const reasons = page.getByRole('listitem');
+    await expect(reasons.filter({ hasText: 'This person is a party to a lease that has not closed. Close or cancel the lease first.' })).toBeVisible();
+    await expect(reasons.filter({ hasText: 'Money is still owed on a lease of this person, or a payment from them is not fully allocated.' })).toBeVisible();
+    await expect(reasons.filter({ hasText: 'A deposit on a lease of this person has not been returned or forfeited.' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Carry out erasure' })).toHaveCount(0);
+    await expectAccessible(page);
+  });
+
+  test('the lettings reasons in Arabic are right to left and accessible at 320 px', async ({ page, state }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await signIn(page, state.users.arabic.email);
+    await page.goto(`/privacy-requests/${state.records.privacy.dohaTenantRequest.id}`);
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    const reasons = page.getByRole('listitem');
+    await expect(reasons.filter({ hasText: 'هذا الشخص طرف في عقد إيجار لم يُغلق بعد. أغلق العقد أو ألغه أولًا.' })).toBeVisible();
+    await expect(reasons.filter({ hasText: 'ما زال هناك مبلغ مستحق على عقد إيجار لهذا الشخص، أو دفعة منه لم تُخصَّص بالكامل.' })).toBeVisible();
+    await expect(reasons.filter({ hasText: 'لم يُردّ تأمين على عقد إيجار لهذا الشخص ولم يُصادَر بعد.' })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+    await expectAccessible(page);
+  });
+
   test('agents have no register and no privacy panel', async ({ page, state }) => {
     await signIn(page, state.users.agent.email, { company: state.companies.accra.name });
     await expect(page.getByRole('navigation', { name: 'Main' }).first().getByRole('link', { name: /Privacy requests/ })).toHaveCount(0);
