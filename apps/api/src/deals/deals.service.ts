@@ -368,8 +368,8 @@ export class DealsService {
         nextStages,
         canReassign: open && managesDeal(ctx, access),
         canExchange: open && row.dealType === 'sale' && stageClass === 'offer_accepted' && canOnDeal(ctx, 'deal.update', access),
-        // Lettings complete at "lease signing" once the lease is active (L1); the action checks the lease.
-        canComplete: open && stageClass === 'contract' && canOnDeal(ctx, 'deal.close', access),
+        // The sale completion screen only; letting deals complete through the same action once their lease is active (L1), with their screen in L6.
+        canComplete: open && row.dealType === 'sale' && stageClass === 'contract' && canOnDeal(ctx, 'deal.close', access),
         canLose: open && canOnDeal(ctx, 'deal.close', access),
       },
       createdAt: row.createdAt.toISOString(),

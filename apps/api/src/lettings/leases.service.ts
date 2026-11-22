@@ -533,7 +533,8 @@ export class LeasesService {
         if (accepted) errors.push({ field: 'listingId', code: 'offer-accepted', message: 'This listing has an accepted offer. Draw the lease up from its deal.' });
       }
     }
-    if (terms.endDate === null || isRealDate(terms.endDate)) {
+    // The overlap check needs a valid range: a start date, and no end date before it.
+    if (isRealDate(terms.startDate) && (terms.endDate === null || (isRealDate(terms.endDate) && terms.endDate >= terms.startDate))) {
       const overlap = await this.overlapping(tx, terms.unitId, terms.startDate, terms.endDate, leaseId);
       if (overlap) errors.push({ field: 'startDate', code: 'unit-let', message: `Lease ${overlap.reference} covers this unit from ${overlap.startDate}${overlap.endDate ? ` to ${overlap.endDate}` : ''}.` });
     }

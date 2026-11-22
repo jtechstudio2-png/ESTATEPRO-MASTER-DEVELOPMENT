@@ -58,7 +58,7 @@ ALTER TABLE document_upload_sessions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY company_isolation ON document_upload_sessions FOR ALL TO estatepro_app
   USING (company_id = app.current_company_id()) WITH CHECK (company_id = app.current_company_id());
 GRANT SELECT, INSERT, UPDATE ON document_upload_sessions TO estatepro_app;
-GRANT SELECT ON document_upload_sessions TO estatepro_platform;
+GRANT SELECT, INSERT, UPDATE, DELETE ON document_upload_sessions TO estatepro_platform;  -- as upload_sessions (0018)
 
 -- A scan result is recorded once: pending → clean, infected or failed.
 CREATE FUNCTION app.document_versions_scan_guard() RETURNS trigger

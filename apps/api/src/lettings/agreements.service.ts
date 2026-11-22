@@ -179,7 +179,7 @@ export class AgreementsService {
       endDate: next.endDate,
       noticePeriodDays: body.noticePeriodDays !== undefined ? body.noticePeriodDays : current.noticePeriodDays,
     };
-    const changes = diffForAudit(pick(current, Object.keys(values)), values);
+    const changes = diffForAudit(comparable(pick(current, Object.keys(values))), comparable(values));
     if (!changes) return this.get(tx, ctx, id);
     const update = current.status === 'draft' ? values : Object.fromEntries(Object.entries(values).filter(([key]) => OPERATIONAL.has(key)));
     await tx.updateTable('managementAgreements').set({ ...update, version: sql`version + 1` }).where('id', '=', id).execute();
@@ -374,4 +374,10 @@ function toDto(row: AgreementRow, minor: Map<string, number>): AgreementDto {
 
 function pick(row: Record<string, unknown>, keys: string[]): Record<string, unknown> {
   return Object.fromEntries(keys.map((key) => [key, row[key]]));
+}
+
+/** Amounts and percentages as numbers, so "100.00" and the stored "100.0000" compare equal. */
+function comparable(values: Record<string, unknown>): Record<string, unknown> {
+  const numeric = new Set(['feePercent', 'feeFixedAmount', 'expenseApprovalLimit', 'floatAmount']);
+  return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, numeric.has(key) && typeof value === 'string' ? Number(value) : value]));
 }
