@@ -468,7 +468,12 @@ BEGIN
     blockers := blockers || 'live_lease'::text;
   END IF;
   -- Money still owed on a lease of theirs, or received from them and not yet allocated.
-  IF EXISTS (SELECT 1 FROM rent_charge_balances b WHERE b.company_id = company AND b.lease_id = ANY (lease_ids) AND b.outstanding_amount <> 0)
+  -- The same sum as rent_charge_balances, per charge, so only this person's charges are read.
+  IF EXISTS (SELECT 1 FROM rent_charges c
+              WHERE c.company_id = company AND c.lease_id = ANY (lease_ids) AND c.status = 'posted'
+                AND c.total_amount
+                    + (SELECT coalesce(sum(j.amount), 0) FROM rent_charge_adjustments j WHERE j.company_id = company AND j.rent_charge_id = c.id)
+                    - (SELECT coalesce(sum(a.amount), 0) FROM payment_allocations a WHERE a.company_id = company AND a.rent_charge_id = c.id) <> 0)
      OR EXISTS (SELECT 1 FROM payments p
                  WHERE p.company_id = company AND p.payer_contact_id = ANY (subjects) AND p.status = 'cleared'
                    AND p.amount > coalesce((SELECT sum(a.amount) FROM payment_allocations a

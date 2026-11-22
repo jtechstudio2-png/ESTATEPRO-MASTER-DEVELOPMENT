@@ -275,6 +275,57 @@ describe('data-subject request register (gap G3)', () => {
       const refused = await as('owner').action(`/api/v1/privacy-requests/${created.id}/status`, working.version, { status: 'refused', note: 'Payment records must be kept for 6 years' }).expect(200);
       expect(refused.body).toMatchObject({ status: 'refused', outcomeNote: 'Payment records must be kept for 6 years', erasureBlockers: [] });
     });
+
+    it('gives the lettings reasons a tenant cannot be erased (ADR-009)', async () => {
+      const tenant = await contact();
+      const typeId = (await fx.db.selectFrom('propertyTypes').select('id').where('companyId', 'is', null).where('code', '=', 'apartment').executeTakeFirstOrThrow()).id;
+      const property = await as('owner')
+        .post('/api/v1/properties', {
+          name: `Lettings ${randomUUID().slice(0, 6)}`,
+          propertyTypeId: typeId,
+          officeId: company.officeId,
+          address: { countryCode: 'GH', addressLine1: '3 Oxford Street', locality: 'Osu', adminArea1: 'Greater Accra' },
+          createWholePropertyUnit: true,
+        })
+        .expect(201);
+      const unit = await fx.db.selectFrom('units').select('id').where('propertyId', '=', property.body.id).executeTakeFirstOrThrow();
+      const lease = await fx.db
+        .insertInto('leases')
+        .values({
+          companyId: company.companyId,
+          reference: `LSE-T-${fx.uniqueSuffix()}`,
+          unitId: unit.id,
+          jurisdictionCode: 'GH',
+          leaseType: 'fixed_term',
+          status: 'active',
+          startDate: '2026-01-01',
+          endDate: '2026-12-31',
+          currencyCode: 'GHS',
+          rentAmount: '6000',
+          rentFrequency: 'monthly',
+          signedAt: new Date(),
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow();
+      await fx.db.insertInto('leaseParties').values({ companyId: company.companyId, leaseId: lease.id, contactId: tenant.id, partyRole: 'tenant', isPrimary: true }).execute();
+      await fx.db
+        .insertInto('rentCharges')
+        .values({ companyId: company.companyId, leaseId: lease.id, chargeType: 'rent', description: 'Rent January 2026', dueDate: '2026-01-01', currencyCode: 'GHS', amount: '6000' })
+        .execute();
+      await fx.db.insertInto('deposits').values({ companyId: company.companyId, leaseId: lease.id, currencyCode: 'GHS', amount: '12000', holderType: 'agent', status: 'held' }).execute();
+
+      const created = await request(tenant.id);
+      const working = await started(created.id, created.version);
+      expect(working).toMatchObject({ erasureBlockers: ['live_lease', 'open_balance', 'deposit_held'], canFulfil: false });
+      const blocked = await as('owner').action(`/api/v1/privacy-requests/${created.id}/erase`, working.version, { confirm: 'ERASE' }).expect(422);
+      expect(blocked.body.errors).toEqual([
+        expect.objectContaining({ code: 'erasure-blocked:live_lease', message: expect.stringContaining('lease that has not closed') }),
+        expect.objectContaining({ code: 'erasure-blocked:open_balance', message: expect.stringContaining('still owed') }),
+        expect.objectContaining({ code: 'erasure-blocked:deposit_held', message: expect.stringContaining('deposit') }),
+      ]);
+      // Another company's member sees nothing of it.
+      await as('otherOwner').get(`/api/v1/privacy-requests/${created.id}`).expect(404);
+    });
   });
 
   describe('dashboard, permissions and isolation', () => {
