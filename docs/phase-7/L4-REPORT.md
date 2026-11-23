@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 23 November 2026 |
-| Branch | `phase-7/readiness`. Commits: `f106416` (L3 approvals recorded), `2a0d238` (migration 0039, SQL suite 22), `1dbeab8`, `6e4a0cc` (API, renewal job, settings), `f8f47aa`, `fc4c2c0`, `25045cf`, `095c0ef` (tests), `8d6e84d` (performance test) and the report commits. CI __CI__ |
+| Branch | `phase-7/readiness`. Commits: `f106416` (L3 approvals recorded), `2a0d238` (migration 0039, SQL suite 22), `1dbeab8`, `6e4a0cc` (API, renewal job, settings), `f8f47aa`, `fc4c2c0`, `25045cf`, `095c0ef` (tests), `8d6e84d` (performance test), `f9853ad` (test ordering), `e5b8564` (arrears query, §3 finding 7), `b6059fa`, `528b5e4` (performance test set-up), and the report commits. CI run 220 on `528b5e4` (the last commit changing code or tests): success |
 | Approvals | L3 approved with L3-D1 to L3-D14 and risks L3-R1 to L3-R4 (23 November 2026). Earlier: L2, L1, P7-0, ADR-009, P7-W and their decisions |
 | Scope | Readiness report §11, L4: deposits, inspections, renewals, notice and move-out (LET-06, LET-07, LET-09; §5.5 to §5.7; P7-D3, P7-D11). Verification report §3.1 row L4: deposit (record, protection, deductions, return); inspections (list, schedule, items, complete, tenant acknowledgement); inspection item photos (W7-S1). Wireframes LS-6, LS-7, DP-1, IN-1 to IN-3, ST-2 |
 | Not in scope | Payment of deposit returns and of deductions to landlords (payouts and statements, Phase 9). Notification delivery (Phase 12). Portals (L5). Screens, including the printable inspection report (L6). Rent dashboard (L7) |
@@ -69,14 +69,16 @@ The migration, services and tests were re-read adversarially before this report.
 | 4 | Notice on a lease with a renewal drawn up, and a "not renewing" decision with a renewal drawn up, would contradict each other | Both refused until the renewal is cancelled |
 | 5 | Ending a lease when the rent schedule had not yet charged its last periods (no lead time set) would leave them uncharged, since ended leases are not scheduled | The rent up to the end date is charged before the lease ends |
 | 6 | Suite 17 (P7-0) added a deduction to a deposit after it was returned | The deduction is proposed and withdrawn before the return (§4.3) |
+| 7 | **The full performance run hung.** The L3 arrears query of the receipts test ran for 44 minutes when that file followed the L2 rent test: the planner looped row by row over the later allocations joined to the open charges, two intermediate results with no index and misestimated sizes. Such a plan could happen in production. Separately, each large performance file left its million money rows in the shared tables, so the next file measured two companies' data on a cold cache (arrears p95 4.7 to 5.7 s, against 0.66 to 0.81 s alone) | The arrears query sums, per charge, what it owes now and every allocation and adjustment made after the date, as rows of one union reaching each charge by its primary key: there is no join between intermediate results (same results in the arrears, receipts and L4 tests; `e5b8564`). The large performance files (rent, receipts, tenancy end) let the database settle after seeding and remove their bulk rows when done, so each measures the one-company volume it states (`b6059fa`, `528b5e4`). Arrears with several such companies in the same tables is L4-R6 |
+| 8 | CI run 216 failed: an L4 test read a deposit's audit rows without an order, and they came back in another order on CI | Audit and outbox rows are read in insertion order (time, entry number) in the L4 tests (`f9853ad`) |
 
 ## 4. Tests
 
 | Suite | Result |
 |---|---|
 | SQL, `verify.sh` | **39 migrations, 23 files passed.** New: `22_deposits_inspections_l4.sql` (66 assertions); suite 17 adds one erasure assertion |
-| API (`test:ci`) | **58 files, 652 tests passed**; coverage 96.19 % statements, 90.33 % branches (thresholds 95 % and 90 %). New: `lease-ending.e2e.test.ts` (9), `deposits.e2e.test.ts` (6), `inspections.e2e.test.ts` (4), `l4-rules.e2e.test.ts` (5); `lettings-access.test.ts` adds the inspection scopes |
-| API performance (`test:performance`) | __PERF__ |
+| API (`test:ci`) | **58 files, 652 tests passed**; coverage 96.19 % statements, 90.32 % branches (thresholds 95 % and 90 %). New: `lease-ending.e2e.test.ts` (9), `deposits.e2e.test.ts` (6), `inspections.e2e.test.ts` (4), `l4-rules.e2e.test.ts` (5); `lettings-access.test.ts` adds the inspection scopes |
+| API performance (`test:performance`) | **17 files, 21 tests passed** in one run (the 16 earlier files and the new tenancy-end test; figures in §8). The three earlier full runs failed on the L3 receipts test (§3 finding 7); in the passing run vitest ran that file first (it had failed last), so the rent-then-receipts order was not repeated there; the clean-up removes the carried-over rows whatever the order |
 | Web unit and message check | Unchanged by L4 (no web change); run in CI |
 | Browser (Playwright, axe, English and Arabic, 320 px to desktop) | Unchanged by L4; run in CI |
 | Lint and typecheck | API clean |
@@ -106,6 +108,8 @@ The migration, services and tests were re-read adversarially before this report.
 | `rent.e2e.test.ts` (L2), lettings settings | The expected settings include `inspectionAreas: []` | The settings gained the default inspection areas (ST-2); an addition |
 | Suite 17 (P7-0), deposit close-out | The withdrawn deduction is inserted as proposed and withdrawn before the deposit is returned, instead of inserted as withdrawn after | Migration 0039: deductions start proposed and are not added to a returned deposit. The erasure assertion on it is unchanged |
 | Suite 17 (P7-0), erasure | One assertion added (inspection cancellation reason, item note, photo caption) | ADR-009 covers the new free text |
+| `rent.performance.test.ts` (L2), `receipts.performance.test.ts` (L3) | After seeding: a checkpoint and a wait for autovacuum; when done: their bulk rows removed (`test/support/settle.ts`). The measured requests and budgets are unchanged | §3 finding 7: each file measures the volume it states |
+| `arrears.service.ts` (L3) | The arrears query restructured (same results) | §3 finding 7: a plan that could loop for minutes |
 
 ## 5. Security impact
 
@@ -136,16 +140,18 @@ Every state change also writes an outbox event (`lease.notice_given`, `lease.end
 
 ## 8. Performance impact
 
-Measured through the full API for one company: 20,000 active fixed-term leases (5,000 ending within 90 days), 20,000 held deposits, 40,000 inspections (a completed move-in and a scheduled periodic inspection per lease) with 400,000 items. Owner (all), property manager (office) and maintenance staff (assigned); 42 requests:
+Measured in the passing full run (`test:performance`, 17 files) through the full API for one company: 20,000 active fixed-term leases (5,000 ending within 90 days), 20,000 held deposits, 40,000 inspections (a completed move-in and a scheduled periodic inspection per lease) with 400,000 items. Owner (all), property manager (office) and maintenance staff (assigned); 42 requests:
 
 | Measure | Result | Budget |
 |---|---|---|
-| API p95 / median | **90 ms / 27 ms** | 1,000 ms |
-| Inspection lists (all, scheduled, assigned, completed) | 113 / 97 ms at most | |
-| One inspection (10 items, photos) / deposit tab / close check / lease | 22 / 40 / 14 / 26 ms | |
-| Renewals list / task list | 68 / 48 ms | |
-| Schedule a move-out (items copied, compared with the move-in) / save items / notice | 60 / 51 / 37 ms | |
-| Daily renewal reminders (5,000 leases, 5,000 tasks, 1,735 escalations, audit and outbox) | **5.1 s**; a second run the same day 81 ms (nothing to write) | 60 s |
+| API p95 / median | **121 ms / 32 ms** | 1,000 ms |
+| Inspection lists (all, scheduled, assigned, completed) | 145 ms at most | |
+| One inspection (10 items) / deposit tab / close check / lease | 26 / 29 / 16 / 28 ms | |
+| Renewals list / task list | 60 / 44 ms | |
+| Schedule a move-out (items copied, compared with the move-in) / save items / notice | 56 / 42 / 42 ms | |
+| Daily renewal reminders (5,000 leases, 5,000 tasks, 1,735 escalations, audit and outbox) | **6.1 s**; a second run the same day 124 ms (nothing to write) | 60 s |
+
+Earlier milestones in the same run: L1 lettings p95 161 ms; L2 rent p95 597 ms, daily job 11.5 s; L3 receipts p95 787 ms (arrears at most 911 ms, month end 635 ms), arrears workflow 11.5 s; all other files within their budgets.
 
 ## 9. Decisions taken in L4 (for confirmation)
 
@@ -176,12 +182,13 @@ Measured through the full API for one company: 20,000 active fixed-term leases (
 | L4-R3 | Inspection photos are kept as evidence when a person is erased (captions are erased); a photo could show a person despite the hint | Low | Accepted with the field hint (#35); revisit with the retention rule (#20) |
 | L4-R4 | The close conditions are enforced by the API, not the database: a direct database change could close an unsettled lease | Low | Accepted (L4-D4); revisit if other writers appear |
 | L4-R5 | The renewal job, like the rent schedule (L2-R1) and the arrears workflow (L3-R3), runs once per UTC day | Low | L7 |
+| L4-R6 | The arrears list reads every open charge of the company on each request (about 200 MB of pages at 500,000 charges). Alone it answers in 0.6 to 0.9 s; with two such companies in the same tables on a cold cache the full run measured 4.7 to 5.7 s (§3 finding 7). The runaway plan is fixed; the volume read is not | Medium | L7 (rent dashboard): a per-lease arrears summary kept with the balances, measured at several readiness-size companies. Extends L3-R2 |
 
 ## 11. GitHub references
 
 | Item | Reference |
 |---|---|
-| CI | __CI__ |
+| CI | Run 220 (`528b5e4`, the last commit changing code or tests): success — https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/45249307911. Runs 218 (`f9853ad`) and 219 (`e5b8564`) also succeeded. Earlier L4 runs: 213 failed (branch coverage 89.43 %, fixed by the rules tests), 214 failed (an unused import, fixed in `8d6e84d`), 215 and 217 were cancelled by later pushes, 216 failed (§3 finding 8) |
 | Earlier CI failure in the screenshot of 23 November | Not found among the last 100 CI runs of the repository (12 to 23 November); the runs on `phase-7/readiness` since L3 commit `21a28f5` (205, 206) passed, and no run since 12 November shows the dependency scan failing |
 
 ## Approval
@@ -190,4 +197,4 @@ Measured through the full API for one company: 20,000 active fixed-term leases (
 |---|---|---|
 | L4 | Pending | |
 | L4-D1 to L4-D15 | Pending | |
-| L4-R1 to L4-R5 | Pending | |
+| L4-R1 to L4-R6 | Pending | |
