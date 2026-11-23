@@ -72,8 +72,10 @@ export class ArrearsService {
     });
     const bucket = Array.isArray(f['bucket']) ? f['bucket'] : null;
     if (bucket) rows = rows.filter((row) => bucket.includes(bucketOf(row.days)));
-    const details = rows.length === 0 ? new Map<string, Detail>() : await detailsFor(tx, rows.map((row) => row.leaseId));
-    if (f['nextActionDue'] === true) rows = rows.filter((row) => { const next = details.get(row.leaseId)?.nextActionDate; return next !== null && next !== undefined && next <= asOf; });
+    if (f['nextActionDue'] === true && rows.length > 0) {
+      const due = await nextActionsDue(tx, rows.map((row) => row.leaseId), asOf);
+      rows = rows.filter((row) => due.has(row.leaseId));
+    }
 
     const minor = await minorUnits(tx, rows.map((row) => row.currencyCode));
     const totals = new Map<string, { leases: number; outstanding: bigint }>();
@@ -91,6 +93,7 @@ export class ArrearsService {
     }
     const page = rows.slice(0, query.limit);
     const last = page[page.length - 1];
+    const details = page.length === 0 ? new Map<string, Detail>() : await detailsFor(tx, page.map((row) => row.leaseId));
     return {
       asOf,
       data: page.map((row) => toRow(row, details.get(row.leaseId)!, minor.get(row.currencyCode) ?? 2)),
@@ -346,26 +349,31 @@ export async function arrearsAsOf(
   const scope = filter.unscoped ? sql<boolean>`true` : leaseScopeSql(ctx.permissions.get('rent.view')?.scope, ctx);
   const due = filter.includeDue ? sql`true` : sql`c.due_date < ${asOf}::date`;
   const leaseFilter = filter.leaseIds ? sql`and c.lease_id = any(${filter.leaseIds}::uuid[])` : sql``;
+  const open = sql`c.allocated_amount <> c.amount + c.tax_amount + c.adjusted_amount`;
   const { rows } = await sql<ArrearsAggregate>`
-    with later as (
-      select a.rent_charge_id as id from payment_allocations a where a.allocated_on > ${asOf}::date
-      union select j.rent_charge_id from rent_charge_adjustments j where j.adjusted_on > ${asOf}::date
+    with la as (
+      select a.rent_charge_id as id, sum(a.amount) as amount from payment_allocations a
+       where a.company_id = ${ctx.companyId}::uuid and a.allocated_on > ${asOf}::date group by a.rent_charge_id
     ),
-    candidates as (
-      select c.id, c.lease_id, c.currency_code, c.due_date, c.total_amount + c.adjusted_amount - c.allocated_amount as now_owed
+    lj as (
+      select j.rent_charge_id as id, sum(j.amount) as amount from rent_charge_adjustments j
+       where j.company_id = ${ctx.companyId}::uuid and j.adjusted_on > ${asOf}::date group by j.rent_charge_id
+    ),
+    charges as (
+      -- Owing now (index rent_charges_open_idx) ...
+      select c.id, c.lease_id, c.currency_code, c.due_date, c.total_amount + c.adjusted_amount - c.allocated_amount as owed_now
         from rent_charges c
-       where c.status = 'posted' and ${due} and c.allocated_amount <> c.amount + c.tax_amount + c.adjusted_amount ${leaseFilter}
-      union
+       where c.company_id = ${ctx.companyId}::uuid and c.status = 'posted' and ${due} and ${open} ${leaseFilter}
+      union all
+      -- ... and settled now, but changed after the date.
       select c.id, c.lease_id, c.currency_code, c.due_date, c.total_amount + c.adjusted_amount - c.allocated_amount
-        from rent_charges c join later on later.id = c.id
-       where c.status = 'posted' and ${due} ${leaseFilter}
+        from rent_charges c
+       where c.company_id = ${ctx.companyId}::uuid and c.id in (select id from la union select id from lj)
+         and c.status = 'posted' and ${due} and not ${open} ${leaseFilter}
     ),
     dated as (
-      select k.lease_id, k.currency_code, k.due_date,
-             k.now_owed
-               + coalesce((select sum(a.amount) from payment_allocations a where a.rent_charge_id = k.id and a.allocated_on > ${asOf}::date), 0)
-               - coalesce((select sum(j.amount) from rent_charge_adjustments j where j.rent_charge_id = k.id and j.adjusted_on > ${asOf}::date), 0) as owed
-        from candidates k
+      select k.lease_id, k.currency_code, k.due_date, k.owed_now + coalesce(la.amount, 0) - coalesce(lj.amount, 0) as owed
+        from charges k left join la on la.id = k.id left join lj on lj.id = k.id
     )
     select d.lease_id as "leaseId", d.currency_code as "currencyCode", sum(d.owed)::text as outstanding,
            coalesce(sum(d.owed) filter (where ${asOf}::date - d.due_date between 1 and 30), 0)::text as d30,
@@ -403,6 +411,16 @@ async function detailsFor(tx: Tx, leaseIds: string[]): Promise<Map<string, Detai
                           order by a.action_date desc, a.created_at desc limit 1) la on true
      where l.id = any(${leaseIds}::uuid[])`.execute(tx);
   return new Map(rows.map((row) => [row.id, row]));
+}
+
+/** Leases whose latest action names a next action due by the date. */
+async function nextActionsDue(tx: Tx, leaseIds: string[], asOf: string): Promise<Set<string>> {
+  const { rows } = await sql<{ leaseId: string }>`
+    select la.lease_id as "leaseId" from (
+      select distinct on (a.lease_id) a.lease_id, a.next_action_date from arrears_actions a
+       where a.lease_id = any(${leaseIds}::uuid[]) order by a.lease_id, a.action_date desc, a.created_at desc) la
+     where la.next_action_date <= ${asOf}::date`.execute(tx);
+  return new Set(rows.map((row) => row.leaseId));
 }
 
 function bucketOf(days: number): string {

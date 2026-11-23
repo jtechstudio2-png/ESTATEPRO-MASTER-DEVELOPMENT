@@ -26,7 +26,7 @@ describe('L3: receipt and arrears rules', () => {
   let account: string;
   let aedAccount: string;
   let lease: { id: string; tenantId: string };
-  let draft: { id: string };
+  let draft: { id: string; tenantId: string };
   let charges: Body[];
 
   const as = () => {
@@ -112,7 +112,7 @@ describe('L3: receipt and arrears rules', () => {
       expect.arrayContaining(['bankAccountId:unknown', 'payerContactId:unknown', 'receivedOn:invalid', 'instrumentDate:invalid']),
     );
     expect(codes(await as().post('/api/v1/payments', receipt({ leaseId: randomUUID() })))).toEqual(['leaseId:unknown']);
-    expect(codes(await as().post('/api/v1/payments', receipt({ leaseId: draft.id, payerContactId: (draft as { tenantId: string }).tenantId })))).toContain('leaseId:lease-status');
+    expect(codes(await as().post('/api/v1/payments', receipt({ leaseId: draft.id, payerContactId: draft.tenantId })))).toContain('leaseId:lease-status');
     expect(codes(await as().post('/api/v1/payments', receipt({ amount: { amount: '1.00', currency: 'AED' } })))).toEqual(['amount.currency:currency-mismatch']);
     expect(codes(await as().post('/api/v1/payments', receipt({ amount: ghs('0.00') })))).toEqual(['amount.amount:positive']);
     // A receipt without a lease, cleared at once.
