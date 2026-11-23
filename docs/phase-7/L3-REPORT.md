@@ -75,7 +75,7 @@ The migration, services and tests were re-read adversarially before this report.
 |---|---|
 | SQL, `verify.sh` | **38 migrations, 22 files passed.** New: `21_receipts_arrears_l3.sql` (36 assertions); suite 17 adds two erasure assertions |
 | API (`test:ci`) | **54 files, 627 tests passed**; coverage 96.07 % statements, 90.30 % branches (thresholds 95 % and 90 %). New: `receipts.e2e.test.ts` (11), `receipts-rules.e2e.test.ts` (5), `arrears.e2e.test.ts` (7), `bank-file.test.ts` (5 unit tests) |
-| API performance (`test:performance`) | __PERF__ |
+| API performance (`test:performance`) | **16 files, 20 tests passed** in one run (the 15 earlier files, including L1 leases and L2 rent, and the new receipts test: p95 654 ms, month end 842 ms, arrears workflow 9.5 s, bank file check 153 ms and commit 291 ms). §8 figures are from the dedicated run; an earlier full run failed (§3 finding 7) |
 | Web unit and message check | Unchanged by L3 (no web change); run in CI |
 | Browser (Playwright, axe, English and Arabic, 320 px to desktop) | Unchanged by L3; run in CI |
 | Lint and typecheck | API clean |
