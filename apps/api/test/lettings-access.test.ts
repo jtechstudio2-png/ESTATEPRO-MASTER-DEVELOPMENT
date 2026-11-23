@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { PermissionScope, TenantContext } from '../src/common/request-context.js';
-import { agreementWithin, canOnAgreement, canOnLease, leaseWithin } from '../src/lettings/lettings-access.js';
+import { agreementWithin, canOnAgreement, canOnInspection, canOnLease, inspectionScopeSql, inspectionWithin, leaseWithin } from '../src/lettings/lettings-access.js';
 
 const ctx = (scope: PermissionScope | null, officeIds: string[] = ['office-a']): TenantContext => ({
   companyId: 'c',
@@ -11,7 +11,7 @@ const ctx = (scope: PermissionScope | null, officeIds: string[] = ['office-a']):
   roleKey: 'x',
   contactId: null,
   officeIds,
-  permissions: new Map(scope ? [['lease.view', { scope, isSensitive: false }], ['management_agreement.view', { scope, isSensitive: false }]] : []),
+  permissions: new Map(scope ? [['lease.view', { scope, isSensitive: false }], ['management_agreement.view', { scope, isSensitive: false }], ['inspection.view', { scope, isSensitive: false }]] : []),
   requestId: 'r',
   ipAddress: null,
   userAgent: null,
@@ -44,5 +44,25 @@ describe('lettings record scope', () => {
     expect(agreementWithin('linked', ctx('linked'), { officeId: 'office-a' })).toBe(false);
     expect(canOnAgreement(ctx('all'), 'management_agreement.view', { officeId: 'x' })).toBe(true);
     expect(canOnAgreement(ctx(null), 'management_agreement.view', { officeId: 'x' })).toBe(false);
+  });
+
+  it('reads inspections by company, office, as their own (inspector, scheduler or own lease), or assigned (L4)', () => {
+    const inspection = { officeId: 'office-a', inspectorId: 'someone', createdBy: 'someone', lease: null };
+    expect(inspectionWithin('all', ctx('all'), { ...inspection, officeId: 'office-z' })).toBe(true);
+    expect(inspectionWithin('office', ctx('office'), inspection)).toBe(true);
+    expect(inspectionWithin('office', ctx('office', ['office-b']), inspection)).toBe(false);
+    expect(inspectionWithin('own', ctx('own'), inspection)).toBe(false);
+    expect(inspectionWithin('own', ctx('own'), { ...inspection, inspectorId: 'me' })).toBe(true);
+    expect(inspectionWithin('own', ctx('own'), { ...inspection, createdBy: 'me' })).toBe(true);
+    expect(inspectionWithin('own', ctx('own'), { ...inspection, lease: { ...lease, createdBy: 'me' } })).toBe(true);
+    expect(inspectionWithin('own', ctx('own'), { ...inspection, lease })).toBe(false);
+    expect(inspectionWithin('assigned', ctx('assigned'), { ...inspection, inspectorId: 'me' })).toBe(true);
+    expect(inspectionWithin('assigned', ctx('assigned'), { ...inspection, createdBy: 'me' })).toBe(false);
+    expect(inspectionWithin('linked', ctx('linked'), inspection)).toBe(false);
+    expect(canOnInspection(ctx('office'), 'inspection.view', inspection)).toBe(true);
+    expect(canOnInspection(ctx(null), 'inspection.view', inspection)).toBe(false);
+    // The SQL forms exist for every scope; an office scope without offices matches nothing.
+    for (const scope of ['all', 'office', 'own', 'assigned', 'linked'] as const) expect(inspectionScopeSql(scope, ctx(scope))).toBeDefined();
+    expect(inspectionScopeSql('office', ctx('office', []))).toBeDefined();
   });
 });
