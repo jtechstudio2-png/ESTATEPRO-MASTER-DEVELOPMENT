@@ -11,6 +11,7 @@ import type { DocumentScanner } from '../documents/document-scanner.js';
 import { DOCUMENT_SCAN_JOB } from '../documents/documents.service.js';
 import { ARREARS_BATCH, arrearsWorkflowBatch } from '../lettings/arrears-workflow.js';
 import { ARREARS_STEPS_KEY, arrearsSteps } from '../lettings/arrears.service.js';
+import { RENEWAL_BATCH, renewalReminderBatch } from '../lettings/renewal-workflow.js';
 import { CHARGE_LEAD_DAYS_KEY, chargeLeadDays, notifyReviewsDue, postRentBatch, postScheduledDue, RENT_POSTING_BATCH } from '../lettings/rent-schedule.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { expireOffers } from '../offers/offers.service.js';
@@ -33,6 +34,7 @@ export const JOBS = {
   rentSchedule: 'rent.schedule',
   rentPostDue: 'rent.post_due',
   arrearsWorkflow: 'arrears.workflow',
+  leaseRenewals: 'lease.renewals',
 } as const;
 
 /** Batches (of 200 rows) one key-rotation job handles before handing over to a follow-up job. */
@@ -211,6 +213,16 @@ export class Worker {
       sql<{ companyId: string }>`select company_id as "companyId" from company_settings where key = ${ARREARS_STEPS_KEY} and office_id is null`,
     );
 
+    // Renewal reminders (readiness §5.6): daily, for companies with fixed-term leases ending within 90 days and no decision.
+    enqueued += await discover(
+      JOBS.leaseRenewals,
+      day,
+      sql<{ companyId: string }>`select distinct company_id as "companyId" from leases
+        where status = 'active' and lease_type = 'fixed_term' and end_date is not null
+          and renewal_status in ('not_due', 'pending_decision')
+          and end_date <= (${now}::timestamptz at time zone 'UTC')::date + 91`,
+    );
+
     // Field-key rotation (ADR-007 §10): yearly per company, then every quarter
     // hour while a rotation is in progress (rewriting or settling).
     for (const companyId of await this.deps.rotation.dueCompanies(now)) {
@@ -322,6 +334,32 @@ export class Worker {
     }
     if (recorded > 0) this.deps.logger.info('arrears steps recorded', { companyId, leases, recorded });
     return { leases, recorded };
+  }
+
+  /**
+   * The daily renewal reminders of one company (readiness §5.6): leases ending
+   * within 90 days without a decision, in batches of RENEWAL_BATCH, one
+   * tenant transaction each, renewing the job's lock after every batch (#42).
+   */
+  async runLeaseRenewals(companyId: string, requestId = `lease-renewals:${companyId}`, job?: ClaimedJob): Promise<{ leases: number; reminded: number; escalated: number }> {
+    const scope = { companyId, userId: '' };
+    const ctx = systemContext(companyId, requestId);
+    const now = this.now();
+    let afterId: string | null = null;
+    let leases = 0;
+    let reminded = 0;
+    let escalated = 0;
+    for (;;) {
+      const batch = await this.deps.tenantDb.run(scope, (tx) => renewalReminderBatch(tx, ctx, this.deps.audit, { afterId, now }));
+      leases += batch.leases;
+      reminded += batch.reminded;
+      escalated += batch.escalated;
+      if (job && !(await this.deps.queue.renewLock(job))) throw new LockLostError(job.id);
+      if (batch.lastId === null || batch.leases < RENEWAL_BATCH) break;
+      afterId = batch.lastId;
+    }
+    if (reminded > 0) this.deps.logger.info('renewal reminders written', { companyId, leases, reminded, escalated });
+    return { leases, reminded, escalated };
   }
 
   private async execute(job: ClaimedJob): Promise<boolean> {
@@ -500,6 +538,10 @@ export class Worker {
 
       case JOBS.arrearsWorkflow:
         await this.runArrearsWorkflow(job.companyId, requestId, job);
+        return;
+
+      case JOBS.leaseRenewals:
+        await this.runLeaseRenewals(job.companyId, requestId, job);
         return;
 
       case JOBS.offerExpire:

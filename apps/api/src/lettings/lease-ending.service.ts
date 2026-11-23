@@ -204,7 +204,7 @@ export class LeaseEndingService {
     const existing = await renewalOf(tx, id);
     if (existing) throw Problems.businessRule(`Renewal ${existing.reference} is drawn up already.`);
     const endDate = current.endDate!;
-    const leaseType = body.leaseType ?? current.leaseType;
+    const leaseType = body.leaseType ?? (current.leaseType as CreateLeaseBody['leaseType']);
     if (leaseType === 'fixed_term' && !body.endDate) throw Problems.validation([{ field: 'endDate', code: 'required', message: 'A fixed-term renewal has an end date.' }]);
     const rentInForce = (await sql<{ rent: string }>`select app.rent_in_force(${ctx.companyId}::uuid, ${id}::uuid, ${endDate}::date)::text as rent`.execute(tx)).rows[0]!.rent;
     const minor = (await minorUnits(tx, [current.currencyCode])).get(current.currencyCode) ?? 2;

@@ -12950,6 +12950,50 @@
         ]
       }
     },
+    "/api/v1/inspections/{inspectionId}/documents": {
+      "get": {
+        "operationId": "Documents_forInspection",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Documents",
+          "Inspections"
+        ]
+      }
+    },
     "/api/v1/management-agreements": {
       "get": {
         "operationId": "Agreements_list",
@@ -13419,6 +13463,13 @@
             "name": "filter[unitId]",
             "required": false,
             "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[renewalStatus]",
+            "required": false,
+            "in": "query",
+            "description": "Renewals list (LS-7): pending_decision, sorted by endDate",
             "schema": {}
           },
           {
@@ -14131,6 +14182,351 @@
           }
         ],
         "summary": "Cancel a lease that is not yet active, with the reason",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/notice": {
+      "post": {
+        "operationId": "LeaseEnding_notice",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoticeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record notice: the tenancy then ends on the given date (default: the lease's notice days, shown, not enforced as law)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/end": {
+      "post": {
+        "operationId": "LeaseEnding_end",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndLeaseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End the lease on or after its end date, with the move-out date; the rent to the end date is charged first",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/close-check": {
+      "get": {
+        "operationId": "LeaseEnding_closeCheck",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseCheckDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What closing the lease waits for: nothing owed, no unsettled receipt, the deposit settled (the move-out inspection is shown)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/close": {
+      "post": {
+        "operationId": "LeaseEnding_close",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Close an ended lease once it is settled; then the unit can be relisted",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/renewal-decision": {
+      "post": {
+        "operationId": "LeaseEnding_renewalDecision",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewalDecisionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record the renewal decision: renew, not renewing, or decide later",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/renewal": {
+      "post": {
+        "operationId": "LeaseEnding_renewal",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the lease being renewed",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewalLeaseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The renewal lease (draft)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Draw up the renewal: a draft lease of the same unit and parties from the day after this one ends",
         "tags": [
           "Leases"
         ]
@@ -16264,6 +16660,1020 @@
         "tags": [
           "Arrears",
           "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/deposit": {
+      "get": {
+        "operationId": "Deposits_forLease",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDepositDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The lease's deposit (or none yet), the amount its terms name, and the jurisdiction's protection rule",
+        "tags": [
+          "Deposits",
+          "Leases"
+        ]
+      },
+      "put": {
+        "operationId": "Deposits_save",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "The deposit's version, required once it exists",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepositBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseDepositDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register the lease's deposit, or change how it is held; a deposit the agency collects gets its deposit charge",
+        "tags": [
+          "Deposits",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/deposits/{depositId}/protection": {
+      "post": {
+        "operationId": "Deposits_protect",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "depositId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProtectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record the protection of a held deposit (scheme, reference, date)",
+        "tags": [
+          "Deposits"
+        ]
+      }
+    },
+    "/api/v1/deposits/{depositId}/deductions": {
+      "post": {
+        "operationId": "Deposits_addDeduction",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "depositId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "The deposit's version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeductionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Propose a deduction with its evidence (after notice or once the lease has ended)",
+        "tags": [
+          "Deposits"
+        ]
+      }
+    },
+    "/api/v1/deposits/{depositId}/deductions/{deductionId}": {
+      "patch": {
+        "operationId": "Deposits_decide",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "depositId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deductionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "The deduction's version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeductionDecisionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Agree, dispute, adjudicate or withdraw a deduction, or attach its evidence",
+        "tags": [
+          "Deposits"
+        ]
+      }
+    },
+    "/api/v1/deposits/{depositId}/return": {
+      "post": {
+        "operationId": "Deposits_returnDeposit",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "depositId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnDepositBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record the return: the deposit less its settled deductions (returned, partly returned or forfeited)",
+        "tags": [
+          "Deposits"
+        ]
+      }
+    },
+    "/api/v1/inspections": {
+      "get": {
+        "operationId": "Inspections_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[scheduledAt][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[scheduledAt][gte]",
+            "required": false,
+            "in": "query",
+            "description": "A date, in the property's time zone",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[inspectorId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leaseId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[unitId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[inspectionType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "scheduledAt",
+                "-scheduledAt",
+                "completedAt",
+                "-completedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Inspections in your scope; latest scheduled first",
+        "tags": [
+          "Inspections"
+        ]
+      },
+      "post": {
+        "operationId": "Inspections_schedule",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleInspectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Schedule an inspection; items come from the unit's last completed inspection",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}": {
+      "get": {
+        "operationId": "Inspections_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Inspections"
+        ]
+      },
+      "patch": {
+        "operationId": "Inspections_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInspectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start it, reschedule or reassign it (while scheduled), record the overall condition and summary",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}/items": {
+      "put": {
+        "operationId": "Inspections_saveItems",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspectionItemsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save the items, in order (items left out are removed)",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}/items/{itemId}/photos": {
+      "post": {
+        "operationId": "Inspections_addPhoto",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspectionPhotoBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link a photo uploaded to the inspection to one of its items (W7-S1)",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}/items/{itemId}/photos/{documentId}": {
+      "delete": {
+        "operationId": "Inspections_removePhoto",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unlink a photo from an item (the document stays with the inspection)",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}/complete": {
+      "post": {
+        "operationId": "Inspections_complete",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteInspectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Complete: the overall condition and every item recorded, every photo scanned clean",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}/tenant-signed": {
+      "post": {
+        "operationId": "Inspections_acknowledge",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantAcknowledgementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record the tenant's acknowledgement of a completed inspection (once)",
+        "tags": [
+          "Inspections"
+        ]
+      }
+    },
+    "/api/v1/inspections/{inspectionId}/cancel": {
+      "post": {
+        "operationId": "Inspections_cancel",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelInspectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Inspections"
         ]
       }
     }
@@ -27003,7 +28413,8 @@
             "type": "string",
             "enum": [
               "contact",
-              "lead"
+              "lead",
+              "lease"
             ]
           },
           "entityId": {
@@ -27012,7 +28423,7 @@
           },
           "label": {
             "type": "string",
-            "description": "Contact name, or lead reference and contact name"
+            "description": "Contact name, lead reference and contact name, or lease reference"
           }
         },
         "required": [
@@ -32031,7 +33442,8 @@
             "enum": [
               "lease",
               "management_agreement",
-              "bank_account"
+              "bank_account",
+              "inspection"
             ]
           },
           "entityId": {
@@ -32130,7 +33542,8 @@
             "enum": [
               "lease",
               "management_agreement",
-              "bank_account"
+              "bank_account",
+              "inspection"
             ]
           },
           "entityId": {
@@ -33197,6 +34610,41 @@
               }
             ]
           },
+          "renewalLease": {
+            "description": "The renewal drawn up from this lease (not cancelled), L4",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "moveOutDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "noticeGivenOn": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "noticeGivenBy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "tenant",
+              "landlord",
+              "agent",
+              null
+            ]
+          },
           "document": {
             "anyOf": [
               {
@@ -33272,6 +34720,10 @@
           "listing",
           "deal",
           "previousLease",
+          "renewalLease",
+          "moveOutDate",
+          "noticeGivenOn",
+          "noticeGivenBy",
           "document",
           "parties",
           "rulesNotReviewed",
@@ -33535,6 +34987,253 @@
         "required": [
           "reason"
         ]
+      },
+      "NoticeBody": {
+        "type": "object",
+        "properties": {
+          "givenBy": {
+            "type": "string",
+            "enum": [
+              "tenant",
+              "landlord",
+              "agent"
+            ]
+          },
+          "givenOn": {
+            "type": "string",
+            "example": "2026-12-10",
+            "description": "The day notice was given (not in the future)"
+          },
+          "endsOn": {
+            "type": "string",
+            "example": "2027-02-28",
+            "description": "The day the tenancy ends. Default: the given date plus the lease's notice days. Shown against the lease's terms, not enforced as law (P7-D3)"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Kept on the record. Do not type identity or bank numbers"
+          }
+        },
+        "required": [
+          "givenBy",
+          "givenOn"
+        ]
+      },
+      "ChargeAfterEndDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "periodEnd": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "total": {
+            "$ref": "#/components/schemas/MoneyDto"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "periodStart",
+          "periodEnd",
+          "dueDate",
+          "total"
+        ]
+      },
+      "NoticeResultDto": {
+        "type": "object",
+        "properties": {
+          "lease": {
+            "$ref": "#/components/schemas/LeaseDto"
+          },
+          "noticeDays": {
+            "type": "number",
+            "description": "Days between the notice and the end of the tenancy"
+          },
+          "agreedNoticeDays": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The lease's notice period, for comparison (not enforced, P7-D3)"
+          },
+          "chargesAfterEnd": {
+            "description": "Charges already raised for days after the new end date: nothing is changed automatically; adjust or cancel them (RC-3, RC-4)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargeAfterEndDto"
+            }
+          }
+        },
+        "required": [
+          "lease",
+          "noticeDays",
+          "agreedNoticeDays",
+          "chargesAfterEnd"
+        ]
+      },
+      "EndLeaseBody": {
+        "type": "object",
+        "properties": {
+          "moveOutDate": {
+            "type": "string",
+            "example": "2027-02-28",
+            "description": "The day the tenant moved out (not in the future). Not needed when the lease was renewed"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Kept on the record. Do not type identity or bank numbers"
+          }
+        }
+      },
+      "CloseConditionDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "balance",
+              "receipts",
+              "deposit",
+              "move_out_inspection"
+            ]
+          },
+          "met": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Closing waits for this condition (the move-out inspection is shown, not required)"
+          },
+          "amount": {
+            "description": "balance: what is still owed; receipts: money received and not allocated or not cleared",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "deposit: its status; move_out_inspection: its status"
+          }
+        },
+        "required": [
+          "code",
+          "met",
+          "required",
+          "amount",
+          "status"
+        ]
+      },
+      "CloseCheckDto": {
+        "type": "object",
+        "properties": {
+          "canClose": {
+            "type": "boolean"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CloseConditionDto"
+            }
+          }
+        },
+        "required": [
+          "canClose",
+          "conditions"
+        ]
+      },
+      "RenewalDecisionBody": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "renew",
+              "not_renewing",
+              "later"
+            ],
+            "description": "renew and not_renewing close the renewal reminders; later keeps them"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "RenewalLeaseBody": {
+        "type": "object",
+        "properties": {
+          "leaseType": {
+            "type": "string",
+            "enum": [
+              "fixed_term",
+              "periodic"
+            ]
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2027-12-31",
+            "description": "Required for a fixed term. The renewal starts the day after the current lease ends"
+          },
+          "rent": {
+            "description": "Default: the rent in force when the current lease ends",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "rentFrequency": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "semi_annual",
+              "annual"
+            ]
+          },
+          "rentDueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31
+          },
+          "noticePeriodDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3650
+          },
+          "nextRentReviewDate": {
+            "type": "string",
+            "example": "2027-12-01"
+          }
+        }
       },
       "ChargeBalanceDto": {
         "type": "object",
@@ -34212,12 +35911,20 @@
             "items": {
               "$ref": "#/components/schemas/ArrearsStepDto"
             }
+          },
+          "inspectionAreas": {
+            "description": "The company's default inspection areas (IN-2), offered when a unit has no earlier inspection; none until set",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
           "chargeLeadDays",
           "requireSignedLease",
-          "arrearsSteps"
+          "arrearsSteps",
+          "inspectionAreas"
         ]
       },
       "ArrearsStepInput": {
@@ -34259,6 +35966,14 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ArrearsStepInput"
+            }
+          },
+          "inspectionAreas": {
+            "maxItems": 50,
+            "description": "Replaces the default inspection areas; leave out to keep them",
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         },
@@ -35636,6 +37351,1196 @@
         "required": [
           "status",
           "closedOn"
+        ]
+      },
+      "DeductionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "settledAmount": {
+            "description": "Agreed (the amount) or adjudicated (the amount decided)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "proposed",
+              "agreed",
+              "disputed",
+              "adjudicated",
+              "withdrawn"
+            ]
+          },
+          "evidenceDocument": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decidedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reasonCode",
+          "description",
+          "amount",
+          "settledAmount",
+          "status",
+          "evidenceDocument",
+          "createdBy",
+          "createdAt",
+          "decidedBy",
+          "decidedAt",
+          "version"
+        ]
+      },
+      "DepositDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lease": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "expected",
+              "held",
+              "protected",
+              "return_pending",
+              "partially_returned",
+              "returned",
+              "forfeited",
+              "disputed"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "holderType": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "landlord",
+              "protection_scheme",
+              "government_body",
+              "other"
+            ]
+          },
+          "holdingAccount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "collected": {
+            "type": "boolean",
+            "description": "The agency collects it: a deposit charge is raised and the receipt that pays it in full makes the deposit held"
+          },
+          "chargeOutstanding": {
+            "description": "What is still owed on the deposit charge",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "receivedOn": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receivedPayment": {
+            "description": "The receipt that paid the deposit charge in full",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schemeName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "schemeReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "protectionDeadline": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "protectionDeadlineSource": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jurisdiction",
+              "entered",
+              null
+            ]
+          },
+          "protectionOverdue": {
+            "type": "boolean",
+            "description": "Held, not protected, and the deadline has passed"
+          },
+          "protectedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "returnDueBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "deductions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeductionDto"
+            }
+          },
+          "settledDeductions": {
+            "description": "Agreed and adjudicated deductions",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "toReturn": {
+            "description": "The deposit less its settled deductions",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "returnedAmount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "returnedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "lease",
+          "status",
+          "amount",
+          "holderType",
+          "holdingAccount",
+          "collected",
+          "chargeOutstanding",
+          "receivedOn",
+          "receivedPayment",
+          "schemeName",
+          "schemeReference",
+          "protectionDeadline",
+          "protectionDeadlineSource",
+          "protectionOverdue",
+          "protectedAt",
+          "returnDueBy",
+          "deductions",
+          "settledDeductions",
+          "toReturn",
+          "returnedAmount",
+          "returnedAt",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "ProtectionRuleDto": {
+        "type": "object",
+        "properties": {
+          "reviewed": {
+            "type": "boolean",
+            "description": "A reviewed protection period exists for the jurisdiction (P7-D3, P7-D11)"
+          },
+          "days": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "required": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Protection is required (reviewed value), or null when no reviewed value exists"
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The source of the reviewed value"
+          }
+        },
+        "required": [
+          "reviewed",
+          "days",
+          "required",
+          "source"
+        ]
+      },
+      "LeaseDepositDto": {
+        "type": "object",
+        "properties": {
+          "deposit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DepositDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agreed": {
+            "description": "The deposit the lease's terms name",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "protectionRule": {
+            "$ref": "#/components/schemas/ProtectionRuleDto"
+          }
+        },
+        "required": [
+          "deposit",
+          "agreed",
+          "protectionRule"
+        ]
+      },
+      "DepositBody": {
+        "type": "object",
+        "properties": {
+          "holderType": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "landlord",
+              "protection_scheme",
+              "government_body",
+              "other"
+            ]
+          },
+          "holdingAccountId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The agency's account holding it (required when the agent holds it), in the lease's currency"
+          },
+          "schemeName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "protectionDeadline": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Only where no reviewed jurisdiction rule exists (P7-D11); with a rule it follows from the date received"
+          },
+          "receivedOn": {
+            "type": "string",
+            "description": "When the agency does not collect the deposit (let only): the day it was received. Otherwise the receipt that pays the deposit charge records it"
+          },
+          "returnDueBy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The day the return is due (entered; no rule is applied)"
+          }
+        },
+        "required": [
+          "holderType"
+        ]
+      },
+      "ProtectionBody": {
+        "type": "object",
+        "properties": {
+          "schemeName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "schemeReference": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "protectedOn": {
+            "type": "string",
+            "example": "2026-12-15",
+            "description": "Not in the future, not before the deposit was received"
+          }
+        },
+        "required": [
+          "schemeName",
+          "schemeReference",
+          "protectedOn"
+        ]
+      },
+      "DeductionBody": {
+        "type": "object",
+        "properties": {
+          "reasonCode": {
+            "type": "string",
+            "description": "Picklist deposit_deduction_reason"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Erased with the tenant (ADR-009). Do not type identity or bank numbers"
+          },
+          "amount": {
+            "description": "In the deposit's currency",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "evidenceDocumentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A clean document of the lease or of one of its inspections (move-out report, photo)"
+          }
+        },
+        "required": [
+          "reasonCode",
+          "description",
+          "amount"
+        ]
+      },
+      "DeductionDecisionBody": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "agree",
+              "dispute",
+              "adjudicate",
+              "withdraw",
+              "attach_evidence"
+            ],
+            "description": "proposed → agree, dispute, withdraw, attach_evidence; disputed → agree, adjudicate, withdraw"
+          },
+          "settledAmount": {
+            "description": "adjudicate: the amount decided (at most the amount claimed)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "evidenceDocumentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "attach_evidence: the document"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "ReturnDepositBody": {
+        "type": "object",
+        "properties": {
+          "returnedOn": {
+            "type": "string",
+            "example": "2027-01-10",
+            "description": "The day the money was returned (not in the future). The payment itself is made outside EstatePro until payouts (Phase 9)"
+          }
+        },
+        "required": [
+          "returnedOn"
+        ]
+      },
+      "InspectionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "inspectionType": {
+            "type": "string",
+            "enum": [
+              "move_in",
+              "move_out",
+              "periodic",
+              "pre_listing",
+              "maintenance",
+              "safety"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "property": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lease": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scheduledAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "inspector": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "overallCondition": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              null
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "inspectionType",
+          "status",
+          "property",
+          "unit",
+          "lease",
+          "scheduledAt",
+          "completedAt",
+          "inspector",
+          "overallCondition",
+          "updatedAt"
+        ]
+      },
+      "InspectionPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InspectionSummaryDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "ScheduleInspectionBody": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unit inspected (required with a lease)"
+          },
+          "leaseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required for move-in and move-out inspections"
+          },
+          "inspectionType": {
+            "type": "string",
+            "enum": [
+              "move_in",
+              "move_out",
+              "periodic",
+              "pre_listing",
+              "maintenance",
+              "safety"
+            ]
+          },
+          "scheduledAt": {
+            "type": "string",
+            "example": "2027-01-02T10:00:00Z"
+          },
+          "inspectorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The member carrying it out"
+          }
+        },
+        "required": [
+          "propertyId",
+          "inspectionType",
+          "scheduledAt"
+        ]
+      },
+      "InspectionPhotoDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "caption": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scanStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "clean",
+              "infected",
+              "failed"
+            ]
+          }
+        },
+        "required": [
+          "document",
+          "caption",
+          "scanStatus"
+        ]
+      },
+      "InspectionItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "area": {
+            "type": "string"
+          },
+          "item": {
+            "type": "string"
+          },
+          "conditionCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "new",
+              "good",
+              "fair",
+              "poor",
+              "damaged",
+              "missing",
+              "not_applicable",
+              null
+            ]
+          },
+          "cleanliness": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "clean",
+              "acceptable",
+              "dirty",
+              null
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "actionRequired": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "moveInCondition": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "new",
+              "good",
+              "fair",
+              "poor",
+              "damaged",
+              "missing",
+              "not_applicable",
+              null
+            ],
+            "description": "Move-out inspections: the same item's condition at move-in"
+          },
+          "moveInCleanliness": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "clean",
+              "acceptable",
+              "dirty",
+              null
+            ]
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InspectionPhotoDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "area",
+          "item",
+          "conditionCode",
+          "cleanliness",
+          "notes",
+          "actionRequired",
+          "sortOrder",
+          "moveInCondition",
+          "moveInCleanliness",
+          "photos"
+        ]
+      },
+      "InspectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "inspectionType": {
+            "type": "string",
+            "enum": [
+              "move_in",
+              "move_out",
+              "periodic",
+              "pre_listing",
+              "maintenance",
+              "safety"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "property": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lease": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scheduledAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "inspector": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "overallCondition": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              null
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tenantSignedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "reportDocument": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancelledReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "moveIn": {
+            "description": "Move-out inspections: the completed move-in inspection compared",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InspectionItemDto"
+            }
+          },
+          "pendingPhotos": {
+            "type": "number",
+            "description": "Photos still being scanned: the inspection is finished once there are none (IN-2)"
+          },
+          "canEdit": {
+            "type": "boolean",
+            "description": "You may change it now (an inspection in progress is changed by its inspector)"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "inspectionType",
+          "status",
+          "property",
+          "unit",
+          "lease",
+          "scheduledAt",
+          "completedAt",
+          "inspector",
+          "overallCondition",
+          "updatedAt",
+          "startedAt",
+          "summary",
+          "tenantSignedAt",
+          "reportDocument",
+          "cancelledReason",
+          "moveIn",
+          "items",
+          "pendingPhotos",
+          "canEdit",
+          "createdBy",
+          "createdAt",
+          "version"
+        ]
+      },
+      "UpdateInspectionBody": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "start"
+            ],
+            "description": "start: scheduled → in progress (the inspector becomes you if none)"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "description": "While scheduled"
+          },
+          "inspectorMembershipId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "While scheduled"
+          },
+          "overallCondition": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              null
+            ]
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 4000,
+            "description": "Erased with the tenant (ADR-009). Do not type identity or bank numbers"
+          }
+        }
+      },
+      "InspectionItemInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An existing item (kept with its photos); left out: a new item"
+          },
+          "area": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Kitchen"
+          },
+          "item": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Oven"
+          },
+          "conditionCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "new",
+              "good",
+              "fair",
+              "poor",
+              "damaged",
+              "missing",
+              "not_applicable",
+              null
+            ]
+          },
+          "cleanliness": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "clean",
+              "acceptable",
+              "dirty",
+              null
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "Erased with the tenant (ADR-009). Do not type identity or bank numbers"
+          },
+          "actionRequired": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "area",
+          "item"
+        ]
+      },
+      "InspectionItemsBody": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 300,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InspectionItemInput"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "InspectionPhotoBody": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A JPEG or PNG uploaded to the inspection (document type inspection_photo); it may still be scanning"
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Photos of people are discouraged. Do not type identity or bank numbers"
+          }
+        },
+        "required": [
+          "documentId"
+        ]
+      },
+      "CompleteInspectionBody": {
+        "type": "object",
+        "properties": {
+          "reportDocumentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A report uploaded to the inspection and scanned clean (optional)"
+          }
+        }
+      },
+      "TenantAcknowledgementBody": {
+        "type": "object",
+        "properties": {
+          "acknowledgedAt": {
+            "type": "string",
+            "example": "2027-01-03T09:30:00Z",
+            "description": "When the tenant acknowledged the report (not in the future, not before completion)"
+          }
+        },
+        "required": [
+          "acknowledgedAt"
+        ]
+      },
+      "CancelInspectionBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500,
+            "description": "Erased with the tenant (ADR-009). Do not type identity or bank numbers"
+          }
+        },
+        "required": [
+          "reason"
         ]
       }
     }

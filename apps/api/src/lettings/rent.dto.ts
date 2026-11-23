@@ -28,6 +28,8 @@ export class LettingsSettingsDto {
   @ApiProperty({ description: 'Activation needs the signed lease (P7-D5); on unless turned off' }) requireSignedLease!: boolean;
   @ApiProperty({ type: [ArrearsStepDto], description: 'The company\'s arrears steps (P7-D10), in increasing days; empty: the workflow is idle (W7-D7)' })
   arrearsSteps!: ArrearsStepDto[];
+  @ApiProperty({ type: [String], description: "The company's default inspection areas (IN-2), offered when a unit has no earlier inspection; none until set" })
+  inspectionAreas!: string[];
 }
 
 export class LettingsSettingsBody {
@@ -47,6 +49,15 @@ export class LettingsSettingsBody {
   @ValidateNested({ each: true })
   @Type(() => ArrearsStepInput)
   arrearsSteps?: ArrearsStepInput[];
+
+  @ApiPropertyOptional({ type: [String], maxItems: 50, description: 'Replaces the default inspection areas; leave out to keep them' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  @MaxLength(100, { each: true })
+  inspectionAreas?: string[];
 }
 
 // ----------------------------------------------------------------- charges

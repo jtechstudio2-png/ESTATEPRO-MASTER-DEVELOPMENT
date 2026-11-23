@@ -11,6 +11,12 @@ import { ArrearsController } from './arrears.controller.js';
 import { ArrearsService } from './arrears.service.js';
 import { BankImportService } from './bank-import.service.js';
 import { ChargesService } from './charges.service.js';
+import { DepositsController } from './deposits.controller.js';
+import { DepositsService } from './deposits.service.js';
+import { InspectionsController } from './inspections.controller.js';
+import { InspectionsService } from './inspections.service.js';
+import { LeaseEndingController } from './lease-ending.controller.js';
+import { LeaseEndingService } from './lease-ending.service.js';
 import { LeasesController } from './leases.controller.js';
 import { LeasesService } from './leases.service.js';
 import { LettingsSettingsService } from './lettings-settings.service.js';
@@ -23,11 +29,22 @@ import { RentReviewsService } from './rent-reviews.service.js';
 /**
  * Lettings: management agreements and leases (Phase 7 L1); rent schedule,
  * charges and reviews (L2); receipts, bank-file import, allocation, arrears
- * and payment plans (L3).
+ * and payment plans (L3); deposits, inspections, notice, ending, closing and
+ * renewal (L4).
  */
 @Module({
   imports: [AuthModule, DocumentsModule, ListingsModule, MediaModule],
-  controllers: [AgreementsController, LeasesController, RentController, RentReviewsController, ReceiptsController, ArrearsController],
+  controllers: [
+    AgreementsController,
+    LeasesController,
+    LeaseEndingController,
+    RentController,
+    RentReviewsController,
+    ReceiptsController,
+    ArrearsController,
+    DepositsController,
+    InspectionsController,
+  ],
   providers: [
     AgreementsService,
     LeasesService,
@@ -37,6 +54,9 @@ import { RentReviewsService } from './rent-reviews.service.js';
     ReceiptsService,
     BankImportService,
     ArrearsService,
+    DepositsService,
+    LeaseEndingService,
+    InspectionsService,
     IdempotencyService,
   ],
 })
