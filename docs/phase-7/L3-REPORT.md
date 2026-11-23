@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Date | 23 November 2026 |
-| Branch | `phase-7/readiness`. Commits: `ef73fa8` (L2 approvals recorded), `2cba4a8` (migration 0038, SQL suite 21), `355efc9` (API, workflow job, tests, bank-file format), `a2658bf` (performance test, set-based arrears query), `7940733`, `a115254`, `21a28f5` and this commit (report, L2 performance seed balances). CI run 205 on `21a28f5`: green |
+| Branch | `phase-7/readiness`. Commits: `ef73fa8` (L2 approvals recorded), `2cba4a8` (migration 0038, SQL suite 21), `355efc9` (API, workflow job, tests, bank-file format), `a2658bf` (performance test, set-based arrears query), `7940733`, `a115254`, `21a28f5` and this commit (report, L2 performance seed balances). CI runs 205 (`21a28f5`) and 206 (`8bd8fcd`): green |
 | Approvals | L2 approved with L2-D1 to L2-D12 and risks L2-R1 to L2-R4 (23 November 2026). Earlier: L1, P7-0, ADR-009, P7-W and their decisions |
 | Scope | Readiness report §11, L3: receipts, bank-file import, allocation, bounced cheques, arrears and payment plans (LET-04, LET-05; §5.3, §5.4; P7-D7, P7-D8, P7-D10). Verification report §3.1 row L3: receipts (list, record, clear, bounce, refund, void), bank-file import and commit, allocations, arrears list, arrears actions, payment plans, arrears settings |
 | Not in scope | Payment-provider receipts (LET-12, P7-D7). Deposits, inspections, notice, ending, renewal (L4). Portals (L5). Screens (L6). Rent dashboard (L7). Statements and payouts (Phase 9). Notification delivery (Phase 12) |
-| Result | **L3 complete, for approval.** P7-0 R1 (company-wide balance reads near the budget) is resolved by maintained balances (L3-D1). Decisions in §9 |
+| Result | **L3 complete and approved (23 November 2026).** P7-0 R1 (company-wide balance reads near the budget) is resolved by maintained balances (L3-D1). Decisions in §9 |
 
 ## 1. Deliverables
 
@@ -186,6 +186,6 @@ Measured through the full API at the readiness volume for one company (§10): 20
 
 | Item | Decision | Date |
 |---|---|---|
-| L3 | Pending | |
-| L3-D1 to L3-D14 | Pending | |
-| L3-R1 to L3-R4 | Pending | |
+| L3 | Approved | 23 November 2026 |
+| L3-D1 to L3-D14 | Each approved | 23 November 2026 |
+| L3-R1 to L3-R4 | Reviewed and accepted | 23 November 2026 |
