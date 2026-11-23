@@ -457,6 +457,10 @@ describe('L2: rent schedule, charges, adjustments, ledger and rent reviews', () 
     it('keeps each company\'s rent apart', async () => {
       const list = (await as('otherOwner').get('/api/v1/rent-charges?filter[status]=scheduled,posted,waived,cancelled').expect(200)).body;
       expect(list).toMatchObject({ data: [], totals: [] });
+      // Without a due-date or lease filter the list covers this month (company time zone).
+      const month = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Accra' }).format(new Date()).slice(0, 7);
+      expect(list.dueDateWindow.gte).toBe(`${month}-01`);
+      expect((await as('owner').get(`/api/v1/rent-charges?filter[dueDate][gte]=2027-01-01`).expect(200)).body.dueDateWindow).toBeNull();
       expect(await worker.runRentSchedule(other.companyId)).toEqual({ leases: 0, posted: 0 });
     });
   });

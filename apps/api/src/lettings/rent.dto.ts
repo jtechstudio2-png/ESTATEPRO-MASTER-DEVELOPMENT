@@ -75,11 +75,18 @@ export class CurrencyTotalDto {
   @ApiProperty({ type: MoneyDto }) outstanding!: MoneyDto;
 }
 
+export class DueDateWindowDto {
+  @ApiProperty() gte!: string;
+  @ApiProperty() lte!: string;
+}
+
 export class RentChargePageDto {
   @ApiProperty({ type: [RentChargeDto] }) data!: RentChargeDto[];
   @ApiProperty({ type: PageDto }) page!: PageDto;
   @ApiProperty({ type: [CurrencyTotalDto], description: 'Per currency over every charge the filters match (never summed across currencies)' })
   totals!: CurrencyTotalDto[];
+  @ApiProperty({ type: DueDateWindowDto, nullable: true, description: 'With no due-date or lease filter: the month applied (this month, company time zone)' })
+  dueDateWindow!: DueDateWindowDto | null;
 }
 
 export class CreateChargeBody {

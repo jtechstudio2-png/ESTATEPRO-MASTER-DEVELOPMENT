@@ -32451,6 +32451,21 @@
           "outstanding"
         ]
       },
+      "DueDateWindowDto": {
+        "type": "object",
+        "properties": {
+          "gte": {
+            "type": "string"
+          },
+          "lte": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "gte",
+          "lte"
+        ]
+      },
       "RentChargePageDto": {
         "type": "object",
         "properties": {
@@ -32469,12 +32484,24 @@
             "items": {
               "$ref": "#/components/schemas/CurrencyTotalDto"
             }
+          },
+          "dueDateWindow": {
+            "description": "With no due-date or lease filter: the month applied (this month, company time zone)",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DueDateWindowDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "data",
           "page",
-          "totals"
+          "totals",
+          "dueDateWindow"
         ]
       },
       "CreateChargeBody": {

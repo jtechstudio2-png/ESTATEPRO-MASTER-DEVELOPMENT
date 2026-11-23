@@ -61,7 +61,17 @@ export class ChargesService {
 
   // ----------------------------------------------------------------- reading
 
-  async list(tx: Tx, ctx: TenantContext, query: ParsedListQuery<ChargeSortField>): Promise<Page<RentChargeDto> & { totals: CurrencyTotalDto[] }> {
+  async list(tx: Tx, ctx: TenantContext, input: ParsedListQuery<ChargeSortField>): Promise<Page<RentChargeDto> & { totals: CurrencyTotalDto[]; dueDateWindow: { gte: string; lte: string } | null }> {
+    // RC-1 opens on the charges due this month (company time zone). Without a due-date or lease filter the list,
+    // and its totals, cover that month, so a request never totals every charge the company has ever raised.
+    let dueDateWindow: { gte: string; lte: string } | null = null;
+    let query = input;
+    if (input.filters['dueDate'] === undefined && input.filters['leaseId'] === undefined) {
+      const company = await tx.selectFrom('companies').select('defaultTimezone').where('id', '=', ctx.companyId).executeTakeFirstOrThrow();
+      const month = todayIn(company.defaultTimezone).slice(0, 7);
+      dueDateWindow = { gte: `${month}-01`, lte: lastDayOfMonth(month) };
+      query = { ...input, filters: { ...input.filters, dueDate: dueDateWindow } };
+    }
     const column = 'c.dueDate';
     const scope = leaseScopeSql(ctx.permissions.get('rent.view')?.scope, ctx);
     let qb = this.filtered(tx, query).where(scope);
@@ -75,23 +85,26 @@ export class ChargesService {
     const minor = await minorUnits(tx, rows.map((row) => row.currencyCode));
     const page = toPage(rows, query.limit, (row) => row.cursorValue, (row) => row.id, (row) => toCharge(row, minor));
 
-    const totalRows = await this.filtered(tx, query)
-      .where(scope)
-      .select([
-        'c.currencyCode',
-        sql<string>`count(*)::text`.as('count'),
-        sql<string>`sum(c.total_amount)::text`.as('total'),
-        sql<string>`coalesce(sum(c.total_amount + ${adjustedSql} - ${paidSql}) filter (where c.status = 'posted'), 0)::text`.as('outstanding'),
-      ])
-      .groupBy('c.currencyCode')
-      .orderBy('c.currencyCode')
-      .execute();
+    // Totals over every matching charge, set-based (one pass over the charges, one over their allocations and adjustments).
+    const matching = this.filtered(tx, query).where(scope).select(['c.id', 'c.currencyCode', 'c.totalAmount', 'c.status']);
+    const { rows: totalRows } = await sql<{ currencyCode: string; count: string; total: string; outstanding: string }>`
+      with f as (${matching}),
+        base as (select currency_code, count(*) as n, sum(total_amount) as total, coalesce(sum(total_amount) filter (where status = 'posted'), 0) as posted
+                   from f group by currency_code),
+        paid as (select f.currency_code, sum(a.amount) as amount from f join payment_allocations a on a.rent_charge_id = f.id
+                  where f.status = 'posted' group by f.currency_code),
+        adjusted as (select f.currency_code, sum(j.amount) as amount from f join rent_charge_adjustments j on j.rent_charge_id = f.id
+                      where f.status = 'posted' group by f.currency_code)
+      select b.currency_code as "currencyCode", b.n::text as count, b.total::text as total,
+             (b.posted + coalesce(j.amount, 0) - coalesce(p.amount, 0))::text as outstanding
+        from base b left join paid p on p.currency_code = b.currency_code left join adjusted j on j.currency_code = b.currency_code
+       order by b.currency_code`.execute(tx);
     const totalMinor = await minorUnits(tx, totalRows.map((row) => row.currencyCode));
     const totals = totalRows.map((row) => {
       const units = totalMinor.get(row.currencyCode) ?? 2;
       return { currency: row.currencyCode, count: Number(row.count), total: toMoney(row.total, row.currencyCode, units), outstanding: toSignedMoney(row.outstanding, row.currencyCode, units) };
     });
-    return { ...page, totals };
+    return { ...page, totals, dueDateWindow };
   }
 
   async get(tx: Tx, ctx: TenantContext, id: string): Promise<RentChargeDto> {
@@ -594,6 +607,11 @@ function unscaled(value: bigint): string {
   const negative = value < 0n;
   const abs = negative ? -value : value;
   return `${negative ? '-' : ''}${abs / FACTOR}.${(abs % FACTOR).toString().padStart(4, '0')}`;
+}
+
+function lastDayOfMonth(month: string): string {
+  const [year, mon] = month.split('-').map(Number) as [number, number];
+  return new Date(Date.UTC(year, mon, 0)).toISOString().slice(0, 10);
 }
 
 export function addDays(date: string, days: number): string {
