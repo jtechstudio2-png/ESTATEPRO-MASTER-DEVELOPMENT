@@ -307,14 +307,15 @@ SELECT test_assert(NOT ('open_balance' = ANY (app.contact_erasure_blockers('a500
 -- Close out the lease: charges settled or waived, deposit returned, tenancy closed.
 UPDATE rent_charges SET status = 'cancelled' WHERE id = 'ac000000-0000-0000-0000-000000000003';
 UPDATE leases SET status = 'ended', move_out_date = '2026-10-31' WHERE id = 'ab000000-0000-0000-0000-000000000001';
+-- A recharge is raised while the lease is ended, before it closes (L2: no charges on a closed lease).
+INSERT INTO rent_charges (id, company_id, lease_id, charge_type, description, due_date, currency_code, amount) VALUES
+  ('ac000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001',
+   'repair_recharge', 'Broken window', '2026-10-31', 'GHS', 500);
 UPDATE leases SET status = 'closed' WHERE id = 'ab000000-0000-0000-0000-000000000001';
 UPDATE deposits SET status = 'returned', returned_amount = 12000, returned_at = now() WHERE id = 'b3000000-0000-0000-0000-000000000001';
 -- The January adjustment left GHS 500 of RCP-T-1 unallocated: the tenant's credit still has to be accounted for.
 SELECT test_assert(app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000002') @> ARRAY['open_balance'],
   'ADR-009: a tenant''s unallocated credit blocks erasure even after the lease closes');
-INSERT INTO rent_charges (id, company_id, lease_id, charge_type, description, due_date, currency_code, amount) VALUES
-  ('ac000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001',
-   'repair_recharge', 'Broken window', '2026-10-31', 'GHS', 500);
 INSERT INTO payment_allocations (company_id, payment_id, rent_charge_id, amount, allocated_on) VALUES
   ('a0000000-0000-0000-0000-000000000001', 'ad000000-0000-0000-0000-000000000001', 'ac000000-0000-0000-0000-000000000006', 500, current_date);
 UPDATE deposits SET status = 'returned', returned_amount = 12000, returned_at = now() WHERE id = 'b3000000-0000-0000-0000-000000000001';
