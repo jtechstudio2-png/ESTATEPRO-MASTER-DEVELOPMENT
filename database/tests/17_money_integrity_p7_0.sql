@@ -317,6 +317,22 @@ INSERT INTO payment_plans (id, company_id, lease_id, currency_code, total_amount
    '[{"due_date": "2026-04-01", "amount": "100"}]', '2026-03-01');
 UPDATE payment_plans SET status = 'cancelled', closed_on = '2026-03-10', closed_reason = 'Ama moved to Kumasi' WHERE id = 'ae400000-0000-0000-0000-000000000001';
 
+-- L4 (migration 0039): an inspection cancelled with a reason, and an item note and photo caption naming the tenant.
+INSERT INTO inspections (id, company_id, reference, property_id, unit_id, lease_id, inspection_type) VALUES
+  ('b4000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'INS-T-1', 'a7000000-0000-0000-0000-000000000001',
+   'a8000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'periodic'),
+  ('b4000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'INS-T-2', 'a7000000-0000-0000-0000-000000000001',
+   'a8000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'periodic');
+UPDATE inspections SET status = 'cancelled', cancelled_reason = 'Ama asked to rebook' WHERE id = 'b4000000-0000-0000-0000-000000000001';
+INSERT INTO inspection_items (id, company_id, inspection_id, area, item, notes) VALUES
+  ('b4100000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000002', 'Hall', 'Door', 'Scratched by Ama''s bicycle');
+INSERT INTO documents (id, company_id, title, document_type_code, category) VALUES
+  ('b4200000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Hall door', 'inspection_photo', 'property');
+INSERT INTO document_links (company_id, document_id, entity_type, entity_id) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'b4200000-0000-0000-0000-000000000001', 'inspection', 'b4000000-0000-0000-0000-000000000002');
+INSERT INTO inspection_item_documents (company_id, inspection_item_id, document_id, caption) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'b4100000-0000-0000-0000-000000000001', 'b4200000-0000-0000-0000-000000000001', 'Ama''s bicycle marks');
+
 -- Close out the lease: charges settled or waived, deposit returned, tenancy closed.
 UPDATE rent_charges SET status = 'cancelled' WHERE id = 'ac000000-0000-0000-0000-000000000003';
 UPDATE leases SET status = 'ended', move_out_date = '2026-10-31' WHERE id = 'ab000000-0000-0000-0000-000000000001';
@@ -325,6 +341,10 @@ INSERT INTO rent_charges (id, company_id, lease_id, charge_type, description, du
   ('ac000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001',
    'repair_recharge', 'Broken window', '2026-10-31', 'GHS', 500);
 UPDATE leases SET status = 'closed' WHERE id = 'ab000000-0000-0000-0000-000000000001';
+-- L4 (migration 0039): deductions are proposed while the deposit is held, then decided, before the return.
+INSERT INTO deposit_deductions (id, company_id, deposit_id, reason_code, description, amount) VALUES
+  ('b3100000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000001', 'cleaning', 'Cleaning after Ama moved out', 200);
+UPDATE deposit_deductions SET status = 'withdrawn' WHERE id = 'b3100000-0000-0000-0000-000000000001';
 UPDATE deposits SET status = 'returned', returned_amount = 12000, returned_at = now() WHERE id = 'b3000000-0000-0000-0000-000000000001';
 -- The January adjustment left GHS 500 of RCP-T-1 unallocated: the tenant's credit still has to be accounted for.
 SELECT test_assert(app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000002') @> ARRAY['open_balance'],
@@ -332,8 +352,6 @@ SELECT test_assert(app.contact_erasure_blockers('a5000000-0000-0000-0000-0000000
 INSERT INTO payment_allocations (company_id, payment_id, rent_charge_id, amount, allocated_on) VALUES
   ('a0000000-0000-0000-0000-000000000001', 'ad000000-0000-0000-0000-000000000001', 'ac000000-0000-0000-0000-000000000006', 500, current_date);
 UPDATE deposits SET status = 'returned', returned_amount = 12000, returned_at = now() WHERE id = 'b3000000-0000-0000-0000-000000000001';
-INSERT INTO deposit_deductions (company_id, deposit_id, reason_code, description, amount, status) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'b3000000-0000-0000-0000-000000000001', 'cleaning', 'Cleaning after Ama moved out', 200, 'withdrawn');
 UPDATE leases SET ended_reason = 'Tenant Ama relocated to Kumasi',
                   custom_fields = '{"guarantor": "Kofi"}'::jsonb
  WHERE id = 'ab000000-0000-0000-0000-000000000001';
@@ -388,6 +406,11 @@ SELECT test_assert(
 SELECT test_assert(
   (SELECT description = '[Erased]' AND amount = 200 FROM deposit_deductions WHERE deposit_id = 'b3000000-0000-0000-0000-000000000001'),
   'ADR-009: deposit deduction descriptions are erased; amounts are kept');
+SELECT test_assert(
+  (SELECT cancelled_reason = '[Erased]' AND status = 'cancelled' FROM inspections WHERE id = 'b4000000-0000-0000-0000-000000000001')
+  AND (SELECT notes = '[Erased]' AND item = 'Door' FROM inspection_items WHERE id = 'b4100000-0000-0000-0000-000000000001')
+  AND (SELECT caption = '[Erased]' FROM inspection_item_documents WHERE inspection_item_id = 'b4100000-0000-0000-0000-000000000001'),
+  'ADR-009 (L4): inspection cancellation reasons, item notes and photo captions are erased; the record is kept');
 SELECT test_assert(
   (SELECT changes = '{"status_reason": {"old": null, "new": "[Erased]"}}'::jsonb FROM audit_logs WHERE action = 'payment.bounced'),
   'ADR-009: audit rows about the receipts lose the text');
