@@ -6,7 +6,7 @@ import { createWorker } from '../src/worker/create-worker.js';
 import type { Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
-import { EICAR, pdf, png, sha256Hex } from './support/media-files.js';
+import { EICAR, pdf, sha256Hex } from './support/media-files.js';
 
 type Company = Awaited<ReturnType<Fixtures['company']>>;
 type Body = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
