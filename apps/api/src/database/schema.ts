@@ -1789,8 +1789,51 @@ export interface PaymentAllocations {
   reversalOfId: string | null;
 }
 
+export interface PaymentImportLines {
+  amount: Numeric | null;
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  currencyCode: string | null;
+  description: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  id: Generated<string>;
+  idempotencyKey: string;
+  importId: string;
+  leaseId: string | null;
+  lineNo: number;
+  payerContactId: string | null;
+  paymentId: string | null;
+  reference: string | null;
+  resolvedBy: string | null;
+  status: string;
+  transactionId: string | null;
+  txnDate: string | null;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+}
+
+export interface PaymentImports {
+  bankAccountId: string;
+  committedAt: Timestamp | null;
+  committedBy: string | null;
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  documentId: string;
+  format: Generated<string>;
+  id: Generated<string>;
+  lineCount: number;
+  status: Generated<string>;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+}
+
 export interface PaymentPlans {
   agreedOn: string;
+  closedBy: string | null;
+  closedOn: string | null;
+  closedReason: string | null;
   companyId: string;
   createdAt: Generated<Timestamp>;
   createdBy: string | null;
@@ -1800,9 +1843,15 @@ export interface PaymentPlans {
   leaseId: string;
   status: Generated<string>;
   totalAmount: Numeric;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
 }
 
 export interface Payments {
+  /**
+   * Net allocated to charges; kept by app.maintain_allocation_balances
+   */
+  allocatedAmount: Generated<Numeric>;
   amount: Numeric;
   bankAccountId: string;
   companyId: string;
@@ -2142,6 +2191,14 @@ export interface RentChargeBalances {
 }
 
 export interface RentCharges {
+  /**
+   * Sum of adjustments; kept by app.maintain_adjustment_balance
+   */
+  adjustedAmount: Generated<Numeric>;
+  /**
+   * Net allocated from receipts; kept by app.maintain_allocation_balances
+   */
+  allocatedAmount: Generated<Numeric>;
   amount: Numeric;
   chargeType: string;
   companyId: string;
@@ -2805,6 +2862,8 @@ export interface DB {
   offices: Offices;
   outboxEvents: OutboxEvents;
   paymentAllocations: PaymentAllocations;
+  paymentImportLines: PaymentImportLines;
+  paymentImports: PaymentImports;
   paymentPlans: PaymentPlans;
   payments: Payments;
   payouts: Payouts;

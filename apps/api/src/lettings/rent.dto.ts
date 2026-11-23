@@ -1,14 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ValidateIf, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ValidateIf, ValidateNested } from 'class-validator';
 
 import { MoneyDto, MoneyInput } from '../common/money.js';
 import { RefLabelDto } from '../contacts/dto.js';
 import { PageDto } from '../properties/dto.js';
+import { ArrearsStepDto, ArrearsStepInput } from './receipts.dto.js';
 
 export const CHARGE_TYPES = ['rent', 'service_charge', 'deposit', 'fee', 'utility', 'late_fee', 'repair_recharge', 'other'] as const;
-/** Types a person adds (RC-2): the schedule creates rent; deposits are L4, late fees L3. */
-export const MANUAL_CHARGE_TYPES = ['service_charge', 'utility', 'repair_recharge', 'fee', 'other'] as const;
+/** Types a person adds (RC-2): the schedule creates rent; deposits are L4. Late fees are added by a person, never computed (L3-D10). */
+export const MANUAL_CHARGE_TYPES = ['service_charge', 'utility', 'repair_recharge', 'fee', 'late_fee', 'other'] as const;
 export const CHARGE_STATUSES = ['scheduled', 'posted', 'waived', 'cancelled'] as const;
 export const REVIEW_METHODS = ['fixed_increase', 'percentage', 'index_linked', 'market', 'negotiated'] as const;
 export const REVIEW_STATUSES = ['scheduled', 'proposed', 'agreed', 'applied', 'disputed', 'cancelled'] as const;
@@ -25,6 +26,8 @@ export class LettingsSettingsDto {
   @ApiProperty({ type: Number, nullable: true, description: 'Charges are created this many days before they are due (P7-D6). Not set: the rent schedule is idle (W7-D7)' })
   chargeLeadDays!: number | null;
   @ApiProperty({ description: 'Activation needs the signed lease (P7-D5); on unless turned off' }) requireSignedLease!: boolean;
+  @ApiProperty({ type: [ArrearsStepDto], description: 'The company\'s arrears steps (P7-D10), in increasing days; empty: the workflow is idle (W7-D7)' })
+  arrearsSteps!: ArrearsStepDto[];
 }
 
 export class LettingsSettingsBody {
@@ -36,6 +39,14 @@ export class LettingsSettingsBody {
   chargeLeadDays!: number | null;
 
   @ApiProperty() @IsBoolean() requireSignedLease!: boolean;
+
+  @ApiPropertyOptional({ type: [ArrearsStepInput], maxItems: 10, description: 'Replaces the steps; leave out to keep them' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => ArrearsStepInput)
+  arrearsSteps?: ArrearsStepInput[];
 }
 
 // ----------------------------------------------------------------- charges

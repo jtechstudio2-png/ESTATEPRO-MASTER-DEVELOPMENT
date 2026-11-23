@@ -14993,6 +14993,1279 @@
           "Leases"
         ]
       }
+    },
+    "/api/v1/payments/imports": {
+      "post": {
+        "operationId": "Receipts_checkImport",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckImportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentImportDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check a bank file (a clean bank statement document of the account, EstatePro CSV v1); nothing is imported yet",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/imports/{importId}": {
+      "get": {
+        "operationId": "Receipts_getImport",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentImportDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/imports/{importId}/commit": {
+      "post": {
+        "operationId": "Receipts_commitImport",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitImportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentImportDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import matched lines and those given a payer as cleared receipts; other unmatched lines wait in the queue",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/imports/{importId}/cancel": {
+      "post": {
+        "operationId": "Receipts_cancelImport",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentImportDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/import-lines": {
+      "get": {
+        "operationId": "Receipts_queue",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportLinePageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bank-file lines waiting for a payer (the queue), oldest first",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/import-lines/{lineId}/match": {
+      "post": {
+        "operationId": "Receipts_match",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchLineBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportLineDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Match a queued line to its payer (and lease): it becomes a cleared receipt",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments": {
+      "get": {
+        "operationId": "Receipts_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[instrumentDate][lte]",
+            "required": false,
+            "in": "query",
+            "description": "Post-dated cheques due by this day (RP-6)",
+            "schema": {}
+          },
+          {
+            "name": "filter[instrumentDate][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[receivedOn][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[receivedOn][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[unallocated]",
+            "required": false,
+            "in": "query",
+            "description": "Cleared receipts with money not yet allocated (RP-5)",
+            "schema": {}
+          },
+          {
+            "name": "filter[currency]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[bankAccountId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[payerContactId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leaseId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[methodCode]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "receivedOn",
+                "-receivedOn",
+                "instrumentDate",
+                "-instrumentDate"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Receipts in your scope; this month unless a date, lease, payer or unallocated filter is given",
+        "tags": [
+          "Receipts"
+        ]
+      },
+      "post": {
+        "operationId": "Receipts_record",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordPaymentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a receipt; a cheque dated after today stays pending until cleared. Send an Idempotency-Key: a repeated submit returns the first receipt",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}": {
+      "get": {
+        "operationId": "Receipts_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}/clear": {
+      "post": {
+        "operationId": "Receipts_clear",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClearPaymentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A pending cheque has cleared",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}/bounce": {
+      "post": {
+        "operationId": "Receipts_bounce",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnwindPaymentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnwindResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A cheque bounced: its allocations are reversed and the rent is owed again",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}/refund": {
+      "post": {
+        "operationId": "Receipts_refund",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnwindPaymentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnwindResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Refund a cleared receipt: its allocations are reversed first",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}/void": {
+      "post": {
+        "operationId": "Receipts_void",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnwindPaymentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnwindResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Void a receipt entered in error: its allocations are reversed first",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}/allocations": {
+      "get": {
+        "operationId": "Receipts_allocations",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The receipt, its allocations and the oldest-first suggestion (not applied, P7-D8)",
+        "tags": [
+          "Receipts"
+        ]
+      },
+      "post": {
+        "operationId": "Receipts_allocate",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Allocate the receipt to charges, all lines in one transaction",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/payments/{paymentId}/allocations/{allocationId}/reverse": {
+      "post": {
+        "operationId": "Receipts_reverse",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseAllocationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationViewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reverse one allocation: the charge is owed again and the money unallocated",
+        "tags": [
+          "Receipts"
+        ]
+      }
+    },
+    "/api/v1/arrears": {
+      "get": {
+        "operationId": "Arrears_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[nextActionDue]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[bucket]",
+            "required": false,
+            "in": "query",
+            "description": "The age of the oldest unpaid charge: 1-30, 31-60, 61-90, 90+",
+            "schema": {}
+          },
+          {
+            "name": "filter[currency]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leaseId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "oldestDueDate",
+                "-oldestDueDate"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "asOf",
+            "required": false,
+            "in": "query",
+            "description": "Default: today (company time zone). A past date reproduces its figures",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrearsPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leases owing money past its due date, as of a date, with ageing; oldest debt first; totals per currency",
+        "tags": [
+          "Arrears"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/arrears": {
+      "get": {
+        "operationId": "Arrears_forLease",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asOf",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseArrearsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Arrears",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/arrears-actions": {
+      "post": {
+        "operationId": "Arrears_recordAction",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArrearsActionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseArrearsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record an arrears action (a history: never edited)",
+        "tags": [
+          "Arrears",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/payment-plans": {
+      "post": {
+        "operationId": "Arrears_createPlan",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentPlanBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseArrearsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Agree a payment plan (one active per lease; at most what the lease owes)",
+        "tags": [
+          "Arrears",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/payment-plans/{planId}": {
+      "patch": {
+        "operationId": "Arrears_closePlan",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the plan",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosePlanBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseArrearsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Close a plan: completed, broken or cancelled (final)",
+        "tags": [
+          "Arrears",
+          "Leases"
+        ]
+      }
     }
   },
   "info": {
@@ -30757,7 +32030,8 @@
             "type": "string",
             "enum": [
               "lease",
-              "management_agreement"
+              "management_agreement",
+              "bank_account"
             ]
           },
           "entityId": {
@@ -30787,7 +32061,8 @@
             "enum": [
               "application/pdf",
               "image/jpeg",
-              "image/png"
+              "image/png",
+              "text/csv"
             ]
           },
           "size": {
@@ -30854,7 +32129,8 @@
             "type": "string",
             "enum": [
               "lease",
-              "management_agreement"
+              "management_agreement",
+              "bank_account"
             ]
           },
           "entityId": {
@@ -32514,6 +33790,7 @@
               "utility",
               "repair_recharge",
               "fee",
+              "late_fee",
               "other"
             ]
           },
@@ -32900,6 +34177,21 @@
           "from"
         ]
       },
+      "ArrearsStepDto": {
+        "type": "object",
+        "properties": {
+          "actionCode": {
+            "type": "string"
+          },
+          "afterDays": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "actionCode",
+          "afterDays"
+        ]
+      },
       "LettingsSettingsDto": {
         "type": "object",
         "properties": {
@@ -32913,11 +34205,38 @@
           "requireSignedLease": {
             "type": "boolean",
             "description": "Activation needs the signed lease (P7-D5); on unless turned off"
+          },
+          "arrearsSteps": {
+            "description": "The company's arrears steps (P7-D10), in increasing days; empty: the workflow is idle (W7-D7)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArrearsStepDto"
+            }
           }
         },
         "required": [
           "chargeLeadDays",
-          "requireSignedLease"
+          "requireSignedLease",
+          "arrearsSteps"
+        ]
+      },
+      "ArrearsStepInput": {
+        "type": "object",
+        "properties": {
+          "actionCode": {
+            "type": "string",
+            "description": "Picklist arrears_action"
+          },
+          "afterDays": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 365,
+            "description": "Days past the oldest unpaid due date"
+          }
+        },
+        "required": [
+          "actionCode",
+          "afterDays"
         ]
       },
       "LettingsSettingsBody": {
@@ -32933,6 +34252,14 @@
           },
           "requireSignedLease": {
             "type": "boolean"
+          },
+          "arrearsSteps": {
+            "maxItems": 10,
+            "description": "Replaces the steps; leave out to keep them",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArrearsStepInput"
+            }
           }
         },
         "required": [
@@ -33140,6 +34467,1175 @@
         },
         "required": [
           "action"
+        ]
+      },
+      "CheckImportBody": {
+        "type": "object",
+        "properties": {
+          "bankAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A clean bank statement document of the account (text/csv, EstatePro CSV v1)"
+          }
+        },
+        "required": [
+          "bankAccountId",
+          "documentId"
+        ]
+      },
+      "ImportSummaryDto": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "number"
+          },
+          "matched": {
+            "type": "number"
+          },
+          "unmatched": {
+            "type": "number"
+          },
+          "duplicate": {
+            "type": "number"
+          },
+          "error": {
+            "type": "number"
+          },
+          "imported": {
+            "type": "number"
+          },
+          "queued": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "lines",
+          "matched",
+          "unmatched",
+          "duplicate",
+          "error",
+          "imported",
+          "queued"
+        ]
+      },
+      "ImportLineDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineNo": {
+            "type": "number"
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transactionId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "unmatched",
+              "duplicate",
+              "error",
+              "imported",
+              "queued"
+            ]
+          },
+          "errorCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lease": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "payer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paymentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "lineNo",
+          "date",
+          "amount",
+          "reference",
+          "description",
+          "transactionId",
+          "status",
+          "errorCode",
+          "errorMessage",
+          "lease",
+          "payer",
+          "paymentId",
+          "version"
+        ]
+      },
+      "PaymentImportDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "bankAccount": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "format": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "checked",
+              "committed",
+              "cancelled"
+            ]
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ImportSummaryDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportLineDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "bankAccount",
+          "document",
+          "format",
+          "status",
+          "summary",
+          "lines",
+          "createdAt",
+          "version"
+        ]
+      },
+      "ImportChoiceInput": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "number"
+          },
+          "payerContactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "leaseId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "lineNo",
+          "payerContactId"
+        ]
+      },
+      "CommitImportBody": {
+        "type": "object",
+        "properties": {
+          "choices": {
+            "description": "Payers chosen for unmatched lines; other unmatched lines wait in the queue",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportChoiceInput"
+            }
+          }
+        },
+        "required": [
+          "choices"
+        ]
+      },
+      "ImportLinePageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportLineDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "MatchLineBody": {
+        "type": "object",
+        "properties": {
+          "payerContactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "leaseId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "payerContactId"
+        ]
+      },
+      "PaymentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "payer": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "lease": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bankAccount": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "methodCode": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "allocated": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "unallocated": {
+            "description": "Cleared receipts only; zero otherwise",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "receivedOn": {
+            "type": "string"
+          },
+          "valueDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instrumentNumber": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instrumentDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instrumentBank": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "cleared",
+              "bounced",
+              "refunded",
+              "voided"
+            ]
+          },
+          "statusReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "imported": {
+            "type": "boolean",
+            "description": "Recorded from a bank file"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "payer",
+          "lease",
+          "bankAccount",
+          "methodCode",
+          "amount",
+          "allocated",
+          "unallocated",
+          "receivedOn",
+          "valueDate",
+          "instrumentNumber",
+          "instrumentDate",
+          "instrumentBank",
+          "status",
+          "statusReason",
+          "notes",
+          "imported",
+          "createdAt",
+          "version"
+        ]
+      },
+      "PaymentPageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          }
+        },
+        "required": [
+          "data",
+          "page"
+        ]
+      },
+      "RecordPaymentBody": {
+        "type": "object",
+        "properties": {
+          "payerContactId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "leaseId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The payer is a party of this lease"
+          },
+          "bankAccountId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The receipt's currency is the account's"
+          },
+          "methodCode": {
+            "type": "string",
+            "description": "Picklist payment_method"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyInput"
+          },
+          "receivedOn": {
+            "type": "string"
+          },
+          "instrumentNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "instrumentDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Cheque date: a cheque dated after today stays pending until cleared"
+          },
+          "instrumentBank": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000,
+            "description": "No identity or bank numbers"
+          }
+        },
+        "required": [
+          "payerContactId",
+          "bankAccountId",
+          "methodCode",
+          "amount",
+          "receivedOn"
+        ]
+      },
+      "ClearPaymentBody": {
+        "type": "object",
+        "properties": {
+          "valueDate": {
+            "type": "string",
+            "description": "The day the funds are available"
+          }
+        },
+        "required": [
+          "valueDate"
+        ]
+      },
+      "UnwindPaymentBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          },
+          "on": {
+            "type": "string",
+            "description": "The date of the reversals, in an open period"
+          }
+        },
+        "required": [
+          "reason",
+          "on"
+        ]
+      },
+      "UnwindResultDto": {
+        "type": "object",
+        "properties": {
+          "payment": {
+            "$ref": "#/components/schemas/PaymentDto"
+          },
+          "reversed": {
+            "type": "number",
+            "description": "Allocations reversed; the charges are owed again"
+          }
+        },
+        "required": [
+          "payment",
+          "reversed"
+        ]
+      },
+      "AllocationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "paymentId": {
+            "type": "string"
+          },
+          "paymentReference": {
+            "type": "string"
+          },
+          "rentChargeId": {
+            "type": "string"
+          },
+          "chargeDescription": {
+            "type": "string"
+          },
+          "amount": {
+            "description": "Negative for a reversal",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "allocatedOn": {
+            "type": "string"
+          },
+          "reversalOfId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reversed": {
+            "type": "boolean",
+            "description": "This allocation has been reversed"
+          }
+        },
+        "required": [
+          "id",
+          "paymentId",
+          "paymentReference",
+          "rentChargeId",
+          "chargeDescription",
+          "amount",
+          "allocatedOn",
+          "reversalOfId",
+          "reversed"
+        ]
+      },
+      "SuggestedLineDto": {
+        "type": "object",
+        "properties": {
+          "rentChargeId": {
+            "type": "string"
+          },
+          "lease": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "outstanding": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "suggested": {
+            "description": "Suggested, oldest due first; not applied (P7-D8)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "rentChargeId",
+          "lease",
+          "description",
+          "dueDate",
+          "outstanding",
+          "suggested"
+        ]
+      },
+      "AllocationViewDto": {
+        "type": "object",
+        "properties": {
+          "payment": {
+            "$ref": "#/components/schemas/PaymentDto"
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationDto"
+            }
+          },
+          "suggestion": {
+            "description": "Outstanding charges of the receipt's lease (or the payer's leases), in its currency, oldest due first",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuggestedLineDto"
+            }
+          }
+        },
+        "required": [
+          "payment",
+          "allocations",
+          "suggestion"
+        ]
+      },
+      "AllocationLineInput": {
+        "type": "object",
+        "properties": {
+          "rentChargeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyInput"
+          }
+        },
+        "required": [
+          "rentChargeId",
+          "amount"
+        ]
+      },
+      "AllocateBody": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "minItems": 1,
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationLineInput"
+            }
+          },
+          "allocatedOn": {
+            "type": "string",
+            "description": "In an open period"
+          }
+        },
+        "required": [
+          "lines",
+          "allocatedOn"
+        ]
+      },
+      "ReverseAllocationBody": {
+        "type": "object",
+        "properties": {
+          "on": {
+            "type": "string",
+            "description": "In an open period"
+          }
+        },
+        "required": [
+          "on"
+        ]
+      },
+      "ArrearsRowDto": {
+        "type": "object",
+        "properties": {
+          "lease": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "tenant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "outstanding": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "days1To30": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "days31To60": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "days61To90": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "daysOver90": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "oldestDueDate": {
+            "type": "string"
+          },
+          "daysPastDue": {
+            "type": "number"
+          },
+          "lastActionCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nextActionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "planActive": {
+            "type": "boolean",
+            "description": "An active payment plan pauses the workflow"
+          }
+        },
+        "required": [
+          "lease",
+          "tenant",
+          "currency",
+          "outstanding",
+          "days1To30",
+          "days31To60",
+          "days61To90",
+          "daysOver90",
+          "oldestDueDate",
+          "daysPastDue",
+          "lastActionCode",
+          "nextActionDate",
+          "planActive"
+        ]
+      },
+      "ArrearsTotalDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "leases": {
+            "type": "number"
+          },
+          "outstanding": {
+            "$ref": "#/components/schemas/MoneyDto"
+          }
+        },
+        "required": [
+          "currency",
+          "leases",
+          "outstanding"
+        ]
+      },
+      "ArrearsPageDto": {
+        "type": "object",
+        "properties": {
+          "asOf": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArrearsRowDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          },
+          "totals": {
+            "description": "Per currency over every lease the filters match",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArrearsTotalDto"
+            }
+          }
+        },
+        "required": [
+          "asOf",
+          "data",
+          "page",
+          "totals"
+        ]
+      },
+      "ArrearsActionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "actionCode": {
+            "type": "string"
+          },
+          "actionDate": {
+            "type": "string"
+          },
+          "arrears": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nextActionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "performedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "automation"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "actionCode",
+          "actionDate",
+          "arrears",
+          "notes",
+          "nextActionDate",
+          "performedBy",
+          "source",
+          "createdAt"
+        ]
+      },
+      "InstalmentDto": {
+        "type": "object",
+        "properties": {
+          "dueDate": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "dueToDate": {
+            "description": "Cumulative amount due by this date",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "dueDate",
+          "amount",
+          "dueToDate"
+        ]
+      },
+      "PaymentPlanDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "leaseId": {
+            "type": "string"
+          },
+          "total": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "instalments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstalmentDto"
+            }
+          },
+          "agreedOn": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "completed",
+              "broken",
+              "cancelled"
+            ]
+          },
+          "paidSinceAgreed": {
+            "description": "Allocated to the lease's charges since the plan was agreed",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "dueToDate": {
+            "description": "Instalments due by today",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "behind": {
+            "type": "boolean",
+            "description": "Active and paid less than is due by today"
+          },
+          "closedOn": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "closedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "leaseId",
+          "total",
+          "instalments",
+          "agreedOn",
+          "status",
+          "paidSinceAgreed",
+          "dueToDate",
+          "behind",
+          "closedOn",
+          "closedReason",
+          "version"
+        ]
+      },
+      "LeaseArrearsDto": {
+        "type": "object",
+        "properties": {
+          "lease": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "asOf": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "outstanding": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "oldestDueDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "daysPastDue": {
+            "type": "number"
+          },
+          "steps": {
+            "description": "The company's steps (ST-2); empty when not set",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArrearsStepDto"
+            }
+          },
+          "currentStep": {
+            "description": "The step the arrears have reached",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ArrearsStepDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArrearsActionDto"
+            }
+          },
+          "plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentPlanDto"
+            }
+          }
+        },
+        "required": [
+          "lease",
+          "asOf",
+          "currency",
+          "outstanding",
+          "oldestDueDate",
+          "daysPastDue",
+          "steps",
+          "currentStep",
+          "actions",
+          "plans"
+        ]
+      },
+      "ArrearsActionBody": {
+        "type": "object",
+        "properties": {
+          "actionCode": {
+            "type": "string",
+            "description": "Picklist arrears_action"
+          },
+          "actionDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "description": "No identity or bank numbers"
+          },
+          "nextActionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "actionCode",
+          "actionDate"
+        ]
+      },
+      "InstalmentInput": {
+        "type": "object",
+        "properties": {
+          "dueDate": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyInput"
+          }
+        },
+        "required": [
+          "dueDate",
+          "amount"
+        ]
+      },
+      "PaymentPlanBody": {
+        "type": "object",
+        "properties": {
+          "instalments": {
+            "minItems": 1,
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstalmentInput"
+            }
+          },
+          "agreedOn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "instalments",
+          "agreedOn"
+        ]
+      },
+      "ClosePlanBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "broken",
+              "cancelled"
+            ]
+          },
+          "closedOn": {
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "status",
+          "closedOn"
         ]
       }
     }

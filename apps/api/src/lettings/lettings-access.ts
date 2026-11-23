@@ -109,13 +109,21 @@ export async function agreementOffice(tx: Tx, agreementId: string): Promise<{ of
   return row ?? null;
 }
 
-export type LettingsEntity = 'lease' | 'management_agreement';
+export type LettingsEntity = 'lease' | 'management_agreement' | 'bank_account';
 
 /**
  * Access to a lease or an agreement for its documents: 404 when the member may
  * not see the record, 403 when `action` (on the record) is not granted.
  */
 export async function assertLettingsRecord(tx: Tx, ctx: TenantContext, entityType: LettingsEntity, entityId: string, action: 'view' | 'change'): Promise<void> {
+  if (entityType === 'bank_account') {
+    // Bank accounts are company-wide; their statement files are for the members who record receipts (L3).
+    const account = await tx.selectFrom('bankAccounts').select('id').where('id', '=', entityId).executeTakeFirst();
+    const allowed = ctx.permissions.get('payment.record')?.scope === 'all' || ctx.permissions.get('bank_account.manage')?.scope === 'all';
+    if (!account || !allowed) throw Problems.notFound();
+    if (action === 'change' && ctx.permissions.get('payment.record')?.scope !== 'all') throw Problems.forbidden('Your role does not allow importing bank files.');
+    return;
+  }
   if (entityType === 'lease') {
     const row = await leaseAccess(tx, entityId);
     if (!row || !canOnLease(ctx, 'lease.view', row)) throw Problems.notFound();

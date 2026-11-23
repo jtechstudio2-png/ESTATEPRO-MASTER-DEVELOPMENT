@@ -247,8 +247,13 @@ CREATE INDEX payment_import_lines_payer_idx ON payment_import_lines (company_id,
 CREATE INDEX payment_import_lines_payment_idx ON payment_import_lines (company_id, payment_id);
 CREATE INDEX payment_import_lines_resolved_idx ON payment_import_lines (company_id, resolved_by);
 
--- Checked lines are decided once: matched or unmatched lines are imported or
--- queued at commit, queued lines are imported when matched, and imported,
+-- A contact merge leaves bank-file lines as they are (migration 0022 register): they are a history of
+-- the bank's data. A line with a payer always has its receipt, and receipts block a merge.
+INSERT INTO contact_reference_columns (table_name, column_name, handling, reason) VALUES
+  ('payment_import_lines', 'payer_contact_id', 'history', 'Bank-file lines are a history; their receipts block a merge');
+
+-- Checked lines are decided once: matched or unmatched lines are imported,
+-- queued, or found to be duplicates at commit, queued lines are imported when matched, and imported,
 -- duplicate and error lines are final. The line's bank data never changes
 -- (an erasure may blank its texts, ADR-009).
 CREATE FUNCTION app.payment_import_lines_guard() RETURNS trigger
@@ -270,7 +275,7 @@ BEGIN
     RAISE EXCEPTION 'the bank data of a file line is fixed' USING ERRCODE = 'insufficient_privilege';
   END IF;
   IF NEW.status IS DISTINCT FROM OLD.status AND NOT (
-       (OLD.status IN ('matched', 'unmatched') AND NEW.status IN ('imported', 'queued'))
+       (OLD.status IN ('matched', 'unmatched') AND NEW.status IN ('imported', 'queued', 'duplicate'))
     OR (OLD.status = 'queued' AND NEW.status = 'imported')) THEN
     RAISE EXCEPTION 'a % file line cannot become %', OLD.status, NEW.status USING ERRCODE = 'check_violation', DETAIL = 'import-line-transition';
   END IF;

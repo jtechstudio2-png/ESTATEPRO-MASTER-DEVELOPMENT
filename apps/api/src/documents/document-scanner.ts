@@ -3,12 +3,12 @@ import { sql } from 'kysely';
 import type { AuditService } from '../audit/audit.service.js';
 import { systemContext } from '../common/request-context.js';
 import type { TenantDb } from '../database/database.module.js';
-import { maxBytesFor } from '../media/media-rules.js';
 import { releaseReservation } from '../media/media.service.js';
 import { sha256, sniffMime } from '../media/processing.js';
 import type { MalwareScanner } from '../media/scanner.js';
 import type { StoragePort } from '../media/storage.js';
-import { DOCUMENT_MIME_TYPES } from './documents.dto.js';
+import { documentMaxBytes, isPlainText } from './document-rules.js';
+import { CSV_MIME, DOCUMENT_MIME_TYPES } from './documents.dto.js';
 
 export type ScanOutcome = 'clean' | 'infected' | 'failed' | 'skipped';
 
@@ -36,10 +36,10 @@ export class DocumentScanner {
 
     let verdict: { status: 'clean' } | { status: 'infected' | 'failed'; code: string; signature?: string };
     const stored = await this.storage.head(version.storageKey);
-    if (!stored || stored.size !== declaredSize || stored.size > maxBytesFor(version.mimeType)) {
+    if (!stored || stored.size !== declaredSize || stored.size > documentMaxBytes(version.mimeType)) {
       verdict = { status: 'failed', code: stored ? 'size-mismatch' : 'missing' };
     } else {
-      const content = await this.storage.read(version.storageKey, maxBytesFor(version.mimeType));
+      const content = await this.storage.read(version.storageKey, documentMaxBytes(version.mimeType));
       if (!sha256(content).equals(Buffer.from(version.checksumSha256))) {
         verdict = { status: 'failed', code: 'checksum-mismatch' };
       } else {
@@ -47,7 +47,7 @@ export class DocumentScanner {
         if (!result.clean) {
           verdict = { status: 'infected', code: 'malware', signature: result.signature };
         } else {
-          const sniffed = await sniffMime(content);
+          const sniffed = version.mimeType === CSV_MIME ? (isPlainText(content) ? CSV_MIME : null) : await sniffMime(content);
           verdict =
             sniffed === version.mimeType && (DOCUMENT_MIME_TYPES as readonly string[]).includes(sniffed)
               ? { status: 'clean' }

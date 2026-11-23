@@ -162,12 +162,12 @@ describe('L2: rent schedule, charges, adjustments, ledger and rent reviews', () 
 
   describe('lettings settings (ST-2)', () => {
     it('start empty, are saved by members with settings.manage, and are audited', async () => {
-      expect((await as('pm').get('/api/v1/settings/lettings').expect(200)).body).toEqual({ chargeLeadDays: null, requireSignedLease: true });
+      expect((await as('pm').get('/api/v1/settings/lettings').expect(200)).body).toEqual({ chargeLeadDays: null, requireSignedLease: true, arrearsSteps: [] });
       await as('pm').put('/api/v1/settings/lettings', { chargeLeadDays: 14, requireSignedLease: false }).expect(403);
       const invalid = await as('owner').put('/api/v1/settings/lettings', { chargeLeadDays: 91, requireSignedLease: false });
       expect(invalid.status).toBe(422);
       const saved = await as('owner').put('/api/v1/settings/lettings', { chargeLeadDays: null, requireSignedLease: false }).expect(200);
-      expect(saved.body).toEqual({ chargeLeadDays: null, requireSignedLease: false });
+      expect(saved.body).toEqual({ chargeLeadDays: null, requireSignedLease: false, arrearsSteps: [] });
       expect((await as('owner').put('/api/v1/settings/lettings', { chargeLeadDays: null, requireSignedLease: false }).expect(200)).body).toEqual(saved.body);
       expect(await auditActions(company.companyId)).toContain('settings.lettings_updated');
     });

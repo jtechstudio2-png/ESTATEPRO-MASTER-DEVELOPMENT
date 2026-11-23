@@ -9,11 +9,11 @@ import type { TenantContext } from '../common/request-context.js';
 import { APP_CONFIG, type AppConfig } from '../config/config.js';
 import type { Tx } from '../database/database.module.js';
 import { assertLettingsRecord, type LettingsEntity } from '../lettings/lettings-access.js';
-import { maxBytesFor } from '../media/media-rules.js';
+import { documentMaxBytes } from './document-rules.js';
 import { normaliseFileName, releaseReservation, reserveStorage } from '../media/media.service.js';
 import { STORAGE, type StoragePort } from '../media/storage.js';
 import { checkPicklistCode } from '../reference/picklists.js';
-import { type CreateDocumentUploadBody, DOCUMENT_MIME_TYPES, type DocumentDownloadDto, type DocumentDto, type DocumentUploadTicketDto } from './documents.dto.js';
+import { type CreateDocumentUploadBody, CSV_MIME, DOCUMENT_MIME_TYPES, type DocumentDownloadDto, type DocumentDto, type DocumentUploadTicketDto } from './documents.dto.js';
 
 export const DOCUMENT_SCAN_JOB = 'document.scan';
 
@@ -32,6 +32,7 @@ const CATEGORY: Record<string, string> = {
   proof_of_funds: 'financial',
   invoice: 'financial',
   receipt: 'financial',
+  bank_statement: 'financial',
   inspection_report: 'compliance',
   safety_certificate: 'compliance',
   insurance: 'compliance',
@@ -58,8 +59,11 @@ export class DocumentsService {
     if (!(DOCUMENT_MIME_TYPES as readonly string[]).includes(mime)) {
       throw Problems.validation([{ field: 'contentType', code: 'unsupported', message: `Accepted: ${DOCUMENT_MIME_TYPES.join(', ')}.` }]);
     }
-    if (body.size > maxBytesFor(mime)) {
-      throw Problems.validation([{ field: 'size', code: 'too-large', message: `Files of this type can be at most ${maxBytesFor(mime) / (1024 * 1024)} MB.` }]);
+    if ((mime === CSV_MIME) !== (body.entityType === 'bank_account' && body.documentTypeCode === 'bank_statement')) {
+      throw Problems.validation([{ field: 'contentType', code: 'unsupported', message: 'CSV files are bank statements of a bank account; a bank statement is a CSV file.' }]);
+    }
+    if (body.size > documentMaxBytes(mime)) {
+      throw Problems.validation([{ field: 'size', code: 'too-large', message: `Files of this type can be at most ${documentMaxBytes(mime) / (1024 * 1024)} MB.` }]);
     }
     const country = await this.entityCountry(tx, body.entityType, body.entityId);
     const typeError = await checkPicklistCode(tx, 'document_type', body.documentTypeCode, country, 'documentTypeCode');
@@ -261,6 +265,9 @@ export class DocumentsService {
 
   /** The country of the record's office, for country-specific picklist values. */
   private async entityCountry(tx: Tx, entityType: LettingsEntity, entityId: string): Promise<string> {
+    if (entityType === 'bank_account') {
+      return (await tx.selectFrom('bankAccounts').select('countryCode').where('id', '=', entityId).executeTakeFirstOrThrow()).countryCode;
+    }
     const row =
       entityType === 'lease'
         ? await tx

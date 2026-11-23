@@ -25,6 +25,7 @@ import type {
   LedgerEntryDto,
   RentChargeDto,
 } from './rent.dto.js';
+import { scaled, unscaled } from './rent-math.js';
 import { chargeLeadDays, postLeaseRent } from './rent-schedule.js';
 
 registerConstraintMessages({
@@ -590,23 +591,6 @@ async function minorUnits(tx: Tx, codes: string[]): Promise<Map<string, number>>
   if (unique.length === 0) return new Map();
   const rows = await tx.selectFrom('currencies').select(['code', 'minorUnits']).where('code', 'in', unique).execute();
   return new Map(rows.map((row) => [row.code, row.minorUnits]));
-}
-
-const FACTOR = 10_000n;
-
-/** A signed stored decimal string → 1/10,000ths. */
-function scaled(value: string): bigint {
-  const text = value.trim();
-  const negative = text.startsWith('-');
-  const [whole = '0', fraction = ''] = (negative ? text.slice(1) : text).split('.');
-  const units = BigInt(whole || '0') * FACTOR + BigInt((fraction + '0000').slice(0, 4));
-  return negative ? -units : units;
-}
-
-function unscaled(value: bigint): string {
-  const negative = value < 0n;
-  const abs = negative ? -value : value;
-  return `${negative ? '-' : ''}${abs / FACTOR}.${(abs % FACTOR).toString().padStart(4, '0')}`;
 }
 
 function lastDayOfMonth(month: string): string {

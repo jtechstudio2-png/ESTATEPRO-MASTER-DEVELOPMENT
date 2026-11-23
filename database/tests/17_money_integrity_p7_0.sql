@@ -304,6 +304,19 @@ UPDATE payments SET status = 'voided', status_reason = 'Entered in error' WHERE 
 SELECT test_assert(NOT ('open_balance' = ANY (app.contact_erasure_blockers('a5000000-0000-0000-0000-000000000003'))),
   'ADR-009: a voided receipt is not money still owed');
 
+-- L3 (migration 0038): a bank-file line naming the tenant, and a payment plan closed with a reason.
+INSERT INTO documents (id, company_id, title, document_type_code, category) VALUES
+  ('ae100000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Statement', 'bank_statement', 'financial');
+INSERT INTO payment_imports (id, company_id, bank_account_id, document_id, line_count) VALUES
+  ('ae200000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000001', 'ae100000-0000-0000-0000-000000000001', 1);
+INSERT INTO payment_import_lines (id, company_id, import_id, line_no, txn_date, amount, currency_code, reference, description, idempotency_key, status, payer_contact_id) VALUES
+  ('ae300000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'ae200000-0000-0000-0000-000000000001', 1, '2026-03-02', 100, 'GHS',
+   'AMA RENT', 'From Ama Mensah', 'erasure-test-1', 'queued', 'a5000000-0000-0000-0000-000000000002');
+INSERT INTO payment_plans (id, company_id, lease_id, currency_code, total_amount, instalments, agreed_on) VALUES
+  ('ae400000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'GHS', 100,
+   '[{"due_date": "2026-04-01", "amount": "100"}]', '2026-03-01');
+UPDATE payment_plans SET status = 'cancelled', closed_on = '2026-03-10', closed_reason = 'Ama moved to Kumasi' WHERE id = 'ae400000-0000-0000-0000-000000000001';
+
 -- Close out the lease: charges settled or waived, deposit returned, tenancy closed.
 UPDATE rent_charges SET status = 'cancelled' WHERE id = 'ac000000-0000-0000-0000-000000000003';
 UPDATE leases SET status = 'ended', move_out_date = '2026-10-31' WHERE id = 'ab000000-0000-0000-0000-000000000001';
@@ -360,6 +373,12 @@ SELECT test_assert(
           AND bool_and(status_reason IS NULL OR status_reason = '[Erased]') AND sum(amount) = 12000
      FROM payments WHERE payer_contact_id = 'a5000000-0000-0000-0000-000000000002'),
   'ADR-009: receipts lose notes and cheque details; amounts are kept');
+SELECT test_assert(
+  (SELECT reference = '[Erased]' AND description = '[Erased]' AND amount = 100 AND txn_date = '2026-03-02' FROM payment_import_lines WHERE id = 'ae300000-0000-0000-0000-000000000001'),
+  'ADR-009 (L3): bank-file line texts of the person are erased; date and amount are kept');
+SELECT test_assert(
+  (SELECT closed_reason = '[Erased]' AND total_amount = 100 AND status = 'cancelled' FROM payment_plans WHERE id = 'ae400000-0000-0000-0000-000000000001'),
+  'ADR-009 (L3): payment-plan reasons are erased; terms are kept');
 SELECT test_assert(
   (SELECT reason = '[Erased]' AND amount = -500 FROM rent_charge_adjustments WHERE id = 'af000000-0000-0000-0000-000000000001'),
   'ADR-009: adjustment reasons are erased; amounts are kept');

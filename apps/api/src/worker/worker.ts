@@ -9,6 +9,8 @@ import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
 import type { DocumentScanner } from '../documents/document-scanner.js';
 import { DOCUMENT_SCAN_JOB } from '../documents/documents.service.js';
+import { ARREARS_BATCH, arrearsWorkflowBatch } from '../lettings/arrears-workflow.js';
+import { ARREARS_STEPS_KEY, arrearsSteps } from '../lettings/arrears.service.js';
 import { CHARGE_LEAD_DAYS_KEY, chargeLeadDays, notifyReviewsDue, postRentBatch, postScheduledDue, RENT_POSTING_BATCH } from '../lettings/rent-schedule.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { expireOffers } from '../offers/offers.service.js';
@@ -30,6 +32,7 @@ export const JOBS = {
   documentScan: DOCUMENT_SCAN_JOB,
   rentSchedule: 'rent.schedule',
   rentPostDue: 'rent.post_due',
+  arrearsWorkflow: 'arrears.workflow',
 } as const;
 
 /** Batches (of 200 rows) one key-rotation job handles before handing over to a follow-up job. */
@@ -201,6 +204,13 @@ export class Worker {
           where status in ('scheduled', 'proposed') and due_notified_at is null and review_date <= (${now}::timestamptz at time zone 'UTC')::date + 1`,
     );
 
+    // The arrears workflow (P7-D10): daily, for companies with arrears steps set.
+    enqueued += await discover(
+      JOBS.arrearsWorkflow,
+      day,
+      sql<{ companyId: string }>`select company_id as "companyId" from company_settings where key = ${ARREARS_STEPS_KEY} and office_id is null`,
+    );
+
     // Field-key rotation (ADR-007 §10): yearly per company, then every quarter
     // hour while a rotation is in progress (rewriting or settling).
     for (const companyId of await this.deps.rotation.dueCompanies(now)) {
@@ -286,6 +296,32 @@ export class Worker {
     }
     if (charges + reviews > 0) this.deps.logger.info('scheduled charges posted and reviews notified', { companyId, charges, reviews });
     return { charges, reviews };
+  }
+
+  /**
+   * The daily arrears workflow of one company (P7-D10): leases owing money in
+   * batches of ARREARS_BATCH, one tenant transaction each, renewing the job's
+   * lock after every batch (#42). Idle while the company has no steps (W7-D7).
+   */
+  async runArrearsWorkflow(companyId: string, requestId = `arrears-workflow:${companyId}`, job?: ClaimedJob): Promise<{ leases: number; recorded: number }> {
+    const scope = { companyId, userId: '' };
+    const ctx = systemContext(companyId, requestId);
+    const steps = await this.deps.tenantDb.run(scope, (tx) => arrearsSteps(tx));
+    if (steps.length === 0) return { leases: 0, recorded: 0 };
+    const now = this.now();
+    let afterId: string | null = null;
+    let leases = 0;
+    let recorded = 0;
+    for (;;) {
+      const batch = await this.deps.tenantDb.run(scope, (tx) => arrearsWorkflowBatch(tx, ctx, this.deps.audit, { afterId, now, steps }));
+      leases += batch.leases;
+      recorded += batch.recorded;
+      if (job && !(await this.deps.queue.renewLock(job))) throw new LockLostError(job.id);
+      if (batch.lastId === null || batch.leases < ARREARS_BATCH) break;
+      afterId = batch.lastId;
+    }
+    if (recorded > 0) this.deps.logger.info('arrears steps recorded', { companyId, leases, recorded });
+    return { leases, recorded };
   }
 
   private async execute(job: ClaimedJob): Promise<boolean> {
@@ -460,6 +496,10 @@ export class Worker {
 
       case JOBS.rentPostDue:
         await this.runRentPostDue(job.companyId, requestId, job);
+        return;
+
+      case JOBS.arrearsWorkflow:
+        await this.runArrearsWorkflow(job.companyId, requestId, job);
         return;
 
       case JOBS.offerExpire:
