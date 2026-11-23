@@ -7,7 +7,7 @@
 | Approvals | P7-0 and ADR-009 approved, with P70-D1 to P70-D9 and risks R1 to R6 (22 November 2026). P7-W approved, with W7-D1 to W7-D8, W7-A1 (approved for L1), W7-A2, W7-S1 and risks W7-R1 to W7-R5 (22 November 2026) |
 | Scope | Readiness report §11, L1: management agreements and leases (life cycle, parties, letting deal to lease, activation, listing `rented`). Also W7-A1: the documents upload API that activation needs |
 | Not in scope | Rent schedule, charges, adjustments and rent reviews (L2). Receipts and arrears (L3). Deposits, inspections, notice, ending, closing and renewal (L4, see L1-D1). Portals (L5). Screens (L6) |
-| Result | **L1 complete, for approval.** Two points refine approved wording and need your decision: L1-D1 (where notice, ending and renewal are built) and L1-D2 (when a letting deal is won). Decisions in §9 |
+| Result | **L1 approved (23 November 2026).** L1 complete. All decisions approved, L1-D1 and L1-D2 explicitly (§9 and Approval) |
 
 ## 1. Deliverables
 
@@ -179,6 +179,9 @@ Measured through the full API at the readiness volume for one company: 2,000 pro
 
 | Item | Decision | Date |
 |---|---|---|
-| L1 | Pending | |
-| L1-D1 to L1-D9 | Pending | |
-| L1-R1 to L1-R4 | Pending | |
+| L1 | Approved | 23 November 2026 |
+| L1-D1 (notice, ending, closing and renewal in L4) | Approved | 23 November 2026 |
+| L1-D2 (letting deal won once the lease is active) | Approved | 23 November 2026 |
+| L1-D3 to L1-D9 | Approved, each individually | 23 November 2026 |
+| L1-R1 to L1-R4 | Reviewed and accepted | 23 November 2026 |
+| W7-A1 (documents upload API) | Completed | 23 November 2026 |
