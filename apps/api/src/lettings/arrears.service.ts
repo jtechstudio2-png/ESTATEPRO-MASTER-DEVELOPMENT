@@ -350,30 +350,31 @@ export async function arrearsAsOf(
   const due = filter.includeDue ? sql`true` : sql`c.due_date < ${asOf}::date`;
   const leaseFilter = filter.leaseIds ? sql`and c.lease_id = any(${filter.leaseIds}::uuid[])` : sql``;
   const open = sql`c.allocated_amount <> c.amount + c.tax_amount + c.adjusted_amount`;
+  // Each charge's amount at the date is what it owes now plus what changed it after the date (allocations
+  // added back, adjustments taken off), summed as rows of one union per charge. The later allocations and
+  // adjustments reach their charge by its primary key: no join between unindexed intermediate results, whose
+  // misestimated sizes once made the planner loop row by row (L4 report §3 finding 7).
   const { rows } = await sql<ArrearsAggregate>`
-    with la as (
-      select a.rent_charge_id as id, sum(a.amount) as amount from payment_allocations a
-       where a.company_id = ${ctx.companyId}::uuid and a.allocated_on > ${asOf}::date group by a.rent_charge_id
-    ),
-    lj as (
-      select j.rent_charge_id as id, sum(j.amount) as amount from rent_charge_adjustments j
-       where j.company_id = ${ctx.companyId}::uuid and j.adjusted_on > ${asOf}::date group by j.rent_charge_id
-    ),
-    charges as (
-      -- Owing now (index rent_charges_open_idx) ...
-      select c.id, c.lease_id, c.currency_code, c.due_date, c.total_amount + c.adjusted_amount - c.allocated_amount as owed_now
+    with amounts as (
+      -- Owing now (index rent_charges_open_idx).
+      select c.id, c.lease_id, c.currency_code, c.due_date, c.total_amount + c.adjusted_amount - c.allocated_amount as amount
         from rent_charges c
        where c.company_id = ${ctx.companyId}::uuid and c.status = 'posted' and ${due} and ${open} ${leaseFilter}
       union all
-      -- ... and settled now, but changed after the date.
-      select c.id, c.lease_id, c.currency_code, c.due_date, c.total_amount + c.adjusted_amount - c.allocated_amount
-        from rent_charges c
-       where c.company_id = ${ctx.companyId}::uuid and c.id in (select id from la union select id from lj)
-         and c.status = 'posted' and ${due} and not ${open} ${leaseFilter}
+      -- Allocated after the date: owed at the date.
+      select c.id, c.lease_id, c.currency_code, c.due_date, a.amount
+        from payment_allocations a join rent_charges c on c.company_id = a.company_id and c.id = a.rent_charge_id
+       where a.company_id = ${ctx.companyId}::uuid and a.allocated_on > ${asOf}::date
+         and c.status = 'posted' and ${due} ${leaseFilter}
+      union all
+      -- Adjusted after the date: not yet adjusted at the date.
+      select c.id, c.lease_id, c.currency_code, c.due_date, -j.amount
+        from rent_charge_adjustments j join rent_charges c on c.company_id = j.company_id and c.id = j.rent_charge_id
+       where j.company_id = ${ctx.companyId}::uuid and j.adjusted_on > ${asOf}::date
+         and c.status = 'posted' and ${due} ${leaseFilter}
     ),
     dated as (
-      select k.lease_id, k.currency_code, k.due_date, k.owed_now + coalesce(la.amount, 0) - coalesce(lj.amount, 0) as owed
-        from charges k left join la on la.id = k.id left join lj on lj.id = k.id
+      select lease_id, currency_code, due_date, sum(amount) as owed from amounts group by id, lease_id, currency_code, due_date
     )
     select d.lease_id as "leaseId", d.currency_code as "currencyCode", sum(d.owed)::text as outstanding,
            coalesce(sum(d.owed) filter (where ${asOf}::date - d.due_date between 1 and 30), 0)::text as d30,
