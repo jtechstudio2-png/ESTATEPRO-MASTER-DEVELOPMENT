@@ -8,7 +8,7 @@ import { createWorker } from '../src/worker/create-worker.js';
 import type { Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
-import { settleDatabase } from './support/settle.js';
+import { dropCompanyBulk, settleDatabase } from './support/settle.js';
 import { sha256Hex } from './support/media-files.js';
 
 /**
@@ -132,10 +132,16 @@ describe('receipts and arrears performance (300,000 payments, 400,000 allocation
   }, 900_000);
 
   afterAll(async () => {
+    const admin = createKysely(inject('databaseUrls').admin, 1, 'estatepro-perf-cleanup');
+    try {
+      await dropCompanyBulk(admin, company.companyId);
+    } finally {
+      await admin.destroy();
+    }
     await closeWorker();
     await fx.close();
     await t.close();
-  });
+  }, 900_000);
 
   it(`answers receipt and arrears requests at p95 under ${TARGET_P95_MS} ms and runs the arrears workflow in under ${TARGET_JOB_MS / 1000} s`, async () => {
     const counts = await sql<{ charges: number; payments: number; allocations: number }>`

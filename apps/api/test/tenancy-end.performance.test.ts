@@ -6,7 +6,7 @@ import { createWorker } from '../src/worker/create-worker.js';
 import type { Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
-import { settleDatabase } from './support/settle.js';
+import { dropCompanyBulk, settleDatabase } from './support/settle.js';
 
 /**
  * Deposits, inspections, ending and renewal at scale (readiness report §10:
@@ -120,10 +120,16 @@ describe('tenancy end performance (20,000 leases, 40,000 inspections)', () => {
   }, 900_000);
 
   afterAll(async () => {
+    const admin = createKysely(inject('databaseUrls').admin, 1, 'estatepro-perf-cleanup');
+    try {
+      await dropCompanyBulk(admin, company.companyId);
+    } finally {
+      await admin.destroy();
+    }
     await closeWorker();
     await fx.close();
     await t.close();
-  });
+  }, 900_000);
 
   it(`writes the renewal reminders in under ${TARGET_JOB_MS / 1000} s and answers requests at p95 under ${TARGET_P95_MS} ms`, async () => {
     const counts = await sql<{ leases: number; inspections: number; items: number }>`
