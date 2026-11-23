@@ -8,6 +8,7 @@ import { createWorker } from '../src/worker/create-worker.js';
 import type { Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
+import { settleDatabase } from './support/settle.js';
 import { sha256Hex } from './support/media-files.js';
 
 /**
@@ -124,6 +125,7 @@ describe('receipts and arrears performance (300,000 payments, 400,000 allocation
                     (${c}::uuid, null, 'lettings.require_signed_lease', 'false'::jsonb)`.execute(tx);
       });
       await sql`vacuum (analyze) leases, lease_parties, rent_charges, payments, payment_allocations, rent_charge_adjustments, arrears_actions, payment_plans`.execute(admin);
+      await settleDatabase(admin);
     } finally {
       await admin.destroy();
     }

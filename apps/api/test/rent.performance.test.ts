@@ -6,6 +6,7 @@ import { createWorker } from '../src/worker/create-worker.js';
 import type { Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
+import { settleDatabase } from './support/settle.js';
 
 /**
  * Rent at scale (readiness report §10): API p95 under 1,000 ms and the daily
@@ -121,6 +122,7 @@ describe('rent performance (20,000 leases, 500,000 charges)', () => {
         await sql`insert into company_settings (company_id, office_id, key, value) values (${c}::uuid, null, 'lettings.charge_lead_days', '14'::jsonb)`.execute(tx);
       });
       await sql`vacuum (analyze) properties, units, contacts, leases, lease_parties, rent_charges, payments, payment_allocations, rent_charge_adjustments, rent_reviews`.execute(admin);
+      await settleDatabase(admin);
     } finally {
       await admin.destroy();
     }

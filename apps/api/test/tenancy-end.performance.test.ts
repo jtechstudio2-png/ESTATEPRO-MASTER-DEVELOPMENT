@@ -6,6 +6,7 @@ import { createWorker } from '../src/worker/create-worker.js';
 import type { Worker } from '../src/worker/worker.js';
 import { createTestApp, type TestApp } from './support/app.js';
 import { Fixtures } from './support/fixtures.js';
+import { settleDatabase } from './support/settle.js';
 
 /**
  * Deposits, inspections, ending and renewal at scale (readiness report §10:
@@ -112,6 +113,7 @@ describe('tenancy end performance (20,000 leases, 40,000 inspections)', () => {
            where i.company_id = ${c}::uuid and i.reference like 'L4I-%'`.execute(tx);
       });
       await sql`vacuum (analyze) properties, units, contacts, leases, lease_parties, deposits, inspections, inspection_items`.execute(admin);
+      await settleDatabase(admin);
     } finally {
       await admin.destroy();
     }
