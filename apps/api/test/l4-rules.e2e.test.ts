@@ -154,7 +154,7 @@ describe('L4: rules of deposits, ending, renewal and inspections', () => {
     expect(changed.body.deposit).toMatchObject({ holderType: 'protection_scheme', schemeName: null, protectionDeadline: '2026-07-15', protectionDeadlineSource: 'entered', returnDueBy: null });
     const cleared = await as('owner').put(`/api/v1/leases/${id}/deposit`, { holderType: 'protection_scheme', protectionDeadline: null }, changed.body.deposit.version).expect(200);
     expect(cleared.body.deposit).toMatchObject({ protectionDeadline: null, protectionDeadlineSource: null });
-    expect((await fx.db.selectFrom('auditLogs').select('action').where('entityId', '=', first.id).execute()).map((r) => r.action)).toEqual(['deposit.registered', 'deposit.updated', 'deposit.updated']);
+    expect((await fx.db.selectFrom('auditLogs').select('action').where('entityId', '=', first.id).orderBy('occurredAt').orderBy('entryNo').execute()).map((r) => r.action)).toEqual(['deposit.registered', 'deposit.updated', 'deposit.updated']);
   });
 
   it('deposits: protection, deductions and return refused out of order', async () => {

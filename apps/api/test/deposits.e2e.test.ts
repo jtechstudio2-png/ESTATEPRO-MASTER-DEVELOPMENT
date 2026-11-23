@@ -122,7 +122,7 @@ describe('L4: deposits', () => {
   const auditActions = async (entityId: string) =>
     (await fx.db.selectFrom('auditLogs').select('action').where('entityId', '=', entityId).orderBy('occurredAt').orderBy('entryNo').execute()).map((row) => row.action);
   const outbox = async (aggregateId: string) =>
-    (await fx.db.selectFrom('outboxEvents').select('eventType').where('aggregateId', '=', aggregateId).orderBy('occurredAt').execute()).map((row) => row.eventType);
+    (await fx.db.selectFrom('outboxEvents').select('eventType').where('aggregateId', '=', aggregateId).orderBy('occurredAt').orderBy('entryNo').execute()).map((row) => row.eventType);
 
   beforeAll(async () => {
     t = await createTestApp();
