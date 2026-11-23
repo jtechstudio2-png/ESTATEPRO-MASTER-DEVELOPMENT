@@ -7,7 +7,7 @@
 | Approvals | L1 approved with L1-D1 to L1-D9 and risks L1-R1 to L1-R4 (23 November 2026); W7-A1 completed. Earlier: P7-0, ADR-009, P70-D1 to P70-D9, P7-W, W7-D1 to W7-D8 (22 November 2026) |
 | Scope | Readiness report §11, L2: rent schedule and charges, adjustments, rent reviews (LET-03, LET-08; §5.2, §5.6; P7-D6). Verification report §3.1 row L2: ledger, charges (list, add, waive, cancel), adjustments, rent reviews, lettings settings (charge lead days) |
 | Not in scope | Receipts, bank-file import, allocation, bounced cheques, arrears and payment plans (L3). Deposits, inspections, notice, ending, renewal (L4). Portals (L5). Screens (L6). Rent dashboard (L7). Fees and statements (Phase 9, P7-D2). Notification delivery (Phase 12) |
-| Result | **L2 complete, for approval.** Decisions in §9; L1-R1 (advance rent at activation) is resolved |
+| Result | **L2 approved (23 November 2026).** All decisions approved (§9 and Approval); L1-R1 (advance rent at activation) is resolved |
 
 ## 1. Deliverables
 
@@ -183,6 +183,6 @@ Measured through the full API at the readiness volume for one company (§10): 20
 
 | Item | Decision | Date |
 |---|---|---|
-| L2 | Pending | |
-| L2-D1 to L2-D12 | Pending | |
-| L2-R1 to L2-R4 | Pending | |
+| L2 | Approved | 23 November 2026 |
+| L2-D1 to L2-D12 | Approved, each individually | 23 November 2026 |
+| L2-R1 to L2-R4 | Reviewed and accepted | 23 November 2026 |
