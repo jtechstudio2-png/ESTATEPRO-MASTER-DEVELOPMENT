@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 23 November 2026 |
-| Branch | `phase-7/readiness`. Commits: `ef73fa8` (L2 approvals recorded), `2cba4a8` (migration 0038, SQL suite 21), `355efc9` (API, workflow job, tests, bank-file format), `a2658bf` (performance test, set-based arrears query), __FINAL__ (report). CI __CI__ |
+| Branch | `phase-7/readiness`. Commits: `ef73fa8` (L2 approvals recorded), `2cba4a8` (migration 0038, SQL suite 21), `355efc9` (API, workflow job, tests, bank-file format), `a2658bf` (performance test, set-based arrears query), `7940733`, `a115254`, `21a28f5` and this commit (report, L2 performance seed balances). CI run 205 on `21a28f5`: green |
 | Approvals | L2 approved with L2-D1 to L2-D12 and risks L2-R1 to L2-R4 (23 November 2026). Earlier: L1, P7-0, ADR-009, P7-W and their decisions |
 | Scope | Readiness report §11, L3: receipts, bank-file import, allocation, bounced cheques, arrears and payment plans (LET-04, LET-05; §5.3, §5.4; P7-D7, P7-D8, P7-D10). Verification report §3.1 row L3: receipts (list, record, clear, bounce, refund, void), bank-file import and commit, allocations, arrears list, arrears actions, payment plans, arrears settings |
 | Not in scope | Payment-provider receipts (LET-12, P7-D7). Deposits, inspections, notice, ending, renewal (L4). Portals (L5). Screens (L6). Rent dashboard (L7). Statements and payouts (Phase 9). Notification delivery (Phase 12) |
@@ -75,7 +75,7 @@ The migration, services and tests were re-read adversarially before this report.
 |---|---|
 | SQL, `verify.sh` | **38 migrations, 22 files passed.** New: `21_receipts_arrears_l3.sql` (36 assertions); suite 17 adds two erasure assertions |
 | API (`test:ci`) | **54 files, 627 tests passed**; coverage 96.07 % statements, 90.30 % branches (thresholds 95 % and 90 %). New: `receipts.e2e.test.ts` (11), `receipts-rules.e2e.test.ts` (5), `arrears.e2e.test.ts` (7), `bank-file.test.ts` (5 unit tests) |
-| API performance (`test:performance`) | **16 files, 20 tests passed** in one run (the 15 earlier files, including L1 leases and L2 rent, and the new receipts test: p95 654 ms, month end 842 ms, arrears workflow 9.5 s, bank file check 153 ms and commit 291 ms). §8 figures are from the dedicated run; an earlier full run failed (§3 finding 7) |
+| API performance (`test:performance`) | **16 files, 20 tests passed** in one run (the 15 earlier files, including L1 leases and L2 rent, and the new receipts test: p95 654 ms, month end 842 ms, arrears workflow 9.5 s, bank file check 153 ms and commit 291 ms). §8 figures are from the dedicated run; an earlier full run failed (§3 finding 7). In the passing full run the L1 lettings test reached p95 846 ms (slowest 1,204 ms, one property-manager list) against 129 ms before; run on its own twice afterwards it gave p95 120 ms and 125 ms (slowest 207 ms), so the rise came from the shared database straight after the larger seeds, not from a change to the lettings queries. Within budget either way |
 | Web unit and message check | Unchanged by L3 (no web change); run in CI |
 | Browser (Playwright, axe, English and Arabic, 320 px to desktop) | Unchanged by L3; run in CI |
 | Lint and typecheck | API clean |
@@ -180,7 +180,7 @@ Measured through the full API at the readiness volume for one company (§10): 20
 
 | Item | Reference |
 |---|---|
-| CI | __CI__ |
+| CI | Run 205 (`21a28f5`), workflow CI: success — https://github.com/jtechstudio2-png/ESTATEPRO-MASTER-DEVELOPMENT/actions/runs/45170080813 |
 
 ## Approval
 
