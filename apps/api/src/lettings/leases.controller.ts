@@ -8,6 +8,7 @@ import { type FilterSpec, type ListQueryInput, parseListQuery, type SortSpec } f
 import { Problems } from '../common/problem.js';
 import type { TenantContext } from '../common/request-context.js';
 import { TenantDb } from '../database/database.module.js';
+import { RENEWAL_STATUSES } from './ending.dto.js';
 import { type LeaseSortField, LeasesService } from './leases.service.js';
 import {
   ActivateLeaseBody,
@@ -32,6 +33,7 @@ const SORT = {
 const FILTERS: FilterSpec = {
   status: { type: 'enum', values: LEASE_STATUSES, multi: true },
   leaseType: { type: 'enum', values: LEASE_TYPES, multi: true },
+  renewalStatus: { type: 'enum', values: RENEWAL_STATUSES, multi: true },
   unitId: { type: 'uuid', multi: true },
   propertyId: { type: 'uuid', multi: true },
   officeId: { type: 'uuid', multi: true },
@@ -60,6 +62,7 @@ export class LeasesController {
   @ApiQuery({ name: 'q', required: false, description: 'Reference prefix, unit, property or tenant name' })
   @ApiQuery({ name: 'filter[status]', required: false })
   @ApiQuery({ name: 'filter[leaseType]', required: false })
+  @ApiQuery({ name: 'filter[renewalStatus]', required: false, description: 'Renewals list (LS-7): pending_decision, sorted by endDate' })
   @ApiQuery({ name: 'filter[unitId]', required: false })
   @ApiQuery({ name: 'filter[propertyId]', required: false })
   @ApiQuery({ name: 'filter[officeId]', required: false })

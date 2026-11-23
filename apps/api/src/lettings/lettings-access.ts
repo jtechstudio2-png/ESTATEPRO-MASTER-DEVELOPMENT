@@ -109,10 +109,73 @@ export async function agreementOffice(tx: Tx, agreementId: string): Promise<{ of
   return row ?? null;
 }
 
-export type LettingsEntity = 'lease' | 'management_agreement' | 'bank_account';
+export type LettingsEntity = 'lease' | 'management_agreement' | 'bank_account' | 'inspection';
 
 /**
- * Access to a lease or an agreement for its documents: 404 when the member may
+ * Record scope for inspections (wireframe IN-1; seeded permissions):
+ *   all       every inspection of the company
+ *   office    inspections of properties of the member's offices
+ *   own       inspections the member carries out or scheduled, or of leases that are theirs
+ *   assigned  inspections the member carries out (maintenance staff)
+ */
+export interface InspectionAccessRow {
+  officeId: string;
+  inspectorId: string | null;
+  createdBy: string | null;
+  lease: LeaseAccessRow | null;
+}
+
+export function inspectionWithin(scope: PermissionScope | null | undefined, ctx: TenantContext, row: InspectionAccessRow): boolean {
+  switch (scope) {
+    case 'all':
+      return true;
+    case 'office':
+      return ctx.officeIds.includes(row.officeId);
+    case 'own':
+      return row.inspectorId === ctx.membershipId || row.createdBy === ctx.membershipId || (row.lease !== null && leaseWithin('own', ctx, row.lease));
+    case 'assigned':
+      return row.inspectorId === ctx.membershipId;
+    default:
+      return false;
+  }
+}
+
+export function canOnInspection(ctx: TenantContext, permission: string, row: InspectionAccessRow): boolean {
+  return inspectionWithin(ctx.permissions.get(permission)?.scope, ctx, row);
+}
+
+/** The same rule in SQL for a query joining the inspection as `i`, its property as `p` and its lease (left join) as `l`. */
+export function inspectionScopeSql(scope: PermissionScope | null | undefined, ctx: TenantContext): RawBuilder<boolean> {
+  switch (scope) {
+    case 'all':
+      return sql<boolean>`true`;
+    case 'office':
+      return ctx.officeIds.length > 0 ? sql<boolean>`p.office_id = any(${[...ctx.officeIds]}::uuid[])` : sql<boolean>`false`;
+    case 'own':
+      return sql<boolean>`(i.inspector_membership_id = ${ctx.membershipId}::uuid or i.created_by = ${ctx.membershipId}::uuid
+        or (l.id is not null and ${leaseScopeSql('own', ctx)}))`;
+    case 'assigned':
+      return sql<boolean>`i.inspector_membership_id = ${ctx.membershipId}::uuid`;
+    default:
+      return sql<boolean>`false`;
+  }
+}
+
+/** Who may see an inspection: its property's office, its inspector and creator, and the people its lease is "own" for. */
+export async function inspectionAccess(tx: Tx, inspectionId: string): Promise<InspectionAccessRow | null> {
+  const row = await tx
+    .selectFrom('inspections as i')
+    .innerJoin('properties as p', 'p.id', 'i.propertyId')
+    .select(['p.officeId', 'i.inspectorMembershipId', 'i.createdBy', 'i.leaseId'])
+    .where('i.id', '=', inspectionId)
+    .executeTakeFirst();
+  if (!row) return null;
+  const lease = row.leaseId ? await leaseAccess(tx, row.leaseId) : null;
+  return { officeId: row.officeId, inspectorId: row.inspectorMembershipId, createdBy: row.createdBy, lease };
+}
+
+/**
+ * Access to a lease, an agreement, a bank account or an inspection for its documents: 404 when the member may
  * not see the record, 403 when `action` (on the record) is not granted.
  */
 export async function assertLettingsRecord(tx: Tx, ctx: TenantContext, entityType: LettingsEntity, entityId: string, action: 'view' | 'change'): Promise<void> {
@@ -122,6 +185,12 @@ export async function assertLettingsRecord(tx: Tx, ctx: TenantContext, entityTyp
     const allowed = ctx.permissions.get('payment.record')?.scope === 'all' || ctx.permissions.get('bank_account.manage')?.scope === 'all';
     if (!account || !allowed) throw Problems.notFound();
     if (action === 'change' && ctx.permissions.get('payment.record')?.scope !== 'all') throw Problems.forbidden('Your role does not allow importing bank files.');
+    return;
+  }
+  if (entityType === 'inspection') {
+    const row = await inspectionAccess(tx, entityId);
+    if (!row || !canOnInspection(ctx, 'inspection.view', row)) throw Problems.notFound();
+    if (action === 'change' && !canOnInspection(ctx, 'inspection.manage', row)) throw Problems.forbidden('Your role does not allow changes to this inspection.');
     return;
   }
   if (entityType === 'lease') {

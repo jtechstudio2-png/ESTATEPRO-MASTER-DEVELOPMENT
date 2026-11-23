@@ -12,6 +12,7 @@ import type { Tx } from '../database/database.module.js';
 import { asPipelineAction, moveDealToStage } from '../deals/deal-stage.js';
 import { dealTimeline, lockDeal } from '../deals/deals.service.js';
 import { DocumentsService } from '../documents/documents.service.js';
+import { DepositsService } from './deposits.service.js';
 import { ListingsService } from '../listings/listings.service.js';
 import { nextReference } from '../properties/properties.service.js';
 import { checkCurrencyAmount, isRealDate } from './agreements.service.js';
@@ -66,8 +67,8 @@ interface LeaseTerms {
  * P7-D4, P7-D5). A lease is drawn up as a draft (directly, or from a letting
  * deal at "terms agreed"), sent for signature, and activated with the signed
  * copy; its rent listing then becomes rented. Terms and parties are fixed once
- * active (migration 0036). Notice, ending, closing and renewal are milestone
- * L4. The database enforces the life cycle; this service checks first to
+ * active (migration 0036). Notice, ending, closing and renewal (L4) are in
+ * lease-ending.service.ts. The database enforces the life cycle; this service checks first to
  * answer with field-level codes, and adds scope, the timeline, audit and
  * outbox events.
  */
@@ -77,6 +78,7 @@ export class LeasesService {
     private readonly audit: AuditService,
     private readonly documents: DocumentsService,
     private readonly listings: ListingsService,
+    private readonly deposits: DepositsService,
   ) {}
 
   // ----------------------------------------------------------------- reading
@@ -95,6 +97,7 @@ export class LeasesService {
       ['officeId', 'p.officeId'],
       ['managementAgreementId', 'l.managementAgreementId'],
       ['leaseType', 'l.leaseType'],
+      ['renewalStatus', 'l.renewalStatus'],
     ] as const) {
       const values = f[filter];
       if (Array.isArray(values)) qb = qb.where(col, 'in', values);
@@ -139,7 +142,9 @@ export class LeasesService {
         'l.breakClauseDate', 'l.breakNoticeDays', 'l.nextRentReviewDate', 'l.governingLocaleCode', 'l.moveInDate', 'l.signedAt', 'l.endedReason',
         'l.managementAgreementId', 'ma.reference as agreementReference', 'l.listingId', 'li.reference as listingReference', 'l.dealId', 'dl.reference as dealReference',
         'l.previousLeaseId', 'pl.reference as previousReference', 'l.documentId', 'doc.title as documentTitle', 'l.createdAt', 'l.version',
-        'l.rentScheduleFrom',
+        'l.rentScheduleFrom', 'l.moveOutDate', 'l.noticeGivenOn', 'l.noticeGivenBy',
+        sql<string | null>`(select r.id::text from leases r where r.company_id = l.company_id and r.previous_lease_id = l.id and r.status <> 'cancelled')`.as('renewalId'),
+        sql<string | null>`(select r.reference from leases r where r.company_id = l.company_id and r.previous_lease_id = l.id and r.status <> 'cancelled')`.as('renewalReference'),
         sql<string>`app.rent_in_force(l.company_id, l.id, greatest(l.start_date, (now() at time zone p.timezone)::date))::text`.as('currentRentAmount'),
         sql<boolean>`not exists (select 1 from jurisdiction_settings js where js.jurisdiction_code = l.jurisdiction_code)`.as('rulesNotReviewed'),
       ])
@@ -177,6 +182,10 @@ export class LeasesService {
       listing: ref(row.listingId, row.listingReference),
       deal: ref(row.dealId, row.dealReference),
       previousLease: ref(row.previousLeaseId, row.previousReference),
+      renewalLease: ref(row.renewalId, row.renewalReference),
+      moveOutDate: row.moveOutDate,
+      noticeGivenOn: row.noticeGivenOn,
+      noticeGivenBy: row.noticeGivenBy,
       document: ref(row.documentId, row.documentTitle),
       parties: parties.map((p) => ({
         contact: { id: p.contactId, name: p.displayName },
@@ -195,14 +204,15 @@ export class LeasesService {
 
   // ----------------------------------------------------------------- drawing up
 
-  async create(tx: Tx, ctx: TenantContext, body: CreateLeaseBody): Promise<LeaseDto> {
+  /** A new draft lease; `previousLeaseId` makes it the renewal of that lease (L4, LS-7). */
+  async create(tx: Tx, ctx: TenantContext, body: CreateLeaseBody, previousLeaseId: string | null = null): Promise<LeaseDto> {
     const unit = await this.unitFor(tx, ctx, body.unitId);
     const terms = termsOf(body, body.unitId, body.listingId ?? null, body.rent);
     const errors: FieldError[] = [];
     await this.checkTerms(tx, terms, unit.propertyId, errors, null);
     const parties = await this.checkParties(tx, body.parties, errors);
     if (errors.length > 0) throw Problems.validation(errors);
-    const id = await this.insert(tx, ctx, unit, terms, body, null);
+    const id = await this.insert(tx, ctx, unit, terms, body, null, previousLeaseId);
     await this.addParties(tx, ctx, id, unit, parties);
     await this.recordCreated(tx, ctx, id, null);
     return this.get(tx, ctx, id);
@@ -428,6 +438,16 @@ export class LeasesService {
     const lead = await chargeLeadDays(tx);
     const advanceCharges = await postLeaseRent(tx, ctx, this.audit, id, lead === null ? addDays(current.startDate, -1) : addDays(today, lead));
     if (current.listingId) await this.rentListing(tx, ctx, current.listingId, current.reference);
+    // L4: a renewal takes over the held deposit of the lease it renews; a registered deposit the agency collects gets its charge.
+    await this.deposits.onLeaseActivated(tx, ctx, id, current.previousLeaseId);
+    if (current.previousLeaseId) {
+      const previous = await tx.selectFrom('leases').select('renewalStatus').where('id', '=', current.previousLeaseId).forUpdate().executeTakeFirstOrThrow();
+      if (previous.renewalStatus !== 'renewed') {
+        await tx.updateTable('leases').set({ renewalStatus: 'renewed' }).where('id', '=', current.previousLeaseId).execute();
+        await this.audit.record(tx, ctx, { action: 'lease.renewed', entityType: 'lease', entityId: current.previousLeaseId, changes: { renewalStatus: { old: previous.renewalStatus, new: 'renewed' } }, metadata: { renewalLeaseId: id } });
+        await this.audit.emit(tx, ctx, { eventType: 'lease.renewed', aggregateType: 'lease', aggregateId: current.previousLeaseId, payload: { leaseId: current.previousLeaseId, renewalLeaseId: id } });
+      }
+    }
     if (current.dealId) {
       const completed = await tx
         .updateTable('dealMilestones')
@@ -470,7 +490,8 @@ export class LeasesService {
 
   // ----------------------------------------------------------------- helpers
 
-  private async lock(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, permission: string) {
+  /** The lease locked for a change, after scope and version checks (also used by the L4 ending and renewal service). */
+  async lock(tx: Tx, ctx: TenantContext, id: string, expectedVersion: number, permission: string) {
     const access = await leaseAccess(tx, id);
     if (!access || !canOnLease(ctx, 'lease.view', access)) throw Problems.notFound();
     if (!canOnLease(ctx, permission, access)) {
@@ -596,6 +617,7 @@ export class LeasesService {
     terms: LeaseTerms,
     body: LeaseFromDealBody & { rentFrequency: string; usage?: string },
     dealId: string | null,
+    previousLeaseId: string | null = null,
   ): Promise<string> {
     const reference = await nextReference(tx, ctx, 'lease');
     const row = await tx
@@ -607,6 +629,7 @@ export class LeasesService {
         managementAgreementId: terms.managementAgreementId,
         listingId: terms.listingId,
         dealId,
+        previousLeaseId,
         jurisdictionCode: unit.jurisdictionCode,
         leaseType: terms.leaseType,
         usage: body.usage ?? 'residential',

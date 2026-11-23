@@ -11,6 +11,8 @@ export const TASK_TYPES = ['follow_up', 'call', 'email', 'viewing_feedback', 'do
 export const PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const;
 export const TASK_STATUSES = ['open', 'done', 'cancelled'] as const;
 export const TASK_ENTITY_TYPES = ['contact', 'lead'] as const;
+/** Records a follow-up may be about when shown: renewal reminders are about leases (Phase 7 L4). */
+export const TASK_SHOWN_ENTITY_TYPES = ['contact', 'lead', 'lease'] as const;
 
 const notNull = (_object: unknown, value: unknown) => value !== undefined && value !== null;
 const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
@@ -53,9 +55,9 @@ export class CancelTaskBody {
 }
 
 export class TaskAboutDto {
-  @ApiProperty({ enum: TASK_ENTITY_TYPES }) entityType!: string;
+  @ApiProperty({ enum: TASK_SHOWN_ENTITY_TYPES }) entityType!: string;
   @ApiProperty({ format: 'uuid' }) entityId!: string;
-  @ApiProperty({ description: 'Contact name, or lead reference and contact name' }) label!: string;
+  @ApiProperty({ description: 'Contact name, lead reference and contact name, or lease reference' }) label!: string;
 }
 
 export class TaskDto {

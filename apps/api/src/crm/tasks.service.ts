@@ -198,6 +198,7 @@ export class TasksService {
         sql<string | null>`case t.entity_type
           when 'contact' then (select c.display_name from contacts c where c.id = t.entity_id)
           when 'lead' then (select l.reference || ' · ' || c.display_name from leads l join contacts c on c.id = l.contact_id where l.id = t.entity_id)
+          when 'lease' then (select l.reference from leases l where l.id = t.entity_id)
         end`.as('aboutLabel'),
       ]);
   }

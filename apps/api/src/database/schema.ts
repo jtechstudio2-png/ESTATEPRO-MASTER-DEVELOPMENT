@@ -732,18 +732,24 @@ export interface DepositDeductions {
   companyId: string;
   createdAt: Generated<Timestamp>;
   createdBy: string | null;
+  decidedAt: Timestamp | null;
+  decidedBy: string | null;
   depositId: string;
   description: string;
   evidenceDocumentId: string | null;
   id: Generated<string>;
   reasonCode: string;
+  settledAmount: Numeric | null;
   status: Generated<string>;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
 }
 
 export interface Deposits {
   amount: Numeric;
   companyId: string;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   currencyCode: string;
   holderType: string;
   holdingAccountId: string | null;
@@ -751,6 +757,14 @@ export interface Deposits {
   leaseId: string;
   protectedAt: Timestamp | null;
   protectionDeadline: string | null;
+  /**
+   * jurisdiction: computed from a reviewed value (P7-D11); entered: given by a person where no reviewed rule exists
+   */
+  protectionDeadlineSource: string | null;
+  /**
+   * The date the deposit was received: the receipt that paid its deposit charge in full, or entered when the agency does not collect
+   */
+  receivedOn: string | null;
   receivedPaymentId: string | null;
   returnDueBy: string | null;
   returnedAmount: Generated<Numeric>;
@@ -1043,6 +1057,15 @@ export interface ImportJobs {
   status: Generated<string>;
 }
 
+export interface InspectionItemDocuments {
+  caption: string | null;
+  companyId: string;
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  documentId: string;
+  inspectionItemId: string;
+}
+
 export interface InspectionItems {
   actionRequired: Generated<boolean>;
   area: string;
@@ -1057,9 +1080,11 @@ export interface InspectionItems {
 }
 
 export interface Inspections {
+  cancelledReason: string | null;
   companyId: string;
   completedAt: Timestamp | null;
   createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   id: Generated<string>;
   inspectionType: string;
   inspectorMembershipId: string | null;
@@ -1069,6 +1094,7 @@ export interface Inspections {
   reference: string;
   reportDocumentId: string | null;
   scheduledAt: Timestamp | null;
+  startedAt: Timestamp | null;
   status: Generated<string>;
   summary: string | null;
   tenantSignedAt: Timestamp | null;
@@ -1307,6 +1333,10 @@ export interface Leases {
   previousLeaseId: string | null;
   prorateFirstPeriod: Generated<boolean>;
   reference: string;
+  /**
+   * Days before the end date of the last renewal reminder written by the renewal job (90, 60, 30)
+   */
+  renewalMark: number | null;
   renewalStatus: Generated<string>;
   rentAmount: Numeric;
   rentDueDay: number | null;
@@ -2819,6 +2849,7 @@ export interface DB {
   idempotencyKeys: IdempotencyKeys;
   identityDocuments: IdentityDocuments;
   importJobs: ImportJobs;
+  inspectionItemDocuments: InspectionItemDocuments;
   inspectionItems: InspectionItems;
   inspections: Inspections;
   invitations: Invitations;

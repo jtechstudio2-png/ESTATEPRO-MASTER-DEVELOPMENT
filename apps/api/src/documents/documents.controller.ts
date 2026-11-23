@@ -87,4 +87,12 @@ export class DocumentsController {
   async forAgreement(@Tenant() ctx: TenantContext, @Param('agreementId', UUID_PARAM) id: string): Promise<DocumentListDto> {
     return { data: await this.tenantDb.run(ctx, (tx) => this.documents.listFor(tx, ctx, 'management_agreement', id)) };
   }
+
+  @Get('inspections/:inspectionId/documents')
+  @RequirePermission('document.view')
+  @ApiTags('Inspections')
+  @ApiOkResponse({ type: DocumentListDto })
+  async forInspection(@Tenant() ctx: TenantContext, @Param('inspectionId', UUID_PARAM) id: string): Promise<DocumentListDto> {
+    return { data: await this.tenantDb.run(ctx, (tx) => this.documents.listFor(tx, ctx, 'inspection', id)) };
+  }
 }

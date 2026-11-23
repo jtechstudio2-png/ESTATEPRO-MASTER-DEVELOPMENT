@@ -6,7 +6,7 @@ import { RefLabelDto } from '../contacts/dto.js';
 import { trim } from '../properties/dto.js';
 
 /** Records a document can be uploaded for in L1 (W7-A1); later milestones add their own. */
-export const DOCUMENT_ENTITY_TYPES = ['lease', 'management_agreement', 'bank_account'] as const;
+export const DOCUMENT_ENTITY_TYPES = ['lease', 'management_agreement', 'bank_account', 'inspection'] as const;
 export const DOCUMENT_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'text/csv'] as const;
 /** Bank files (L3, P7-D7) are plain text: CSV only as a bank statement of a bank account. */
 export const CSV_MIME = 'text/csv';

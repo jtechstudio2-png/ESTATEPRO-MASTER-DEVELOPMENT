@@ -265,6 +265,10 @@ export class LeaseDto extends LeaseSummaryDto {
   @ApiProperty({ type: RefLabelDto, nullable: true }) listing!: RefLabelDto | null;
   @ApiProperty({ type: RefLabelDto, nullable: true }) deal!: RefLabelDto | null;
   @ApiProperty({ type: RefLabelDto, nullable: true }) previousLease!: RefLabelDto | null;
+  @ApiProperty({ type: RefLabelDto, nullable: true, description: 'The renewal drawn up from this lease (not cancelled), L4' }) renewalLease!: RefLabelDto | null;
+  @ApiProperty({ type: String, nullable: true }) moveOutDate!: string | null;
+  @ApiProperty({ type: String, nullable: true }) noticeGivenOn!: string | null;
+  @ApiProperty({ type: String, nullable: true, enum: ['tenant', 'landlord', 'agent'] }) noticeGivenBy!: string | null;
   @ApiProperty({ type: RefLabelDto, nullable: true }) document!: RefLabelDto | null;
   @ApiProperty({ type: [LeasePartyDto] }) parties!: LeasePartyDto[];
   @ApiProperty({ description: 'No reviewed legal rules exist for this jurisdiction: limits are not enforced (P7-D3)' }) rulesNotReviewed!: boolean;

@@ -34,6 +34,7 @@ const CATEGORY: Record<string, string> = {
   receipt: 'financial',
   bank_statement: 'financial',
   inspection_report: 'compliance',
+  inspection_photo: 'media',
   safety_certificate: 'compliance',
   insurance: 'compliance',
 };
@@ -203,6 +204,11 @@ export class DocumentsService {
 
   /** The document must belong to the record and be clean (checked here for a clear answer; the database checks again). */
   async assertUsable(tx: Tx, documentId: string, entityType: LettingsEntity, entityId: string, field: string): Promise<void> {
+    await this.assertClean(tx, documentId, entityType, entityId, field, true);
+  }
+
+  /** The document belongs to the record and passed the scan (photos and evidence need no signature). */
+  async assertClean(tx: Tx, documentId: string, entityType: LettingsEntity, entityId: string, field: string, signed = false): Promise<void> {
     const row = await tx
       .selectFrom('documents as d')
       .innerJoin('documentVersions as v', 'v.id', 'd.currentVersionId')
@@ -213,7 +219,7 @@ export class DocumentsService {
     if (!row) throw Problems.validation([{ field, code: 'not-found', message: 'Upload the document to this record first.' }]);
     if (row.scanStatus === 'pending') throw Problems.validation([{ field, code: 'scan-pending', message: 'The document is still being checked. Try again in a moment.' }]);
     if (row.scanStatus !== 'clean') throw Problems.validation([{ field, code: 'scan-failed', message: 'The document did not pass the security scan. Upload it again.' }]);
-    if (!row.isSigned) throw Problems.validation([{ field, code: 'not-signed', message: 'Upload the signed copy.' }]);
+    if (signed && !row.isSigned) throw Problems.validation([{ field, code: 'not-signed', message: 'Upload the signed copy.' }]);
   }
 
   private async assertVisible(tx: Tx, ctx: TenantContext, links: Array<{ entityType: string; entityId: string }>): Promise<void> {
@@ -267,6 +273,16 @@ export class DocumentsService {
   private async entityCountry(tx: Tx, entityType: LettingsEntity, entityId: string): Promise<string> {
     if (entityType === 'bank_account') {
       return (await tx.selectFrom('bankAccounts').select('countryCode').where('id', '=', entityId).executeTakeFirstOrThrow()).countryCode;
+    }
+    if (entityType === 'inspection') {
+      const inspection = await tx
+        .selectFrom('inspections as i')
+        .innerJoin('properties as p', 'p.id', 'i.propertyId')
+        .innerJoin('offices as o', 'o.id', 'p.officeId')
+        .select('o.countryCode')
+        .where('i.id', '=', entityId)
+        .executeTakeFirstOrThrow();
+      return inspection.countryCode;
     }
     const row =
       entityType === 'lease'
