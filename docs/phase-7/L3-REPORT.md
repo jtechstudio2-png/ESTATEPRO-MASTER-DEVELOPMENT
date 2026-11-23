@@ -67,6 +67,7 @@ The migration, services and tests were re-read adversarially before this report.
 | 4 | A contact merge had no rule for the payer of a bank-file line (database catalogue test) | Registered as a history (receipts already block a merge) |
 | 5 | A line imported by another file between check and commit could not be marked duplicate | The line guard allows matched or unmatched → duplicate at commit |
 | 6 | Erasure did not reach the new free text (bank-file line texts, plan reasons) | Added to `app.erase_contact_tenancy` (suite 17) |
+| 7 | In the full performance run the arrears list took 4.9 s and the month end 24 s: the L2 rent test seeds 500,000 charges with triggers off and left their new balances at zero, so half a million charges looked unpaid and skewed the planner's estimates for every company | The L2 test now fills the balances as the triggers would (§4.3); both tests pass in sequence. L3-R2 records the sensitivity |
 
 ## 4. Tests
 
@@ -103,6 +104,7 @@ The migration, services and tests were re-read adversarially before this report.
 |---|---|---|
 | `rent.e2e.test.ts` (L2), lettings settings | The expected settings include `arrearsSteps: []` | The settings gained the arrears steps (ST-2); an addition |
 | Suite 17 (P7-0), erasure | Two assertions added (bank-file line texts, plan reasons); the existing ones unchanged | ADR-009 covers the new free text |
+| `rent.performance.test.ts` (L2), seed | After seeding with triggers off, the maintained balances are filled as the triggers would have kept them | Data no real company can have (every charge unpaid while allocated) skewed later tests (§3 finding 7). The measured requests are unchanged |
 
 ## 5. Security impact
 
@@ -170,7 +172,7 @@ Measured through the full API at the readiness volume for one company (§10): 20
 | # | Risk | Rating | Owner / when |
 |---|---|---|---|
 | L3-R1 | Arrears as of a past date leave out a charge waived or cancelled after that date (the charge does not record when its status changed) | Low | L7 (record the date if month-end packs need it) |
-| L3-R2 | The arrears list with every lease of the largest company in arrears is within budget but not far from it (652 ms; month end 825 ms) | Medium | L7 (rent dashboard), measured again with the screens (L6) |
+| L3-R2 | The arrears list with every lease of the largest company in arrears is within budget but not far from it (652 ms; month end 825 ms), and its plan depends on the table statistics (§3 finding 7) | Medium | L7 (rent dashboard), measured again with the screens (L6) |
 | L3-R3 | The workflow, like the rent schedule (L2-R1), runs once per UTC day | Low | L7 |
 | L3-R4 | Plans are not marked broken automatically; the record shows "behind" and people decide | Low | Accepted practice; revisit with Phase 12 notifications |
 

@@ -111,6 +111,13 @@ describe('rent performance (20,000 leases, 500,000 charges)', () => {
           insert into payment_allocations (company_id, payment_id, rent_charge_id, amount, allocated_on)
           select a.company_id, p.id, a.charge_id, a.amount, a.due_date
             from l2_alloc a join leases l on l.id = a.lease_id join payments p on p.company_id = a.company_id and p.reference = 'L2R-' || l.reference || '-' || a.payment_no`.execute(tx);
+        // The maintained balances (migration 0038, L3), as the triggers would have kept them.
+        await sql`update rent_charges c set allocated_amount = a.net
+                    from (select rent_charge_id, sum(amount) as net from payment_allocations where company_id = ${c}::uuid group by rent_charge_id) a
+                   where c.id = a.rent_charge_id`.execute(tx);
+        await sql`update payments p set allocated_amount = a.net
+                    from (select payment_id, sum(amount) as net from payment_allocations where company_id = ${c}::uuid group by payment_id) a
+                   where p.id = a.payment_id`.execute(tx);
         await sql`insert into company_settings (company_id, office_id, key, value) values (${c}::uuid, null, 'lettings.charge_lead_days', '14'::jsonb)`.execute(tx);
       });
       await sql`vacuum (analyze) properties, units, contacts, leases, lease_parties, rent_charges, payments, payment_allocations, rent_charge_adjustments, rent_reviews`.execute(admin);
