@@ -1,0 +1,42 @@
+import { Injectable } from '@nestjs/common';
+
+import { AuditService } from '../audit/audit.service.js';
+import type { TenantContext } from '../common/request-context.js';
+import type { Tx } from '../database/database.module.js';
+import { REQUIRE_SIGNED_LEASE_KEY } from './leases.service.js';
+import type { LettingsSettingsBody, LettingsSettingsDto } from './rent.dto.js';
+import { CHARGE_LEAD_DAYS_KEY, chargeLeadDays } from './rent-schedule.js';
+
+/**
+ * Lettings company settings (ST-2): the charge lead time (P7-D6), which has
+ * no default and leaves the rent schedule idle until set (W7-D7), and the
+ * signed-lease rule for activation (P7-D5, L1-D3), on unless turned off. The
+ * arrears steps (L3) and inspection areas (L4) join this screen later.
+ */
+@Injectable()
+export class LettingsSettingsService {
+  constructor(private readonly audit: AuditService) {}
+
+  async get(tx: Tx): Promise<LettingsSettingsDto> {
+    const signed = await tx.selectFrom('companySettings').select('value').where('officeId', 'is', null).where('key', '=', REQUIRE_SIGNED_LEASE_KEY).executeTakeFirst();
+    return { chargeLeadDays: await chargeLeadDays(tx), requireSignedLease: signed?.value !== false };
+  }
+
+  async save(tx: Tx, ctx: TenantContext, body: LettingsSettingsBody): Promise<LettingsSettingsDto> {
+    const before = await this.get(tx);
+    const after: LettingsSettingsDto = { chargeLeadDays: body.chargeLeadDays, requireSignedLease: body.requireSignedLease };
+    if (before.chargeLeadDays === after.chargeLeadDays && before.requireSignedLease === after.requireSignedLease) return before;
+    await tx.deleteFrom('companySettings').where('officeId', 'is', null).where('key', 'in', [CHARGE_LEAD_DAYS_KEY, REQUIRE_SIGNED_LEASE_KEY]).execute();
+    const rows = [{ key: REQUIRE_SIGNED_LEASE_KEY, value: JSON.stringify(after.requireSignedLease) }];
+    if (after.chargeLeadDays !== null) rows.push({ key: CHARGE_LEAD_DAYS_KEY, value: JSON.stringify(after.chargeLeadDays) });
+    await tx
+      .insertInto('companySettings')
+      .values(rows.map((row) => ({ companyId: ctx.companyId, officeId: null, key: row.key, value: row.value, updatedBy: ctx.userId })))
+      .execute();
+    const changes: Record<string, { old: unknown; new: unknown }> = {};
+    if (before.chargeLeadDays !== after.chargeLeadDays) changes['chargeLeadDays'] = { old: before.chargeLeadDays, new: after.chargeLeadDays };
+    if (before.requireSignedLease !== after.requireSignedLease) changes['requireSignedLease'] = { old: before.requireSignedLease, new: after.requireSignedLease };
+    await this.audit.record(tx, ctx, { action: 'settings.lettings_updated', entityType: 'company', entityId: ctx.companyId, changes });
+    return after;
+  }
+}

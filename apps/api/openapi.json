@@ -14135,6 +14135,864 @@
           "Leases"
         ]
       }
+    },
+    "/api/v1/rent-charges": {
+      "get": {
+        "operationId": "Rent_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter[dueDate][lte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[dueDate][gte]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[officeId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[propertyId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[leaseId]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[currency]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[chargeType]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "filter[status]",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "dueDate",
+                "-dueDate"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentChargePageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Charges across leases in your scope; posted by default; totals per currency",
+        "tags": [
+          "Rent"
+        ]
+      }
+    },
+    "/api/v1/rent-charges/{chargeId}": {
+      "get": {
+        "operationId": "Rent_get",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chargeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentChargeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Rent"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/charges": {
+      "post": {
+        "operationId": "Rent_create",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChargeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentChargeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a charge the schedule does not create (service, utility, repair recharge, fee, other), posted now or on its due date",
+        "tags": [
+          "Rent",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/rent-charges/{chargeId}/waive": {
+      "post": {
+        "operationId": "Rent_waive",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chargeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentChargeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Waive a posted charge with nothing allocated, with the reason",
+        "tags": [
+          "Rent"
+        ]
+      }
+    },
+    "/api/v1/rent-charges/{chargeId}/cancel": {
+      "post": {
+        "operationId": "Rent_cancel",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chargeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentChargeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a scheduled charge, or a posted one with nothing allocated",
+        "tags": [
+          "Rent"
+        ]
+      }
+    },
+    "/api/v1/rent-charges/{chargeId}/adjustments/preview": {
+      "post": {
+        "operationId": "Rent_preview",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chargeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdjustmentPreviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What the charge would owe after the adjustment; nothing is saved",
+        "tags": [
+          "Rent"
+        ]
+      }
+    },
+    "/api/v1/rent-charges/{chargeId}/adjustments": {
+      "post": {
+        "operationId": "Rent_adjust",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chargeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdjustmentResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Correct a posted charge by a credit or debit (append-only; approved; open period; never below what is paid)",
+        "tags": [
+          "Rent"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/ledger": {
+      "get": {
+        "operationId": "Rent_ledger",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asOf",
+            "required": false,
+            "in": "query",
+            "description": "Default: today in the property's time zone",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LedgerDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The lease ledger as of a date: charges, receipts, reversals and adjustments with the running balance and ageing",
+        "tags": [
+          "Rent",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/rent-schedule": {
+      "post": {
+        "operationId": "Rent_startSchedule",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the lease",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RentScheduleBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "posted": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start the rent schedule of an imported live lease from a date (fixed once set); posts what is already due",
+        "tags": [
+          "Rent",
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/settings/lettings": {
+      "get": {
+        "operationId": "Rent_getSettings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LettingsSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lettings settings (ST-2): charge lead time and the signed-lease rule",
+        "tags": [
+          "Rent",
+          "Settings"
+        ]
+      },
+      "put": {
+        "operationId": "Rent_saveSettings",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LettingsSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LettingsSettingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Rent",
+          "Settings"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/rent-reviews": {
+      "get": {
+        "operationId": "RentReviews_list",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentReviewListDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The lease's rent reviews, latest first",
+        "tags": [
+          "Leases"
+        ]
+      },
+      "post": {
+        "operationId": "RentReviews_schedule",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleReviewBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentReviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Schedule a rent review (one open review per lease)",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/rent-reviews/{reviewId}": {
+      "patch": {
+        "operationId": "RentReviews_update",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the review",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentReviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit, propose (notice to the outbox), agree, dispute or cancel a review",
+        "tags": [
+          "Leases"
+        ]
+      }
+    },
+    "/api/v1/leases/{leaseId}/rent-reviews/{reviewId}/apply": {
+      "post": {
+        "operationId": "RentReviews_apply",
+        "parameters": [
+          {
+            "name": "X-Company-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leaseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "Version of the review",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentReviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apply an agreed review: the agreed rent is charged from its effective date",
+        "tags": [
+          "Leases"
+        ]
+      }
     }
   },
   "info": {
@@ -31083,6 +31941,21 @@
             "type": "boolean",
             "description": "No reviewed legal rules exist for this jurisdiction: limits are not enforced (P7-D3)"
           },
+          "rentScheduleFrom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "First day rent is charged from (L2); set at activation, or once for an imported lease"
+          },
+          "currentRent": {
+            "description": "The rent in force today (from the start date until then): applied rent reviews included",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -31126,6 +31999,8 @@
           "document",
           "parties",
           "rulesNotReviewed",
+          "rentScheduleFrom",
+          "currentRent",
           "createdAt",
           "version"
         ]
@@ -31383,6 +32258,861 @@
         },
         "required": [
           "reason"
+        ]
+      },
+      "ChargeBalanceDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Amount plus tax",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "adjustments": {
+            "description": "Sum of adjustments (negative: credits)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "paid": {
+            "description": "Net allocated from receipts",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "outstanding": {
+            "description": "Total + adjustments − paid (posted charges; zero otherwise)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "total",
+          "adjustments",
+          "paid",
+          "outstanding"
+        ]
+      },
+      "RentChargeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lease": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "tenant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefLabelDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chargeType": {
+            "type": "string",
+            "enum": [
+              "rent",
+              "service_charge",
+              "deposit",
+              "fee",
+              "utility",
+              "late_fee",
+              "repair_recharge",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "periodEnd": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "taxCodeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "balance": {
+            "$ref": "#/components/schemas/ChargeBalanceDto"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "posted",
+              "waived",
+              "cancelled"
+            ]
+          },
+          "waivedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "schedule",
+              "manual",
+              "import",
+              "automation"
+            ]
+          },
+          "postedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "lease",
+          "tenant",
+          "chargeType",
+          "description",
+          "periodStart",
+          "periodEnd",
+          "dueDate",
+          "amount",
+          "tax",
+          "taxCodeId",
+          "balance",
+          "status",
+          "waivedReason",
+          "source",
+          "postedAt",
+          "createdAt",
+          "version"
+        ]
+      },
+      "CurrencyTotalDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "total": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "outstanding": {
+            "$ref": "#/components/schemas/MoneyDto"
+          }
+        },
+        "required": [
+          "currency",
+          "count",
+          "total",
+          "outstanding"
+        ]
+      },
+      "RentChargePageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentChargeDto"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageDto"
+          },
+          "totals": {
+            "description": "Per currency over every charge the filters match (never summed across currencies)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyTotalDto"
+            }
+          }
+        },
+        "required": [
+          "data",
+          "page",
+          "totals"
+        ]
+      },
+      "CreateChargeBody": {
+        "type": "object",
+        "properties": {
+          "chargeType": {
+            "type": "string",
+            "enum": [
+              "service_charge",
+              "utility",
+              "repair_recharge",
+              "fee",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "periodStart": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "periodEnd": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "amount": {
+            "description": "Before tax; in the lease currency",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "taxCodeId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Tax computed from the code's components in force on the due date"
+          },
+          "when": {
+            "type": "string",
+            "enum": [
+              "post",
+              "schedule"
+            ],
+            "description": "Post now, or schedule: posted on the due date by the rent job"
+          }
+        },
+        "required": [
+          "chargeType",
+          "description",
+          "dueDate",
+          "amount",
+          "when"
+        ]
+      },
+      "AdjustmentBody": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "credit",
+              "debit"
+            ],
+            "description": "Credit reduces what is owed; debit adds to it"
+          },
+          "amount": {
+            "description": "Positive; in the charge currency",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "adjustedOn": {
+            "type": "string",
+            "description": "In an open financial period"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          },
+          "approvedBy": {
+            "type": "string",
+            "description": "A member who holds rent.manage for this lease (W7-D2)"
+          }
+        },
+        "required": [
+          "direction",
+          "amount",
+          "adjustedOn",
+          "reason",
+          "approvedBy"
+        ]
+      },
+      "AdjustmentPreviewDto": {
+        "type": "object",
+        "properties": {
+          "before": {
+            "$ref": "#/components/schemas/ChargeBalanceDto"
+          },
+          "after": {
+            "$ref": "#/components/schemas/ChargeBalanceDto"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ]
+      },
+      "AdjustmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rentChargeId": {
+            "type": "string"
+          },
+          "amount": {
+            "description": "Signed: negative is a credit",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "adjustedOn": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "approvedBy": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "rentChargeId",
+          "amount",
+          "adjustedOn",
+          "reason",
+          "approvedBy",
+          "createdAt"
+        ]
+      },
+      "AdjustmentResultDto": {
+        "type": "object",
+        "properties": {
+          "adjustment": {
+            "$ref": "#/components/schemas/AdjustmentDto"
+          },
+          "charge": {
+            "$ref": "#/components/schemas/RentChargeDto"
+          }
+        },
+        "required": [
+          "adjustment",
+          "charge"
+        ]
+      },
+      "LedgerEntryDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "charge",
+              "payment",
+              "reversal",
+              "adjustment"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "charge": {
+            "description": "Charges (posted) add to the balance",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paid": {
+            "description": "Allocated receipts reduce it; reversals are negative",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "adjustment": {
+            "description": "Signed adjustment",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "balance": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "counted": {
+            "type": "boolean",
+            "description": "False for waived or cancelled charges: shown, not counted"
+          },
+          "chargeStatus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "scheduled",
+              "posted",
+              "waived",
+              "cancelled",
+              null
+            ]
+          },
+          "rentChargeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paymentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paymentReference": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Receipt reference"
+          },
+          "payerName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Shown to members who may see contacts"
+          },
+          "adjustmentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "approvedByName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "kind",
+          "description",
+          "charge",
+          "paid",
+          "adjustment",
+          "balance",
+          "counted",
+          "chargeStatus",
+          "rentChargeId",
+          "paymentId",
+          "paymentReference",
+          "payerName",
+          "adjustmentId",
+          "approvedByName"
+        ]
+      },
+      "AgeingDto": {
+        "type": "object",
+        "properties": {
+          "outstanding": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "current": {
+            "description": "Due on the day (not yet late)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "days1To30": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "days31To60": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "days61To90": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "daysOver90": {
+            "$ref": "#/components/schemas/MoneyDto"
+          }
+        },
+        "required": [
+          "outstanding",
+          "current",
+          "days1To30",
+          "days31To60",
+          "days61To90",
+          "daysOver90"
+        ]
+      },
+      "LedgerDto": {
+        "type": "object",
+        "properties": {
+          "lease": {
+            "$ref": "#/components/schemas/RefLabelDto"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "asOf": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerEntryDto"
+            }
+          },
+          "ageing": {
+            "description": "Readiness §5.4 buckets, days past due as of the date",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AgeingDto"
+              }
+            ]
+          },
+          "upcoming": {
+            "description": "Posted charges due after the date (created ahead by the lead time)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentChargeDto"
+            }
+          }
+        },
+        "required": [
+          "lease",
+          "currency",
+          "asOf",
+          "entries",
+          "ageing",
+          "upcoming"
+        ]
+      },
+      "RentScheduleBody": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "First day rent is charged from (an imported live lease); fixed once set"
+          }
+        },
+        "required": [
+          "from"
+        ]
+      },
+      "LettingsSettingsDto": {
+        "type": "object",
+        "properties": {
+          "chargeLeadDays": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Charges are created this many days before they are due (P7-D6). Not set: the rent schedule is idle (W7-D7)"
+          },
+          "requireSignedLease": {
+            "type": "boolean",
+            "description": "Activation needs the signed lease (P7-D5); on unless turned off"
+          }
+        },
+        "required": [
+          "chargeLeadDays",
+          "requireSignedLease"
+        ]
+      },
+      "LettingsSettingsBody": {
+        "type": "object",
+        "properties": {
+          "chargeLeadDays": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 90
+          },
+          "requireSignedLease": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "chargeLeadDays",
+          "requireSignedLease"
+        ]
+      },
+      "RentReviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "leaseId": {
+            "type": "string"
+          },
+          "reviewDate": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "fixed_increase",
+              "percentage",
+              "index_linked",
+              "market",
+              "negotiated"
+            ]
+          },
+          "current": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "proposed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agreed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "effectiveFrom": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "proposed",
+              "agreed",
+              "applied",
+              "disputed",
+              "cancelled"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dueNotifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the \"review due\" notice went to the outbox (delivery in Phase 12)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "leaseId",
+          "reviewDate",
+          "method",
+          "current",
+          "proposed",
+          "agreed",
+          "effectiveFrom",
+          "status",
+          "notes",
+          "dueNotifiedAt",
+          "createdAt",
+          "version"
+        ]
+      },
+      "RentReviewListDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentReviewDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ScheduleReviewBody": {
+        "type": "object",
+        "properties": {
+          "reviewDate": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "fixed_increase",
+              "percentage",
+              "index_linked",
+              "market",
+              "negotiated"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "reviewDate",
+          "method"
+        ]
+      },
+      "UpdateReviewBody": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "propose",
+              "agree",
+              "dispute",
+              "cancel",
+              "edit"
+            ],
+            "description": "edit (date, method, notes, while open and not agreed), propose, agree, dispute, cancel"
+          },
+          "reviewDate": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "fixed_increase",
+              "percentage",
+              "index_linked",
+              "market",
+              "negotiated"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "proposed": {
+            "description": "propose",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "agreed": {
+            "description": "agree",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyInput"
+              }
+            ]
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "agree: when the new rent applies"
+          }
+        },
+        "required": [
+          "action"
         ]
       }
     }

@@ -67,6 +67,47 @@ export class AuditService {
       .execute();
   }
 
+  /** Several audit events in one statement (batch jobs such as the rent schedule). */
+  async recordMany(tx: Tx, ctx: TenantContext, entries: readonly AuditEntry[]): Promise<void> {
+    if (entries.length === 0) return;
+    await tx
+      .insertInto('auditLogs')
+      .values(
+        entries.map((entry) => ({
+          companyId: ctx.companyId,
+          actorType: ctx.system ? 'system' : 'user',
+          actorUserId: ctx.system ? null : ctx.userId,
+          actorMembershipId: actingMembership(ctx),
+          action: entry.action,
+          entityType: entry.entityType,
+          entityId: entry.entityId,
+          changes: entry.changes ? JSON.stringify(entry.changes) : null,
+          metadata: JSON.stringify(entry.metadata ?? {}),
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
+          requestId: ctx.requestId,
+        })),
+      )
+      .execute();
+  }
+
+  /** Several domain events in one statement. */
+  async emitMany(tx: Tx, ctx: TenantContext, events: readonly DomainEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    await tx
+      .insertInto('outboxEvents')
+      .values(
+        events.map((event) => ({
+          companyId: ctx.companyId,
+          eventType: event.eventType,
+          aggregateType: event.aggregateType,
+          aggregateId: event.aggregateId,
+          payload: JSON.stringify({ ...event.payload, requestId: ctx.requestId, actorUserId: ctx.system ? null : ctx.userId }),
+        })),
+      )
+      .execute();
+  }
+
   async emit(tx: Tx, ctx: TenantContext, event: DomainEvent): Promise<void> {
     await tx
       .insertInto('outboxEvents')

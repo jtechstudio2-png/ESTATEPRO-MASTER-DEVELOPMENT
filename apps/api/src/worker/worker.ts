@@ -9,6 +9,7 @@ import { expireExports } from '../exports/exports.service.js';
 import type { ListingsService } from '../listings/listings.service.js';
 import type { DocumentScanner } from '../documents/document-scanner.js';
 import { DOCUMENT_SCAN_JOB } from '../documents/documents.service.js';
+import { CHARGE_LEAD_DAYS_KEY, chargeLeadDays, notifyReviewsDue, postRentBatch, postScheduledDue, RENT_POSTING_BATCH } from '../lettings/rent-schedule.js';
 import type { MediaProcessor } from '../media/media-processor.js';
 import { expireOffers } from '../offers/offers.service.js';
 import { ARCHIVE_RETENTION_DAYS, MEDIA_PROCESS_JOB, purgeMedia } from '../media/media.service.js';
@@ -27,6 +28,8 @@ export const JOBS = {
   keyRotate: 'key.rotate',
   offerExpire: 'offer.expire',
   documentScan: DOCUMENT_SCAN_JOB,
+  rentSchedule: 'rent.schedule',
+  rentPostDue: 'rent.post_due',
 } as const;
 
 /** Batches (of 200 rows) one key-rotation job handles before handing over to a follow-up job. */
@@ -179,6 +182,25 @@ export class Worker {
       sql<{ companyId: string }>`select distinct company_id as "companyId" from offers where status = 'submitted' and expires_at <= ${now}::timestamptz`,
     );
 
+    // The rent schedule (P7-D6): daily, for companies with a lead time and scheduled leases.
+    enqueued += await discover(
+      JOBS.rentSchedule,
+      day,
+      sql<{ companyId: string }>`select s.company_id as "companyId" from company_settings s
+        where s.key = ${CHARGE_LEAD_DAYS_KEY} and s.office_id is null
+          and exists (select 1 from leases l where l.company_id = s.company_id and l.rent_schedule_from is not null
+                        and l.status in ('active', 'periodic', 'notice_given'))`,
+    );
+    // Scheduled charges due and rent reviews whose date has come, hourly (each property's local date decides).
+    enqueued += await discover(
+      JOBS.rentPostDue,
+      hour,
+      sql<{ companyId: string }>`select company_id as "companyId" from rent_charges
+          where status = 'scheduled' and due_date <= (${now}::timestamptz at time zone 'UTC')::date + 1
+        union select company_id from rent_reviews
+          where status in ('scheduled', 'proposed') and due_notified_at is null and review_date <= (${now}::timestamptz at time zone 'UTC')::date + 1`,
+    );
+
     // Field-key rotation (ADR-007 §10): yearly per company, then every quarter
     // hour while a rotation is in progress (rewriting or settling).
     for (const companyId of await this.deps.rotation.dueCompanies(now)) {
@@ -214,6 +236,56 @@ export class Worker {
     }
     await this.deps.tenantDb.run(scope, (tx) => removeInactiveMatchStatus(tx));
     return total;
+  }
+
+  /**
+   * The daily rent schedule of one company (P7-D6): leases in batches of
+   * RENT_SCHEDULE_BATCH, one short tenant transaction each, renewing the job's
+   * lock after every batch (#42). Idle while the company has no lead time
+   * (W7-D7). Returns the leases looked at and the charges posted.
+   */
+  async runRentSchedule(companyId: string, requestId = `rent-schedule:${companyId}`, job?: ClaimedJob): Promise<{ leases: number; posted: number }> {
+    const scope = { companyId, userId: '' };
+    const ctx = systemContext(companyId, requestId);
+    const lead = await this.deps.tenantDb.run(scope, (tx) => chargeLeadDays(tx));
+    if (lead === null) return { leases: 0, posted: 0 };
+    const now = this.now();
+    let afterId: string | null = null;
+    let leases = 0;
+    let posted = 0;
+    for (;;) {
+      const batch = await this.deps.tenantDb.run(scope, (tx) => postRentBatch(tx, ctx, this.deps.audit, { afterId, leadDays: lead, now }));
+      leases += batch.leases;
+      posted += batch.posted;
+      if (job && !(await this.deps.queue.renewLock(job))) throw new LockLostError(job.id);
+      if (batch.lastId === null) break;
+      afterId = batch.lastId;
+    }
+    if (posted > 0) this.deps.logger.info('rent charges posted', { companyId, leases, posted });
+    return { leases, posted };
+  }
+
+  /** Posts scheduled charges whose due date has come and writes the rent-review-due notices, in batches. */
+  async runRentPostDue(companyId: string, requestId = `rent-post-due:${companyId}`, job?: ClaimedJob): Promise<{ charges: number; reviews: number }> {
+    const scope = { companyId, userId: '' };
+    const ctx = systemContext(companyId, requestId);
+    const now = this.now();
+    let charges = 0;
+    let reviews = 0;
+    for (;;) {
+      const count = await this.deps.tenantDb.run(scope, (tx) => postScheduledDue(tx, ctx, this.deps.audit, now));
+      charges += count;
+      if (job && !(await this.deps.queue.renewLock(job))) throw new LockLostError(job.id);
+      if (count < RENT_POSTING_BATCH) break;
+    }
+    for (;;) {
+      const count = await this.deps.tenantDb.run(scope, (tx) => notifyReviewsDue(tx, ctx, this.deps.audit, now));
+      reviews += count;
+      if (job && !(await this.deps.queue.renewLock(job))) throw new LockLostError(job.id);
+      if (count < RENT_POSTING_BATCH) break;
+    }
+    if (charges + reviews > 0) this.deps.logger.info('scheduled charges posted and reviews notified', { companyId, charges, reviews });
+    return { charges, reviews };
   }
 
   private async execute(job: ClaimedJob): Promise<boolean> {
@@ -380,6 +452,14 @@ export class Worker {
 
       case JOBS.requirementMatchRefresh:
         await this.refreshRequirementMatches(job.companyId, requestId, job);
+        return;
+
+      case JOBS.rentSchedule:
+        await this.runRentSchedule(job.companyId, requestId, job);
+        return;
+
+      case JOBS.rentPostDue:
+        await this.runRentPostDue(job.companyId, requestId, job);
         return;
 
       case JOBS.offerExpire:

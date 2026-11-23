@@ -1311,6 +1311,10 @@ export interface Leases {
   rentAmount: Numeric;
   rentDueDay: number | null;
   rentFrequency: string;
+  /**
+   * First day rent periods are charged from (set at activation, or once for an imported lease); fixed once set.
+   */
+  rentScheduleFrom: string | null;
   rentTaxCodeId: string | null;
   signedAt: Timestamp | null;
   startDate: string;
@@ -2165,6 +2169,10 @@ export interface RentReviews {
   agreedAmount: Numeric | null;
   companyId: string;
   createdAt: Generated<Timestamp>;
+  /**
+   * When the "review due" notice was written to the outbox (once).
+   */
+  dueNotifiedAt: Timestamp | null;
   effectiveFrom: string | null;
   id: Generated<string>;
   leaseId: string;

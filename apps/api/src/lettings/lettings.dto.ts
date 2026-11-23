@@ -268,6 +268,8 @@ export class LeaseDto extends LeaseSummaryDto {
   @ApiProperty({ type: RefLabelDto, nullable: true }) document!: RefLabelDto | null;
   @ApiProperty({ type: [LeasePartyDto] }) parties!: LeasePartyDto[];
   @ApiProperty({ description: 'No reviewed legal rules exist for this jurisdiction: limits are not enforced (P7-D3)' }) rulesNotReviewed!: boolean;
+  @ApiProperty({ type: String, nullable: true, description: 'First day rent is charged from (L2); set at activation, or once for an imported lease' }) rentScheduleFrom!: string | null;
+  @ApiProperty({ type: MoneyDto, description: 'The rent in force today (from the start date until then): applied rent reviews included' }) currentRent!: MoneyDto;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty() version!: number;
 }

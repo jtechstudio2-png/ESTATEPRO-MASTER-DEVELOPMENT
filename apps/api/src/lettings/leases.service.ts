@@ -15,6 +15,8 @@ import { DocumentsService } from '../documents/documents.service.js';
 import { ListingsService } from '../listings/listings.service.js';
 import { nextReference } from '../properties/properties.service.js';
 import { checkCurrencyAmount, isRealDate } from './agreements.service.js';
+import { addDays } from './charges.service.js';
+import { chargeLeadDays, postLeaseRent } from './rent-schedule.js';
 import type {
   ActivateLeaseBody,
   CreateLeaseBody,
@@ -137,6 +139,8 @@ export class LeasesService {
         'l.breakClauseDate', 'l.breakNoticeDays', 'l.nextRentReviewDate', 'l.governingLocaleCode', 'l.moveInDate', 'l.signedAt', 'l.endedReason',
         'l.managementAgreementId', 'ma.reference as agreementReference', 'l.listingId', 'li.reference as listingReference', 'l.dealId', 'dl.reference as dealReference',
         'l.previousLeaseId', 'pl.reference as previousReference', 'l.documentId', 'doc.title as documentTitle', 'l.createdAt', 'l.version',
+        'l.rentScheduleFrom',
+        sql<string>`app.rent_in_force(l.company_id, l.id, greatest(l.start_date, (now() at time zone p.timezone)::date))::text`.as('currentRentAmount'),
         sql<boolean>`not exists (select 1 from jurisdiction_settings js where js.jurisdiction_code = l.jurisdiction_code)`.as('rulesNotReviewed'),
       ])
       .where('l.id', '=', id)
@@ -182,6 +186,8 @@ export class LeasesService {
         portalAccess: p.portalAccess,
       })),
       rulesNotReviewed: row.rulesNotReviewed,
+      rentScheduleFrom: row.rentScheduleFrom,
+      currentRent: toMoney(row.currentRentAmount, row.currencyCode, units),
       createdAt: row.createdAt.toISOString(),
       version: row.version,
     };
@@ -412,10 +418,15 @@ export class LeasesService {
         signedAt: sql<Date>`(${body.signedOn}::date)::timestamp at time zone ${current.timezone}`,
         documentId: body.documentId ?? null,
         moveInDate: moveIn,
+        rentScheduleFrom: current.startDate,
         version: sql`version + 1`,
       })
       .where('id', '=', id)
       .execute();
+    // The rent schedule starts with the lease (L2, P7-D6): the first period and the advance periods are charged at signing,
+    // and, once the company has a lead time, whatever else is due by then (a lease activated after its start date).
+    const lead = await chargeLeadDays(tx);
+    const advanceCharges = await postLeaseRent(tx, ctx, this.audit, id, lead === null ? addDays(current.startDate, -1) : addDays(today, lead));
     if (current.listingId) await this.rentListing(tx, ctx, current.listingId, current.reference);
     if (current.dealId) {
       const completed = await tx
@@ -437,7 +448,7 @@ export class LeasesService {
       entityType: 'lease',
       entityId: id,
       changes: { status: { old: 'pending_signature', new: 'active' } },
-      metadata: { signedOn: body.signedOn, documentId: body.documentId ?? null, moveInDate: moveIn, signedDocumentRequired: required },
+      metadata: { signedOn: body.signedOn, documentId: body.documentId ?? null, moveInDate: moveIn, signedDocumentRequired: required, rentScheduleFrom: current.startDate, chargesPosted: advanceCharges },
     });
     await this.audit.emit(tx, ctx, { eventType: 'lease.activated', aggregateType: 'lease', aggregateId: id, payload: { leaseId: id, unitId: current.unitId, listingId: current.listingId, dealId: current.dealId } });
     return this.get(tx, ctx, id);

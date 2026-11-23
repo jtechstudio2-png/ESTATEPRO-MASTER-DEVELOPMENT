@@ -44,3 +44,14 @@ export function formatAmount(stored: string, minorUnits: number): string {
 export function toMoney(stored: string, currency: string, minorUnits: number): MoneyDto {
   return { amount: formatAmount(stored, minorUnits), currency };
 }
+
+/** A signed stored amount (adjustments, balances, reversals) to the currency's minor units, half away from zero. */
+export function formatSigned(stored: string, minorUnits: number): string {
+  const negative = stored.trim().startsWith('-');
+  const text = formatAmount(negative ? stored.trim().slice(1) : stored.trim(), minorUnits);
+  return negative && /[1-9]/.test(text) ? `-${text}` : text;
+}
+
+export function toSignedMoney(stored: string, currency: string, minorUnits: number): MoneyDto {
+  return { amount: formatSigned(stored, minorUnits), currency };
+}
