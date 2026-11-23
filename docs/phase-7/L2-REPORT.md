@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date | 23 November 2026 |
-| Branch | `phase-7/readiness`. Commits: `11bd5e5` (L1 approvals recorded), `8404c52` (migration 0037, SQL suite 20), `94e3251` (API, worker jobs, tests), `5b394bb` (performance test, charges list window), __FINAL__ (report). CI __CI__ |
+| Branch | `phase-7/readiness`. Commits: `11bd5e5` (L1 approvals recorded), `8404c52` (migration 0037, SQL suite 20), `94e3251` (API, worker jobs, tests), `5b394bb` (performance test, charges list window), `678bf1c` and the commit recording these results (report). CI run 197 green on `678bf1c` |
 | Approvals | L1 approved with L1-D1 to L1-D9 and risks L1-R1 to L1-R4 (23 November 2026); W7-A1 completed. Earlier: P7-0, ADR-009, P70-D1 to P70-D9, P7-W, W7-D1 to W7-D8 (22 November 2026) |
 | Scope | Readiness report §11, L2: rent schedule and charges, adjustments, rent reviews (LET-03, LET-08; §5.2, §5.6; P7-D6). Verification report §3.1 row L2: ledger, charges (list, add, waive, cancel), adjustments, rent reviews, lettings settings (charge lead days) |
 | Not in scope | Receipts, bank-file import, allocation, bounced cheques, arrears and payment plans (L3). Deposits, inspections, notice, ending, renewal (L4). Portals (L5). Screens (L6). Rent dashboard (L7). Fees and statements (Phase 9, P7-D2). Notification delivery (Phase 12) |
@@ -74,7 +74,7 @@ The migration, services and tests were re-read adversarially before this report.
 |---|---|
 | SQL, `verify.sh` | **37 migrations, 21 files passed.** New: `20_rent_schedule_l2.sql` (43 assertions) |
 | API (`test:ci`) | **50 files, 599 tests passed**; coverage 96.00 % statements, 90.42 % branches (thresholds 95 % and 90 %). New: `rent.e2e.test.ts` (14 tests), `rent-rules.e2e.test.ts` (4 tests) |
-| API performance (`test:performance`) | __PERF__ |
+| API performance (`test:performance`) | **15 files, 19 tests passed** in one run (the 14 earlier files unchanged; the new rent test: daily job 11.3 s, p95 587 ms in this run, §8 figures from the dedicated run) |
 | Web unit and message check | Unchanged by L2 (no web change); run in CI |
 | Browser (Playwright, axe, English and Arabic, 320 px to desktop) | Unchanged by L2; run in CI |
 | Lint and typecheck | API clean |
@@ -177,7 +177,7 @@ Measured through the full API at the readiness volume for one company (§10): 20
 
 | Item | Reference |
 |---|---|
-| CI | __CI__ |
+| CI | Run 197 (`678bf1c`, the complete L2 code): all 6 jobs green: API lint, typecheck, build and tests with coverage thresholds; database migrations and SQL suites; web lint, typecheck, messages, unit tests and build; web end-to-end (Playwright, axe, English and Arabic, 320 px to desktop); secret scanning; dependency scanning. Runs 190, 195 and 196 were cancelled by the next push; run 193 (`8404c52`) green |
 
 ## Approval
 
